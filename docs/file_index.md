@@ -22,6 +22,8 @@
 - `CODEX_PLAYBOOK.md` - Codex workflow protocol for safe, minimal, validated edits.
 - `System_SPEC.md` - Source-of-truth system specification for behavior and rules.
 - `docs/architecture_flows.md` - Flow/connector integration and PAC CLI guidance.
+- `docs/collaboration_setup_guide.md` - Step-by-step collaboration guide for Edwin and Recruitment accounts.
+- `docs/flows_easy_english.md` - Plain-language explanation of BGV_0 to BGV_6 process flow.
 - `docs/progress.md` - Ongoing status log for completed tasks and next actions.
 - `flows/main.flow.json` - Placeholder export metadata for main flow.
 - `flows/flowrunlogs-exporter.flow.json` - Placeholder export metadata for FlowRunLogs exporter flow.

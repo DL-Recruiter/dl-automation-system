@@ -49,3 +49,26 @@ Then:
 3. Update affected tests/docs in the same task.
 4. Log completion and next actions in `docs/progress.md`.
 5. If a related file is not changed intentionally, state why in the final report.
+
+## Power Automate Canonical Source (Mandatory)
+1. Canonical flow source path: `flows/power-automate/unpacked/Workflows/`.
+2. Non-canonical duplicates are read-only unless explicitly requested by the user:
+   - `power-automate/`
+   - root-level `BGV_*.json` exports (if present later)
+3. When editing cloud flows, modify only canonical files and keep formatting stable.
+4. After edits, include exact changed flow file paths in the report.
+
+## Collaboration Accounts and Auth Discipline
+1. `edwin.teo@dlresources.com.sg` is the development/admin account.
+2. `recruitment@dlresources.com.sg` is the operations/collaborator account.
+3. Before any PAC CLI command, run `pac auth who` and confirm active identity.
+4. If active identity is not intended for the task, stop and switch profile before changes.
+5. Do not assume account context from profile name alone; always verify `User` output.
+
+## Power Automate Setup Boundary (CLI-first)
+1. Use CLI first for export/unpack/pack/import (`pac solution ...`).
+2. UI-only steps must be listed explicitly and minimally:
+   - create/sign in connection instances
+   - share flows with co-owner permissions
+   - bind connection references in designer when required
+3. After UI-only steps, return to CLI sync and commit updated artifacts.

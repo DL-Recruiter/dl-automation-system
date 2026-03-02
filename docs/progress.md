@@ -61,3 +61,35 @@ Log each session with:
   - `Get-Content -Raw docs/flows_easy_english.md`
 - Next actions and blockers:
   - Next action: if needed, generate a second version with business-only wording for HR users (without technical terms like trigger/action).
+
+## 2026-03-02 (Collaboration setup hardening)
+- Current status:
+  - Added explicit collaboration rules for dual-account operations and canonical flow edit paths.
+- Completed tasks:
+  - Verified git and PAC baseline in `C:\bgv_project`.
+  - Fast-forwarded local branch to latest `origin/master`.
+  - Confirmed environment context and active identity output in PAC CLI.
+  - Updated `AGENTS.md` with mandatory canonical flow path:
+    - `flows/power-automate/unpacked/Workflows/`
+  - Added account/auth discipline section:
+    - `edwin.teo@dlresources.com.sg` (dev/admin)
+    - `recruitment@dlresources.com.sg` (operations)
+  - Added `docs/collaboration_setup_guide.md`:
+    - one-time setup
+    - daily collaboration loop
+    - export/unpack/edit/validate/commit
+    - pack/import deployment loop
+    - UI-only sharing steps for recruitment account
+    - troubleshooting playbook
+  - Updated `docs/file_index.md` to include new collaboration guide.
+- Validation commands run:
+  - `git -C C:\bgv_project pull --ff-only`
+  - `pac auth list`
+  - `pac env list`
+  - `pac auth create --name BGV_EDWIN --environment https://orgde64dc49.crm5.dynamics.com/` (success)
+  - `pac auth create --name BGV_RECRUITMENT --environment https://orgde64dc49.crm5.dynamics.com/` (created with wrong user because current sign-in stayed edwin)
+  - `pac auth delete --name BGV_RECRUITMENT`
+  - `pac auth create --name BGV_EDWIN --deviceCode --environment https://orgde64dc49.crm5.dynamics.com/` (timed out waiting for interactive sign-in)
+- Next actions and blockers:
+  - Blocker: `pac auth create --deviceCode` needs interactive sign-in completion in browser; this cannot be completed unattended by agent.
+  - Next action: run device-code sign-in manually to create a true `BGV_RECRUITMENT` profile with `recruitment@dlresources.com.sg`.
