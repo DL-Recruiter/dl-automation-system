@@ -1,0 +1,8 @@
+{
+  "exportType": "power_platform_connector",
+  "connectorDisplayName": "shared_flowrunops",
+  "apiName": "shared_flowrunops",
+  "connectionId": "__REPLACE_WITH_CONNECTION_ID__",
+  "status": "placeholder",
+  "notes": "Export via Power Platform (PAC/portal) and overwrite with real definition JSON."
+}

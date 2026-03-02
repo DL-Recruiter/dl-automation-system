@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<connector>
+  <name>new_flowrunops</name>
+  <apiName>new_flowrunops</apiName>
+  <status>placeholder</status>
+  <note>Replace with provided Dataverse custom connector XML export.</note>
+</connector>

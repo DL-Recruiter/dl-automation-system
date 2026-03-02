@@ -1,0 +1,15 @@
+{
+  "connector": "new_flowrunops",
+  "apiName": "new_flowrunops",
+  "authType": "oauth2",
+  "connectionId": "__REPLACE_WITH_CONNECTION_ID__",
+  "parameters": {
+    "clientId": "__REPLACE_ME__",
+    "clientSecret": "__REPLACE_ME__",
+    "authorizationUrl": "__REPLACE_ME__",
+    "tokenUrl": "__REPLACE_ME__",
+    "scope": "__REPLACE_ME__"
+  },
+  "status": "placeholder",
+  "note": "Keep secrets out of source control; store real values in secure local configuration only."
+}

@@ -3,7 +3,7 @@
 <!-- This template defines the source-of-truth document for this automation project. -->
 
 ## 1. System Purpose & Scope
-The **DL Resources Automation** system automates business workflows by coordinating scripts, optional serverless functions, and optional Power Automate flows.  
+The **DL Resources Automation** system automates business workflows by coordinating scripts, optional serverless functions, and Power Automate flows.
 Primary goals:
 - Reduce manual operational steps.
 - Enforce consistent processing rules.
@@ -63,33 +63,68 @@ When rules change, perform an impact sweep across scripts, tests, and docs in th
 - Use environment variables for credentials and endpoints.
 - Keep `.env` out of version control.
 - Use HTTPS for external calls where applicable.
+- Azure Function keys must be passed via `x-functions-key` and stored in local `.env` only.
 
-## 7. Environment Variables
+## 7. Runtime Environment
+| Item | Value |
+| --- | --- |
+| Signed-in profile | `recruitment@dlresources.com.sg` |
+| Power Platform environment URL | `https://orgde64dc49.crm5.dynamics.com/` |
+| Azure tenant | `__REPLACE_WITH_AZURE_TENANT_ID_OR_NAME__` |
+| Azure subscription | `__REPLACE_WITH_AZURE_SUBSCRIPTION_ID_OR_NAME__` |
+
+Runtime tooling baseline:
+- Power Platform CLI (`pac`) is expected to already be installed and authenticated.
+- Azure CLI (`az`) is expected to already be installed and authenticated.
+- Azure Functions Core Tools (`func`) is expected to already be installed and authenticated.
+- Agents must not reauthenticate or install these tools unless explicitly requested by the user.
+
+Connection/data-source automation baseline:
+- Use CLI-first automation. Prefer `pac connection list` to discover connector API names and connection IDs.
+- For adding non-tabular connector sources to a code app, use `pac code add-data-source -a <apiName> -c <connectionId>`.
+- For SharePoint/custom connector integration, always provide both API name (example: `shared_sharepointonline`) and the target connection ID.
+- Capture connection IDs via `pac connection list` or the Power Apps portal before wiring flows or code apps.
+
+## 8. Environment Variables
 | Variable | Purpose | Required? | Default/Example |
 | --- | --- | --- | --- |
 | `API_URL` | Base URL for upstream/downstream API | No | `https://example.local` |
 | `API_ACCESS_TOKEN` | Bearer token or API secret | No | *(set in `.env` only)* |
 | `CUSTOM_SETTING` | Optional behavior flag | No | `20` |
+| `POWER_PLATFORM_ENV_URL` | Dataverse/Power Platform environment URL | Yes | `https://orgde64dc49.crm5.dynamics.com/` |
+| `SHAREPOINT_SITE_URL` | SharePoint site used by `shared_sharepointonline` | Yes | `https://contoso.sharepoint.com/sites/example` |
+| `DATAVERSE_INSTANCE_URL` | Dataverse instance URL for connector/app configuration | Yes | `https://orgde64dc49.crm5.dynamics.com/` |
+| `FUNCTION_ENDPOINT_URL` | Azure Function endpoint consumed by flow/app logic | Yes | `https://<functionapp>.azurewebsites.net/api/<endpoint>` |
+| `FUNCTION_KEY` | Value sent as `x-functions-key` when calling Azure Function API endpoint | Yes | `__REPLACE_WITH_FUNCTION_KEY__` |
+| `FLOW_VERIFY_TENANT_ID` | Azure AD tenant for Flow Management API OAuth token request | Yes | `__REPLACE_WITH_AZURE_TENANT_ID__` |
+| `FLOW_VERIFY_CLIENT_ID` | OAuth client ID for flow verification app registration | Yes | `__REPLACE_WITH_APP_REGISTRATION_CLIENT_ID__` |
+| `FLOW_VERIFY_CLIENT_SECRET` | OAuth client secret for flow verification app registration | Yes | *(set in `.env` only)* |
+| `FLOW_VERIFY_ENVIRONMENT_ID` | Power Platform environment ID for ARM run-history endpoint | Yes (if `FLOW_VERIFY_RUNS_URL` is empty) | `__REPLACE_WITH_POWER_PLATFORM_ENVIRONMENT_ID__` |
+| `FLOW_VERIFY_FLOW_ID` | Power Automate flow ID for ARM run-history endpoint | Yes (if `FLOW_VERIFY_RUNS_URL` is empty) | `__REPLACE_WITH_FLOW_ID__` |
+| `FLOW_VERIFY_SCOPE` | OAuth scope used to request access token | No | `https://management.azure.com/.default` |
+| `FLOW_VERIFY_BASE_URL` | Base URL for ARM Flow Management API | No | `https://management.azure.com` |
+| `FLOW_VERIFY_API_VERSION` | API version for run-history endpoint | No | `2016-11-01` |
+| `FLOW_VERIFY_RUNS_URL` | Optional full runs endpoint URL (for connector endpoint override) | No | *(leave empty to use ARM URL composition)* |
 
 Maintain `.env.example` with placeholder values only.
 
-## 8. Deployment & Hosting
+## 9. Deployment & Hosting
 Document runtime/deployment model when finalized:
-- Local scripts only, or
-- Serverless deployment (`functions/`), or
-- Hybrid with Power Automate (`flows/`).
+- Local scripts and docs.
+- Serverless function integration (`functions/`).
+- Power Automate exports (`flows/`) and connector definitions (`connectors/`).
 
-## 9. Error Handling & Logging
+## 10. Error Handling & Logging
 - Use structured, actionable error messages.
 - Log at appropriate levels (`INFO`, `WARNING`, `ERROR`).
 - Write runtime artifacts to `out/` for debugging/audit.
 
-## 10. Non-Functional Requirements
+## 11. Non-Functional Requirements
 - Reliability: deterministic processing and retry-safe behavior.
 - Maintainability: clear modules and tests under `tests/`.
 - Traceability: all behavior changes reflected in this spec and progress log.
 
-## 11. Change Management
+## 12. Change Management
 This file is the single source of truth for system behavior.
 1. Update this spec first for behavior/contract changes.
 2. Perform an impact sweep across scripts, tests, and docs.
@@ -97,7 +132,8 @@ This file is the single source of truth for system behavior.
 4. Record changes and validation commands in `docs/progress.md`.
 5. If a related file is intentionally unchanged, explain why in the change report.
 
-## 12. References
+## 13. References
 - `AGENTS.md`
 - `CODEX_PLAYBOOK.md`
 - `docs/progress.md`
+- `docs/architecture_flows.md`

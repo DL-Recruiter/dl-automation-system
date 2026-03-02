@@ -1,0 +1,13 @@
+{
+  "exportType": "power_automate_flow",
+  "flowName": "main",
+  "environmentUrl": "https://orgde64dc49.crm5.dynamics.com/",
+  "connectionReferences": [
+    {
+      "apiName": "shared_sharepointonline",
+      "connectionId": "__REPLACE_WITH_CONNECTION_ID__"
+    }
+  ],
+  "status": "placeholder",
+  "notes": "Replace this file with PAC/Power Platform JSON export from authenticated environment."
+}

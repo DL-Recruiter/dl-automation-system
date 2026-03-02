@@ -1,0 +1,44 @@
+{
+  "profile": "recruitment@dlresources.com.sg",
+  "environmentUrl": "https://orgde64dc49.crm5.dynamics.com/",
+  "flows": [
+    {
+      "name": "main",
+      "connections": [
+        {
+          "apiName": "shared_sharepointonline",
+          "connectionId": "mock-connection-shared-sharepointonline"
+        }
+      ]
+    },
+    {
+      "name": "FlowRunLogs exporter",
+      "connections": [
+        {
+          "apiName": "shared_flowrunops",
+          "connectionId": "mock-connection-shared-flowrunops"
+        },
+        {
+          "apiName": "shared_sharepointonline",
+          "connectionId": "mock-connection-shared-sharepointonline"
+        }
+      ]
+    }
+  ],
+  "connectors": [
+    {
+      "apiName": "shared_flowrunops",
+      "connectionId": "mock-connection-shared-flowrunops",
+      "usedBy": [
+        "flow"
+      ]
+    },
+    {
+      "apiName": "new_flowrunops",
+      "connectionId": "mock-connection-new-flowrunops",
+      "usedBy": [
+        "code_app"
+      ]
+    }
+  ]
+}
