@@ -46,3 +46,18 @@ Log each session with:
 - Next actions and blockers:
   - Blocker: real flow export replacement still requires authenticated `pac`/tenant access in user environment.
   - Next action: run authenticated export commands to replace placeholder files under `flows/`.
+
+## 2026-03-02 (Flow plain-English documentation)
+- Current status:
+  - Added a non-technical flow summary document for the exported BGV JSON flows.
+- Completed tasks:
+  - Reviewed root-level BGV flow exports (`BGV_0` to `BGV_6`) and mapped each trigger/action chain into plain-language process steps.
+  - Added `docs/flows_easy_english.md` with:
+    - End-to-end process story.
+    - Per-flow purpose, trigger, key actions, and outcome.
+    - Cross-flow dependency mapping (candidate side, employer side, reminders/escalations).
+- Validation commands run:
+  - `git diff -- docs/flows_easy_english.md docs/progress.md`
+  - `Get-Content -Raw docs/flows_easy_english.md`
+- Next actions and blockers:
+  - Next action: if needed, generate a second version with business-only wording for HR users (without technical terms like trigger/action).
