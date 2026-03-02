@@ -1,0 +1,316 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "api": {
+          "name": "shared_sharepointonline"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedsharepointonline_11e61"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "When_a_file_is_created_or_modified_(properties_only)": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+              "table": "d411563f-2b1c-4fa5-90fc-ecc5f50941a1",
+              "folderPath": "/BGV Records/Candidate Files"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetOnUpdatedFileItems",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "recurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          },
+          "splitOn": "@triggerOutputs()?['body/value']"
+        }
+      },
+      "actions": {
+        "Get_candidateID_from_word_doc_file_name": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "contains": [
+                  "@triggerBody()?['{Path}']",
+                  "/Candidate Files/"
+                ]
+              },
+              {
+                "contains": [
+                  "@triggerBody()?['{Path}']",
+                  "/Authorization/"
+                ]
+              },
+              {
+                "contains": [
+                  "@triggerBody()?['{FilenameWithExtension}']",
+                  "Authorization Form -"
+                ]
+              },
+              {
+                "endsWith": [
+                  "@triggerBody()?['{FilenameWithExtension}']",
+                  ".docx"
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "Extract_candidateID": {
+              "type": "Compose",
+              "inputs": "@trim( \r\n\r\n  replace( \r\n\r\n    replace(triggerBody()?['{FilenameWithExtension}'],'Authorization Form - ',''), \r\n\r\n    '.docx', \r\n\r\n    '' \r\n\r\n  ) \r\n\r\n) "
+            },
+            "Get_CandidateID_from_Auth_File": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+                  "table": "7b78dcaf-8744-478b-a40f-633ed7becff3",
+                  "$filter": "CandidateID eq '@{outputs('Extract_candidateID')}'",
+                  "$top": 1
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "GetItems",
+                  "connectionName": "shared_sharepointonline"
+                }
+              },
+              "runAfter": {
+                "Extract_candidateID": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Get_file_content_using_path": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+                  "path": "@concat(triggerBody()?['{Path}'], triggerBody()?['{FilenameWithExtension}'])\r\n",
+                  "inferContentType": true
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "GetFileContentByPath",
+                  "connectionName": "shared_sharepointonline"
+                }
+              },
+              "runAfter": {
+                "Get_CandidateID_from_Auth_File": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_Base64": {
+              "type": "Compose",
+              "inputs": "@base64(body('Get_file_content_using_path'))\r\n",
+              "runAfter": {
+                "Get_file_content_using_path": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "HTTP": {
+              "type": "Http",
+              "inputs": {
+                "uri": "https://bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net/api/parseauthorizationcontrols?code=kAnie8Zeiq83_f9E4NZQMPfrxJasZfoo1iFQqbWZKQTpAzFuZCATcQ%3D%3D",
+                "method": "POST",
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "fileName": "@{triggerBody()?['{FilenameWithExtension}']}",
+                  "docxBase64": "@{outputs('Compose_Base64')}"
+                }
+              },
+              "runAfter": {
+                "Compose_Base64": [
+                  "Succeeded"
+                ]
+              },
+              "runtimeConfiguration": {
+                "contentTransfer": {
+                  "transferMode": "Chunked"
+                }
+              }
+            },
+            "Signature_checkbox_condition": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@body('Parse_JSON')?['signedYes']",
+                      true
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "If_candidate_record_found": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "greater": [
+                          "@length(body('Get_CandidateID_from_Auth_File')?['value'])",
+                          0
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "Update_BGV_Candidates_SP_list_record": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+                          "table": "7b78dcaf-8744-478b-a40f-633ed7becff3",
+                          "id": "@first(body('Get_CandidateID_from_Auth_File')?['value'])?['ID'] ",
+                          "item/ConsentTimestamp": "@utcNow()",
+                          "item/Status/Value": "Obtained Authorization Form Signature",
+                          "item/AuthorisationSigned": true
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "PatchItem",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "runAfter": {
+                "Error_Handler_Parse_JSON": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Error_Handler_Parse_JSON": {
+              "type": "Scope",
+              "actions": {
+                "Compose": {
+                  "type": "Compose",
+                  "inputs": "File: @{triggerBody()?['{FilenameWithExtension}']}\nPath: @{triggerBody()?['{Path}']}\nHTTP body (if any): @{body('HTTP')}\n"
+                }
+              },
+              "runAfter": {
+                "Parse_JSON": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Error_Handler_HTTP": {
+              "type": "Scope",
+              "actions": {
+                "HTTP_Compose": {
+                  "type": "Compose",
+                  "inputs": "HTTP FAILED\n\nFile: @{triggerBody()?['{FilenameWithExtension}']}\nPath: @{triggerBody()?['{Path}']}\n\nHTTP status code (if available): @{outputs('HTTP')?['statusCode']}\nHTTP error/body (if available): @{body('HTTP')}\n"
+                }
+              },
+              "runAfter": {
+                "HTTP": [
+                  "TimedOut",
+                  "Failed"
+                ]
+              }
+            },
+            "Parse_JSON": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@body('HTTP')",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fileName": {
+                      "type": "string"
+                    },
+                    "signedYes": {
+                      "type": "boolean"
+                    },
+                    "signedNo": {
+                      "type": "boolean"
+                    },
+                    "controlsFound": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "tag": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "isChecked": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "tag",
+                          "title",
+                          "isChecked"
+                        ]
+                      }
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "Error_Handler_HTTP": [
+                  "Failed",
+                  "TimedOut",
+                  "Skipped"
+                ],
+                "HTTP": [
+                  "Succeeded",
+                  "TimedOut",
+                  "Failed"
+                ]
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {}
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}
