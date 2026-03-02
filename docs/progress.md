@@ -93,3 +93,24 @@ Log each session with:
 - Next actions and blockers:
   - Blocker: `pac auth create --deviceCode` needs interactive sign-in completion in browser; this cannot be completed unattended by agent.
   - Next action: run device-code sign-in manually to create a true `BGV_RECRUITMENT` profile with `recruitment@dlresources.com.sg`.
+
+## 2026-03-02 (Daily sync script added)
+- Current status:
+  - Added a one-command script to reduce manual command mistakes during daily flow sync.
+- Completed tasks:
+  - Added `scripts/active/bgv_daily_sync.ps1` with safe defaults:
+    - verifies required commands (`git`, `pac`)
+    - prints active PAC identity (`pac auth who`)
+    - runs `git pull --ff-only`
+    - exports `BGV_System` to `artifacts/exports/`
+    - unpacks into canonical folder `flows/power-automate/unpacked/`
+    - optional `-RunTests` flag (`python -m pytest -q tests`)
+  - Updated `docs/collaboration_setup_guide.md` with one-command usage examples.
+  - Updated `docs/file_index.md` to index the new script.
+- Validation commands run:
+  - `powershell -File scripts/active/bgv_daily_sync.ps1 -SkipExport -SkipUnpack` (PASS)
+  - `powershell -File scripts/active/bgv_daily_sync.ps1 -SkipPull -SkipExport -SkipUnpack -RunTests` (FAIL: `python` not on PATH in this shell)
+  - `powershell -File scripts/active/bgv_daily_sync.ps1 -SkipPull -SkipExport -SkipUnpack -RunTests -PythonExe C:\ceipal_api_test\.venv\Scripts\python.exe` (PASS)
+- Next actions and blockers:
+  - Next action: teammate can adopt the one-command daily sync in VS Code terminal.
+  - Note: if Python is not in PATH, pass `-PythonExe <full_path_to_python.exe>`.

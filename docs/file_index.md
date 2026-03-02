@@ -31,6 +31,7 @@
 - `connectors/new_flowrunops.connector.xml` - Placeholder Dataverse custom connector XML baseline.
 - `connectors/new_flowrunops.oauth.parameters.json` - Placeholder OAuth parameter definition for new_flowrunops.
 - `scripts/active/import_flow_exports.ps1` - Helper to copy authenticated exported flow JSON files into `flows/` standard filenames.
+- `scripts/active/bgv_daily_sync.ps1` - One-command daily sync for PAC identity check, git pull, export, and unpack.
 - `scripts/active/verify_flow_runs.py` - Flow run-history verification script using OAuth and ARM/connector endpoint support.
 - `tests/fixtures/connections.mock.json` - Mocked flow/connector connection metadata for tests.
 - `tests/test_flow_connector_fixtures.py` - Fixture validation tests for connector/flow mappings.

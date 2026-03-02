@@ -72,6 +72,22 @@ pac solution export --name BGV_System --path .\artifacts\exports\BGV_System_unma
 pac solution unpack --zipfile .\artifacts\exports\BGV_System_unmanaged.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true
 ```
 
+### One-command daily sync (recommended)
+Use the helper script to run identity check + pull + export + unpack:
+```powershell
+powershell -File scripts/active/bgv_daily_sync.ps1
+```
+
+Optional with tests:
+```powershell
+powershell -File scripts/active/bgv_daily_sync.ps1 -RunTests
+```
+
+If `python` is not available in PATH, pass full executable path:
+```powershell
+powershell -File scripts/active/bgv_daily_sync.ps1 -RunTests -PythonExe C:\path\to\python.exe
+```
+
 ### Step C: Edit canonical flow files (manual or Codex)
 - Only edit files under `flows/power-automate/unpacked/Workflows/`.
 
@@ -136,4 +152,3 @@ pac auth create --name <PROFILE_NAME> --deviceCode --environment https://orgde64
 ### Problem: import succeeds but flow fails at runtime
 - Check connection references and owner permissions first.
 - Then inspect run history and connector authorization states.
-
