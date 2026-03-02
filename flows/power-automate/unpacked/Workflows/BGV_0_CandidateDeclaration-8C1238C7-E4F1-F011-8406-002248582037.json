@@ -1,0 +1,631 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_microsoftforms": {
+        "api": {
+          "name": "shared_microsoftforms"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedmicrosoftforms_c86c2"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_sharepointonline": {
+        "api": {
+          "name": "shared_sharepointonline"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedsharepointonline_11e61"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_wordonlinebusiness": {
+        "api": {
+          "name": "shared_wordonlinebusiness"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedwordonlinebusiness_2ff9a"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_office365": {
+        "api": {
+          "name": "shared_office365"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedoffice365_d9a67"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "When_a_new_response_is_submitted": {
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "parameters": {
+              "form_id": "cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUNlVFTjhUNjNWOTI4SEsxTVc0V1ZSV1o3Qi4u"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_microsoftforms",
+              "operationId": "CreateFormWebhook",
+              "connectionName": "shared_microsoftforms"
+            }
+          },
+          "splitOn": "@triggerOutputs()?['body/value']",
+          "metadata": {
+            "operationMetadataId": "84d4a69d-ac01-4818-a6f3-f23c57a0cd90"
+          }
+        }
+      },
+      "actions": {
+        "Get_response_details": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "form_id": "cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUNlVFTjhUNjNWOTI4SEsxTVc0V1ZSV1o3Qi4u",
+              "response_id": "@triggerOutputs()?['body/resourceData/responseId']"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_microsoftforms",
+              "operationId": "GetFormResponseById",
+              "connectionName": "shared_microsoftforms"
+            }
+          },
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "5bbf02dd-2ea8-4d44-a92b-f9ced6d3c0ce"
+          }
+        },
+        "Initialize_varCandidateID": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varCandidateID",
+                "type": "string",
+                "value": "@concat(\r\n  'BGV-',\r\n  formatDateTime(utcNow(),'yyyyMMdd'),\r\n  '-',\r\n  substring(guid(),0,5)\r\n)"
+              }
+            ]
+          },
+          "runAfter": {
+            "Get_response_details": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "bbf026bd-ca30-4058-8dbe-05bd624127e8"
+          }
+        },
+        "Create_Candidate_Folder": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+              "table": "BGV Records",
+              "parameters/path": "Candidate Files/@{variables('varCandidateID')}"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "CreateNewFolder",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {
+            "Initialize_varCandidateID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "6312058a-3ab3-4c31-b953-3602bdfc076b"
+          }
+        },
+        "Create_BGV_Candidates_Row": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+              "table": "BGV_Candidates",
+              "item/CandidateID": "@variables('varCandidateID')",
+              "item/FullName": "@outputs('Get_response_details')?['body/rfe96c622120343f294de908deb0e849d']",
+              "item/CandidateEmail": "@outputs('Get_response_details')?['body/rcd8057cd92b24b5594681a5b39c07e3d']",
+              "item/ConsentCaptured": true,
+              "item/Status/Value": "New Candidate Form Filled",
+              "item/CreatedDate": "@utcNow()",
+              "item/IdentificationNumberPassport": "@outputs('Get_response_details')?['body/rf5b324c022804863a720ef13edeb9d9b']",
+              "item/IdentificationNumberNRIC": "@outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49']",
+              "item/{ContentType}/Id": "0x0100E0621C02A8D0D243940C59EBF81136500059EFDD3D7C7F2A4DBB73BD7372B4FC38"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "PostItem",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {
+            "Create_Candidate_Folder": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "1ce7a329-6792-4937-ba26-1d84739af40f"
+          }
+        },
+        "Create_Authorization_Sub_Folder": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+              "table": "d411563f-2b1c-4fa5-90fc-ecc5f50941a1",
+              "parameters/path": "Candidate Files/@{variables('varCandidateID')}/Authorization"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "CreateNewFolder",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {
+            "Is_E3_filled": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "9d6183ea-2eb8-4833-a970-7c004ab023ee"
+          }
+        },
+        "Populate_a_Microsoft_Word_template": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "source": "sites/dlresourcespl88.sharepoint.com,a1e3e6dd-e1df-4fde-8716-956137c7d557,b823cd7e-ca43-4824-a574-6d84eea5cf94",
+              "drive": "b!3ebjod_h3k-HFpVhN8fVV37NI7hDyiRIpXRthO6lz5Q_VhHUHCulT5D87MX1CUGh",
+              "file": "016SGZG5PNMCLLHQOWHRFJZTFJ5JG55C7V",
+              "dynamicFileSchema/974713748": "@outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49']",
+              "dynamicFileSchema/-1424797845": "@outputs('Get_response_details')?['body/rfe96c622120343f294de908deb0e849d']",
+              "dynamicFileSchema/-206184337": "@outputs('Get_response_details')?['body/rf5b324c022804863a720ef13edeb9d9b']",
+              "dynamicFileSchema/-352883803": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'Singapore Standard Time'), 'dd MMM yyyy')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_wordonlinebusiness",
+              "operationId": "CreateFileItem",
+              "connectionName": "shared_wordonlinebusiness"
+            }
+          },
+          "runAfter": {
+            "Create_Authorization_Sub_Folder": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "016SGZG5NYDHTWYGVEHBAJJ55N7V55HNXG": "/Templates/AuthorizationLetter_Template.docx",
+            "operationMetadataId": "eea86399-9b39-4f42-904d-a81b4256ca44",
+            "016SGZG5PNMCLLHQOWHRFJZTFJ5JG55C7V": "/Templates/AuthorizationLetter_Template.docx"
+          }
+        },
+        "_Create_the_filled_DOCX_in_Authorization_Folder": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+              "folderPath": "/BGV Records/Candidate Files/@{variables('varCandidateID')}/Authorization",
+              "name": "Authorization Form - @{variables('varCandidateID')}.docx",
+              "body": "@body('Populate_a_Microsoft_Word_template')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "CreateFile",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {
+            "Populate_a_Microsoft_Word_template": [
+              "Succeeded"
+            ]
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "826e9602-2cbb-40b1-8ca4-437fb4b4cf7a"
+          }
+        },
+        "Create_sharing_link_for_a_file_or_folder": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+              "table": "d411563f-2b1c-4fa5-90fc-ecc5f50941a1",
+              "id": "@outputs('_Create_the_filled_DOCX_in_Authorization_Folder')?['body/ItemId']",
+              "permission/type": "edit",
+              "permission/scope": "anonymous"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "CreateSharingLink",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {
+            "_Create_the_filled_DOCX_in_Authorization_Folder": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "23339f4d-1240-408a-a87f-c7f82b6875c8"
+          }
+        },
+        "Send_an_email_(V2)": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "emailMessage/To": "@outputs('Get_response_details')?['body/rcd8057cd92b24b5594681a5b39c07e3d']",
+              "emailMessage/Subject": "Please sign: Authorization - @{variables('varCandidateID')}",
+              "emailMessage/Body": "<p class=\"editor-paragraph\">Open Link @{outputs('Create_sharing_link_for_a_file_or_folder')?['body/link/webUrl']}</p>",
+              "emailMessage/Importance": "Normal"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+              "operationId": "SendEmailV2",
+              "connectionName": "shared_office365"
+            }
+          },
+          "runAfter": {
+            "Create_sharing_link_for_a_file_or_folder": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ba3b7fad-87f9-435d-b2bb-5d755df05afc"
+          }
+        },
+        "Update_BGV_Candidates_List_Row_Status": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+              "table": "7b78dcaf-8744-478b-a40f-633ed7becff3",
+              "id": "@outputs('Create_BGV_Candidates_Row')?['body/ID']",
+              "item/Status/Value": "Pending Authorization Form Signature",
+              "item/AuthorizationLink": "@outputs('Create_sharing_link_for_a_file_or_folder')?['body/link/webUrl']",
+              "item/AuthorizationLinkCreatedAt": "@utcNow()"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "PatchItem",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {
+            "Send_an_email_(V2)": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "43f3b6df-7698-4b73-bfc9-10e23f2242dc"
+          }
+        },
+        "Get_Candidate_Row": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+              "table": "7b78dcaf-8744-478b-a40f-633ed7becff3",
+              "$filter": "CandidateID eq '@{variables('varCandidateID')}'"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetItems",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {
+            "Create_BGV_Candidates_Row": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "db28722d-9dcf-4754-8ee1-4268ac0ca0ec"
+          }
+        },
+        "CandidateItemId": {
+          "type": "Compose",
+          "inputs": "@if(\r\n  greater(length(body('Get_Candidate_Row')?['value']), 0),\r\n  first(body('Get_Candidate_Row')?['value'])?['ID'],\r\n  null\r\n)\r\n",
+          "runAfter": {
+            "Get_Candidate_Row": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "99d25561-589b-465e-9439-e954d7fb46a9"
+          }
+        },
+        "Is_E2_filled": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "not": {
+                  "equals": [
+                    "@outputs('Get_response_details')?['body/r32be5c779be8409da404c296b3262471']",
+                    ""
+                  ]
+                }
+              }
+            ]
+          },
+          "actions": {
+            "E2_Row_Check": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+                  "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+                  "$filter": "@concat('RequestID eq ''REQ-', variables('varCandidateID'), '-EMP2''')",
+                  "$top": 1
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "GetItems",
+                  "connectionName": "shared_sharepointonline"
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "9ad2b380-094b-423d-91e7-7372c9ed5318"
+              }
+            },
+            "E2_Row_Check_Condition": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@equals(length(body('E1_Row_Check')?['value']), 0)",
+                      true
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Create_BGV_Request_Row_E2": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+                      "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+                      "item/CandidateID": "@variables('varCandidateID')",
+                      "item/EmployerName": "@outputs('Get_response_details')?['body/r1bb545a59a184a8d8a688825a042a314']",
+                      "item/EmployerHR_Email": "@outputs('Get_response_details')?['body/r32be5c779be8409da404c296b3262471']",
+                      "item/CandidateItemID/Id": "@outputs('CandidateItemId')",
+                      "item/RequestID": "@concat('REQ-', variables('varCandidateID'), '-EMP2')\r\n",
+                      "item/SendAfterDate": "@utcNow()",
+                      "item/VerificationStatus/Value": "Pending"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "PostItem",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  },
+                  "metadata": {
+                    "operationMetadataId": "c7713e38-8f26-4e84-85b7-2ced17547ede"
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "runAfter": {
+                "E2_Row_Check": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "6405c22c-f06a-43c8-b972-59dd8231508e"
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {
+            "E1_Row_Check_Condition": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "da1f97d9-a380-41f8-9231-dd66adab0171"
+          }
+        },
+        "Is_E3_filled": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "not": {
+                  "equals": [
+                    "@outputs('Get_response_details')?['body/r7032b42718eb4a84a88453304c2ee557']",
+                    ""
+                  ]
+                }
+              }
+            ]
+          },
+          "actions": {
+            "E3_Row_Check": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+                  "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+                  "$filter": "@concat('RequestID eq ''REQ-', variables('varCandidateID'), '-EMP3''')",
+                  "$top": 1
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "GetItems",
+                  "connectionName": "shared_sharepointonline"
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "682fdccf-7761-4439-803f-f35ee7b9e32f"
+              }
+            },
+            "E3_Row_Check_Condition": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@length(body('E3_Row_Check')?['value'])",
+                      true
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Create_BGV_Request_Row_E3": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+                      "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+                      "item/CandidateID": "@variables('varCandidateID')",
+                      "item/EmployerName": "@outputs('Get_response_details')?['body/r3e674ff5973e4d54b9f96952de10cd37']",
+                      "item/EmployerHR_Email": "@outputs('Get_response_details')?['body/r7032b42718eb4a84a88453304c2ee557']",
+                      "item/CandidateItemID/Id": "@outputs('CandidateItemId')",
+                      "item/RequestID": "@concat('REQ-', variables('varCandidateID'), '-EMP3')\r\n",
+                      "item/SendAfterDate": "@utcNow()",
+                      "item/VerificationStatus/Value": "Pending"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "PostItem",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  },
+                  "metadata": {
+                    "operationMetadataId": "04e73bca-6507-4002-8a43-2557d810e9dc"
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "runAfter": {
+                "E3_Row_Check": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "5ee015f2-dce2-487c-82d5-12427f827ff9"
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {
+            "Is_E2_filled": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "aab47ea2-6759-4803-bea9-8528f24d9b91"
+          }
+        },
+        "E1_Row_Check": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+              "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+              "$filter": "@concat(\r\n  'RequestID eq ''REQ-',\r\n  variables('varCandidateID'),\r\n  '-EMP1'''\r\n)\r\n",
+              "$top": 1
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetItems",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {
+            "CandidateItemId": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c1561da1-2115-496c-b040-fad36a9eca5b"
+          }
+        },
+        "E1_Row_Check_Condition": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@equals(length(body('E1_Row_Check')?['value']), 0)",
+                  true
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "Create_BGV_Request_Row": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+                  "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+                  "item/CandidateID": "@variables('varCandidateID')",
+                  "item/EmployerName": "@outputs('Get_response_details')?['body/rd186af3305c44a399ff007602a528c90']",
+                  "item/EmployerHR_Email": "@outputs('Get_response_details')?['body/r99f0629822f44e1990ee2e00b3c2b442']",
+                  "item/CandidateItemID/Id": "@outputs('CandidateItemId')",
+                  "item/RequestID": "@{concat('REQ-', variables('varCandidateID'), '-EMP1')\r\n}\n",
+                  "item/SendAfterDate": "@{if(\r\n  and(\r\n    equals(toLower(outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e']), 'yes'),\r\n    not(empty(outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e'])),\r\n    greater(\r\n      ticks(outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e>']),\r\n      ticks(utcNow())\r\n    )\r\n  ),\r\n  outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e'],\r\n  utcNow()\r\n)}\n",
+                  "item/VerificationStatus/Value": "Pending"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "PostItem",
+                  "connectionName": "shared_sharepointonline"
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "6e9dbe9d-f407-4a41-afff-64a8785e5844"
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {
+            "E1_Row_Check": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d4f48fa6-fc06-4f7d-9d2e-e6b5ceb6ee99"
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}
