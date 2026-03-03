@@ -90,13 +90,28 @@ def build_runs_url() -> str:
     if explicit_url:
         return explicit_url
 
-    base_url = os.getenv("FLOW_VERIFY_BASE_URL", BASE_URL_DEFAULT).rstrip("/")
     environment_id = require_env("FLOW_VERIFY_ENVIRONMENT_ID")
     flow_id = require_env("FLOW_VERIFY_FLOW_ID")
+    base_url = os.getenv("FLOW_VERIFY_BASE_URL", BASE_URL_DEFAULT)
     api_version = os.getenv("FLOW_VERIFY_API_VERSION", API_VERSION_DEFAULT)
 
+    return build_runs_url_for(
+        environment_id=environment_id,
+        flow_id=flow_id,
+        base_url=base_url,
+        api_version=api_version,
+    )
+
+
+def build_runs_url_for(
+    environment_id: str,
+    flow_id: str,
+    base_url: str = BASE_URL_DEFAULT,
+    api_version: str = API_VERSION_DEFAULT,
+) -> str:
+    normalized_base_url = base_url.rstrip("/")
     return (
-        f"{base_url}/providers/Microsoft.ProcessSimple/environments/"
+        f"{normalized_base_url}/providers/Microsoft.ProcessSimple/environments/"
         f"{environment_id}/flows/{flow_id}/runs?api-version={api_version}"
     )
 

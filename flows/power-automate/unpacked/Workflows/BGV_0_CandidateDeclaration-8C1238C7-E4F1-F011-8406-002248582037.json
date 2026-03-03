@@ -411,7 +411,7 @@
                       "item/EmployerName": "@outputs('Get_response_details')?['body/r1bb545a59a184a8d8a688825a042a314']",
                       "item/EmployerHR_Email": "@outputs('Get_response_details')?['body/r32be5c779be8409da404c296b3262471']",
                       "item/CandidateItemID/Id": "@outputs('CandidateItemId')",
-                      "item/RequestID": "@concat('REQ-', variables('varCandidateID'), '-EMP2')\r\n",
+                      "item/RequestID": "@concat('REQ-', variables('varCandidateID'), '-EMP2')",
                       "item/SendAfterDate": "@utcNow()",
                       "item/VerificationStatus/Value": "Pending"
                     },
@@ -508,7 +508,7 @@
                       "item/EmployerName": "@outputs('Get_response_details')?['body/r3e674ff5973e4d54b9f96952de10cd37']",
                       "item/EmployerHR_Email": "@outputs('Get_response_details')?['body/r7032b42718eb4a84a88453304c2ee557']",
                       "item/CandidateItemID/Id": "@outputs('CandidateItemId')",
-                      "item/RequestID": "@concat('REQ-', variables('varCandidateID'), '-EMP3')\r\n",
+                      "item/RequestID": "@concat('REQ-', variables('varCandidateID'), '-EMP3')",
                       "item/SendAfterDate": "@utcNow()",
                       "item/VerificationStatus/Value": "Pending"
                     },
@@ -595,7 +595,7 @@
                   "item/EmployerName": "@outputs('Get_response_details')?['body/rd186af3305c44a399ff007602a528c90']",
                   "item/EmployerHR_Email": "@outputs('Get_response_details')?['body/r99f0629822f44e1990ee2e00b3c2b442']",
                   "item/CandidateItemID/Id": "@outputs('CandidateItemId')",
-                  "item/RequestID": "@{concat('REQ-', variables('varCandidateID'), '-EMP1')\r\n}\n",
+                      "item/RequestID": "@concat('REQ-', variables('varCandidateID'), '-EMP1')",
                   "item/SendAfterDate": "@{if(\r\n  and(\r\n    equals(toLower(outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e']), 'yes'),\r\n    not(empty(outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e'])),\r\n    greater(\r\n      ticks(outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e>']),\r\n      ticks(utcNow())\r\n    )\r\n  ),\r\n  outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e'],\r\n  utcNow()\r\n)}\n",
                   "item/VerificationStatus/Value": "Pending"
                 },

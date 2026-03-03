@@ -105,7 +105,7 @@
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
               "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
-              "$filter": "RequestID eq ' @{outputs('Get_response_details')?['body/rd745d133eb7f4611b59ea051f980f97a']} '",
+              "$filter": "startswith(RequestID, '@{outputs('Get_response_details')?['body/rd745d133eb7f4611b59ea051f980f97a']}')",
               "$top": 1
             },
             "host": {

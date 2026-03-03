@@ -102,3 +102,20 @@ When `FLOW_VERIFY_RUNS_URL` is set, the script calls that URL directly instead o
 ```powershell
 python scripts/active/verify_flow_runs.py
 ```
+
+## Pull All Canonical Flow Runs (VS Code Friendly)
+- Script path: `scripts/active/pull_all_flow_runs.py`
+- Purpose:
+  - Discover canonical flow IDs from `flows/power-automate/unpacked/Workflows/`.
+  - Pull run history for each canonical flow automatically.
+  - Save a combined report to `out/flow_run_history_latest.json` by default.
+
+### Optional Environment Variables
+- `FLOW_VERIFY_CANONICAL_DIR` (default: `flows/power-automate/unpacked/Workflows`)
+- `FLOW_VERIFY_REPORT_PATH` (default: `out/flow_run_history_latest.json`)
+- `FLOW_VERIFY_TOP` (optional integer run limit per flow, for example `10`)
+
+### Example Run (All 7 Flows)
+```powershell
+py scripts/active/pull_all_flow_runs.py
+```

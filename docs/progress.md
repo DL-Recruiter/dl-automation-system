@@ -94,6 +94,73 @@ Log each session with:
   - Blocker: `pac auth create --deviceCode` needs interactive sign-in completion in browser; this cannot be completed unattended by agent.
   - Next action: run device-code sign-in manually to create a true `BGV_RECRUITMENT` profile with `recruitment@dlresources.com.sg`.
 
+## 2026-03-03 (VS Code automatic flow run pull)
+- Current status:
+  - Added one-command automation to pull run history for all canonical BGV solution flows from VS Code.
+- Completed tasks:
+  - Updated `scripts/active/verify_flow_runs.py` with reusable `build_runs_url_for(...)` helper for environment/flow-specific URL composition.
+  - Added `scripts/active/pull_all_flow_runs.py` to:
+    - discover canonical flow IDs from `flows/power-automate/unpacked/Workflows/`
+    - pull run histories for each flow using existing OAuth/token logic
+    - write combined JSON report to `out/flow_run_history_latest.json` (configurable via env var)
+  - Added `tests/test_pull_all_flow_runs.py` for canonical flow discovery and run query helper coverage.
+  - Updated `tests/test_verify_flow_runs.py` for URL composition helper coverage.
+  - Updated `.env.example` and docs (`docs/architecture_flows.md`, `docs/file_index.md`) with new command and optional settings.
+- Validation commands run:
+  - `py -m py_compile scripts/active/verify_flow_runs.py scripts/active/pull_all_flow_runs.py tests/test_verify_flow_runs.py tests/test_pull_all_flow_runs.py` (pass)
+  - `py scripts/active/pull_all_flow_runs.py` (expected failure: missing local OAuth env var `FLOW_VERIFY_TENANT_ID`)
+  - `py -m pytest tests/test_verify_flow_runs.py tests/test_pull_all_flow_runs.py` (failed: `No module named pytest`)
+- Next actions and blockers:
+  - Next action: populate local `.env` with `FLOW_VERIFY_TENANT_ID`, `FLOW_VERIFY_CLIENT_ID`, `FLOW_VERIFY_CLIENT_SECRET`, and `FLOW_VERIFY_ENVIRONMENT_ID`, then run `py scripts/active/pull_all_flow_runs.py`.
+  - Blocker: OAuth app registration credentials are required for automated run-history retrieval.
+  - Blocker: `python` alias is unavailable in current terminal; use `py` launcher or enable Python alias.
+
+## 2026-03-03 (BGV_5 RequestID filter fix)
+- Current status:
+  - Patched `BGV_5_Response1` flow to remove unintended whitespace in SharePoint RequestID filter expression.
+- Completed tasks:
+  - Updated canonical flow file:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Changed `$filter` from spaced RequestID comparison to exact match:
+    - `RequestID eq '@{outputs('Get_response_details')?['body/rd745d133eb7f4611b59ea051f980f97a']}'`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null` (pass)
+  - `Select-String -Path flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json -SimpleMatch '"$filter"'` (confirmed updated line)
+- Next actions and blockers:
+  - Next action: rerun `BGV_5_Response1` with a new employer form response and confirm `Get_items` returns 1 row and flow no longer terminates in else branch.
+
+## 2026-03-03 (BGV_5 live failure root-cause and hardening)
+- Current status:
+  - Investigated failed run `08584290828823558058429050158CU23` in `BGV_5_Response1` after deployment.
+  - Confirmed filter spacing issue was fixed, but `Get_items` still returned 0.
+- Completed tasks:
+  - Pulled live run action inputs/outputs via Flow API.
+  - Confirmed `BGV_0` created RequestID with trailing newline (`REQ-BGV-...-EMP1\n`) in existing rows.
+  - Updated canonical flows:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+      - removed trailing newline artifacts from `item/RequestID` expressions for EMP1/EMP2/EMP3.
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+      - changed `$filter` to `startswith(RequestID, '<form request id>')` to match both existing newline-suffixed rows and normalized future rows.
+  - Repacked and imported updated solution to Power Automate (`BGV_System`) with publish + force overwrite.
+- Validation commands run:
+  - `ConvertFrom-Json` checks for both patched workflow JSON files (pass).
+  - `pac solution pack ...` (pass).
+  - `pac solution import ... --publish-changes --force-overwrite` (pass).
+- Next actions and blockers:
+  - Next action: run a new `BGV_5_Response1` test; verify `Get_items` returns >=1 row and flow does not terminate in else branch.
+
+## 2026-03-03 (Repository inventory documentation)
+- Current status:
+  - Added a full file-by-file inventory document for the GitHub-tracked repository contents.
+- Completed tasks:
+  - Added `docs/repo_inventory.md` with purpose descriptions for root files, connectors, docs, flow artifacts, scripts, and tests.
+  - Updated `docs/file_index.md` to include `docs/repo_inventory.md`.
+- Validation commands run:
+  - `git ls-tree -r --name-only origin/master` (confirmed baseline tracked file set for inventory generation)
+  - `Get-Content -Raw docs/repo_inventory.md`
+- Next actions and blockers:
+  - Next action: keep `docs/repo_inventory.md` updated whenever tracked files are added/removed significantly.
+
 ## 2026-03-02 (Daily sync script added)
 - Current status:
   - Added a one-command script to reduce manual command mistakes during daily flow sync.

@@ -89,3 +89,18 @@ def test_build_runs_url_uses_explicit_override(monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setenv("FLOW_VERIFY_RUNS_URL", "https://connector.internal/runs")
 
     assert verify_flow_runs.build_runs_url() == "https://connector.internal/runs"
+
+
+def test_build_runs_url_for_composes_expected_arm_url() -> None:
+    url = verify_flow_runs.build_runs_url_for(
+        environment_id="env-123",
+        flow_id="flow-456",
+        base_url="https://management.azure.com/",
+        api_version="2016-11-01",
+    )
+
+    assert (
+        url
+        == "https://management.azure.com/providers/Microsoft.ProcessSimple/environments/"
+        "env-123/flows/flow-456/runs?api-version=2016-11-01"
+    )
