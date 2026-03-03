@@ -221,6 +221,20 @@ Log each session with:
 - Next actions and blockers:
   - Next action: if needed, add a short FAQ section for common operator errors (wrong PAC account, stale exports, missing Python launcher).
 
+## 2026-03-03 (README push workflow + best practices)
+- Current status:
+  - Added missing operator guidance for safe GitHub push workflow and day-to-day best practices.
+- Completed tasks:
+  - Updated `README.md` with:
+    - "How To Push To GitHub (Safe Sequence)" section
+    - "Best Practices Checklist" section
+  - Included explicit commands for pull/status/add/commit/push and CI verification.
+- Validation commands run:
+  - `Get-Content -Raw README.md`
+  - `git status --short`
+- Next actions and blockers:
+  - Next action: if preferred, add a PR-based workflow variant as the default and keep direct-`master` push as an exception path.
+
 ## 2026-03-02 (Daily sync script added)
 - Current status:
   - Added a one-command script to reduce manual command mistakes during daily flow sync.

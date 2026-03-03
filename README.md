@@ -125,6 +125,56 @@ Default output file:
    git pull --ff-only
    ```
 
+## How To Push To GitHub (Safe Sequence)
+Use this sequence every time you finish a change:
+
+1. Confirm latest baseline:
+   ```powershell
+   git pull --ff-only
+   ```
+2. Check what changed:
+   ```powershell
+   git status --short
+   ```
+3. Stage only intended files:
+   ```powershell
+   git add <file1> <file2> ...
+   ```
+4. Commit with a clear message:
+   ```powershell
+   git commit -m "bgv: <what changed>"
+   ```
+5. Push:
+   - if working on `master`:
+     ```powershell
+     git push origin master
+     ```
+   - if working on a feature branch:
+     ```powershell
+     git push origin <branch-name>
+     ```
+6. Verify CI result in GitHub (especially `Linked Docs Guard`).
+
+## Best Practices Checklist
+- Always run `pac auth who` before any PAC command.
+- Always sync first (`bgv_daily_sync.ps1`) before editing flows.
+- Edit only canonical flow files:
+  - `flows/power-automate/unpacked/Workflows/`
+- Keep changes minimal and task-focused; avoid broad refactors during production fixes.
+- Never commit secrets or `.env`; keep credentials local only.
+- When flow JSON changes, update linked docs in the same task:
+  - `docs/progress.md` and at least one behavior doc.
+- Validate before deploy:
+  - JSON parse checks on edited flow files.
+  - script syntax checks where applicable.
+- Deploy intentionally with pack/import; do not assume local edits are live.
+- After test runs, capture and share:
+  - flow name
+  - run ID
+  - failed action
+  - error message
+- If unsure which account is active or which path is canonical, stop and verify first.
+
 ## Linked Documentation Policy (Auto Enforced)
 When canonical flow JSON changes, docs must be updated in same change.
 
