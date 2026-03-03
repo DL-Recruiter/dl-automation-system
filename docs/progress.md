@@ -161,6 +161,30 @@ Log each session with:
 - Next actions and blockers:
   - Next action: keep `docs/repo_inventory.md` updated whenever tracked files are added/removed significantly.
 
+## 2026-03-03 (Linked-doc CI enforcement)
+- Current status:
+  - Added automated GitHub validation to enforce linked documentation updates when canonical flow JSON files change.
+- Completed tasks:
+  - Added `.github/workflows/linked-docs-guard.yml`:
+    - runs on pull requests and pushes to `master`
+    - computes diff range and enforces policy check
+  - Added `scripts/active/enforce_linked_docs.py`:
+    - detects canonical flow JSON changes under `flows/power-automate/unpacked/Workflows/`
+    - requires `docs/progress.md` updates
+    - requires at least one linked behavior doc update:
+      - `System_SPEC.md`
+      - `docs/flows_easy_english.md`
+      - `docs/architecture_flows.md`
+  - Added `tests/test_enforce_linked_docs.py` for pass/fail policy scenarios.
+  - Updated `docs/file_index.md` with new workflow/script/test entries.
+- Validation commands run:
+  - `py -m py_compile scripts/active/enforce_linked_docs.py tests/test_enforce_linked_docs.py`
+  - `py scripts/active/enforce_linked_docs.py --base HEAD~1 --head HEAD` (policy execution smoke check)
+  - `py -m pytest tests/test_enforce_linked_docs.py` (failed: `No module named pytest`)
+- Next actions and blockers:
+  - Next action: verify the `Linked Docs Guard` workflow run on next PR/push in GitHub Actions.
+  - Blocker: local `pytest` module is not installed in current shell.
+
 ## 2026-03-02 (Daily sync script added)
 - Current status:
   - Added a one-command script to reduce manual command mistakes during daily flow sync.
