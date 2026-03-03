@@ -155,6 +155,88 @@ Use this sequence every time you finish a change:
      ```
 6. Verify CI result in GitHub (especially `Linked Docs Guard`).
 
+## End-to-End Delivery: GitHub -> Power Automate -> Live Production
+Use this when you want to move changes safely from source control into runtime environments.
+
+### A) From Local To GitHub (source of truth update)
+1. Sync and verify:
+   ```powershell
+   powershell -File scripts/active/bgv_daily_sync.ps1
+   pac auth who
+   git status --short --branch
+   ```
+2. Commit and push:
+   ```powershell
+   git add <intended-files>
+   git commit -m "bgv: <change summary>"
+   git push origin master
+   ```
+3. Confirm GitHub checks pass (`Linked Docs Guard` at minimum).
+
+### B) From GitHub To Power Automate (same environment deployment)
+This deploys your committed canonical unpacked files.
+
+1. Pull latest:
+   ```powershell
+   git pull --ff-only
+   ```
+2. Confirm target identity/environment before deploying:
+   ```powershell
+   pac auth who
+   ```
+3. (Recommended) Export backup of current environment state before import:
+   ```powershell
+   pac solution export --name BGV_System --path .\artifacts\exports\BGV_System_predeploy_backup.zip --managed false --overwrite
+   ```
+4. Pack from canonical unpacked source:
+   ```powershell
+   pac solution pack --zipfile .\artifacts\exports\BGV_System_unmanaged.repack.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true
+   ```
+5. Import and publish:
+   ```powershell
+   pac solution import --path .\artifacts\exports\BGV_System_unmanaged.repack.zip --publish-changes --force-overwrite
+   ```
+6. Post-deploy smoke check:
+   - ensure the 7 `BGV_*` flows are `On`
+   - run at least one known test scenario
+   - confirm run history has no immediate failures
+
+### C) Promote To Live Production (recommended controlled path)
+If production is a different environment, avoid direct ad-hoc edits in production.
+
+1. Confirm production PAC profile/environment:
+   ```powershell
+   pac auth select --name <PROD_PROFILE>
+   pac auth who
+   ```
+2. Take production backup export first:
+   ```powershell
+   pac solution export --name BGV_System --path .\artifacts\exports\BGV_System_prod_predeploy_backup.zip --managed false --overwrite
+   ```
+3. Import approved package to production:
+   ```powershell
+   pac solution import --path .\artifacts\exports\BGV_System_unmanaged.repack.zip --publish-changes --force-overwrite
+   ```
+4. Run production smoke tests:
+   - one candidate declaration
+   - one employer response path
+   - verify reminder flows remain healthy
+5. Record deployment in `docs/progress.md` (date, package used, result, rollback point).
+
+### Rollback (if production issue found)
+Fastest safe rollback:
+1. Re-import known good backup package:
+   ```powershell
+   pac solution import --path .\artifacts\exports\BGV_System_prod_predeploy_backup.zip --publish-changes --force-overwrite
+   ```
+2. Re-test critical path (`BGV_0` -> `BGV_5`) and confirm recovery.
+
+### UI-only Tasks (keep minimal)
+CLI-first remains default. Use portal only for:
+- creating/signing-in connection instances
+- sharing flows with co-owner permissions
+- rebinding broken connection references when needed
+
 ## Best Practices Checklist
 - Always run `pac auth who` before any PAC command.
 - Always sync first (`bgv_daily_sync.ps1`) before editing flows.

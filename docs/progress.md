@@ -235,6 +235,23 @@ Log each session with:
 - Next actions and blockers:
   - Next action: if preferred, add a PR-based workflow variant as the default and keep direct-`master` push as an exception path.
 
+## 2026-03-03 (README deployment runbook: GitHub -> Power Automate -> Production)
+- Current status:
+  - Added detailed deployment instructions covering source control handoff, environment deployment, production promotion, and rollback.
+- Completed tasks:
+  - Expanded `README.md` with end-to-end sections:
+    - Local -> GitHub
+    - GitHub -> Power Automate deployment
+    - Production promotion checklist
+    - Rollback steps
+    - UI-only task boundary list
+  - Included explicit command sequences and smoke-test requirements.
+- Validation commands run:
+  - `Get-Content -Raw README.md`
+  - `git status --short --branch`
+- Next actions and blockers:
+  - Next action: if production has a separate environment URL/profile naming standard, add those exact values to README examples.
+
 ## 2026-03-02 (Daily sync script added)
 - Current status:
   - Added a one-command script to reduce manual command mistakes during daily flow sync.
