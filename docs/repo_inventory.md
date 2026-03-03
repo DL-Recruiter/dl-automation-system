@@ -5,6 +5,7 @@ This inventory lists repository-tracked files and what each file is used for.
 ## Root Files
 - `.env.example` - Placeholder environment variables for local setup; contains no secrets.
 - `.gitignore` - Git ignore rules for local secrets, caches, outputs, and generated artifacts.
+- `README.md` - Repository quick-start for developers/Codex operators, including daily sync/deploy workflow and policy notes.
 - `.vscode/settings.json` - VS Code workspace settings.
 - `AGENTS.md` - Mandatory operating rules and safety constraints for coding agents.
 - `CODEX_PLAYBOOK.md` - Agent workflow/playbook for context loading, edits, validation, and reporting.

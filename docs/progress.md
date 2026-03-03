@@ -185,6 +185,25 @@ Log each session with:
   - Next action: verify the `Linked Docs Guard` workflow run on next PR/push in GitHub Actions.
   - Blocker: local `pytest` module is not installed in current shell.
 
+## 2026-03-03 (README onboarding and operator guide)
+- Current status:
+  - Added a root `README.md` with concrete instructions for developers guiding Codex sessions.
+- Completed tasks:
+  - Added `README.md` with:
+    - daily sync commands (`scripts/active/bgv_daily_sync.ps1`)
+    - canonical flow edit path rules
+    - pack/import deployment commands
+    - run-history commands (`verify_flow_runs.py`, `pull_all_flow_runs.py`)
+    - linked-doc policy and CI guard references
+    - recommended Codex prompt pattern
+  - Updated `docs/file_index.md` and `docs/repo_inventory.md` to include the new README purpose.
+- Validation commands run:
+  - `Get-Content -Raw README.md`
+  - `Get-Content -Raw docs/file_index.md`
+  - `Get-Content -Raw docs/repo_inventory.md`
+- Next actions and blockers:
+  - Next action: keep README examples updated when script names or deployment commands change.
+
 ## 2026-03-02 (Daily sync script added)
 - Current status:
   - Added a one-command script to reduce manual command mistakes during daily flow sync.

@@ -18,6 +18,7 @@
 ## Files
 - `.env.example` - Placeholder environment variable template (no real secrets).
 - `.gitignore` - Ignore rules for secrets, virtual env, and generated outputs.
+- `README.md` - Developer and Codex operator quick-start, daily sync workflow, and linked-doc policy summary.
 - `AGENTS.md` - Agent operating constraints and mandatory repository rules.
 - `CODEX_PLAYBOOK.md` - Codex workflow protocol for safe, minimal, validated edits.
 - `System_SPEC.md` - Source-of-truth system specification for behavior and rules.
