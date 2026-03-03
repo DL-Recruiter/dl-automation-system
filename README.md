@@ -7,24 +7,61 @@ Power Automate solution repository for `BGV_System` with canonical unpacked flow
 - Standardize daily sync/edit/deploy workflow for team members and Codex sessions.
 - Enforce linked documentation updates when flow behavior changes.
 
-## Developer + Codex Quick Start
+## Short Answer: Do I Need To Sync First?
+Yes. Always sync first.
+
+Use this command at start of day before editing/testing:
+```powershell
+powershell -File scripts/active/bgv_daily_sync.ps1
+```
+
+## One-Time Setup
 1. Open repo in VS Code at `C:\bgv_project`.
-2. Confirm active PAC identity:
+2. Ensure required tools exist in terminal:
+   - `git`
+   - `pac`
+3. (Optional but recommended) Ensure Python launcher exists for scripts/tests:
+   - `py`
+4. Confirm PAC identity:
    ```powershell
    pac auth who
    ```
-3. Run daily sync (recommended first command each day):
-   ```powershell
-   powershell -File scripts/active/bgv_daily_sync.ps1
-   ```
-4. If needed, run with tests:
-   ```powershell
-   powershell -File scripts/active/bgv_daily_sync.ps1 -RunTests
-   ```
-   If Python is not on PATH:
-   ```powershell
-   powershell -File scripts/active/bgv_daily_sync.ps1 -RunTests -PythonExe C:\path\to\python.exe
-   ```
+
+## What `bgv_daily_sync.ps1` Actually Does
+`scripts/active/bgv_daily_sync.ps1` is the start-of-day refresh script.
+
+Step by step:
+1. Checks prerequisites:
+   - validates `git` and `pac` are available
+   - confirms current folder is a git repo
+2. Shows active Power Platform login:
+   - runs `pac auth who`
+3. Pulls latest Git changes:
+   - runs `git pull --ff-only`
+4. Exports latest tenant solution:
+   - exports `BGV_System` to `artifacts/exports/BGV_System_unmanaged.zip`
+5. Unpacks solution into editable source-controlled files:
+   - `flows/power-automate/unpacked/`
+6. Optionally runs tests:
+   - only when `-RunTests` is passed
+
+What it does NOT do:
+- does not auto `git add/commit/push`
+- does not auto deploy/import solution back to environment
+
+Typical commands:
+```powershell
+powershell -File scripts/active/bgv_daily_sync.ps1
+```
+
+```powershell
+powershell -File scripts/active/bgv_daily_sync.ps1 -RunTests
+```
+
+If Python is not on PATH:
+```powershell
+powershell -File scripts/active/bgv_daily_sync.ps1 -RunTests -PythonExe C:\path\to\python.exe
+```
 
 ## Mandatory Flow Edit Rules
 - Edit cloud flows only in canonical path:
@@ -32,45 +69,83 @@ Power Automate solution repository for `BGV_System` with canonical unpacked flow
 - Treat non-canonical duplicates as read-only unless explicitly requested:
   - `power-automate/`
   - root `BGV_*.json` exports (if present)
-- After edits, pack/import back to environment:
-  ```powershell
-  pac solution pack --zipfile .\artifacts\exports\BGV_System_unmanaged.repack.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true
-  pac solution import --path .\artifacts\exports\BGV_System_unmanaged.repack.zip --publish-changes --force-overwrite
-  ```
 
-## Run History Utilities
-- Single-flow verification:
-  ```powershell
-  py scripts/active/verify_flow_runs.py
-  ```
-- All canonical flows (writes combined report):
-  ```powershell
-  py scripts/active/pull_all_flow_runs.py
-  ```
-  Output file (default):
-  - `out/flow_run_history_latest.json`
+## How To Deploy Flow Changes Back To Power Automate
+After edits are done:
+```powershell
+pac solution pack --zipfile .\artifacts\exports\BGV_System_unmanaged.repack.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true
+pac solution import --path .\artifacts\exports\BGV_System_unmanaged.repack.zip --publish-changes --force-overwrite
+```
 
-## Linked Documentation Policy
-When canonical flow JSON files change, linked docs must be updated in the same change.
+## Run History Utilities (VS Code Terminal)
+Single-flow verification:
+```powershell
+py scripts/active/verify_flow_runs.py
+```
 
-Required by policy:
+All canonical flows (combined report):
+```powershell
+py scripts/active/pull_all_flow_runs.py
+```
+
+Default output file:
+- `out/flow_run_history_latest.json`
+
+## Common Task Playbooks
+### 1) Start Work Safely
+1. Run daily sync script.
+2. Confirm active account with `pac auth who`.
+3. Confirm working tree before edits:
+   ```powershell
+   git status --short
+   ```
+
+### 2) Investigate a Failed Flow Run
+1. Provide flow name + run ID to Codex.
+2. Codex pulls action-level run details via API/CLI.
+3. Codex identifies exact failing action and root cause.
+4. If approved, Codex patches canonical flow JSON and deploys.
+
+### 3) Patch + Deploy with Codex
+1. Ask Codex to patch specific flow.
+2. Codex edits canonical file only.
+3. Codex validates JSON/smoke checks.
+4. Codex runs `pac solution pack` + `pac solution import`.
+5. You re-test and send new run ID.
+
+### 4) Share Changes with Team
+1. Commit and push:
+   ```powershell
+   git add .
+   git commit -m "bgv: <summary>"
+   git push
+   ```
+2. Teammate pulls latest:
+   ```powershell
+   git pull --ff-only
+   ```
+
+## Linked Documentation Policy (Auto Enforced)
+When canonical flow JSON changes, docs must be updated in same change.
+
+Required:
 - `docs/progress.md`
-- At least one behavior doc:
+- plus at least one behavior doc:
   - `System_SPEC.md`
   - `docs/flows_easy_english.md`
   - `docs/architecture_flows.md`
 
-Enforced by CI:
+CI guard:
 - `.github/workflows/linked-docs-guard.yml`
 - `scripts/active/enforce_linked_docs.py`
 
-## Recommended Prompting Pattern for Codex
-When requesting flow fixes, include:
+## Recommended Prompt Format for Codex
+When requesting fixes, include:
 - flow name
 - run ID
 - expected behavior
 - current failure behavior
-- whether Codex should deploy to Power Automate after patch
+- whether Codex should deploy after patch
 
 Example:
 ```text

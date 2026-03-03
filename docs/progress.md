@@ -204,6 +204,23 @@ Log each session with:
 - Next actions and blockers:
   - Next action: keep README examples updated when script names or deployment commands change.
 
+## 2026-03-03 (README expanded with full user task playbooks)
+- Current status:
+  - Expanded README with a more explicit, screenshot-style operational guide for users/developers guiding Codex.
+- Completed tasks:
+  - Updated `README.md` with:
+    - explicit answer: sync first
+    - one-time setup checklist
+    - detailed `bgv_daily_sync.ps1` step-by-step behavior
+    - what `bgv_daily_sync.ps1` does not do
+    - common task playbooks (start work, investigate failure, patch/deploy, share with teammate)
+    - explicit deploy commands and run-history utility commands
+    - linked-doc CI policy summary
+- Validation commands run:
+  - `Get-Content -Raw README.md`
+- Next actions and blockers:
+  - Next action: if needed, add a short FAQ section for common operator errors (wrong PAC account, stale exports, missing Python launcher).
+
 ## 2026-03-02 (Daily sync script added)
 - Current status:
   - Added a one-command script to reduce manual command mistakes during daily flow sync.
