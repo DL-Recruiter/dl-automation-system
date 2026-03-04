@@ -272,3 +272,132 @@ Log each session with:
 - Next actions and blockers:
   - Next action: teammate can adopt the one-command daily sync in VS Code terminal.
   - Note: if Python is not in PATH, pass `-PythonExe <full_path_to_python.exe>`.
+
+## 2026-03-03 (BGV_4 employer prefill + email context fix)
+- Current status:
+  - Patched `BGV_4_SendToEmployer_Clean` so the employer-form link pre-fills company fields that were previously left blank.
+- Completed tasks:
+  - Retrieved live `BGV_5_Response1` run payload via Flow API and confirmed the second form fields existed but were empty:
+    - `r413feb4da00a44258984ab4bc0a0d1c1`
+    - `r1e9155da913446b2bda4ca5b56e5b502`
+    - `rbe5f659a0dca4526878cf1af042a1af4`
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - `FinalVerificationLink` now uses `@concat(...)` with URL-encoded prefill query params for:
+    - `RequestID` (`rd745...`)
+    - declared employer name/address/UEN fields (`r413...`, `r1e...`, `rbe...`)
+  - Expanded employer email body to include declared company details (name/address/UEN) so HR can verify context directly in the email.
+  - Packed and imported updated solution to Power Automate (`BGV_System`) with publish + force overwrite.
+  - Updated linked behavior documentation:
+    - `docs/architecture_flows.md`
+- Validation commands run:
+  - `pac auth who` (confirmed active identity before live Flow API inspection)
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - Flow API checks for run/action payloads (`runs`, `actions/Get_response_details`) to confirm field IDs and blank values before patch.
+- Next actions and blockers:
+  - Next action: run a fresh end-to-end test from `BGV_0` through `BGV_5` and confirm the second-form company fields prefill.
+  - Limitation: `BGV_Requests` currently does not expose dedicated `EmployerAddress`/`EmployerUEN` columns in action output; these values may remain blank unless source columns are added and populated upstream.
+
+## 2026-03-03 (BGV_4 prefill key remap for candidate context fields)
+- Current status:
+  - Remapped `BGV_4` second-form prefill query keys to the latest Microsoft Forms keys shared from `Get Pre-filled URL`.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - `FinalVerificationLink` now maps:
+    - `r4930fc603c0f4cada09832be79f2a76f` <- `BGV_Candidates.FullName`
+    - `r27b6bdb850dd48339dc05df11d485470` <- `BGV_Candidates.IdentificationNumberNRIC`
+    - `r0c342001cdd8463181c36dba2a8933ad` <- `BGV_Candidates.IdentificationNumberPassport`
+    - `rd745d133eb7f4611b59ea051f980f97a` <- `BGV_Requests.RequestID`
+    - `rccaf3632669648baaa335c12d4ea40bf` <- `BGV_Requests.EmployerName`
+  - Updated linked behavior documentation:
+    - `docs/architecture_flows.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Select-String` checks for new `r...` keys in `FinalVerificationLink`
+- Next actions and blockers:
+  - Next action: receive remaining first-form -> second-form field mapping from user, then append additional prefill parameters in `BGV_4`.
+
+## 2026-03-03 (PnP interactive app auth documentation alignment)
+- Current status:
+  - Captured newly completed PnP interactive app registration details in source-controlled documentation.
+- Completed tasks:
+  - Updated `System_SPEC.md`:
+    - added auth-context separation (`pac` vs flow connector runtime vs PnP).
+    - documented PnP interactive app baseline:
+      - registration method: `Register-PnPEntraIDAppForInteractiveLogin`
+      - app display name: `BGV-PnP-Automation`
+      - app client id: `3e59bbcc-3e14-4837-b6e0-0a1870286f31`
+    - added env contract entries:
+      - `PNP_CLIENT_ID`
+      - `PNP_TENANT_ID`
+  - Updated `.env.example` with placeholder keys:
+    - `PNP_CLIENT_ID`
+    - `PNP_TENANT_ID`
+  - Updated `docs/collaboration_setup_guide.md` with:
+    - PnP login command pattern (`Connect-PnPOnline -Interactive -ClientId -Tenant`)
+    - session verification command (`Get-PnPConnection`)
+  - Updated `docs/architecture_flows.md` with explicit authentication context separation.
+- Validation commands run:
+  - `az ad app list --all --query "[?contains(displayName, 'PnP') || contains(displayName, 'PNP')].{displayName:displayName,appId:appId}" -o table`
+  - `rg -n "Register-PnPEntraIDAppForInteractiveLogin|PnP|ClientId|TenantId" System_SPEC.md .env.example docs/collaboration_setup_guide.md docs/architecture_flows.md docs/progress.md`
+- Next actions and blockers:
+  - Next action: on each operator machine, set local `.env` values for `PNP_CLIENT_ID` and `PNP_TENANT_ID` before running PnP list admin commands.
+
+## 2026-03-03 (BGV_FormData wiring across flows 0/4/5 + deployment)
+- Current status:
+  - Connected the new SharePoint list `BGV_FormData` (list id `f5248a99-fdf1-4660-946a-d54e00575a40`) into the active BGV flow path.
+- Completed tasks:
+  - Updated canonical flow files:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+      - add `Create_BGV_FormData_Row_E1/E2/E3` after request-row creation.
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+      - add `Get_items_(BGV_FormData)` by `RequestID`.
+      - use FormData values as preferred source for second-form prefill URL.
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+      - add `Get_items_(BGV_FormData)` by `RequestID`.
+      - add conditional `Update_item_-_BGV_FormData` to persist form-2 normalized fields and raw payload.
+  - Repacked and imported `BGV_System` unmanaged solution with publish and overwrite.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --zipfile .\artifacts\exports\BGV_System_unmanaged.repack.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --path .\artifacts\exports\BGV_System_unmanaged.repack.zip --publish-changes --force-overwrite`
+- Next actions and blockers:
+  - Next action: run a fresh end-to-end test (`BGV_0` -> `BGV_4` -> `BGV_5`) and verify `BGV_FormData` rows are created/updated for EMP1/EMP2/EMP3 where provided.
+
+## 2026-03-04 (HR verification mapping quick-reference documented)
+- Current status:
+  - Added a dedicated quick-reference section for the requested cross-system mapping view:
+    `BGV_Candidates` <-> `BGV_Requests` <-> `MS Forms (HR Verification Form)` <-> `Flow 4 outputs`.
+- Completed tasks:
+  - Updated `docs/data_mapping_dictionary.md` with:
+    - current end-to-end path summary (`BGV_4` prefill/send + `BGV_5` response update linkage)
+    - focused field mapping table for:
+      - candidate identity fields to HR form prefill keys
+      - request fields to HR form prefill key and downstream usage
+      - Flow 4 SharePoint outputs (`HRRequestSentAt`, `VerificationStatus`) and email recipient field
+  - Kept existing detailed sections (Form 1 mapping, Form 2 mapping, risk logic) unchanged.
+- Validation commands run:
+  - `rg -n "Requested View|2\\.1\\.1|2\\.1\\.2|rd745d133eb7f4611b59ea051f980f97a" docs/data_mapping_dictionary.md`
+  - `Get-Content -Raw docs/data_mapping_dictionary.md`
+- Next actions and blockers:
+  - Next action: whenever prefill keys or SharePoint target fields change in `BGV_4`/`BGV_5`, update this quick-reference section in the same commit.
+
+## 2026-03-04 (Canonical field-level mapping dictionary added)
+- Current status:
+  - Added a single source document for exact current-state field mapping across Microsoft Forms, SharePoint lists, document library, and flows `BGV_0` to `BGV_6`.
+- Completed tasks:
+  - Added `docs/data_mapping_dictionary.md` with:
+    - data store IDs and relationship keys (`CandidateID`, `RequestID`, `RecordKey`)
+    - Form 1 -> list/library mappings (including per-slot EMP1/EMP2/EMP3 columns)
+    - SharePoint -> Form 2 prefill key mappings (`r...` query params)
+    - Form 2 -> `BGV_Requests` / `BGV_FormData` mappings and risk-logic field usage
+    - non-form status/reminder field updates across flows `BGV_1`, `BGV_2`, `BGV_3`, `BGV_4`, `BGV_6`
+  - Updated `docs/file_index.md` and `docs/repo_inventory.md` to include the new canonical mapping doc.
+- Validation commands run:
+  - `rg -n "BGV Data Mapping and Data Dictionary|Form 1 response key|Form 2 prefill query key|Form 2 response key" docs/data_mapping_dictionary.md`
+  - `Get-Content -Raw docs/data_mapping_dictionary.md`
+- Next actions and blockers:
+  - Next action: when additional Form 2 prefill keys are added in `BGV_4`, update `docs/data_mapping_dictionary.md` in the same commit.
