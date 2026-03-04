@@ -401,3 +401,102 @@ Log each session with:
   - `Get-Content -Raw docs/data_mapping_dictionary.md`
 - Next actions and blockers:
   - Next action: when additional Form 2 prefill keys are added in `BGV_4`, update `docs/data_mapping_dictionary.md` in the same commit.
+
+## 2026-03-04 (HR form Q1-Q33 inventory and wiring coverage documented)
+- Current status:
+  - Captured a full inventory-oriented view for the "Previous Employee Verification - HR Use Only" form and aligned each question to current flow wiring state.
+- Completed tasks:
+  - Updated `docs/data_mapping_dictionary.md` with a dedicated section:
+    - `HR Verification Form (Q1-Q33) Inventory and Wiring Status`
+  - Added per-question coverage table with:
+    - Forms key (when present in canonical flow JSON)
+    - wiring status (`Prefill`, `Read`, `Stored`, `Not wired`)
+    - SharePoint target/use notes
+  - Included explicit list of fields currently persisted directly into `BGV_FormData` for Form 2.
+- Validation commands run:
+  - `rg -n "## 11\\) HR Verification Form|Q\\#|F2_InformationAccurate|F2_SelectedIssues|F2_EmployerWouldReEmploy|F2_ReEmployReason" docs/data_mapping_dictionary.md`
+  - `Get-Content -Raw docs/data_mapping_dictionary.md`
+- Next actions and blockers:
+  - Next action: capture complete Forms key IDs for currently `Not wired` questions (for example Q6/Q7/Q28/Q29/Q30/Q31/Q33) and wire them in `BGV_5` plus SharePoint columns as needed.
+
+## 2026-03-04 (PDF-annotated prefill pairing captured)
+- Current status:
+  - Processed user-uploaded annotated PDFs and captured explicit color-circled prefill pairings from Candidate Declaration -> HR Use Only form.
+- Completed tasks:
+  - Converted both PDFs to local page images and reviewed all pages.
+  - Updated `docs/data_mapping_dictionary.md` with section:
+    - `User-Annotated Prefill Mapping (PDF Markup, 2026-03-04)`
+  - Recorded pairing status as `Implemented` vs `Pending` for:
+    - identity fields (name/NRIC/passport)
+    - company fields (name/UEN/address)
+    - employment fields (period/salary/job title)
+  - Marked unresolved key-ID dependency for pending fields where candidate/HR `r...` keys are not yet present in canonical flow JSON.
+- Validation commands run:
+  - `rg -n "User-Annotated Prefill Mapping|Pending prefill wiring|RequestID remains auto-filled" docs/data_mapping_dictionary.md`
+  - `Get-Content -Raw docs/data_mapping_dictionary.md`
+- Next actions and blockers:
+  - Blocker: missing exact Forms key IDs for candidate Q7/Q8/Q10/Q11/Q12/Q13 and HR Q6/Q7/Q10/Q12/Q13 in current canonical flow definitions.
+  - Next action: obtain latest Microsoft Forms prefill query keys for HR fields and candidate response keys (from `Get response details` output) before wiring in `BGV_0` and `BGV_4`.
+
+## 2026-03-04 (HR prefill URL keys captured from user)
+- Current status:
+  - Captured additional HR form prefill keys from user-provided `Get prefilled link` URL for "Previous Employee Verification - HR Use Only".
+- Completed tasks:
+  - Updated `docs/data_mapping_dictionary.md` section 11 and section 12 with newly confirmed HR keys:
+    - `rcf35c7cc008e472f9d0b84bde67cc1ff` (Company UEN)
+    - `r19aae6e8163d4aaeb8a3f3f2d5329be2` (Company Address)
+    - `r2d39255c2449439096683ca0e39241b0` (Information Accurate - company details section)
+    - `r0bef44c0d22d493f95a33484875b951e` (Employment Period)
+    - `r513ad5ab3a14453286bdb910820985ec` (Reason For Leaving)
+    - `ra6ab2e26d2d84a92b33148fc4694773a` (Last Drawn Renumeration Package)
+    - `r49ca8a655f5e4bcba0e8f75d4475ad77` (Last Position Held)
+  - Marked these as `key known; not wired` until canonical flow JSON is patched.
+- Validation commands run:
+  - `rg -n "rcf35c7cc008e472f9d0b84bde67cc1ff|r19aae6e8163d4aaeb8a3f3f2d5329be2|r2d39255c2449439096683ca0e39241b0|r0bef44c0d22d493f95a33484875b951e|r513ad5ab3a14453286bdb910820985ec|ra6ab2e26d2d84a92b33148fc4694773a|r49ca8a655f5e4bcba0e8f75d4475ad77" docs/data_mapping_dictionary.md`
+  - `Get-Content -Raw docs/data_mapping_dictionary.md`
+- Next actions and blockers:
+  - Blocker: matching candidate form response keys are still needed before implementing the remaining prefill wiring in `BGV_4`.
+  - Next action: receive user's second response with candidate-form keys, then patch canonical flow JSON and update linked docs in same change.
+
+## 2026-03-04 (Verified candidate->HR mapping wired without assumptions)
+- Current status:
+  - Completed a strict verification pass for candidate-source key IDs using live Microsoft Forms runtime metadata (not value guessing), then wired the confirmed mappings into canonical flows.
+- Completed tasks:
+  - Extracted candidate form runtime metadata from:
+    - `out/forms/candidate_responsepage.html` -> `prefetchFormUrl`
+    - `out/forms/candidate_runtime_form.json`
+  - Verified exact candidate source keys for E1/E2/E3 normalized fields (company UEN/address/postal code, job title, salary, employment start/end, HR contact/mobile/email).
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+      - `Create_BGV_FormData_Row_E1/E2/E3` now persist additional normalized Form 1 fields:
+        - `F1_EmployerUEN`
+        - `F1_EmployerAddress`
+        - `F1_EmployerPostalCode`
+        - `F1_JobTitle`
+        - `F1_LastDrawnSalary`
+        - `F1_EmploymentStartDate`
+        - `F1_EmploymentEndDate`
+        - `F1_HRContactName`
+        - `F1_HRMobile`
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+      - `FinalVerificationLink` now pre-fills additional HR form keys:
+        - `rcf35c7cc008e472f9d0b84bde67cc1ff` (Company UEN)
+        - `r19aae6e8163d4aaeb8a3f3f2d5329be2` (Company Address)
+        - `r0bef44c0d22d493f95a33484875b951e` (Employment Period: `start to end` when both dates exist, else single available date)
+        - `ra6ab2e26d2d84a92b33148fc4694773a` (Last Drawn Salary)
+        - `r49ca8a655f5e4bcba0e8f75d4475ad77` (Last Position Held)
+  - Verified a current source gap:
+    - Candidate declaration runtime metadata has no question with `Reason/Leaving` text, so HR key `r513ad5ab3a14453286bdb910820985ec` remains intentionally unmapped.
+  - Updated linked behavior docs:
+    - `docs/data_mapping_dictionary.md`
+    - `docs/architecture_flows.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "F1_EmployerUEN|F1_EmployerAddress|F1_EmployerPostalCode|F1_JobTitle|F1_LastDrawnSalary|F1_EmploymentStartDate|F1_EmploymentEndDate|F1_HRContactName|F1_HRMobile|rcf35c7cc008e472f9d0b84bde67cc1ff|r19aae6e8163d4aaeb8a3f3f2d5329be2|r0bef44c0d22d493f95a33484875b951e|ra6ab2e26d2d84a92b33148fc4694773a|r49ca8a655f5e4bcba0e8f75d4475ad77" flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - `Get-Content out/forms/candidate_e1_verified_fields.json`
+  - `NO_REASON_OR_LEAVING_FIELD_FOUND` check via runtime metadata query
+- Next actions and blockers:
+  - Blocker: HR runtime metadata endpoint currently returns `Required user login` from this non-interactive shell, so HR key inventory remains sourced from user-provided prefill URL + existing flow usage.
+  - Next action: run an end-to-end live submission (`BGV_0` -> `BGV_4`) and verify emitted employer link values for Q6/Q7/Q10/Q12/Q13 in actual email.
