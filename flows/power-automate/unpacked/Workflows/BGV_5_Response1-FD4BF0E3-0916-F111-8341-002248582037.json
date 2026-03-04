@@ -116,6 +116,28 @@
             "authentication": "@parameters('$authentication')"
           }
         },
+        "Get_items_(BGV_FormData)": {
+          "runAfter": {
+            "Get_items": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+              "table": "f5248a99-fdf1-4660-946a-d54e00575a40",
+              "$filter": "@concat('RequestID eq ''', outputs('Get_response_details')?['body/rd745d133eb7f4611b59ea051f980f97a'], '''')",
+              "$top": 1
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetItems"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
         "Condition_-_if_row_found": {
           "actions": {
             "Apply_to_each": {
@@ -462,6 +484,57 @@
                     "authentication": "@parameters('$authentication')"
                   }
                 },
+                "Condition_-_if_FormData_row_found": {
+                  "actions": {
+                    "Update_item_-_BGV_FormData": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+                          "table": "f5248a99-fdf1-4660-946a-d54e00575a40",
+                          "id": "@first(body('Get_items_(BGV_FormData)')?['value'])?['ID']",
+                          "item/RequestID": "@outputs('Get_response_details')?['body/rd745d133eb7f4611b59ea051f980f97a']",
+                          "item/CandidateID": "@items('Apply_to_each')?['CandidateID']",
+                          "item/RecordItemID": "@items('Apply_to_each')?['ID']",
+                          "item/Form2SubmittedAt": "@utcNow()",
+                          "item/Form2RawJson": "@string(outputs('Get_response_details')?['body'])",
+                          "item/F2_InformationAccurate": "@equals(outputs('Get_response_details')?['body/r9594fab1bfa04c90883b1dffd7f4549e'],'Yes')",
+                          "item/F2_SelectedIssues": "@outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029']",
+                          "item/F2_EmployerWouldReEmploy": "@equals(outputs('Get_response_details')?['body/rafe3ada4157c49fb9e555cd0fb53bd59'],'Yes')",
+                          "item/F2_ReEmployReason": "@outputs('Get_response_details')?['body/r5f7ebc3390bc4699b160504c65254c3e']",
+                          "item/F2_Severity/Value": "@variables('varSeverity')",
+                          "item/F2_Outcome": "@variables('varOutcome')",
+                          "item/F2_Notes": "@variables('varNotifyBody')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "connectionName": "shared_sharepointonline",
+                          "operationId": "PatchItem"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Update_item_-_of_BGV_Request": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "greater": [
+                          "@length(body('Get_items_(BGV_FormData)')?['value'])",
+                          0
+                        ]
+                      }
+                    ]
+                  },
+                  "type": "If"
+                },
                 "Condition_-_Notifying_Teams": {
                   "actions": {
                     "Post_message_in_a_chat_or_channel": {
@@ -484,8 +557,9 @@
                     }
                   },
                   "runAfter": {
-                    "Update_item_-_of_BGV_Request": [
-                      "Succeeded"
+                    "Condition_-_if_FormData_row_found": [
+                      "Succeeded",
+                      "Skipped"
                     ]
                   },
                   "else": {
@@ -607,7 +681,7 @@
         },
         "Initialize_variable_-_Severity": {
           "runAfter": {
-            "Get_items": [
+            "Get_items_(BGV_FormData)": [
               "Succeeded"
             ]
           },
