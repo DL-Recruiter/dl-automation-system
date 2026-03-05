@@ -78,6 +78,7 @@ This document describes the current behavior in your canonical flow files under 
     - Employment period
     - Last drawn salary
     - Job title
+  - Uses the matching `BGV_FormData` row as the first source for company name/address/UEN in the employer email body, so EMP1/EMP2/EMP3 show the correct declared company details.
   - Finds authorization file, attaches it, and emails employer HR.
   - Recipient email resolution is guarded:
     - use `BGV_FormData.F1_HREmail` when it is email-formatted
@@ -106,6 +107,7 @@ This document describes the current behavior in your canonical flow files under 
     - `ResponseReceivedAt`
     - `Severity`, `Outcome`, `Notes`
   - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields.
+  - Keeps required SharePoint fields (including `Title`) when updating `BGV_FormData`, preventing save/runtime validation errors.
   - Sends Teams alert when notify flag is true.
   - Sends internal high-severity email when severity is `High`.
 - Main outcome: Employer response is automatically triaged, stored, and escalated when needed.

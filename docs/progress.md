@@ -583,3 +583,22 @@ Log each session with:
   - `rg -n "emailMessage/To|F1_HREmail|EmployerHR_Email|dlresplmain@dlresources.com.sg" flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
 - Next actions and blockers:
   - Next action: run a new `BGV_4` recurrence and verify failed request now routes successfully (or falls back) instead of throwing `String/email` conversion error.
+
+## 2026-03-05 (BGV_4 company detail mapping fix + BGV_5 FormData title fix)
+- Current status:
+  - Patched `BGV_4` and `BGV_5` to address employer-detail mismatch and FormData save validation failure.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+      - Employer email body now resolves company `Name/Address/UEN` from matching `BGV_FormData` (`F1_EmployerName`, `F1_EmployerAddress`, `F1_EmployerUEN`) before falling back to `BGV_Requests` fields.
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+      - Added `item/Title` to `Update_item_-_BGV_FormData` payload to satisfy required SharePoint `PatchItem` validation.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md` for both fixes.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "F1_EmployerAddress|F1_EmployerUEN|item/Title|Update_item_-_BGV_FormData" flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+- Next actions and blockers:
+  - Next action: run one live EMP1/EMP2/EMP3 case and verify `BGV_4` email body details match each slot and `BGV_5` save/update now succeeds without `item/Title` error.

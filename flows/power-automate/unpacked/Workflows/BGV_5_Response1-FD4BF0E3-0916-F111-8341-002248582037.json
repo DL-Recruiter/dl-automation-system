@@ -493,6 +493,7 @@
                           "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
                           "table": "f5248a99-fdf1-4660-946a-d54e00575a40",
                           "id": "@first(body('Get_items_(BGV_FormData)')?['value'])?['ID']",
+                          "item/Title": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Title']",
                           "item/RequestID": "@outputs('Get_response_details')?['body/rd745d133eb7f4611b59ea051f980f97a']",
                           "item/CandidateID": "@items('Apply_to_each')?['CandidateID']",
                           "item/RecordItemID": "@items('Apply_to_each')?['ID']",
