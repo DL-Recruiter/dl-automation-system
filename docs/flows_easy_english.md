@@ -1,99 +1,136 @@
 # BGV Flows in Simple English
 
-This document explains your exported Power Automate flows in plain language.
+This document describes the current behavior in your canonical flow files under `flows/power-automate/unpacked/Workflows/`.
 
-## Quick End-to-End Story
-1. Candidate fills your declaration form.
-2. System creates candidate records and an authorization document.
-3. Candidate receives a link and signs the authorization form.
-4. System detects signature and marks authorization as signed.
-5. System sends verification requests to employer HR contacts.
-6. Employers submit responses through your verification form.
-7. System scores/flags responses and notifies your team.
-8. Reminder and escalation flows chase missing responses.
+## Quick End-to-End Story (Current State)
+1. Candidate submits the declaration form.
+2. The system creates candidate records, authorization files, employer request rows, and normalized `BGV_FormData` rows.
+3. Candidate receives a signature email and signs the authorization document.
+4. Signature is detected automatically and candidate status is updated.
+5. Pending employer requests are sent out with a prefilled HR form link and signed authorization attachment.
+6. Employer submits the HR verification form.
+7. The response is scored for severity, request records are updated, and alerts are sent if needed.
+8. Scheduled reminder flows chase unsigned candidate forms and unanswered employer requests.
 
 ## Flow-by-Flow Explanation
 
 ### `BGV_0_CandidateDeclaration`
-- Trigger: A new Microsoft Form response from the candidate declaration form.
+- Trigger: New response in candidate declaration Microsoft Form.
 - What it does:
-  - Creates a unique Candidate ID.
-  - Creates candidate folders in SharePoint.
-  - Writes candidate details into SharePoint lists.
-  - Generates an authorization letter from a Word template.
-  - Saves the authorization `.docx` to SharePoint.
-  - Creates a share link and emails candidate to sign.
+  - Creates `CandidateID`.
+  - Creates candidate folder and authorization subfolder in SharePoint.
+  - Creates candidate row in `BGV_Candidates`.
+  - Generates and saves authorization `.docx`, then shares it and emails candidate.
   - Updates candidate status to pending signature.
-  - Creates one or more BGV request rows (EMP1/EMP2/EMP3) for employer checks.
-- Main outcome: Candidate and request records are prepared, and signature request is sent.
+  - Creates `BGV_Requests` rows for EMP1 always, and EMP2/EMP3 when those employer sections are filled.
+  - Before creating each EMP slot row, checks whether that same slot RequestID already exists to avoid duplicate inserts.
+  - Creates `BGV_FormData` rows (`EMP1`, optional `EMP2`, optional `EMP3`) with normalized candidate/employer fields and raw Form 1 payload.
+  - Uses Request IDs in format:
+    - `REQ-<CandidateID>-EMP1`
+    - `REQ-<CandidateID>-EMP2`
+    - `REQ-<CandidateID>-EMP3`
+- Main outcome: Candidate onboarding data, request tracking, and structured Form 1 data are prepared in one run.
 
 ### `BGV_1_Detect_Authorization_Signature`
-- Trigger: A file is created/updated in the candidate files area.
+- Trigger: SharePoint file created or modified.
+- Gate checks:
+  - File must be under candidate authorization folder path.
+  - File name must match `Authorization Form - ... .docx`.
 - What it does:
-  - Detects authorization `.docx` files in the expected folder pattern.
-  - Extracts Candidate ID from filename.
-  - Reads file content and sends it to an Azure Function parser.
-  - Checks parser output for `signedYes = true`.
-  - If signed, updates candidate row with signed status and consent timestamp.
-- Main outcome: Candidate status changes to "authorization signed" automatically after signature detection.
+  - Extracts `CandidateID` from file name.
+  - Loads matching candidate record.
+  - Sends file content to Azure Function parser.
+  - If parser returns `signedYes = true`, updates candidate record:
+    - `AuthorisationSigned = true`
+    - consent/status fields for signed authorization.
+- Main outcome: Signed authorization is detected and candidate is marked as signed without manual review.
 
 ### `BGV_2_Postsignature`
-- Trigger: Candidate item created/modified in SharePoint.
-- Condition: Status becomes `Obtained Authorization Form Signature`.
+- Trigger: Candidate item created or modified.
+- Condition: candidate status is `Obtained Authorization Form Signature`.
 - What it does:
-  - Finds related authorization files.
-  - Stops sharing/unshares file(s) after signature is confirmed.
-- Main outcome: Signature file access is tightened after successful signing.
+  - Finds related `.docx` files in authorization folder.
+  - Stops sharing for those files.
+- Main outcome: Signed authorization files are no longer broadly shared.
 
 ### `BGV_3_AuthReminder_5Days`
 - Trigger: Daily recurrence.
 - What it does:
-  - Finds candidates still pending authorization signature.
-  - Calculates days since authorization link was created.
-  - Sends daily reminder email (day 1 to day 5, with "not reminded today" guard).
-  - On day 5, posts Teams escalation and sends internal alert email.
-- Main outcome: Candidates are reminded to sign, and unresolved day-5 cases are escalated.
+  - Gets candidates with `Status = Pending Authorization Form Signature`.
+  - Computes days since authorization link creation.
+  - Sends reminder emails between day 1 and day 5 (max once per day).
+  - On day 5 unresolved cases, posts Teams escalation and sends internal escalation email.
+- Main outcome: Unsigned candidate authorization forms are actively chased and escalated.
 
 ### `BGV_4_SendToEmployer_Clean`
-- Trigger: Every 30 minutes.
-- What it does:
-  - Reads pending BGV request rows where HR request has not been sent.
-  - Verifies candidate has signed authorization.
-  - Builds employer verification form link (Request ID embedded).
-  - Fetches signed authorization file from candidate folder.
-  - Emails employer HR with form link + authorization attachment.
-  - Marks request as sent with timestamp.
-- Main outcome: Employer verification requests are dispatched only after valid authorization.
+- Trigger: Recurrence every 30 minutes.
+- Selection:
+  - Reads `BGV_Requests` where `VerificationStatus = Pending` and `HRRequestSentAt` is null.
+- What it does (per request):
+  - Loads candidate row and checks `AuthorisationSigned = true`.
+  - Loads matching `BGV_FormData` row by `RequestID`.
+  - Builds prefilled HR verification form URL with:
+    - Candidate name / NRIC / passport
+    - Request ID
+    - Employer name
+    - Employer UEN
+    - Employer address
+    - Employment period
+    - Last drawn salary
+    - Job title
+  - Finds authorization file, attaches it, and emails employer HR.
+  - Updates request row:
+    - `VerificationStatus = Sent`
+    - `HRRequestSentAt = utcNow()`
+- Main outcome: Only signed-authorized candidates are sent to employer HR, with rich prefill context.
 
 ### `BGV_5_Response1`
-- Trigger: Employer submits verification Microsoft Form.
+- Trigger: New response in employer HR verification Microsoft Form.
+- Matching:
+  - Looks up `BGV_Requests` by `startswith(RequestID, <submitted RequestID>)`.
+  - Looks up `BGV_FormData` by exact `RequestID`.
 - What it does:
-  - Finds matching BGV request row by Request ID.
-  - Evaluates responses for risk signals (for example: MAS misconduct, disciplinary items, re-employ answer, data mismatch).
-  - Sets severity (`High`/`Medium`/`Low`) and outcome (`Verified` or `Needs Clarification`).
-  - Stores response summary/notes in SharePoint and marks request completed.
-  - Sends Teams notifications when action/flags exist.
-  - Sends high-severity alert email to internal mailbox.
-- Main outcome: Employer responses are auto-scored, recorded, and escalated when risky.
+  - Initializes scoring variables (`Severity`, `Outcome`, notify flags).
+  - Applies risk logic:
+    - MAS misconduct not `No / Not Applicable` -> High.
+    - Disciplinary issue `Yes` -> High.
+    - Would not re-employ -> at least Medium.
+    - Information inaccurate -> Low if no higher severity already set.
+    - Contact requested -> action-required notify flag.
+  - Writes final result to `BGV_Requests`:
+    - `Status = Completed`
+    - `ResponseReceivedAt`
+    - `Severity`, `Outcome`, `Notes`
+  - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields.
+  - Sends Teams alert when notify flag is true.
+  - Sends internal high-severity email when severity is `High`.
+- Main outcome: Employer response is automatically triaged, stored, and escalated when needed.
 
 ### `BGV_6_HRReminderAndEscalation`
 - Trigger: Daily recurrence.
-- What it does:
-  - Finds BGV requests with status `Sent` and no employer response yet.
-  - Sends reminder 1, reminder 2, and final reminder at configured time gaps.
-  - Writes reminder timestamps (`Reminder1At`, `Reminder2At`, `Reminder3At`).
-  - Posts Teams escalation when reminders are ignored.
-- Main outcome: Non-responsive employers are followed up systematically and escalated.
+- Selection baseline: requests with `Status = Sent` and still no response.
+- Reminder/escalation timeline:
+  - Reminder 1: when HR request is at least 2 days old.
+  - Reminder 2: 3+ days after Reminder 1.
+  - Escalation post to recruiters: 1+ day after Reminder 2 with no response.
+  - Final reminder: when HR request is 11+ days old and `Reminder3At` is empty.
+- What it updates:
+  - Reminder timestamps (`Reminder1At`, `Reminder2At`, `Reminder3At`)
+  - Shared-mailbox reminder emails
+  - Teams escalation message for unresolved cases
+- Main outcome: Employer follow-up is systematic, time-based, and auditable.
 
 ## How the Flows Connect
-- Candidate side:
+- Candidate signature track:
   - `BGV_0` -> `BGV_1` -> `BGV_2`
-- Employer side:
-  - `BGV_0` creates request rows -> `BGV_4` sends HR request -> `BGV_5` processes HR response
-- Reminder/escalation side:
-  - `BGV_3` handles unsigned candidate authorization.
-  - `BGV_6` handles unanswered employer verification requests.
+- Employer verification track:
+  - `BGV_0` creates `BGV_Requests` + `BGV_FormData`
+  - `BGV_4` sends prefilled HR request + attachment
+  - `BGV_5` processes HR response and updates both lists
+- Reminder/escalation track:
+  - `BGV_3` for candidate signature delays
+  - `BGV_6` for employer response delays
 
 ## Notes
-- This summary is based on exported JSON logic and action names.
-- Some expressions in the flow JSON appear to have minor formatting inconsistencies; behavior in live flow may differ slightly from export text.
+- This summary is based on the current unpacked canonical flow JSON in the repo.
+- If cloud flows are changed in Power Automate but not exported/unpacked yet, cloud behavior may be newer than this file.

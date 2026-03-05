@@ -394,7 +394,7 @@
                 "and": [
                   {
                     "equals": [
-                      "@equals(length(body('E1_Row_Check')?['value']), 0)",
+                      "@equals(length(body('E2_Row_Check')?['value']), 0)",
                       true
                     ]
                   }
@@ -535,7 +535,7 @@
                 "and": [
                   {
                     "equals": [
-                      "@length(body('E3_Row_Check')?['value'])",
+                      "@equals(length(body('E3_Row_Check')?['value']), 0)",
                       true
                     ]
                   }

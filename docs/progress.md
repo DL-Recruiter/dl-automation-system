@@ -500,3 +500,43 @@ Log each session with:
 - Next actions and blockers:
   - Blocker: HR runtime metadata endpoint currently returns `Required user login` from this non-interactive shell, so HR key inventory remains sourced from user-provided prefill URL + existing flow usage.
   - Next action: run an end-to-end live submission (`BGV_0` -> `BGV_4`) and verify emitted employer link values for Q6/Q7/Q10/Q12/Q13 in actual email.
+
+## 2026-03-04 (flows_easy_english refreshed from canonical unpacked flows)
+- Current status:
+  - Updated plain-English flow narrative to match latest canonical files under `flows/power-automate/unpacked/Workflows/`.
+- Completed tasks:
+  - Re-read all canonical workflow JSON files (`BGV_0` to `BGV_6`) and extracted current triggers, action chains, conditions, and key filters.
+  - Updated `docs/flows_easy_english.md` with current-state behavior including:
+    - `BGV_FormData` creation in `BGV_0` for EMP1/EMP2/EMP3.
+    - Prefilled HR form URL behavior in `BGV_4` (candidate + employer + employment context fields).
+    - Current request matching/scoring/escalation flow in `BGV_5` including `startswith(RequestID, ...)` matching and FormData update path.
+    - Reminder timing logic now documented explicitly for `BGV_6` (2-day, +3-day, +1-day escalation, 11-day final reminder).
+- Validation commands run:
+  - `Get-ChildItem flows/power-automate/unpacked/Workflows -Filter '*.json'`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw docs/flows_easy_english.md`
+- Next actions and blockers:
+  - Next action: after each new `pac solution export/unpack`, rerun this same doc refresh so operational wording always matches latest cloud logic.
+
+## 2026-03-05 (BGV_0 EMP2/EMP3 row-check condition fix)
+- Current status:
+  - Root-cause fixed for missing EMP3 records in `BGV_0_CandidateDeclaration`.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - Fixed EMP2 duplicate-check condition to use the correct action output:
+    - from `length(body('E1_Row_Check')?['value'])`
+    - to `length(body('E2_Row_Check')?['value'])`
+  - Fixed EMP3 create condition logic:
+    - from invalid `equals(length(body('E3_Row_Check')?['value']), true)`
+    - to `equals(length(body('E3_Row_Check')?['value']), 0)` (create only when EMP3 row does not already exist).
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md` (explicit per-slot duplicate-check note for EMP1/EMP2/EMP3 creation path).
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "E2_Row_Check_Condition|E3_Row_Check_Condition|E2_Row_Check|E3_Row_Check|equals\\(length\\(body\\('E3_Row_Check'\\)\\?\\['value'\\]\\), 0\\)" flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - `git diff -- flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json docs/flows_easy_english.md docs/progress.md`
+- Next actions and blockers:
+  - Next action: run `pac solution pack` + `pac solution import` to deploy this canonical fix to cloud flow, then submit a new candidate form with EMP3 data and verify rows appear in both `BGV_Requests` and `BGV_FormData`.
