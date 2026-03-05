@@ -627,3 +627,30 @@ Log each session with:
   - `rg -n "F1_ReasonForLeaving|F2_ReasonForLeaving|r73ad46a6f6e34cb5a811f76061af5d59|r3b040646143e4015a21562a7c692b3d0|r3c7e9cef2f37468fbdb8cb058ac11ce6|r513ad5ab3a14453286bdb910820985ec" flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
 - Next actions and blockers:
   - Next action: run one full EMP1/EMP2/EMP3 submission and verify each RequestID row gets the correct `F1_ReasonForLeaving`, then verify employer response writes `F2_ReasonForLeaving` to the same RequestID row.
+
+## 2026-03-05 (Shared mailbox routing + BGV_5 Teams destination update)
+- Current status:
+  - Updated all Outlook send actions across canonical BGV flows to route via shared mailbox `DLRRecruitmentOps@dlresources.com.sg`.
+- Completed tasks:
+  - Updated flow JSON files:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - Converted `SendEmailV2` actions to `SharedMailboxSendEmailV2` where needed and set:
+    - `emailMessage/MailboxAddress = DLRRecruitmentOps@dlresources.com.sg`
+  - For all email actions inside `BGV_5_Response1`, enforced:
+    - `emailMessage/To = DLRRecruitmentOps@dlresources.com.sg`
+  - Updated BGV_5 Teams post destination only:
+    - `body/recipient/groupId = b680487c-a11c-44f4-9de6-8813d3e2951b`
+    - `body/recipient/channelId = 19:NcAD8P3aERodeV2-NR6D9OBEOnwZI62MVLgNoBrSIl01@thread.tacv2`
+  - Subject/body/attachments/message HTML were preserved.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - Action inventory script over all canonical flow JSON files to list Outlook/Teams operation IDs and key parameters before/after patch.
+  - `Get-Content -Raw <each_changed_flow_json> | ConvertFrom-Json | Out-Null` (implicit via inventory parse).
+  - `git diff -- flows/power-automate/unpacked/Workflows/*.json docs/flows_easy_english.md docs/progress.md`
+- Next actions and blockers:
+  - Next action: run one test candidate submission + one BGV_5 notification path to verify emails appear in `DLRRecruitmentOps@dlresources.com.sg` and Teams posts appear in the new destination.

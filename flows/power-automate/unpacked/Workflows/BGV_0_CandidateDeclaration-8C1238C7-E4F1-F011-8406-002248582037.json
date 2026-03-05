@@ -276,11 +276,12 @@
               "emailMessage/To": "@outputs('Get_response_details')?['body/rcd8057cd92b24b5594681a5b39c07e3d']",
               "emailMessage/Subject": "Please sign: Authorization - @{variables('varCandidateID')}",
               "emailMessage/Body": "<p class=\"editor-paragraph\">Open Link @{outputs('Create_sharing_link_for_a_file_or_folder')?['body/link/webUrl']}</p>",
-              "emailMessage/Importance": "Normal"
+              "emailMessage/Importance": "Normal",
+              "emailMessage/MailboxAddress": "DLRRecruitmentOps@dlresources.com.sg"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
-              "operationId": "SendEmailV2",
+              "operationId": "SharedMailboxSendEmailV2",
               "connectionName": "shared_office365"
             }
           },
@@ -764,4 +765,3 @@
   },
   "schemaVersion": "1.0.0.0"
 }
-
