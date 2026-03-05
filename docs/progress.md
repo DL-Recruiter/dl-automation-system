@@ -540,3 +540,28 @@ Log each session with:
   - `git diff -- flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json docs/flows_easy_english.md docs/progress.md`
 - Next actions and blockers:
   - Next action: run `pac solution pack` + `pac solution import` to deploy this canonical fix to cloud flow, then submit a new candidate form with EMP3 data and verify rows appear in both `BGV_Requests` and `BGV_FormData`.
+
+## 2026-03-05 (Full flow health check + reminder path fixes)
+- Current status:
+  - Completed repository-wide flow integrity review for canonical workflows (`BGV_0` to `BGV_6`) and patched two reminder-path blockers.
+- Completed tasks:
+  - Validated all canonical workflow JSON files parse successfully.
+  - Verified cross-flow wiring:
+    - `BGV_0` EMP1/EMP2/EMP3 row-check conditions now all use `equals(length(...), 0)`.
+    - `BGV_4` reads `BGV_FormData` by `RequestID` for prefill.
+    - `BGV_5` matches `BGV_Requests` by `startswith(RequestID, ...)` and reads/updates `BGV_FormData` by exact `RequestID`.
+  - Fixed `BGV_3` status string mismatch in nested condition:
+    - removed trailing space from `Pending Authorization Form Signature ` to `Pending Authorization Form Signature`.
+  - Fixed `BGV_6` initial SharePoint query filter field:
+    - from `Status eq 'Sent'`
+    - to `VerificationStatus eq 'Sent'`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md` (`BGV_6` selection baseline wording).
+- Validation commands run:
+  - `Get-ChildItem flows/power-automate/unpacked/Workflows -Filter '*.json' | Get-Content -Raw | ConvertFrom-Json`
+  - `pac solution pack --zipfile artifacts/exports/BGV_System_validation_20260305.zip --folder flows/power-automate/unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `rg` checks for EMP row-check expressions and BGV_FormData RequestID filters.
+  - `py scripts/active/pull_all_flow_runs.py` (failed due missing `FLOW_VERIFY_TENANT_ID` local env var).
+- Next actions and blockers:
+  - Blocker: automated run-history verification requires local OAuth env vars (`FLOW_VERIFY_TENANT_ID`, `FLOW_VERIFY_CLIENT_ID`, `FLOW_VERIFY_CLIENT_SECRET`, `FLOW_VERIFY_ENVIRONMENT_ID`).
+  - Next action: import latest packed solution and run one live smoke submission covering EMP3 and reminder paths.

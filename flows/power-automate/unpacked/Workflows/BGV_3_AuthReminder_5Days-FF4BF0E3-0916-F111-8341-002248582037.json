@@ -253,7 +253,7 @@
                         {
                           "equals": [
                             "@items('Apply_to_each')?['Status/Value']",
-                            "Pending Authorization Form Signature "
+                        "Pending Authorization Form Signature"
                           ]
                         }
                       ]

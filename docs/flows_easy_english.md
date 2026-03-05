@@ -108,7 +108,7 @@ This document describes the current behavior in your canonical flow files under 
 
 ### `BGV_6_HRReminderAndEscalation`
 - Trigger: Daily recurrence.
-- Selection baseline: requests with `Status = Sent` and still no response.
+- Selection baseline: requests with `VerificationStatus = Sent` and still no response.
 - Reminder/escalation timeline:
   - Reminder 1: when HR request is at least 2 days old.
   - Reminder 2: 3+ days after Reminder 1.

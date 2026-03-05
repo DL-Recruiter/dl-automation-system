@@ -65,7 +65,7 @@
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
               "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
-              "$filter": "Status eq 'Sent'"
+              "$filter": "VerificationStatus eq 'Sent'"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
