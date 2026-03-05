@@ -503,6 +503,7 @@
                           "item/F2_SelectedIssues": "@outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029']",
                           "item/F2_EmployerWouldReEmploy": "@equals(outputs('Get_response_details')?['body/rafe3ada4157c49fb9e555cd0fb53bd59'],'Yes')",
                           "item/F2_ReEmployReason": "@outputs('Get_response_details')?['body/r5f7ebc3390bc4699b160504c65254c3e']",
+                          "item/F2_ReasonForLeaving": "@coalesce(outputs('Get_response_details')?['body/r513ad5ab3a14453286bdb910820985ec'],'')",
                           "item/F2_Severity/Value": "@variables('varSeverity')",
                           "item/F2_Outcome": "@variables('varOutcome')",
                           "item/F2_Notes": "@variables('varNotifyBody')"

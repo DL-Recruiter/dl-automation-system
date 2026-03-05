@@ -602,3 +602,28 @@ Log each session with:
   - `rg -n "F1_EmployerAddress|F1_EmployerUEN|item/Title|Update_item_-_BGV_FormData" flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
 - Next actions and blockers:
   - Next action: run one live EMP1/EMP2/EMP3 case and verify `BGV_4` email body details match each slot and `BGV_5` save/update now succeeds without `item/Title` error.
+
+## 2026-03-05 (ReasonForLeaving mapped into BGV_FormData for Form1 + Form2)
+- Current status:
+  - Added end-to-end ReasonForLeaving field mapping into canonical flows for both candidate and employer forms, matched by RequestID/employer slot.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - Added Form 1 -> `BGV_FormData.F1_ReasonForLeaving` mappings per slot:
+    - EMP1: `r73ad46a6f6e34cb5a811f76061af5d59`
+    - EMP2: `r3b040646143e4015a21562a7c692b3d0`
+    - EMP3: `r3c7e9cef2f37468fbdb8cb058ac11ce6`
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Added Form 2 -> `BGV_FormData.F2_ReasonForLeaving` mapping:
+    - `r513ad5ab3a14453286bdb910820985ec`
+  - Ensured null/empty safety by using `coalesce(...,'')` in both flows.
+  - Updated linked docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+- Validation commands run:
+  - `Get-Content -Raw <BGV_0_json> | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw <BGV_5_json> | ConvertFrom-Json | Out-Null`
+  - `rg -n "F1_ReasonForLeaving|F2_ReasonForLeaving|r73ad46a6f6e34cb5a811f76061af5d59|r3b040646143e4015a21562a7c692b3d0|r3c7e9cef2f37468fbdb8cb058ac11ce6|r513ad5ab3a14453286bdb910820985ec" flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+- Next actions and blockers:
+  - Next action: run one full EMP1/EMP2/EMP3 submission and verify each RequestID row gets the correct `F1_ReasonForLeaving`, then verify employer response writes `F2_ReasonForLeaving` to the same RequestID row.

@@ -25,6 +25,10 @@ This document describes the current behavior in your canonical flow files under 
   - Creates `BGV_Requests` rows for EMP1 always, and EMP2/EMP3 when those employer sections are filled.
   - Before creating each EMP slot row, checks whether that same slot RequestID already exists to avoid duplicate inserts.
   - Creates `BGV_FormData` rows (`EMP1`, optional `EMP2`, optional `EMP3`) with normalized candidate/employer fields and raw Form 1 payload.
+  - Writes Form 1 reason-for-leaving per slot into `BGV_FormData.F1_ReasonForLeaving`:
+    - EMP1 <- E1 reason key
+    - EMP2 <- E2 reason key
+    - EMP3 <- E3 reason key
   - Uses Request IDs in format:
     - `REQ-<CandidateID>-EMP1`
     - `REQ-<CandidateID>-EMP2`
@@ -106,7 +110,7 @@ This document describes the current behavior in your canonical flow files under 
     - `Status = Completed`
     - `ResponseReceivedAt`
     - `Severity`, `Outcome`, `Notes`
-  - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields.
+  - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including `F2_ReasonForLeaving`.
   - Keeps required SharePoint fields (including `Title`) when updating `BGV_FormData`, preventing save/runtime validation errors.
   - Sends Teams alert when notify flag is true.
   - Sends internal high-severity email when severity is `High`.

@@ -456,6 +456,7 @@
                       "item/F1_EmployerPostalCode": "@outputs('Get_response_details')?['body/r9e3813d18bc3416e8ddb87cef1ce4de1']",
                       "item/F1_JobTitle": "@outputs('Get_response_details')?['body/r2e71b6400a364fe1aa626eeea6a99f61']",
                       "item/F1_LastDrawnSalary": "@outputs('Get_response_details')?['body/rd7edb8d30e1b49a89cf77ac3eb85b5c5']",
+                      "item/F1_ReasonForLeaving": "@coalesce(outputs('Get_response_details')?['body/r3b040646143e4015a21562a7c692b3d0'],'')",
                       "item/F1_EmploymentStartDate": "@if(empty(outputs('Get_response_details')?['body/ra375ae9073404fc79aa6cd8e6bfb8a65']), null, outputs('Get_response_details')?['body/ra375ae9073404fc79aa6cd8e6bfb8a65'])",
                       "item/F1_EmploymentEndDate": "@if(empty(outputs('Get_response_details')?['body/rc503abfcc3014499993291e460a366b1']), null, outputs('Get_response_details')?['body/rc503abfcc3014499993291e460a366b1'])",
                       "item/F1_HRContactName": "@outputs('Get_response_details')?['body/r125e48f9283a4dea8d82c8d39fd708d9']",
@@ -597,6 +598,7 @@
                       "item/F1_EmployerPostalCode": "@outputs('Get_response_details')?['body/r2d958068e4064949b7207ee243c9dd12']",
                       "item/F1_JobTitle": "@outputs('Get_response_details')?['body/rd71dd57467e6403cbf9f162ad9863073']",
                       "item/F1_LastDrawnSalary": "@outputs('Get_response_details')?['body/r2c266cfd9f3e4ec6a9308aa6a7575660']",
+                      "item/F1_ReasonForLeaving": "@coalesce(outputs('Get_response_details')?['body/r3c7e9cef2f37468fbdb8cb058ac11ce6'],'')",
                       "item/F1_EmploymentStartDate": "@if(empty(outputs('Get_response_details')?['body/r252a6b495a1548b08c3030617d883ea9']), null, outputs('Get_response_details')?['body/r252a6b495a1548b08c3030617d883ea9'])",
                       "item/F1_EmploymentEndDate": "@if(empty(outputs('Get_response_details')?['body/rf84549cedfd64afaa85c45865bce1b08']), null, outputs('Get_response_details')?['body/rf84549cedfd64afaa85c45865bce1b08'])",
                       "item/F1_HRContactName": "@outputs('Get_response_details')?['body/r036860f157014aaba9446454923fe35a']",
@@ -728,6 +730,7 @@
                   "item/F1_EmployerPostalCode": "@outputs('Get_response_details')?['body/r98441b417415436c804fd0d540acbf34']",
                   "item/F1_JobTitle": "@outputs('Get_response_details')?['body/r048c10ad09924a4ea7360b2bbe2203d9']",
                   "item/F1_LastDrawnSalary": "@outputs('Get_response_details')?['body/r7266236add10436d83e254a8ec5a2a07']",
+                  "item/F1_ReasonForLeaving": "@coalesce(outputs('Get_response_details')?['body/r73ad46a6f6e34cb5a811f76061af5d59'],'')",
                   "item/F1_EmploymentStartDate": "@if(empty(outputs('Get_response_details')?['body/rf5ce346dbc2e4326b0e23bd037a5a405']), null, outputs('Get_response_details')?['body/rf5ce346dbc2e4326b0e23bd037a5a405'])",
                   "item/F1_EmploymentEndDate": "@if(empty(outputs('Get_response_details')?['body/rad5353936be1480f9ffe08b3fde00739']), null, outputs('Get_response_details')?['body/rad5353936be1480f9ffe08b3fde00739'])",
                   "item/F1_HRContactName": "@outputs('Get_response_details')?['body/r7f64c0a46334405a952868d9921d83bf']",
@@ -761,3 +764,4 @@
   },
   "schemaVersion": "1.0.0.0"
 }
+

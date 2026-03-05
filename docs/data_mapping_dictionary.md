@@ -158,7 +158,7 @@ Flow action: `BGV_4 / FinalVerificationLink`.
 | `r49ca8a655f5e4bcba0e8f75d4475ad77` | Declared last position held | `BGV_FormData.F1_JobTitle` |
 
 Note:
-- Candidate reason-for-leaving prefill (`r513ad5ab3a14453286bdb910820985ec`) is not mapped because no matching candidate-source question exists in current Candidate Declaration runtime metadata.
+- Candidate reason-for-leaving prefill (`r513ad5ab3a14453286bdb910820985ec`) is now mapped from slot-specific Form 1 sources via `BGV_FormData.F1_ReasonForLeaving`.
 - All values are URL-encoded with `encodeUriComponent(...)`.
 
 ## 7) Field Mapping: Form 2 -> SharePoint (BGV_5)
@@ -179,6 +179,7 @@ Note:
 | `r72b23e4aa192405091846e1279085029` | Selected issues | `BGV_FormData.F2_SelectedIssues` | direct |
 | `rafe3ada4157c49fb9e555cd0fb53bd59` | Re-employ yes/no | `BGV_FormData.F2_EmployerWouldReEmploy` | `equals(value,'Yes')` (boolean) |
 | `r5f7ebc3390bc4699b160504c65254c3e` | Re-employ reason | `BGV_FormData.F2_ReEmployReason` | direct |
+| `r513ad5ab3a14453286bdb910820985ec` | Candidate reason for leaving (employer-submitted) | `BGV_FormData.F2_ReasonForLeaving` | direct (coalesce to empty string) |
 | Derived runtime values | Scoring output | `BGV_FormData.F2_Severity/Value`, `F2_Outcome`, `F2_Notes` | from variables |
 | Full Form 2 response JSON | Snapshot | `BGV_FormData.Form2RawJson` | `string(outputs('Get_response_details')?['body'])` |
 | Timestamp | Submission timestamp | `BGV_FormData.Form2SubmittedAt` | `utcNow()` |
@@ -257,7 +258,7 @@ Legend:
 | 8 | Information Accurate | `r2d39255c2449439096683ca0e39241b0` (from user-provided prefill URL) | Key known; not wired in canonical flow JSON | N/A |
 | 9 | If information not accurate, select options and explain | Not present in current canonical flow JSON | Not wired | N/A |
 | 10 | Employment Period (Declared By Candidate) | `r0bef44c0d22d493f95a33484875b951e` (from user-provided prefill URL) | Prefill | `BGV_4` writes `start to end` if both dates exist, else uses the single available date |
-| 11 | Reason For Leaving (Declared By Candidate) | `r513ad5ab3a14453286bdb910820985ec` (from user-provided prefill URL) | Not wired | No matching reason/leaving question found in current Candidate Declaration runtime metadata |
+| 11 | Reason For Leaving (Declared By Candidate) | `r513ad5ab3a14453286bdb910820985ec` | Prefill + Stored | Prefill now comes from `BGV_FormData.F1_ReasonForLeaving` (slot-matched by RequestID) and Form 2 response is stored in `BGV_FormData.F2_ReasonForLeaving` |
 | 12 | Last Drawn Renumeration Package (Declared By Candidate) | `ra6ab2e26d2d84a92b33148fc4694773a` (from user-provided prefill URL) | Prefill | `BGV_4` uses `BGV_FormData.F1_LastDrawnSalary` |
 | 13 | Last Position Held (Declared By Candidate) | `r49ca8a655f5e4bcba0e8f75d4475ad77` (from user-provided prefill URL) | Prefill | `BGV_4` uses `BGV_FormData.F1_JobTitle` |
 | 14 | Employment details section field (question text not yet captured in repo) | Not present in current canonical flow JSON | Not wired | N/A |
@@ -315,4 +316,9 @@ This section records the color-circled field pairings requested by user for pref
 
 Related note:
 - HR Q4 `RequestID` remains auto-filled from `BGV_Requests.RequestID` (`rd745d133eb7f4611b59ea051f980f97a`) and is already implemented.
-- HR Q11 `Reason For Leaving (Declared By Candidate)` key is known (`r513ad5ab3a14453286bdb910820985ec`), but no source question with `Reason/Leaving` text exists in current candidate runtime metadata, so this remains intentionally unmapped.
+- HR Q11 `Reason For Leaving (Declared By Candidate)` (`r513ad5ab3a14453286bdb910820985ec`) is now wired:
+  - Form 1 side uses slot-specific keys:
+    - EMP1 `r73ad46a6f6e34cb5a811f76061af5d59`
+    - EMP2 `r3b040646143e4015a21562a7c692b3d0`
+    - EMP3 `r3c7e9cef2f37468fbdb8cb058ac11ce6`
+  - Values are stored as `BGV_FormData.F1_ReasonForLeaving` per RequestID/slot and consumed downstream.
