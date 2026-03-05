@@ -565,3 +565,21 @@ Log each session with:
 - Next actions and blockers:
   - Blocker: automated run-history verification requires local OAuth env vars (`FLOW_VERIFY_TENANT_ID`, `FLOW_VERIFY_CLIENT_ID`, `FLOW_VERIFY_CLIENT_SECRET`, `FLOW_VERIFY_ENVIRONMENT_ID`).
   - Next action: import latest packed solution and run one live smoke submission covering EMP3 and reminder paths.
+
+## 2026-03-05 (BGV_4 invalid HR email runtime guard)
+- Current status:
+  - Patched `BGV_4_SendToEmployer_Clean` to prevent runtime failure when `EmployerHR_Email` contains a name instead of an email address.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - Changed `Send_an_email_(V2)` `emailMessage/To` expression to guarded fallback order:
+    - `BGV_FormData.F1_HREmail` (if contains `@`)
+    - else `BGV_Requests.EmployerHR_Email` (if contains `@`)
+    - else `dlresplmain@dlresources.com.sg`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md` (`BGV_4` recipient resolution note).
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "emailMessage/To|F1_HREmail|EmployerHR_Email|dlresplmain@dlresources.com.sg" flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+- Next actions and blockers:
+  - Next action: run a new `BGV_4` recurrence and verify failed request now routes successfully (or falls back) instead of throwing `String/email` conversion error.

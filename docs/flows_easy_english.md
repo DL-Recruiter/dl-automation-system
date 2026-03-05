@@ -79,6 +79,10 @@ This document describes the current behavior in your canonical flow files under 
     - Last drawn salary
     - Job title
   - Finds authorization file, attaches it, and emails employer HR.
+  - Recipient email resolution is guarded:
+    - use `BGV_FormData.F1_HREmail` when it is email-formatted
+    - else use `BGV_Requests.EmployerHR_Email` when it is email-formatted
+    - else fallback to `dlresplmain@dlresources.com.sg` to avoid runtime send failure.
   - Updates request row:
     - `VerificationStatus = Sent`
     - `HRRequestSentAt = utcNow()`
