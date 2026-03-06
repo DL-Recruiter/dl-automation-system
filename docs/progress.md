@@ -673,3 +673,21 @@ Log each session with:
   - `rg -n "r27b6bdb850dd48339dc05df11d485470|r0c342001cdd8463181c36dba2a8933ad" flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
 - Next actions and blockers:
   - Next action: run one employer-form email send from BGV_4 and confirm candidate passport-only submissions appear in the HR form NRIC field.
+
+## 2026-03-06 (BGV_0 email shard-error fix with shared-mailbox send-as)
+- Current status:
+  - Patched `BGV_0_CandidateDeclaration` email action to avoid `Group Shard is used in non-Groups URI` runtime failure.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - Changed `Send_an_email_(V2)` in `BGV_0`:
+    - `operationId`: `SharedMailboxSendEmailV2` -> `SendEmailV2`
+    - `emailMessage/MailboxAddress` -> `emailMessage/From` set to `DLRRecruitmentOps@dlresources.com.sg`
+  - Preserved subject/body/to/importance unchanged.
+  - Updated linked behavior documentation:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "Send_an_email_\(V2\)|SendEmailV2|SharedMailboxSendEmailV2|emailMessage/From|emailMessage/MailboxAddress" flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+- Next actions and blockers:
+  - Next action: run one new `BGV_0` submission and confirm candidate receives from shared mailbox identity and flow no longer fails at send step.
