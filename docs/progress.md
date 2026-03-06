@@ -784,3 +784,21 @@ Log each session with:
   - `rg -n "Filter_array_-_SignedYes|signedyes|CandidateAuthorisation" <BGV_1_json> docs/flows_easy_english.md`
 - Next actions and blockers:
   - Next action: test one ticked and one unticked authorization form; ensure only ticked sets `AuthorisationSigned=true`.
+
+## 2026-03-06 (BGV_1 signature detection hardening: signedYes OR SignedYes control)
+- Current status:
+  - Hardened `BGV_1` signature detection to support both parser summary flag and control-tag path.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json`
+  - `Signature_checkbox_condition` now passes when either:
+    - `Parse_JSON.signedYes == true`, or
+    - `Filter_array_-_SignedYes` finds a control and first match `isChecked == true`.
+  - This avoids false negatives when `controlsFound` is empty but parser still reports signed status.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `Get-Content -Raw <BGV_1_json> | ConvertFrom-Json | Out-Null`
+  - `rg -n "signedYes|Filter_array_-_SignedYes|Signature_checkbox_condition|isChecked" <BGV_1_json>`
+- Next actions and blockers:
+  - Next action: rerun with your signed document and confirm `AuthorisationSigned` flips to true, then test one unsigned sample to ensure no false positive.

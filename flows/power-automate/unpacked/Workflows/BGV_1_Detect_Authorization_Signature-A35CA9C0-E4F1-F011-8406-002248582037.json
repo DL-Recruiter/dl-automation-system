@@ -159,17 +159,27 @@
             "Signature_checkbox_condition": {
               "type": "If",
               "expression": {
-                "and": [
+                "or": [
                   {
-                    "greater": [
-                      "@length(body('Filter_array_-_SignedYes'))",
-                      0
+                    "equals": [
+                      "@body('Parse_JSON')?['signedYes']",
+                      true
                     ]
                   },
                   {
-                    "equals": [
-                      "@first(body('Filter_array_-_SignedYes'))?['isChecked']",
-                      true
+                    "and": [
+                      {
+                        "greater": [
+                          "@length(body('Filter_array_-_SignedYes'))",
+                          0
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@first(body('Filter_array_-_SignedYes'))?['isChecked']",
+                          true
+                        ]
+                      }
                     ]
                   }
                 ]
