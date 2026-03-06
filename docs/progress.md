@@ -654,3 +654,22 @@ Log each session with:
   - `git diff -- flows/power-automate/unpacked/Workflows/*.json docs/flows_easy_english.md docs/progress.md`
 - Next actions and blockers:
   - Next action: run one test candidate submission + one BGV_5 notification path to verify emails appear in `DLRRecruitmentOps@dlresources.com.sg` and Teams posts appear in the new destination.
+
+## 2026-03-06 (BGV_4 ID prefill remap: NRIC field with passport fallback)
+- Current status:
+  - Updated employer prefill mapping so the HR form NRIC field receives candidate identification using NRIC-first, then Passport fallback.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - In `FinalVerificationLink`:
+    - kept `r27b6bdb850dd48339dc05df11d485470` and changed fallback chain to:
+      - `F1_IDNumberNRIC` -> `F1_IDNumberPassport` -> `IdentificationNumberNRIC` -> `IdentificationNumberPassport`.
+    - removed direct prefill mapping for `r0c342001cdd8463181c36dba2a8933ad` (passport field).
+  - Updated linked docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "r27b6bdb850dd48339dc05df11d485470|r0c342001cdd8463181c36dba2a8933ad" flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+- Next actions and blockers:
+  - Next action: run one employer-form email send from BGV_4 and confirm candidate passport-only submissions appear in the HR form NRIC field.

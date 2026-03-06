@@ -76,7 +76,7 @@ This document describes the current behavior in your canonical flow files under 
   - Loads candidate row and checks `AuthorisationSigned = true`.
   - Loads matching `BGV_FormData` row by `RequestID`.
   - Builds prefilled HR verification form URL with:
-    - Candidate name / NRIC / passport
+    - Candidate name / identification number (`NRIC`, else `Passport`) mapped into the HR form NRIC field
     - Request ID
     - Employer name
     - Employer UEN

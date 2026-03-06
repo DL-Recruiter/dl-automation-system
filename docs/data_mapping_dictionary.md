@@ -147,8 +147,8 @@ Flow action: `BGV_4 / FinalVerificationLink`.
 | Form 2 prefill query key | Source expression in flow | Source fallback order |
 | --- | --- | --- |
 | `r4930fc603c0f4cada09832be79f2a76f` | Candidate full name | `BGV_FormData.F1_CandidateFullName` -> `BGV_Candidates.FullName` |
-| `r27b6bdb850dd48339dc05df11d485470` | Candidate NRIC | `BGV_FormData.F1_IDNumberNRIC` -> `BGV_Candidates.IdentificationNumberNRIC` |
-| `r0c342001cdd8463181c36dba2a8933ad` | Candidate Passport | `BGV_FormData.F1_IDNumberPassport` -> `BGV_Candidates.IdentificationNumberPassport` |
+| `r27b6bdb850dd48339dc05df11d485470` | Candidate identification number (NRIC field) | `BGV_FormData.F1_IDNumberNRIC` -> `BGV_FormData.F1_IDNumberPassport` -> `BGV_Candidates.IdentificationNumberNRIC` -> `BGV_Candidates.IdentificationNumberPassport` |
+| `r0c342001cdd8463181c36dba2a8933ad` | Candidate Passport | Not currently prefilled (intentionally unmapped) |
 | `rd745d133eb7f4611b59ea051f980f97a` | Request ID | `BGV_Requests.RequestID` |
 | `rccaf3632669648baaa335c12d4ea40bf` | Declared company name | `BGV_FormData.F1_EmployerName` -> `BGV_Requests.EmployerName` |
 | `rcf35c7cc008e472f9d0b84bde67cc1ff` | Declared company UEN | `BGV_FormData.F1_EmployerUEN` |
@@ -250,7 +250,7 @@ Legend:
 | --- | --- | --- | --- | --- |
 | 1 | Candidate Full Name | `r4930fc603c0f4cada09832be79f2a76f` | Prefill | Context for employer; not stored from Form 2 response |
 | 2 | Candidate Identification (NRIC) | `r27b6bdb850dd48339dc05df11d485470` | Prefill | Context for employer; not stored from Form 2 response |
-| 3 | Candidate Identification (Passport) | `r0c342001cdd8463181c36dba2a8933ad` | Prefill | Context for employer; not stored from Form 2 response |
+| 3 | Candidate Identification (Passport) | `r0c342001cdd8463181c36dba2a8933ad` | Key known; intentionally not prefilled | Candidate Passport now falls back into Q2 (NRIC field) prefill when NRIC is empty |
 | 4 | RequestID (auto-filled) | `rd745d133eb7f4611b59ea051f980f97a` | Prefill + Read + Stored | Request lookup key; stored in `BGV_FormData.RequestID` |
 | 5 | Company Name (Declared by Candidate) | `rccaf3632669648baaa335c12d4ea40bf` | Prefill | Context for employer; not stored from Form 2 response |
 | 6 | Company UEN (Declared by Candidate) | `rcf35c7cc008e472f9d0b84bde67cc1ff` (from user-provided prefill URL) | Prefill | `BGV_4` uses `BGV_FormData.F1_EmployerUEN` |
