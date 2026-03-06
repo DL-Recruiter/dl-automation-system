@@ -710,3 +710,24 @@ Log each session with:
   - `rg -n "SendEmailV2|SharedMailboxSendEmailV2|emailMessage/MailboxAddress|emailMessage/From" flows/power-automate/unpacked/Workflows`
 - Next actions and blockers:
   - Next action: if authorization error persists, grant mailbox-level `Send As` or `Send on behalf` for the Office 365 connection identity against `DLRRecruitmentOps@dlresources.com.sg`.
+
+## 2026-03-06 (Synced manual cloud edit for BGV_0)
+- Current status:
+  - Exported and unpacked latest cloud solution after manual edit in `BGV_0_CandidateDeclaration`.
+- Completed tasks:
+  - Updated canonical flow from cloud export:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - Synced changes observed in flow JSON:
+    - Office 365 connection reference renamed to `shared_office365-1` with logical reference `cr94d_sharedoffice365_bdd97`.
+    - Email action now named `Send_an_email_from_a_shared_mailbox_(V2)` and uses `SharedMailboxSendEmailV2`.
+    - Candidate email subject/body content reflects current manual cloud version.
+    - Candidate status update now runs after `Send_an_email_from_a_shared_mailbox_(V2)`.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `pac auth who`
+  - `pac solution export --name BGV_System --path artifacts/exports/BGV_System_unmanaged.zip --managed false --overwrite`
+  - `pac solution unpack --zipfile artifacts/exports/BGV_System_unmanaged.zip --folder flows/power-automate/unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `git diff -- flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+- Next actions and blockers:
+  - Next action: monitor one live BGV_0 run to verify mailbox permissions and successful send from shared mailbox action.

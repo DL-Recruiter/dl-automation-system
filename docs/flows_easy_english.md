@@ -33,7 +33,8 @@ This document describes the current behavior in your canonical flow files under 
     - `REQ-<CandidateID>-EMP1`
     - `REQ-<CandidateID>-EMP2`
     - `REQ-<CandidateID>-EMP3`
-  - Sends candidate email via shared mailbox action from `DLRRecruitmentOps@dlresources.com.sg`.
+  - Sends candidate email via `Send an email from a shared mailbox (V2)` from `DLRRecruitmentOps@dlresources.com.sg`.
+  - Current candidate email wording/subject comes from the latest manual cloud edit and is now synced in canonical JSON.
 - Main outcome: Candidate onboarding data, request tracking, and structured Form 1 data are prepared in one run.
 
 ### `BGV_1_Detect_Authorization_Signature`

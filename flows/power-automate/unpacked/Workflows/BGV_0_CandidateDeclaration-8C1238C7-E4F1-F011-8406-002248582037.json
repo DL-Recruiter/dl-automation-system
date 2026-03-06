@@ -28,12 +28,12 @@
         },
         "runtimeSource": "embedded"
       },
-      "shared_office365": {
+      "shared_office365-1": {
         "api": {
           "name": "shared_office365"
         },
         "connection": {
-          "connectionReferenceLogicalName": "new_sharedoffice365_d9a67"
+          "connectionReferenceLogicalName": "cr94d_sharedoffice365_bdd97"
         },
         "runtimeSource": "embedded"
       }
@@ -269,31 +269,6 @@
             "operationMetadataId": "23339f4d-1240-408a-a87f-c7f82b6875c8"
           }
         },
-        "Send_an_email_(V2)": {
-          "type": "OpenApiConnection",
-          "inputs": {
-            "parameters": {
-              "emailMessage/To": "@outputs('Get_response_details')?['body/rcd8057cd92b24b5594681a5b39c07e3d']",
-              "emailMessage/Subject": "Please sign: Authorization - @{variables('varCandidateID')}",
-              "emailMessage/Body": "<p class=\"editor-paragraph\">Open Link @{outputs('Create_sharing_link_for_a_file_or_folder')?['body/link/webUrl']}</p>",
-              "emailMessage/Importance": "Normal",
-              "emailMessage/MailboxAddress": "DLRRecruitmentOps@dlresources.com.sg"
-            },
-            "host": {
-              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
-              "operationId": "SharedMailboxSendEmailV2",
-              "connectionName": "shared_office365"
-            }
-          },
-          "runAfter": {
-            "Create_sharing_link_for_a_file_or_folder": [
-              "Succeeded"
-            ]
-          },
-          "metadata": {
-            "operationMetadataId": "ba3b7fad-87f9-435d-b2bb-5d755df05afc"
-          }
-        },
         "Update_BGV_Candidates_List_Row_Status": {
           "type": "OpenApiConnection",
           "inputs": {
@@ -312,7 +287,7 @@
             }
           },
           "runAfter": {
-            "Send_an_email_(V2)": [
+            "Send_an_email_from_a_shared_mailbox_(V2)": [
               "Succeeded"
             ]
           },
@@ -427,11 +402,6 @@
                   }
                 },
                 "Create_BGV_FormData_Row_E2": {
-                  "runAfter": {
-                    "Create_BGV_Request_Row_E2": [
-                      "Succeeded"
-                    ]
-                  },
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
@@ -469,6 +439,11 @@
                       "operationId": "PostItem",
                       "connectionName": "shared_sharepointonline"
                     }
+                  },
+                  "runAfter": {
+                    "Create_BGV_Request_Row_E2": [
+                      "Succeeded"
+                    ]
                   }
                 }
               },
@@ -569,11 +544,6 @@
                   }
                 },
                 "Create_BGV_FormData_Row_E3": {
-                  "runAfter": {
-                    "Create_BGV_Request_Row_E3": [
-                      "Succeeded"
-                    ]
-                  },
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
@@ -611,6 +581,11 @@
                       "operationId": "PostItem",
                       "connectionName": "shared_sharepointonline"
                     }
+                  },
+                  "runAfter": {
+                    "Create_BGV_Request_Row_E3": [
+                      "Succeeded"
+                    ]
                   }
                 }
               },
@@ -701,11 +676,6 @@
               }
             },
             "Create_BGV_FormData_Row_E1": {
-              "runAfter": {
-                "Create_BGV_Request_Row": [
-                  "Succeeded"
-                ]
-              },
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
@@ -743,6 +713,11 @@
                   "operationId": "PostItem",
                   "connectionName": "shared_sharepointonline"
                 }
+              },
+              "runAfter": {
+                "Create_BGV_Request_Row": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -756,6 +731,28 @@
           },
           "metadata": {
             "operationMetadataId": "d4f48fa6-fc06-4f7d-9d2e-e6b5ceb6ee99"
+          }
+        },
+        "Send_an_email_from_a_shared_mailbox_(V2)": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "emailMessage/MailboxAddress": "DLRRecruitmentOps@dlresources.com.sg",
+              "emailMessage/To": "@outputs('Get_response_details')?['body/rcd8057cd92b24b5594681a5b39c07e3d']",
+              "emailMessage/Subject": "Please Sign: Authorization Form - @{variables('varCandidateID')}",
+              "emailMessage/Body": "<p class=\"editor-paragraph\">This is the authorisation form to allow us to conduct the verification check , please ensure that you sign the form and confirm your signature with the checkbox in the form. <br><br>Please open via this link: @{outputs('Create_sharing_link_for_a_file_or_folder')?['body/link/webUrl']}</p><br><p class=\"editor-paragraph\">Kindly fill this up as soon as possible, thank you.</p>",
+              "emailMessage/Importance": "Normal"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+              "operationId": "SharedMailboxSendEmailV2",
+              "connectionName": "shared_office365-1"
+            }
+          },
+          "runAfter": {
+            "Create_sharing_link_for_a_file_or_folder": [
+              "Succeeded"
+            ]
           }
         }
       },
