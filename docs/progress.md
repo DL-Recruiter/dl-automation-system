@@ -750,3 +750,21 @@ Log each session with:
   - `ConvertFrom-Json` parse check for all workflow JSON files under canonical path.
 - Next actions and blockers:
   - Next action: verify Office 365 connector permission on `recruitmentops@dlresources.com.sg` for the active connection identity.
+
+## 2026-03-06 (BGV_1 signature detection remap to CandidateAuthorisation tag)
+- Current status:
+  - Fixed signature detection logic to use Word checkbox content-control tag `CandidateAuthorisation` after template control recreation.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json`
+  - Replaced old condition source `Parse_JSON.signedYes` with tag-driven logic:
+    - Added `Filter_array_-_CandidateAuthorisation` over `Parse_JSON.controlsFound`
+    - Filter criterion: `toLower(item().tag) == 'candidateauthorisation'`
+    - Signature condition now requires:
+      - filtered array length > 0
+      - first match `isChecked == true`
+- Validation commands run:
+  - `Get-Content -Raw <BGV_1_json> | ConvertFrom-Json | Out-Null`
+  - `rg -n "Filter_array_-_CandidateAuthorisation|candidateauthorisation|isChecked|signedYes" <BGV_1_json>`
+- Next actions and blockers:
+  - Next action: submit one signed and one unsigned authorization form to confirm `AuthorisationSigned` toggles correctly.

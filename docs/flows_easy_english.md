@@ -46,7 +46,8 @@ This document describes the current behavior in your canonical flow files under 
   - Extracts `CandidateID` from file name.
   - Loads matching candidate record.
   - Sends file content to Azure Function parser.
-  - If parser returns `signedYes = true`, updates candidate record:
+  - Filters parsed Word controls for checkbox tag `CandidateAuthorisation`.
+  - If that tag exists and `isChecked = true`, updates candidate record:
     - `AuthorisationSigned = true`
     - consent/status fields for signed authorization.
 - Main outcome: Signed authorization is detected and candidate is marked as signed without manual review.
