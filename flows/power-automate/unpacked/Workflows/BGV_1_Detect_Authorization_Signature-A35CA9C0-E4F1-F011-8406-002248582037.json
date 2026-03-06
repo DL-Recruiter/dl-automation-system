@@ -162,24 +162,14 @@
                 "or": [
                   {
                     "equals": [
-                      "@body('Parse_JSON')?['signedYes']",
-                      true
+                      "@toLower(string(body('HTTP')?['signedYes']))",
+                      "true"
                     ]
                   },
                   {
-                    "and": [
-                      {
-                        "greater": [
-                          "@length(body('Filter_array_-_SignedYes'))",
-                          0
-                        ]
-                      },
-                      {
-                        "equals": [
-                          "@first(body('Filter_array_-_SignedYes'))?['isChecked']",
-                          true
-                        ]
-                      }
+                    "greater": [
+                      "@length(body('Filter_array_-_SignedYes_Checked'))",
+                      0
                     ]
                   }
                 ]
@@ -226,7 +216,7 @@
                 "actions": {}
               },
               "runAfter": {
-                "Filter_array_-_SignedYes": [
+                "Filter_array_-_SignedYes_Checked": [
                   "Succeeded"
                 ]
               }
@@ -234,11 +224,23 @@
             "Filter_array_-_SignedYes": {
               "type": "Query",
               "inputs": {
-                "from": "@body('Parse_JSON')?['controlsFound']",
-                "where": "@or(equals(toLower(item()?['tag']), 'signedyes'), equals(toLower(item()?['title']), 'signedyes'))"
+                "from": "@coalesce(body('HTTP')?['controlsFound'], createArray())",
+                "where": "@or(contains(toLower(string(item()?['tag'])), 'signedyes'), contains(toLower(string(item()?['title'])), 'signedyes'), contains(toLower(string(item()?['tag'])), 'candidateauthorisation'), contains(toLower(string(item()?['title'])), 'candidateauthorisation'))"
               },
               "runAfter": {
-                "Parse_JSON": [
+                "HTTP": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filter_array_-_SignedYes_Checked": {
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Filter_array_-_SignedYes')",
+                "where": "@equals(toLower(string(item()?['isChecked'])), 'true')"
+              },
+              "runAfter": {
+                "Filter_array_-_SignedYes": [
                   "Succeeded"
                 ]
               }

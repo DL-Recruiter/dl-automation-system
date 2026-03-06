@@ -802,3 +802,24 @@ Log each session with:
   - `rg -n "signedYes|Filter_array_-_SignedYes|Signature_checkbox_condition|isChecked" <BGV_1_json>`
 - Next actions and blockers:
   - Next action: rerun with your signed document and confirm `AuthorisationSigned` flips to true, then test one unsigned sample to ensure no false positive.
+
+## 2026-03-06 (BGV_1/BGV_4 hardening for signed authorization detection)
+- Current status:
+  - Added tolerant signed-detection logic to reduce false negatives from parser schema and value-type differences.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json`
+      - Signature condition now checks raw `HTTP.signedYes` as true-like string/boolean.
+      - Control filter now reads from `HTTP.controlsFound` directly (no dependency on `Parse_JSON` success).
+      - Added secondary filter `Filter_array_-_SignedYes_Checked` to require checked state true-like.
+      - Tag/title match supports `SignedYes` and compatibility fallback `CandidateAuthorisation`.
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+      - `Condition_-_AuthorisationSigned` now accepts both boolean true and string `"true"`.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` checks for updated flow JSON files.
+  - `rg` checks for updated expressions/actions (`Filter_array_-_SignedYes_Checked`, `toLower(string(body('HTTP')?['signedYes']))`, tolerant `AuthorisationSigned` condition).
+- Next actions and blockers:
+  - Next action: rerun one known signed file and verify `BGV_1` updates candidate row, then trigger `BGV_4` recurrence to confirm employer send resumes.

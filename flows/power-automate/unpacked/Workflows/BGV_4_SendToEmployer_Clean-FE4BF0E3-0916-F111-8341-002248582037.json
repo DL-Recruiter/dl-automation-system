@@ -312,11 +312,17 @@
                 "actions": {}
               },
               "expression": {
-                "and": [
+                "or": [
                   {
                     "equals": [
                       "@outputs('Get_item')?['body/AuthorisationSigned']",
                       "@true"
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@toLower(string(outputs('Get_item')?['body/AuthorisationSigned']))",
+                      "true"
                     ]
                   }
                 ]

@@ -46,8 +46,9 @@ This document describes the current behavior in your canonical flow files under 
   - Extracts `CandidateID` from file name.
   - Loads matching candidate record.
   - Sends file content to Azure Function parser.
-  - Filters parsed Word controls for checkbox tag/title `SignedYes`.
-  - Marks signed if either parser `signedYes = true` or `SignedYes` control is found with `isChecked = true`.
+  - Reads parser output directly and does tolerant signature checks.
+  - Filters parsed controls by tag/title containing `SignedYes` (and compatibility fallback `CandidateAuthorisation`).
+  - Marks signed if parser `signedYes` is true-like or any matched checkbox has `isChecked = true`.
   - If signed, updates candidate record:
     - `AuthorisationSigned = true`
     - consent/status fields for signed authorization.
@@ -76,7 +77,7 @@ This document describes the current behavior in your canonical flow files under 
 - Selection:
   - Reads `BGV_Requests` where `VerificationStatus = Pending` and `HRRequestSentAt` is null.
 - What it does (per request):
-  - Loads candidate row and checks `AuthorisationSigned = true`.
+  - Loads candidate row and treats `AuthorisationSigned` as signed when value is boolean/string true.
   - Loads matching `BGV_FormData` row by `RequestID`.
   - Builds prefilled HR verification form URL with:
     - Candidate name / identification number (`NRIC`, else `Passport`) mapped into the HR form NRIC field
