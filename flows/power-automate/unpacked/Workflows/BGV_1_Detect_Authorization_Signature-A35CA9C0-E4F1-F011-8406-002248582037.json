@@ -162,13 +162,13 @@
                 "and": [
                   {
                     "greater": [
-                      "@length(body('Filter_array_-_CandidateAuthorisation'))",
+                      "@length(body('Filter_array_-_SignedYes'))",
                       0
                     ]
                   },
                   {
                     "equals": [
-                      "@first(body('Filter_array_-_CandidateAuthorisation'))?['isChecked']",
+                      "@first(body('Filter_array_-_SignedYes'))?['isChecked']",
                       true
                     ]
                   }
@@ -216,16 +216,16 @@
                 "actions": {}
               },
               "runAfter": {
-                "Filter_array_-_CandidateAuthorisation": [
+                "Filter_array_-_SignedYes": [
                   "Succeeded"
                 ]
               }
             },
-            "Filter_array_-_CandidateAuthorisation": {
+            "Filter_array_-_SignedYes": {
               "type": "Query",
               "inputs": {
                 "from": "@body('Parse_JSON')?['controlsFound']",
-                "where": "@equals(toLower(item()?['tag']), 'candidateauthorisation')"
+                "where": "@or(equals(toLower(item()?['tag']), 'signedyes'), equals(toLower(item()?['title']), 'signedyes'))"
               },
               "runAfter": {
                 "Parse_JSON": [

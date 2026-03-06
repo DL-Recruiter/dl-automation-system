@@ -768,3 +768,19 @@ Log each session with:
   - `rg -n "Filter_array_-_CandidateAuthorisation|candidateauthorisation|isChecked|signedYes" <BGV_1_json>`
 - Next actions and blockers:
   - Next action: submit one signed and one unsigned authorization form to confirm `AuthorisationSigned` toggles correctly.
+
+## 2026-03-06 (BGV_1 tag correction: SignedYes)
+- Current status:
+  - Corrected BGV_1 checkbox detection tag/title to `SignedYes` based on latest template properties.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json`
+  - Renamed filter action to `Filter_array_-_SignedYes` and changed condition dependencies accordingly.
+  - Filter now matches either tag or title (case-insensitive): `SignedYes`.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `Get-Content -Raw <BGV_1_json> | ConvertFrom-Json | Out-Null`
+  - `rg -n "Filter_array_-_SignedYes|signedyes|CandidateAuthorisation" <BGV_1_json> docs/flows_easy_english.md`
+- Next actions and blockers:
+  - Next action: test one ticked and one unticked authorization form; ensure only ticked sets `AuthorisationSigned=true`.

@@ -46,7 +46,7 @@ This document describes the current behavior in your canonical flow files under 
   - Extracts `CandidateID` from file name.
   - Loads matching candidate record.
   - Sends file content to Azure Function parser.
-  - Filters parsed Word controls for checkbox tag `CandidateAuthorisation`.
+  - Filters parsed Word controls for checkbox tag/title `SignedYes`.
   - If that tag exists and `isChecked = true`, updates candidate record:
     - `AuthorisationSigned = true`
     - consent/status fields for signed authorization.
