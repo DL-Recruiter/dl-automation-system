@@ -277,11 +277,11 @@
               "emailMessage/Subject": "Please sign: Authorization - @{variables('varCandidateID')}",
               "emailMessage/Body": "<p class=\"editor-paragraph\">Open Link @{outputs('Create_sharing_link_for_a_file_or_folder')?['body/link/webUrl']}</p>",
               "emailMessage/Importance": "Normal",
-              "emailMessage/From": "DLRRecruitmentOps@dlresources.com.sg"
+              "emailMessage/MailboxAddress": "DLRRecruitmentOps@dlresources.com.sg"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
-              "operationId": "SendEmailV2",
+              "operationId": "SharedMailboxSendEmailV2",
               "connectionName": "shared_office365"
             }
           },

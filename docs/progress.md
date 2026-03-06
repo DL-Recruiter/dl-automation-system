@@ -691,3 +691,22 @@ Log each session with:
   - `rg -n "Send_an_email_\(V2\)|SendEmailV2|SharedMailboxSendEmailV2|emailMessage/From|emailMessage/MailboxAddress" flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
 - Next actions and blockers:
   - Next action: run one new `BGV_0` submission and confirm candidate receives from shared mailbox identity and flow no longer fails at send step.
+
+## 2026-03-06 (Revert BGV_0 to shared mailbox email action)
+- Current status:
+  - Updated `BGV_0` email action to use `Send an email from a shared mailbox (V2)` per runtime permission model.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - In `Send_an_email_(V2)`:
+    - `operationId`: `SendEmailV2` -> `SharedMailboxSendEmailV2`
+    - `emailMessage/From` -> `emailMessage/MailboxAddress` = `DLRRecruitmentOps@dlresources.com.sg`
+  - Preserved `To`, `Subject`, `Body`, links, and formatting unchanged.
+  - Confirmed all other BGV email actions already use shared mailbox operation.
+  - Updated linked behavior documentation:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "SendEmailV2|SharedMailboxSendEmailV2|emailMessage/MailboxAddress|emailMessage/From" flows/power-automate/unpacked/Workflows`
+- Next actions and blockers:
+  - Next action: if authorization error persists, grant mailbox-level `Send As` or `Send on behalf` for the Office 365 connection identity against `DLRRecruitmentOps@dlresources.com.sg`.
