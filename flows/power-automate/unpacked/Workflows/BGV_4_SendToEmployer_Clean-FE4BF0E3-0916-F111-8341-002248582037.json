@@ -234,7 +234,7 @@
                                 }
                               ],
                               "emailMessage/Importance": "Normal",
-                              "emailMessage/MailboxAddress": "DLRRecruitmentOps@dlresources.com.sg"
+                              "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg"
                             },
                             "host": {
                               "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",

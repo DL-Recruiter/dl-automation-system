@@ -33,7 +33,7 @@ This document describes the current behavior in your canonical flow files under 
     - `REQ-<CandidateID>-EMP1`
     - `REQ-<CandidateID>-EMP2`
     - `REQ-<CandidateID>-EMP3`
-  - Sends candidate email via `Send an email from a shared mailbox (V2)` from `DLRRecruitmentOps@dlresources.com.sg`.
+  - Sends candidate email via `Send an email from a shared mailbox (V2)` from `recruitmentops@dlresources.com.sg`.
   - Current candidate email wording/subject comes from the latest manual cloud edit and is now synced in canonical JSON.
 - Main outcome: Candidate onboarding data, request tracking, and structured Form 1 data are prepared in one run.
 
@@ -66,7 +66,7 @@ This document describes the current behavior in your canonical flow files under 
   - Computes days since authorization link creation.
   - Sends reminder emails between day 1 and day 5 (max once per day).
   - On day 5 unresolved cases, posts Teams escalation and sends internal escalation email.
-  - Email sends are routed via shared mailbox `DLRRecruitmentOps@dlresources.com.sg`.
+  - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
 - Main outcome: Unsigned candidate authorization forms are actively chased and escalated.
 
 ### `BGV_4_SendToEmployer_Clean`
@@ -87,7 +87,7 @@ This document describes the current behavior in your canonical flow files under 
     - Job title
   - Uses the matching `BGV_FormData` row as the first source for company name/address/UEN in the employer email body, so EMP1/EMP2/EMP3 show the correct declared company details.
   - Finds authorization file, attaches it, and emails employer HR.
-  - Email sends are routed via shared mailbox `DLRRecruitmentOps@dlresources.com.sg`.
+  - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
   - Recipient email resolution is guarded:
     - use `BGV_FormData.F1_HREmail` when it is email-formatted
     - else use `BGV_Requests.EmployerHR_Email` when it is email-formatted
@@ -118,7 +118,7 @@ This document describes the current behavior in your canonical flow files under 
   - Keeps required SharePoint fields (including `Title`) when updating `BGV_FormData`, preventing save/runtime validation errors.
   - Sends Teams alert when notify flag is true.
   - Sends internal high-severity email when severity is `High`.
-  - All email notifications in this flow are routed via shared mailbox and addressed to `DLRRecruitmentOps@dlresources.com.sg`.
+  - All email notifications in this flow are routed via shared mailbox and addressed to `recruitmentops@dlresources.com.sg`.
   - Teams notification target for this flow is updated to the new Team/Channel destination.
 - Main outcome: Employer response is automatically triaged, stored, and escalated when needed.
 
@@ -134,7 +134,7 @@ This document describes the current behavior in your canonical flow files under 
   - Reminder timestamps (`Reminder1At`, `Reminder2At`, `Reminder3At`)
   - Shared-mailbox reminder emails
   - Teams escalation message for unresolved cases
-  - Shared-mailbox sender is `DLRRecruitmentOps@dlresources.com.sg`.
+  - Shared-mailbox sender is `recruitmentops@dlresources.com.sg`.
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
 
 ## How the Flows Connect
@@ -151,3 +151,4 @@ This document describes the current behavior in your canonical flow files under 
 ## Notes
 - This summary is based on the current unpacked canonical flow JSON in the repo.
 - If cloud flows are changed in Power Automate but not exported/unpacked yet, cloud behavior may be newer than this file.
+

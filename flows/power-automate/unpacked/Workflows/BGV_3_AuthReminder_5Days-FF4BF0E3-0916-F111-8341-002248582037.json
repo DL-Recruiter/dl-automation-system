@@ -100,7 +100,7 @@
                                     "emailMessage/Subject": "Reminder: Please complete your authorization form",
                                     "emailMessage/Body": "<p class=\"editor-paragraph\"><br>This is a reminder to complete your authorization form required for verification step. Note: These reminder emails will stop when you have completed the form.</p><br><p class=\"editor-paragraph\">Link: @{items('Apply_to_each')?['AuthorizationLink']}<br><br>Thank you,</p><p class=\"editor-paragraph\">D L Resources</p>",
                                     "emailMessage/Importance": "Normal",
-                                    "emailMessage/MailboxAddress": "DLRRecruitmentOps@dlresources.com.sg"
+                                    "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg"
                                   },
                                   "host": {
                                     "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
@@ -166,7 +166,7 @@
                                         "emailMessage/Subject": "[Day 5 ALERT} Authorization Form Not Submitted ",
                                         "emailMessage/Body": "<p class=\"editor-paragraph\">Hi Team,</p><br><p class=\"editor-paragraph\">Candidate has not completed the Authorization Form after 5 days of reminder. Please ask applicant to fill it up.</p><br><p class=\"editor-paragraph\">Candidate: @{outputs('Update_item_-_lastauthremindersentat')?['body/FullName']}<br>Candidate ID: @{outputs('Update_item_-_lastauthremindersentat')?['body/CandidateID']}</p><p class=\"editor-paragraph\">Candidate Email: @{outputs('Update_item_-_lastauthremindersentat')?['body/CandidateEmail']}<br>Status: @{items('Apply_to_each')?['Status/Value']}<br><br>Authorization Link: @{outputs('Update_item_-_lastauthremindersentat')?['body/AuthorizationLink']}</p>",
                                         "emailMessage/Importance": "Normal",
-                                        "emailMessage/MailboxAddress": "DLRRecruitmentOps@dlresources.com.sg"
+                                        "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg"
                                       },
                                       "host": {
                                         "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",

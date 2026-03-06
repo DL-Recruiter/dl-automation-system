@@ -731,3 +731,22 @@ Log each session with:
   - `git diff -- flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
 - Next actions and blockers:
   - Next action: monitor one live BGV_0 run to verify mailbox permissions and successful send from shared mailbox action.
+
+## 2026-03-06 (Mailbox migration: DLRRecruitmentOps -> recruitmentops)
+- Current status:
+  - Updated all canonical BGV flow email actions to use shared mailbox `recruitmentops@dlresources.com.sg`.
+- Completed tasks:
+  - Replaced sender mailbox address in workflow JSON files:
+    - `BGV_0_CandidateDeclaration`
+    - `BGV_3_AuthReminder_5Days`
+    - `BGV_4_SendToEmployer_Clean`
+    - `BGV_5_Response1`
+    - `BGV_6_HRReminderAndEscalation`
+  - Updated BGV_5 mailbox-routed recipient constants from old mailbox to new mailbox where applicable.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `rg -n "DLRRecruitmentOps@dlresources.com.sg|recruitmentops@dlresources.com.sg" flows/power-automate/unpacked/Workflows docs/flows_easy_english.md`
+  - `ConvertFrom-Json` parse check for all workflow JSON files under canonical path.
+- Next actions and blockers:
+  - Next action: verify Office 365 connector permission on `recruitmentops@dlresources.com.sg` for the active connection identity.
