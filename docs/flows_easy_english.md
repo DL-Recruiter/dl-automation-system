@@ -137,6 +137,9 @@ This document describes the current behavior in your canonical flow files under 
   - Reminder timestamps (`Reminder1At`, `Reminder2At`, `Reminder3At`)
   - Shared-mailbox reminder emails
   - Teams escalation message for unresolved cases
+  - Teams escalation destination:
+    - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
+    - `channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
   - Shared-mailbox sender is `recruitmentops@dlresources.com.sg`.
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
 

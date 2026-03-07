@@ -823,3 +823,23 @@ Log each session with:
   - `rg` checks for updated expressions/actions (`Filter_array_-_SignedYes_Checked`, `toLower(string(body('HTTP')?['signedYes']))`, tolerant `AuthorisationSigned` condition).
 - Next actions and blockers:
   - Next action: rerun one known signed file and verify `BGV_1` updates candidate row, then trigger `BGV_4` recurrence to confirm employer send resumes.
+
+## 2026-03-08 (Synced BGV_6 manual Team/Channel update from cloud)
+- Current status:
+  - Exported and unpacked latest cloud solution after manual BGV_6 escalation destination update in Power Automate.
+- Completed tasks:
+  - Updated canonical flow from cloud export:
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - Confirmed Teams escalation destination in BGV_6 now points to:
+    - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
+    - `channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `pac auth who`
+  - `pac solution export --name BGV_System --path artifacts/exports/BGV_System_unmanaged.zip --managed false --overwrite`
+  - `pac solution unpack --zipfile artifacts/exports/BGV_System_unmanaged.zip --folder flows/power-automate/unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `git diff -- flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - `rg -n "body/recipient/groupId|body/recipient/channelId" flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+- Next actions and blockers:
+  - Next action: run a BGV_6 cycle with an escalated item and confirm the Teams message lands in the new channel.
