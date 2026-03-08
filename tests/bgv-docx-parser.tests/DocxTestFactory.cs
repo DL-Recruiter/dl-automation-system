@@ -8,6 +8,18 @@ internal static class DocxTestFactory
 {
     public static byte[] CreateDocument(params CheckboxDefinition[] checkboxes)
     {
+        return CreateDocument(checkboxes, Array.Empty<PackageXmlPartDefinition>());
+    }
+
+    public static byte[] CreateDocumentWithPackageXmlParts(params PackageXmlPartDefinition[] packageXmlParts)
+    {
+        return CreateDocument(Array.Empty<CheckboxDefinition>(), packageXmlParts);
+    }
+
+    private static byte[] CreateDocument(
+        IReadOnlyCollection<CheckboxDefinition> checkboxes,
+        IReadOnlyCollection<PackageXmlPartDefinition> packageXmlParts)
+    {
         using var stream = new MemoryStream();
 
         using (WordprocessingDocument document = WordprocessingDocument.Create(
@@ -24,6 +36,11 @@ internal static class DocxTestFactory
             foreach (CheckboxDefinition checkbox in checkboxes)
             {
                 body.AppendChild(CreateCheckboxParagraph(checkbox));
+            }
+
+            foreach (PackageXmlPartDefinition packageXmlPart in packageXmlParts)
+            {
+                AddPackageXmlPart(mainPart, packageXmlPart);
             }
 
             mainPart.Document.Save();
@@ -62,9 +79,24 @@ internal static class DocxTestFactory
             $"<w14:checkbox xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\"><w14:checked w14:val=\"{checkedValue}\" /></w14:checkbox>");
     }
 
+    private static void AddPackageXmlPart(MainDocumentPart mainPart, PackageXmlPartDefinition packageXmlPart)
+    {
+        CustomXmlPart customXmlPart = packageXmlPart.UseInkContentType
+            ? mainPart.AddCustomXmlPart(CustomXmlPartType.InkContent)
+            : mainPart.AddCustomXmlPart(CustomXmlPartType.CustomXml);
+
+        using Stream stream = customXmlPart.GetStream(FileMode.Create, FileAccess.Write);
+        using var writer = new StreamWriter(stream);
+        writer.Write(packageXmlPart.XmlPayload);
+    }
+
     internal sealed record CheckboxDefinition(
         string? Tag,
         string? Title,
         bool IsChecked,
         string DisplayText = "checkbox");
+
+    internal sealed record PackageXmlPartDefinition(
+        string XmlPayload,
+        bool UseInkContentType = false);
 }

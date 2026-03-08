@@ -11,6 +11,7 @@ var host = new HostBuilder()
         services.ConfigureFunctionsApplicationInsights();
         services.AddSingleton<IDocxCheckboxExtractor, OpenXmlDocxCheckboxExtractor>();
         services.AddSingleton<IAuthorizationMatchEvaluator, AuthorizationMatchEvaluator>();
+        services.AddSingleton<IDrawingDetectionService, OpenXmlDrawingDetectionService>();
     })
     .Build();
 

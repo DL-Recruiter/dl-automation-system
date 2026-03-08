@@ -13,11 +13,11 @@
 - `scripts/active/` - In-progress scripts under active development.
 - `scripts/legacy/` - Archived or superseded scripts kept for reference.
 - `shared/` - Reusable shared modules and helpers.
-- `tests/` - Automated tests and test fixtures.
+- `tests/` - Automated tests and test fixtures; generated `.NET` `bin/` and `obj/` outputs under test projects are not source files and remain untracked.
 
 ## Files
 - `.env.example` - Placeholder environment variable template (no real secrets).
-- `.gitignore` - Ignore rules for secrets, virtual env, and generated outputs.
+- `.gitignore` - Ignore rules for secrets, virtual env, generated outputs, and `.NET` build/test artifacts.
 - `README.md` - Developer and Codex operator quick-start, daily sync workflow, and linked-doc policy summary.
 - `AGENTS.md` - Agent operating constraints and mandatory repository rules.
 - `CODEX_PLAYBOOK.md` - Codex workflow protocol for safe, minimal, validated edits.
@@ -35,10 +35,10 @@
 - `connectors/new_flowrunops.connector.xml` - Placeholder Dataverse custom connector XML baseline.
 - `connectors/new_flowrunops.oauth.parameters.json` - Placeholder OAuth parameter definition for new_flowrunops.
 - `functions/bgv-docx-parser/bgv-docx-parser.csproj` - .NET 8 isolated Azure Function project for DOCX authorization parsing.
-- `functions/bgv-docx-parser/Program.cs` - Azure Functions isolated-worker host bootstrap with Application Insights wiring.
-- `functions/bgv-docx-parser/ParseAuthorizationControls.cs` - HTTP-trigger DOCX checkbox parser used by BGV authorization signature detection.
-- `functions/bgv-docx-parser/Models/` - Request/response and evaluation models for the DOCX parser function.
-- `functions/bgv-docx-parser/Services/` - OpenXML extraction and authorization-matching services used by the function endpoint.
+- `functions/bgv-docx-parser/Program.cs` - Azure Functions isolated-worker host bootstrap with Application Insights and parser/drawing service wiring.
+- `functions/bgv-docx-parser/ParseAuthorizationControls.cs` - HTTP-trigger DOCX checkbox parser that also returns additive Level A drawing-detection results.
+- `functions/bgv-docx-parser/Models/` - Request/response, evaluation, and Level A drawing-detection models for the DOCX parser function.
+- `functions/bgv-docx-parser/Services/` - OpenXML extraction, authorization-matching, and Level A drawing-detection services used by the function endpoint.
 - `functions/bgv-docx-parser/Utilities/` - Shared helper utilities for JSON options, request body reading, and base64 validation.
 - `functions/bgv-docx-parser/host.json` - Host logging and Application Insights settings for the parser function app.
 - `functions/bgv-docx-parser/global.json` - Local .NET SDK baseline for the parser function project.
@@ -57,6 +57,7 @@
 - `tests/bgv-docx-parser.tests/AuthorizationMatchEvaluatorTests.cs` - Verifies current SignedYes/SignedNo matching and compatibility alias behavior.
 - `tests/bgv-docx-parser.tests/Base64UtilitiesTests.cs` - Verifies request base64 normalization and decoded-length estimation helpers.
 - `tests/bgv-docx-parser.tests/DocxTestFactory.cs` - Deterministic DOCX sample generator for parser integration tests.
+- `tests/bgv-docx-parser.tests/DrawingDetectionServiceTests.cs` - Deterministic Level A drawing-detection tests for no-drawing, canvas/group, and ink package markers.
 - `tests/bgv-docx-parser.tests/ParserIntegrationTests.cs` - End-to-end tests covering current DOCX checkbox extraction plus SignedYes/SignedNo evaluation behavior.
 - `Repository Template.docx` - Source template document provided by user.
 - `System Specification Template.docx` - Source specification template provided by user.

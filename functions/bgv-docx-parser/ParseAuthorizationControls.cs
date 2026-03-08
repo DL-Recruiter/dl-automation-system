@@ -18,15 +18,18 @@ public class ParseAuthorizationControls
 
     private readonly IDocxCheckboxExtractor _checkboxExtractor;
     private readonly IAuthorizationMatchEvaluator _matchEvaluator;
+    private readonly IDrawingDetectionService _drawingDetectionService;
     private readonly ILogger<ParseAuthorizationControls> _logger;
 
     public ParseAuthorizationControls(
         IDocxCheckboxExtractor checkboxExtractor,
         IAuthorizationMatchEvaluator matchEvaluator,
+        IDrawingDetectionService drawingDetectionService,
         ILoggerFactory loggerFactory)
     {
         _checkboxExtractor = checkboxExtractor;
         _matchEvaluator = matchEvaluator;
+        _drawingDetectionService = drawingDetectionService;
         _logger = loggerFactory.CreateLogger<ParseAuthorizationControls>();
     }
 
@@ -147,6 +150,7 @@ public class ParseAuthorizationControls
         }
 
         AuthorizationEvaluationResult evaluation = _matchEvaluator.Evaluate(controlsFound);
+        DrawingDetectionResult drawingDetection = DrawingDetectionResult.Disabled;
 
         if (evaluation.SignedYesMatches.Count > 1)
         {
@@ -164,14 +168,25 @@ public class ParseAuthorizationControls
                 payload?.FileName ?? "<unknown>");
         }
 
+        try
+        {
+            drawingDetection = _drawingDetectionService.Detect(docBytes);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Level A drawing detection failed; preserving checkbox response behavior.");
+        }
+
         _logger.LogInformation(
-            "DOCX parsed successfully. ControlsFound={ControlsFoundCount}, SignedYesMatches={SignedYesMatchCount}, SignedNoMatches={SignedNoMatchCount}, SignedYes={SignedYes}, SignedNo={SignedNo}, DrawingDetectionEnabled={DrawingDetectionEnabled}.",
+            "DOCX parsed successfully. ControlsFound={ControlsFoundCount}, SignedYesMatches={SignedYesMatchCount}, SignedNoMatches={SignedNoMatchCount}, SignedYes={SignedYes}, SignedNo={SignedNo}, DrawingDetectionEnabled={DrawingDetectionEnabled}, DrawingSignatureDetected={DrawingSignatureDetected}, DrawingFindingsCount={DrawingFindingsCount}.",
             controlsFound.Count,
             evaluation.SignedYesMatches.Count,
             evaluation.SignedNoMatches.Count,
             evaluation.SignedYes,
             evaluation.SignedNo,
-            DrawingDetectionResult.Disabled.Enabled);
+            drawingDetection.Enabled,
+            drawingDetection.SignatureDetected,
+            drawingDetection.Findings.Count);
 
         var responsePayload = new AuthorizationResponsePayload(
             payload?.FileName,
@@ -179,7 +194,7 @@ public class ParseAuthorizationControls
             evaluation.SignedNo,
             controlsFound,
             GuidanceNote,
-            DrawingDetectionResult.Disabled);
+            drawingDetection);
 
         return await WriteJsonAsync(req, HttpStatusCode.OK, responsePayload);
     }

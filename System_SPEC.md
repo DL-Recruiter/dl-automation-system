@@ -25,23 +25,97 @@ If APIs are exposed or consumed, document each endpoint with:
 - Response schema
 - Authentication expectations
 
-### ENDPOINT_NAME
+### ParseAuthorizationControls
+Purpose:
+- Parses a candidate authorization DOCX and returns checkbox-based authorization status used by the BGV flows.
+- Adds additive Level A drawing-detection metadata based on Open XML package inspection.
+
+HTTP method and path:
+- `GET /api/ParseAuthorizationControls`
+- `POST /api/ParseAuthorizationControls`
+
+Authentication:
+- Azure Function endpoint protected by `AuthorizationLevel.Function`.
+- Callers must send the function key via `x-functions-key`.
+
+**Request Fields (`POST`):**
 | Field | Description | Type | Required? |
 | --- | --- | --- | --- |
-| param_1 | Placeholder request field | string | Yes |
-| param_2 | Optional request field | integer | No |
+| `fileName` | Source DOCX filename for logging/traceability. | string | No |
+| `docxBase64` | Base64-encoded DOCX payload to parse. | string | Yes |
+
+**GET health response (`200 OK`):**
+```json
+{
+  "status": "ok",
+  "message": "Use POST with JSON { fileName, docxBase64 }."
+}
+```
 
 **Response (200 OK):**
 ```json
 {
-  "field_1": "...",
-  "field_2": []
+  "fileName": "candidate.docx",
+  "signedYes": true,
+  "signedNo": false,
+  "controlsFound": [
+    {
+      "tag": "SignedYes",
+      "title": "SignedYes",
+      "isChecked": true
+    }
+  ],
+  "note": "Best practice: use SignedYes for the consent checkbox tag/title. CandidateAuthorisation remains supported for compatibility.",
+  "drawingDetection": {
+    "enabled": true,
+    "signatureDetected": false,
+    "level": "A",
+    "findings": []
+  }
 }
 ```
 
+**Response Fields (`200 OK`):**
+| Field | Description | Type | Notes |
+| --- | --- | --- | --- |
+| `fileName` | Echo of the provided filename. | string or null | Preserved for Power Automate compatibility. |
+| `signedYes` | Summary of current SignedYes-compatible checkbox matches. | boolean or null | Current checkbox contract remains authoritative for flow decisions. |
+| `signedNo` | Summary of current SignedNo checkbox matches. | boolean or null | Preserved current null/false semantics. |
+| `controlsFound` | Parsed checkbox content controls from the current DOCX parsing scope. | array | Exposed to Power Automate for downstream logic/debugging. |
+| `note` | Parser guidance string. | string | Informational only. |
+| `drawingDetection.enabled` | Whether Level A drawing detection ran. | boolean | Currently `true` on successful detection pass, `false` on fallback. |
+| `drawingDetection.signatureDetected` | Whether Level A detected drawing-like signature content anywhere in the DOCX package. | boolean or null | `null` when detection is disabled/fell back. |
+| `drawingDetection.level` | Detection level identifier. | string or null | Currently `\"A\"` when detection runs, otherwise `null`. |
+| `drawingDetection.findings[]` | Structured additive findings from Level A package inspection. | array | Each finding includes `kind`, `partUri`, and `detail`. |
+
+**Level A drawing detection scope and limitations:**
+- Level A is additive only and does not change checkbox detection behavior.
+- Detection is based on Open XML / DOCX package inspection only.
+- It returns `signatureDetected = true` when the DOCX package contains any of:
+  - ink-related content
+  - freeform or scribble-like drawing geometry markers
+  - drawing canvas or grouped drawing content
+- It does not perform Word COM automation, raster image analysis, or visual signature recognition.
+
+**Fallback behavior on drawing-detection failure:**
+- If Level A drawing detection throws or cannot complete, the function preserves the existing checkbox response behavior.
+- In fallback mode, `drawingDetection` returns the disabled placeholder:
+```json
+{
+  "enabled": false,
+  "signatureDetected": null,
+  "level": null,
+  "findings": []
+}
+```
+
+Governance:
+- Existing consumers may ignore `drawingDetection`; the checkbox contract remains authoritative for current flow behavior.
+
 **Error Codes:**
 - `400 Bad Request` - invalid input.
-- `401 Unauthorized` - invalid or missing auth.
+- `401 Unauthorized` - invalid or missing function key.
+- `413 Request Entity Too Large` - request body or decoded DOCX exceeds enforced limits.
 - `500 Internal Server Error` - unexpected failure.
 
 ## 4. Data Models & Structures

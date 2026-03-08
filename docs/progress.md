@@ -975,3 +975,51 @@ Log each session with:
   - `Invoke-WebRequest http://127.0.0.1:7073/api/ParseAuthorizationControls -Method Post ... -SkipHttpErrorCheck` (oversized request)
 - Next actions and blockers:
   - None.
+
+## 2026-03-08 (Azure Function additive Level A drawing detection)
+- Current status:
+  - Added Level A drawing detection to `ParseAuthorizationControls` as an additive package-inspection feature without changing checkbox matching, request fields, or existing top-level response fields.
+- Completed tasks:
+  - Added `IDrawingDetectionService` and `OpenXmlDrawingDetectionService` under `functions/bgv-docx-parser/Services/`.
+  - Wired the Level A detector into `ParseAuthorizationControls` so `drawingDetection` now returns live results while `signedYes`, `signedNo`, `controlsFound`, and `note` remain unchanged.
+  - Added `DrawingDetectionFinding` and updated `DrawingDetectionResult` to return structured findings with `enabled`, `signatureDetected`, `level`, and `findings`.
+  - Extended `DocxTestFactory` to generate deterministic DOCX package XML parts for drawing-detection tests.
+  - Added `tests/bgv-docx-parser.tests/DrawingDetectionServiceTests.cs` covering:
+    - no drawing content -> `enabled=true`, `signatureDetected=false`, `findings=[]`
+    - drawing canvas/group content -> `signatureDetected=true`
+    - ink-related content -> `signatureDetected=true`
+  - Kept current SignedYes exact match, `CandidateAuthorisation` compatibility alias, substring fallback behavior, and null/false checkbox semantics unchanged.
+  - Updated `docs/file_index.md` and `docs/repo_inventory.md` for the new Level A model/service/test files.
+- Validation commands run:
+  - `dotnet build functions/bgv-docx-parser/bgv-docx-parser.csproj`
+  - `dotnet test tests/bgv-docx-parser.tests/bgv-docx-parser.tests.csproj -m:1`
+- Next actions and blockers:
+  - Limitation: Level A currently detects OpenXML package markers for ink, grouped/canvas drawing content, and freeform geometry only; it does not interpret raster images or perform COM/visual signature recognition.
+
+## 2026-03-08 (System spec updated for additive drawingDetection contract)
+- Current status:
+  - Updated `System_SPEC.md` to document the live `ParseAuthorizationControls` request/response contract, including additive `drawingDetection` behavior.
+- Completed tasks:
+  - Replaced the placeholder API contract section with the concrete `ParseAuthorizationControls` endpoint.
+  - Documented `drawingDetection.enabled`, `drawingDetection.signatureDetected`, `drawingDetection.level`, and `drawingDetection.findings[]`.
+  - Documented Level A scope, limitations, and fallback behavior when drawing detection fails.
+  - Added governance note: existing consumers may ignore `drawingDetection`; checkbox contract remains authoritative for current flow behavior.
+- Validation commands run:
+  - `rg -n "ParseAuthorizationControls|drawingDetection|signatureDetected|Request Entity Too Large" System_SPEC.md`
+- Next actions and blockers:
+  - None.
+
+## 2026-03-08 (Repo hygiene cleanup for tracked .NET test outputs)
+- Current status:
+  - Isolated repository hygiene cleanup from parser logic changes by stopping generated `.NET` test outputs from being tracked under `tests/bgv-docx-parser.tests/`.
+- Completed tasks:
+  - Updated root `.gitignore` to ignore `.NET` generated `bin/`, `obj/`, and `TestResults/` paths repo-wide.
+  - Removed the currently tracked `tests/bgv-docx-parser.tests/bin/` and `tests/bgv-docx-parser.tests/obj/` artifacts from Git tracking without changing parser source files.
+  - Updated `docs/file_index.md` and `docs/repo_inventory.md` to document that these outputs are generated artifacts and not source-of-truth files.
+- Validation commands run:
+  - `git ls-files "*bin/*" "*obj/*"`
+  - `git rm -r --cached --ignore-unmatch tests/bgv-docx-parser.tests/bin tests/bgv-docx-parser.tests/obj`
+  - `git ls-files tests/bgv-docx-parser.tests/bin tests/bgv-docx-parser.tests/obj`
+  - `git status --short`
+- Next actions and blockers:
+  - Next action: commit the hygiene-only change separately from the parser logic change so future `dotnet test` runs stop producing tracked artifact noise.

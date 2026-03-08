@@ -2,6 +2,8 @@
 
 This inventory lists repository-tracked files and what each file is used for.
 
+Generated `.NET` build/test outputs such as `bin/`, `obj/`, and `TestResults/` are not source-of-truth artifacts and are intentionally kept untracked.
+
 ## Root Files
 - `.env.example` - Placeholder environment variables for local setup; contains no secrets.
 - `.gitignore` - Git ignore rules for local secrets, caches, outputs, and generated artifacts.
@@ -61,17 +63,20 @@ This inventory lists repository-tracked files and what each file is used for.
 - `functions/bgv-docx-parser/global.json` - Pinned .NET SDK baseline with feature-band roll-forward for local builds.
 - `functions/bgv-docx-parser/bgv-docx-parser.sln` - Visual Studio solution for the BGV DOCX parser function app.
 - `functions/bgv-docx-parser/bgv-docx-parser.csproj` - .NET 8 isolated Azure Function project referencing OpenXML and Application Insights.
-- `functions/bgv-docx-parser/Program.cs` - Isolated worker host bootstrap and Application Insights service registration.
-- `functions/bgv-docx-parser/ParseAuthorizationControls.cs` - HTTP-trigger function that parses authorization DOCX checkbox controls and returns signed-status summary data.
+- `functions/bgv-docx-parser/Program.cs` - Isolated worker host bootstrap and Application Insights service registration for checkbox and Level A drawing detection services.
+- `functions/bgv-docx-parser/ParseAuthorizationControls.cs` - HTTP-trigger function that parses authorization DOCX checkbox controls and returns signed-status summary plus additive Level A drawing-detection data.
 - `functions/bgv-docx-parser/Models/AuthorizationRequestPayload.cs` - POST request model for `fileName` and `docxBase64`.
-- `functions/bgv-docx-parser/Models/AuthorizationResponsePayload.cs` - Backward-compatible response model plus additive drawing-detection placeholder payload.
+- `functions/bgv-docx-parser/Models/AuthorizationResponsePayload.cs` - Backward-compatible response model plus additive Level A drawing-detection payload.
 - `functions/bgv-docx-parser/Models/AuthorizationEvaluationResult.cs` - Internal result model for resolved SignedYes/SignedNo matches.
 - `functions/bgv-docx-parser/Models/CheckboxControl.cs` - Parsed checkbox content-control model exposed in `controlsFound`.
-- `functions/bgv-docx-parser/Models/DrawingDetectionResult.cs` - Disabled placeholder model reserved for future drawing/signature detection.
+- `functions/bgv-docx-parser/Models/DrawingDetectionResult.cs` - Response model for additive Level A drawing-detection results.
+- `functions/bgv-docx-parser/Models/DrawingDetectionFinding.cs` - Structured drawing-detection finding model with kind, package part URI, and detail.
 - `functions/bgv-docx-parser/Services/IDocxCheckboxExtractor.cs` - Service contract for extracting checkbox content controls from DOCX bytes.
 - `functions/bgv-docx-parser/Services/OpenXmlDocxCheckboxExtractor.cs` - Current OpenXML implementation for extracting checkbox controls from the main document body.
 - `functions/bgv-docx-parser/Services/IAuthorizationMatchEvaluator.cs` - Service contract for SignedYes/SignedNo evaluation rules.
 - `functions/bgv-docx-parser/Services/AuthorizationMatchEvaluator.cs` - Centralized current matching policy including `CandidateAuthorisation` compatibility and substring fallback.
+- `functions/bgv-docx-parser/Services/IDrawingDetectionService.cs` - Service contract for additive Level A drawing detection against DOCX package content.
+- `functions/bgv-docx-parser/Services/OpenXmlDrawingDetectionService.cs` - OpenXML package inspector that flags ink, canvas/group, and freeform drawing markers anywhere in the DOCX part graph.
 - `functions/bgv-docx-parser/Utilities/RequestBodyReader.cs` - Request-body reader with max-size enforcement for the HTTP trigger.
 - `functions/bgv-docx-parser/Utilities/Base64Utilities.cs` - Base64 normalization and decoded-size estimation helpers.
 - `functions/bgv-docx-parser/Utilities/FunctionJson.cs` - Shared JSON serializer options used by the function endpoint.
@@ -90,7 +95,12 @@ This inventory lists repository-tracked files and what each file is used for.
 - `tests/bgv-docx-parser.tests/AuthorizationMatchEvaluatorTests.cs` - Unit tests for current SignedYes/SignedNo matching behavior and compatibility alias handling.
 - `tests/bgv-docx-parser.tests/Base64UtilitiesTests.cs` - Unit tests for base64 request helper behavior used by the function endpoint.
 - `tests/bgv-docx-parser.tests/DocxTestFactory.cs` - Shared deterministic DOCX generator for parser integration test cases.
+- `tests/bgv-docx-parser.tests/DrawingDetectionServiceTests.cs` - Deterministic tests for additive Level A drawing detection on empty, grouped/canvas, and ink-marked DOCX packages.
 - `tests/bgv-docx-parser.tests/ParserIntegrationTests.cs` - Integration tests that exercise the real OpenXML extractor plus current authorization match evaluation semantics.
 - `tests/test_flow_connector_fixtures.py` - Validates expected connector/flow fixture relationships.
 - `tests/test_pull_all_flow_runs.py` - Tests canonical flow discovery and helper behavior for bulk run-history pull.
 - `tests/test_verify_flow_runs.py` - Tests token request, run-history fetch, and URL composition behavior.
+
+Generated test-project outputs:
+- `tests/bgv-docx-parser.tests/bin/` - Local `dotnet build` / `dotnet test` output; intentionally untracked.
+- `tests/bgv-docx-parser.tests/obj/` - Local intermediate MSBuild/NuGet output; intentionally untracked.
