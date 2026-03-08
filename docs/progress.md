@@ -843,3 +843,22 @@ Log each session with:
   - `rg -n "body/recipient/groupId|body/recipient/channelId" flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
 - Next actions and blockers:
   - Next action: run a BGV_6 cycle with an escalated item and confirm the Teams message lands in the new channel.
+
+## 2026-03-08 (BGV_0 candidate authorization email wording update)
+- Current status:
+  - Updated candidate authorization email body text in `BGV_0` to new approved wording.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - In action `Send_an_email_from_a_shared_mailbox_(V2)`:
+    - Added greeting: `Dear <dynamic candidate name>,`
+    - Kept candidate name expression from existing form response field.
+    - Kept existing dynamic authorization link expression unchanged.
+    - Updated only surrounding static wording per requested template.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` on updated BGV_0 JSON.
+  - `rg` checks for updated email body fragments and dynamic expressions.
+- Next actions and blockers:
+  - Next action: run one BGV_0 test submission and verify rendered email body in received message.

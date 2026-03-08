@@ -34,7 +34,7 @@ This document describes the current behavior in your canonical flow files under 
     - `REQ-<CandidateID>-EMP2`
     - `REQ-<CandidateID>-EMP3`
   - Sends candidate email via `Send an email from a shared mailbox (V2)` from `recruitmentops@dlresources.com.sg`.
-  - Current candidate email wording/subject comes from the latest manual cloud edit and is now synced in canonical JSON.
+  - Candidate authorization email body now uses personalized salutation (`Dear <Candidate Name>`) and explicit signing instructions while preserving dynamic name/link expressions.
 - Main outcome: Candidate onboarding data, request tracking, and structured Form 1 data are prepared in one run.
 
 ### `BGV_1_Detect_Authorization_Signature`
