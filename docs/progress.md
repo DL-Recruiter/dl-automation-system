@@ -956,3 +956,22 @@ Log each session with:
   - `Get-Content -Raw .vscode/settings.json | ConvertFrom-Json | Out-Null`
 - Next actions and blockers:
   - Next action: reload the VS Code window if the Chat view does not pick up the new workspace settings immediately.
+
+## 2026-03-08 (ParseAuthorizationControls validation summary)
+- Current status:
+  - Validated the refactored `ParseAuthorizationControls` function with behavior and HTTP contract checks.
+- Completed tasks:
+  - Behavior preserved:
+    - SignedYes doc -> `signedYes=true`, `signedNo=false`
+    - SignedNo doc -> `signedYes=false`, `signedNo=true`
+    - No-checkbox doc -> `signedYes=null`, `signedNo=null`
+  - HTTP validation preserved:
+    - corrupted base64 -> `400`
+    - oversized request -> `413`
+  - No Power Automate contract changes.
+- Validation commands run:
+  - `dotnet test tests/bgv-docx-parser.tests/bgv-docx-parser.tests.csproj -m:1`
+  - `Invoke-WebRequest http://127.0.0.1:7073/api/ParseAuthorizationControls -Method Post ... -SkipHttpErrorCheck` (corrupted base64)
+  - `Invoke-WebRequest http://127.0.0.1:7073/api/ParseAuthorizationControls -Method Post ... -SkipHttpErrorCheck` (oversized request)
+- Next actions and blockers:
+  - None.
