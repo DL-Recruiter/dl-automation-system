@@ -33,6 +33,12 @@
 - `connectors/shared_flowrunops.powerplatform.json` - Placeholder export metadata for shared_flowrunops connector.
 - `connectors/new_flowrunops.connector.xml` - Placeholder Dataverse custom connector XML baseline.
 - `connectors/new_flowrunops.oauth.parameters.json` - Placeholder OAuth parameter definition for new_flowrunops.
+- `functions/bgv-docx-parser/bgv-docx-parser.csproj` - .NET 8 isolated Azure Function project for DOCX authorization parsing.
+- `functions/bgv-docx-parser/Program.cs` - Azure Functions isolated-worker host bootstrap with Application Insights wiring.
+- `functions/bgv-docx-parser/ParseAuthorizationControls.cs` - HTTP-trigger DOCX checkbox parser used by BGV authorization signature detection.
+- `functions/bgv-docx-parser/host.json` - Host logging and Application Insights settings for the parser function app.
+- `functions/bgv-docx-parser/global.json` - Local .NET SDK baseline for the parser function project.
+- `functions/bgv-docx-parser/Properties/launchSettings.json` - Local debug launch profile for the parser function app.
 - `scripts/active/import_flow_exports.ps1` - Helper to copy authenticated exported flow JSON files into `flows/` standard filenames.
 - `scripts/active/bgv_daily_sync.ps1` - One-command daily sync for PAC identity check, git pull, export, and unpack.
 - `scripts/active/verify_flow_runs.py` - Flow run-history verification script using OAuth and ARM/connector endpoint support.

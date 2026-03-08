@@ -55,6 +55,16 @@ This inventory lists repository-tracked files and what each file is used for.
 - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json` - HR reminder/escalation follow-up flow definition.
 - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json.data.xml` - Dataverse workflow metadata for `BGV_6_HRReminderAndEscalation`.
 
+## Function Files
+- `functions/bgv-docx-parser/.gitignore` - Project-specific ignore rules for local settings and generated build outputs.
+- `functions/bgv-docx-parser/global.json` - Pinned .NET SDK baseline with feature-band roll-forward for local builds.
+- `functions/bgv-docx-parser/bgv-docx-parser.sln` - Visual Studio solution for the BGV DOCX parser function app.
+- `functions/bgv-docx-parser/bgv-docx-parser.csproj` - .NET 8 isolated Azure Function project referencing OpenXML and Application Insights.
+- `functions/bgv-docx-parser/Program.cs` - Isolated worker host bootstrap and Application Insights service registration.
+- `functions/bgv-docx-parser/ParseAuthorizationControls.cs` - HTTP-trigger function that parses authorization DOCX checkbox controls and returns signed-status summary data.
+- `functions/bgv-docx-parser/host.json` - Host-level logging and Application Insights settings for the function app.
+- `functions/bgv-docx-parser/Properties/launchSettings.json` - Local debug launch profile for the function app.
+
 ## Active Scripts
 - `scripts/active/bgv_daily_sync.ps1` - Daily automation helper for auth check, git pull, export, unpack, and optional test run.
 - `scripts/active/import_flow_exports.ps1` - Copies exported flow files into repository-standard flow paths.

@@ -862,3 +862,31 @@ Log each session with:
   - `rg` checks for updated email body fragments and dynamic expressions.
 - Next actions and blockers:
   - Next action: run one BGV_0 test submission and verify rendered email body in received message.
+
+## 2026-03-08 (Azure Function parser source import + signed-detection refactor)
+- Current status:
+  - Added the uploaded .NET isolated Azure Function source to the repo under `functions/bgv-docx-parser/`.
+  - Refactored the parser to align with the March 6 BGV_1 signed-detection hardening while keeping the existing HTTP response contract stable for flow callers.
+- Completed tasks:
+  - Added clean function project files under `functions/bgv-docx-parser/`:
+    - `.gitignore`
+    - `global.json`
+    - `bgv-docx-parser.sln`
+    - `bgv-docx-parser.csproj`
+    - `Program.cs`
+    - `ParseAuthorizationControls.cs`
+    - `host.json`
+    - `Properties/launchSettings.json`
+  - Intentionally excluded `local.settings.json`, `.vscode/`, `bin/`, `obj/`, and the sample DOCX from the uploaded zip to avoid committing secrets or generated artifacts.
+  - Updated `Program.cs` to register Application Insights for the isolated worker host.
+  - Refactored `ParseAuthorizationControls.cs` to:
+    - enforce request-body and decoded-DOCX size limits before parsing
+    - preserve the existing `GET` health-check path
+    - aggregate duplicate checkbox matches deterministically with any-checked semantics
+    - support `SignedYes` plus compatibility fallback `CandidateAuthorisation`
+    - preserve response fields `fileName`, `signedYes`, `signedNo`, `controlsFound`, and `note`
+  - Updated `docs/file_index.md` and `docs/repo_inventory.md` to index the new function project.
+- Validation commands run:
+  - `dotnet build functions/bgv-docx-parser/bgv-docx-parser.csproj`
+- Next actions and blockers:
+  - Next action: deploy the updated `functions/bgv-docx-parser/` project to the live `bgv-docx-parser` Function App and verify one signed and one unsigned authorization DOCX against `BGV_1`.
