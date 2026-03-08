@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bgv-docx-parser", "bgv-docx-parser.csproj", "{8529E524-ECA8-2307-B523-2CB019067235}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8529E524-ECA8-2307-B523-2CB019067235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8529E524-ECA8-2307-B523-2CB019067235}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8529E524-ECA8-2307-B523-2CB019067235}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8529E524-ECA8-2307-B523-2CB019067235}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {83533770-697B-49A2-93D1-64345E0E9ECF}
+	EndGlobalSection
+EndGlobal

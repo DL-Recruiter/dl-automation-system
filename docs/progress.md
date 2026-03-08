@@ -890,3 +890,69 @@ Log each session with:
   - `dotnet build functions/bgv-docx-parser/bgv-docx-parser.csproj`
 - Next actions and blockers:
   - Next action: deploy the updated `functions/bgv-docx-parser/` project to the live `bgv-docx-parser` Function App and verify one signed and one unsigned authorization DOCX against `BGV_1`.
+
+## 2026-03-08 (Azure Function structural refactor into layered services)
+- Current status:
+  - Refactored `ParseAuthorizationControls` into a layered architecture while preserving the current isolated-worker runtime model and Power Automate-compatible HTTP behavior.
+- Completed tasks:
+  - Kept unchanged:
+    - function name `ParseAuthorizationControls`
+    - `GET` health response behavior
+    - `POST` request fields `fileName` and `docxBase64`
+    - top-level response fields `fileName`, `signedYes`, `signedNo`, `controlsFound`, and `note`
+    - current SignedYes exact match, `CandidateAuthorisation` compatibility alias, and substring fallback behavior
+  - Added internal model layer under `functions/bgv-docx-parser/Models/` for request, response, checkbox, evaluation, and additive `drawingDetection` placeholder payloads.
+  - Added service layer under `functions/bgv-docx-parser/Services/`:
+    - `OpenXmlDocxCheckboxExtractor` for current DOCX checkbox extraction scope
+    - `AuthorizationMatchEvaluator` for centralized current SignedYes/SignedNo matching policy
+  - Added helper utilities under `functions/bgv-docx-parser/Utilities/` for shared JSON options, request-body reading, and base64 validation helpers.
+  - Updated `Program.cs` to register the new services for dependency injection.
+  - Reduced `ParseAuthorizationControls.cs` to a thinner endpoint/orchestration layer with structured logging and unchanged validation/error messages.
+  - Added .NET unit tests under `tests/bgv-docx-parser.tests/` for:
+    - exact SignedYes behavior
+    - `CandidateAuthorisation` compatibility alias
+    - current substring fallback behavior
+    - duplicate any-checked semantics
+    - SignedNo exact-only behavior
+    - base64 normalization and decoded-length helper behavior
+  - Updated `docs/file_index.md` and `docs/repo_inventory.md` for the new layered function files and test project.
+- Validation commands run:
+  - `dotnet build functions/bgv-docx-parser/bgv-docx-parser.csproj`
+  - `dotnet test tests/bgv-docx-parser.tests/bgv-docx-parser.tests.csproj -m:1`
+- Next actions and blockers:
+  - Next action: if you want Level A or Level B detection later, plug it in behind the additive `drawingDetection` model and a new service without changing the current HTTP contract.
+
+## 2026-03-08 (Azure Function validation: parser cases + local HTTP error checks)
+- Current status:
+  - Added deterministic DOCX integration tests for the refactored parser services and validated two HTTP error-contract cases against the local Azure Functions host.
+- Completed tasks:
+  - Added `tests/bgv-docx-parser.tests/DocxTestFactory.cs` to generate repeatable DOCX samples with checkbox content controls.
+  - Added `tests/bgv-docx-parser.tests/ParserIntegrationTests.cs` covering:
+    - valid SignedYes document -> `signedYes=true`, `signedNo=false`
+    - valid SignedNo document -> `signedYes=false`, `signedNo=true`
+    - unchecked document -> observed current semantics `signedYes=false`, `signedNo=false`
+    - multiple SignedYes controls -> `signedYes=true`
+    - no checkbox -> observed current semantics `signedYes=null`, `signedNo=null`, `controlsFound=[]`
+  - Started the local function host with `FUNCTIONS_WORKER_RUNTIME=dotnet-isolated` and ran sequential HTTP checks:
+    - corrupted base64 -> observed `400` with body `{\"error\":\"docxBase64 is not valid base64\"}`
+    - oversized request body -> observed `413` with body `{\"error\":\"Request body exceeds 16777216 bytes.\"}`
+  - Stopped the local host after validation.
+- Validation commands run:
+  - `dotnet test tests/bgv-docx-parser.tests/bgv-docx-parser.tests.csproj -m:1`
+  - `Invoke-WebRequest http://127.0.0.1:7073/api/ParseAuthorizationControls -Method Post ... -SkipHttpErrorCheck` (corrupted base64)
+  - `Invoke-WebRequest http://127.0.0.1:7073/api/ParseAuthorizationControls -Method Post ... -SkipHttpErrorCheck` (oversized request)
+- Next actions and blockers:
+  - Next action: if you want, add local host startup automation that injects `FUNCTIONS_WORKER_RUNTIME=dotnet-isolated` so these HTTP checks can be rerun with a single command.
+
+## 2026-03-08 (VS Code chat multi-agent workspace flags)
+- Current status:
+  - Enabled the requested VS Code chat workspace flags in the repository settings.
+- Completed tasks:
+  - Updated `.vscode/settings.json` to set:
+    - `chat.agentsControl.enabled = true`
+    - `chat.viewSessions.enabled = true`
+  - Preserved the existing `sarif-viewer.connectToGithubCodeScanning` workspace setting unchanged.
+- Validation commands run:
+  - `Get-Content -Raw .vscode/settings.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Next action: reload the VS Code window if the Chat view does not pick up the new workspace settings immediately.

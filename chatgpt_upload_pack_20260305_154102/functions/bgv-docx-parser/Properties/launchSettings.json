@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "bgv_docx_parser": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7189",
+      "launchBrowser": false
+    }
+  }
+}
