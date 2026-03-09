@@ -944,3 +944,21 @@ Log each session with:
   - `rg -n "groupId|channelId"` on BGV_3 JSON
 - Next actions and blockers:
   - Next action: trigger a day-5 escalation scenario and verify Teams post lands in `DLR Recruitment Ops > BGV`.
+
+## 2026-03-09 (BGV_4 sends signed form copy to candidate)
+- Current status:
+  - Added candidate-copy email behavior so the same signed authorization form sent to employer is also sent to the candidate.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - Added action `Send_signed_form_copy_to_candidate_(V2)` after employer send.
+  - Reused the same attachment payload (`AuthFileName` + `Get_file_content`) and shared mailbox sender.
+  - Candidate recipient mapping uses `Get_item.body/CandidateEmail` with fallback to `recruitmentops@dlresources.com.sg` if invalid.
+  - Updated request status update runAfter to execute after candidate-copy email succeeds.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` check on updated BGV_4 JSON
+  - `rg -n "Send_signed_form_copy_to_candidate_\(V2\)|emailMessage/To|CandidateEmail"` on BGV_4 JSON
+- Next actions and blockers:
+  - Next action: trigger one BGV_4 run and verify both employer and candidate receive the same signed form attachment.

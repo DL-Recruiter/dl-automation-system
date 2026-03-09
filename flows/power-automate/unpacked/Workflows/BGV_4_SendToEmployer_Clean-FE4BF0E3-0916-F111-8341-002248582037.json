@@ -244,9 +244,38 @@
                             "authentication": "@parameters('$authentication')"
                           }
                         },
-                        "Update_item_-_BGV_Requests": {
+                        "Send_signed_form_copy_to_candidate_(V2)": {
                           "runAfter": {
                             "Send_an_email_(V2)": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "emailMessage/To": "@if(contains(trim(string(outputs('Get_item')?['body/CandidateEmail'])),'@'),trim(string(outputs('Get_item')?['body/CandidateEmail'])),'recruitmentops@dlresources.com.sg')",
+                              "emailMessage/Subject": "Copy of Signed Authorization Form - @{outputs('Get_item')?['body/FullName']}",
+                              "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{outputs('Get_item')?['body/FullName']},</p><br><p class=\"editor-paragraph\">This is a copy of your signed authorization form that was sent for background verification.</p><br><p class=\"editor-paragraph\">Please keep this for your reference.</p><br><p class=\"editor-paragraph\">Thank you.<br>DL Resources Recruitment Team</p>",
+                              "emailMessage/Attachments": [
+                                {
+                                  "Name": "@variables('AuthFileName')",
+                                  "ContentBytes": "@body('Get_file_content')"
+                                }
+                              ],
+                              "emailMessage/Importance": "Normal",
+                              "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg"
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                              "connectionName": "shared_office365",
+                              "operationId": "SharedMailboxSendEmailV2"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Update_item_-_BGV_Requests": {
+                          "runAfter": {
+                            "Send_signed_form_copy_to_candidate_(V2)": [
                               "Succeeded"
                             ]
                           },
