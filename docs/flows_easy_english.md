@@ -33,6 +33,7 @@ This document describes the current behavior in your canonical flow files under 
     - `REQ-<CandidateID>-EMP1`
     - `REQ-<CandidateID>-EMP2`
     - `REQ-<CandidateID>-EMP3`
+  - Sets `SendAfterDate` as `utcNow()` for EMP1/EMP2/EMP3 request rows (consistent scheduling baseline).
   - Sends candidate email via `Send an email from a shared mailbox (V2)` from `recruitmentops@dlresources.com.sg`.
   - Candidate authorization email body now uses personalized salutation (`Dear <Candidate Name>`) and explicit signing instructions while preserving dynamic name/link expressions.
 - Main outcome: Candidate onboarding data, request tracking, and structured Form 1 data are prepared in one run.

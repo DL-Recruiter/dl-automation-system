@@ -878,3 +878,19 @@ Log each session with:
   - `git diff -- flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json docs/flows_easy_english.md docs/progress.md`
 - Next actions and blockers:
   - Next action: trigger one BGV_4 run and verify received employer email renders expected company/candidate dynamic values and unchanged declared-details/link section.
+
+## 2026-03-09 (BGV_0 validation error fix: malformed SendAfterDate expression)
+- Current status:
+  - Fixed a flow-designer validation error in `BGV_0_CandidateDeclaration` caused by a malformed EMP1 `SendAfterDate` expression.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - Replaced malformed EMP1 `item/SendAfterDate` expression with valid `@utcNow()` to match EMP2/EMP3 behavior.
+  - Ran full JSON syntax validation on all canonical workflows (`BGV_0` to `BGV_6`).
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` validation for all files under `flows/power-automate/unpacked/Workflows/*.json`
+  - `rg -n "item/SendAfterDate" flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+- Next actions and blockers:
+  - Next action: import updated solution and run one live BGV_0 submission to confirm designer validation passes and run succeeds.

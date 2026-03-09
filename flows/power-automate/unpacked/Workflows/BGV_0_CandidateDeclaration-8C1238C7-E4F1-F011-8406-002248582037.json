@@ -662,7 +662,7 @@
                   "item/EmployerHR_Email": "@outputs('Get_response_details')?['body/r99f0629822f44e1990ee2e00b3c2b442']",
                   "item/CandidateItemID/Id": "@outputs('CandidateItemId')",
                   "item/RequestID": "@concat('REQ-', variables('varCandidateID'), '-EMP1')",
-                  "item/SendAfterDate": "@{if(\r\n  and(\r\n    equals(toLower(outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e']), 'yes'),\r\n    not(empty(outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e'])),\r\n    greater(\r\n      ticks(outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e>']),\r\n      ticks(utcNow())\r\n    )\r\n  ),\r\n  outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e'],\r\n  utcNow()\r\n)}\n",
+                  "item/SendAfterDate": "@utcNow()",
                   "item/VerificationStatus/Value": "Pending"
                 },
                 "host": {
