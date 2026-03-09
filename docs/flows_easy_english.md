@@ -69,7 +69,7 @@ This document describes the current behavior in your canonical flow files under 
   - Gets candidates with `Status = Pending Authorization Form Signature`.
   - Computes days since authorization link creation.
   - Sends reminder emails between day 1 and day 5 (max once per day).
-  - On day 5 unresolved cases, posts Teams escalation and sends internal escalation email.
+  - On day 5 unresolved cases, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email.
   - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
 - Main outcome: Unsigned candidate authorization forms are actively chased and escalated.
 
@@ -161,5 +161,6 @@ This document describes the current behavior in your canonical flow files under 
 ## Notes
 - This summary is based on the current unpacked canonical flow JSON in the repo.
 - If cloud flows are changed in Power Automate but not exported/unpacked yet, cloud behavior may be newer than this file.
+
 
 

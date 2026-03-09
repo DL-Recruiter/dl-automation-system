@@ -927,3 +927,20 @@ Log each session with:
   - `rg -n "groupId|channelId"` on BGV_6 JSON
 - Next actions and blockers:
   - Next action: run one BGV_6 escalation cycle and verify message lands in `DLR Recruitment Ops > BGV` channel.
+
+## 2026-03-09 (BGV_3 escalation Teams destination remap)
+- Current status:
+  - Remapped BGV_3 day-5 escalation Teams post to the DLR Recruitment Ops BGV channel for consistency with BGV_6/BGV_5.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+  - Updated Teams destination values in BGV_3:
+    - `body/recipient/groupId = b680487c-a11c-44f4-9de6-8813d3e2951b`
+    - `body/recipient/channelId = 19:NcAD8P3aERodeV2-NR6D9OBEOnwZI62MVLgNoBrSIl01@thread.tacv2`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` check on updated BGV_3 JSON
+  - `rg -n "groupId|channelId"` on BGV_3 JSON
+- Next actions and blockers:
+  - Next action: trigger a day-5 escalation scenario and verify Teams post lands in `DLR Recruitment Ops > BGV`.
