@@ -894,3 +894,19 @@ Log each session with:
   - `rg -n "item/SendAfterDate" flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
 - Next actions and blockers:
   - Next action: import updated solution and run one live BGV_0 submission to confirm designer validation passes and run succeeds.
+
+## 2026-03-09 (BGV_4 employer email wording sync)
+- Current status:
+  - Updated BGV_4 employer email template wording in canonical flow after cloud still showed old text.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - Preserved existing dynamic mappings in subject, declared company details block, and verification link block.
+  - Updated opening body sentence to use dynamic candidate full name and dynamic company name wording.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` check on updated BGV_4 JSON
+  - `rg -n "emailMessage/Subject|emailMessage/Body|Declared company details from candidate|FinalVerificationLink"` on BGV_4 JSON
+- Next actions and blockers:
+  - Next action: run one BGV_4 send cycle and confirm new intro wording appears in sent email.

@@ -90,6 +90,7 @@ This document describes the current behavior in your canonical flow files under 
     - Last drawn salary
     - Job title
   - Uses the matching `BGV_FormData` row as the first source for company name/address/UEN in the employer email body, so EMP1/EMP2/EMP3 show the correct declared company details.
+  - Employer email intro sentence now uses dynamic candidate full name plus the dynamic company field, while keeping declared-details and verification-link sections unchanged.
   - Finds authorization file, attaches it, and emails employer HR.
   - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
   - Employer email subject now uses the mapped dynamic company field.
