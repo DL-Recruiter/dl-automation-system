@@ -910,3 +910,20 @@ Log each session with:
   - `rg -n "emailMessage/Subject|emailMessage/Body|Declared company details from candidate|FinalVerificationLink"` on BGV_4 JSON
 - Next actions and blockers:
   - Next action: run one BGV_4 send cycle and confirm new intro wording appears in sent email.
+
+## 2026-03-09 (BGV_6 escalation Teams destination remap)
+- Current status:
+  - Remapped BGV_6 escalation post destination from old main-channel IDs to the DLR Recruitment Ops BGV channel IDs.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - Updated Teams destination values in BGV_6:
+    - `body/recipient/groupId = b680487c-a11c-44f4-9de6-8813d3e2951b`
+    - `body/recipient/channelId = 19:NcAD8P3aERodeV2-NR6D9OBEOnwZI62MVLgNoBrSIl01@thread.tacv2`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` check on updated BGV_6 JSON
+  - `rg -n "groupId|channelId"` on BGV_6 JSON
+- Next actions and blockers:
+  - Next action: run one BGV_6 escalation cycle and verify message lands in `DLR Recruitment Ops > BGV` channel.
