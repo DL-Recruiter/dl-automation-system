@@ -12,8 +12,12 @@ Yes. Always sync first.
 
 Use this command at start of day before editing/testing:
 ```powershell
-powershell -File scripts/active/bgv_daily_sync.ps1
+powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/
 ```
+
+If `pac auth who` shows the correct user but `pac solution export` fails with `No active environment set`, either:
+- reselect a PAC profile created with `--environment`, or
+- pass `-EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/` to the sync script as shown above.
 
 ## One-Time Setup
 1. Open repo in VS Code at `C:\bgv_project`.
@@ -40,6 +44,7 @@ Step by step:
    - runs `git pull --ff-only`
 4. Exports latest tenant solution:
    - exports `BGV_System` to `artifacts/exports/BGV_System_unmanaged.zip`
+   - uses the active PAC environment or the explicit `-EnvironmentUrl` override
 5. Unpacks solution into editable source-controlled files:
    - `flows/power-automate/unpacked/`
 6. Optionally runs tests:
@@ -51,16 +56,16 @@ What it does NOT do:
 
 Typical commands:
 ```powershell
-powershell -File scripts/active/bgv_daily_sync.ps1
+powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/
 ```
 
 ```powershell
-powershell -File scripts/active/bgv_daily_sync.ps1 -RunTests
+powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/ -RunTests
 ```
 
 If Python is not on PATH:
 ```powershell
-powershell -File scripts/active/bgv_daily_sync.ps1 -RunTests -PythonExe C:\path\to\python.exe
+powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/ -RunTests -PythonExe C:\path\to\python.exe
 ```
 
 ## Mandatory Flow Edit Rules
@@ -93,7 +98,7 @@ Default output file:
 
 ## Common Task Playbooks
 ### 1) Start Work Safely
-1. Run daily sync script.
+1. Run daily sync script with the environment override if your PAC profile does not already have an active environment.
 2. Confirm active account with `pac auth who`.
 3. Confirm working tree before edits:
    ```powershell
@@ -161,7 +166,7 @@ Use this when you want to move changes safely from source control into runtime e
 ### A) From Local To GitHub (source of truth update)
 1. Sync and verify:
    ```powershell
-   powershell -File scripts/active/bgv_daily_sync.ps1
+   powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/
    pac auth who
    git status --short --branch
    ```
@@ -240,6 +245,7 @@ CLI-first remains default. Use portal only for:
 ## Best Practices Checklist
 - Always run `pac auth who` before any PAC command.
 - Always sync first (`bgv_daily_sync.ps1`) before editing flows.
+- If sync fails with `No active environment set`, rerun with `-EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/` or reselect the correct PAC profile.
 - Edit only canonical flow files:
   - `flows/power-automate/unpacked/Workflows/`
 - Keep changes minimal and task-focused; avoid broad refactors during production fixes.
@@ -250,6 +256,7 @@ CLI-first remains default. Use portal only for:
   - JSON parse checks on edited flow files.
   - script syntax checks where applicable.
 - Deploy intentionally with pack/import; do not assume local edits are live.
+- Review sync diffs before documenting behavior changes. End-of-file newline-only diffs from export/unpack are formatting noise, not logic changes.
 - After test runs, capture and share:
   - flow name
   - run ID
