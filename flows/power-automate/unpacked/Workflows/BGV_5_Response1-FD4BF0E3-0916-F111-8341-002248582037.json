@@ -587,7 +587,7 @@
                         "parameters": {
                           "emailMessage/To": "recruitmentops@dlresources.com.sg",
                           "emailMessage/Subject": "HIGH BGV FLAG - @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}, @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}",
-                          "emailMessage/Body": "<p class=\"editor-paragraph\">A High Severity BGV issue has been flagged. <br><br>Severity: High<br><br>Details: @{variables('varNotifyBody')}</p>",
+                          "emailMessage/Body": "<p class=\"editor-paragraph\">A High Severity BGV issue has been flagged. <br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br><br>Severity: High<br><br>Details: @{variables('varNotifyBody')}</p>",
                           "emailMessage/Importance": "Normal",
                           "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg"
                         },
@@ -631,7 +631,7 @@
                     "parameters": {
                       "emailMessage/To": "recruitmentops@dlresources.com.sg",
                       "emailMessage/Subject": "BGV Reponse Received - @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']},@{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">The employer verification response has been received for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>Status : Completed<br><br>Severity: @{variables('varSeverity')} -- Please check the form for clarifications</p>",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">The employer verification response has been received for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br><br>Status : Completed<br><br>Severity: @{variables('varSeverity')} -- Please check the form for clarifications</p>",
                       "emailMessage/Importance": "Normal",
                       "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg"
                     },

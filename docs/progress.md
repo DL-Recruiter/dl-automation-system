@@ -1039,3 +1039,21 @@ Log each session with:
   - `rg -n "body/recipient/groupId|body/recipient/channelId"` on BGV_5 and BGV_6
 - Next actions and blockers:
   - Next action: trigger one BGV_5 high-severity response and one BGV_6 escalation to confirm both posts appear in `DLR Recruitment Ops > BGV`.
+
+## 2026-03-10 (BGV_5 recruiter email bodies include EmployerName)
+- Current status:
+  - Updated recruiter-facing BGV_5 email bodies to include `EmployerName` while preserving all existing logic/content.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Added `EmployerName` line into both recruiter email bodies:
+    - `Send_an_email_-_High_Severity_(V2)`
+    - `Send_an_email_(V2)_1`
+  - Revalidated BGV_6 JSON and destination mapping remained stable.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` checks on BGV_5 and BGV_6 JSON
+  - `rg` checks on updated BGV_5 email body fields and mapping references
+- Next actions and blockers:
+  - Next action: run one normal and one high-severity BGV_5 submission to verify both recruiter emails render EmployerName correctly.

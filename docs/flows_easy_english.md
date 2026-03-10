@@ -129,6 +129,7 @@ This document describes the current behavior in your canonical flow files under 
   - Keeps required SharePoint fields (including `Title`) when updating `BGV_FormData`, preventing save/runtime validation errors.
   - Sends Teams alert when notify flag is true.
   - Sends internal high-severity email when severity is `High`.
+  - Recruiter-facing BGV_5 emails now include `EmployerName` in the email body context.
   - All email notifications in this flow are routed via shared mailbox and addressed to `recruitmentops@dlresources.com.sg`.
   - Teams notification target for this flow is `DLR Recruitment Ops > BGV`:
     - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
