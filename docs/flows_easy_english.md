@@ -143,8 +143,8 @@ This document describes the current behavior in your canonical flow files under 
   - Shared-mailbox reminder emails
   - Teams escalation message for unresolved cases
   - Teams escalation destination:
-    - `groupId = b680487c-a11c-44f4-9de6-8813d3e2951b`
-    - `channelId = 19:NcAD8P3aERodeV2-NR6D9OBEOnwZI62MVLgNoBrSIl01@thread.tacv2`
+    - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
+    - `channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
   - Shared-mailbox sender is `recruitmentops@dlresources.com.sg`.
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
 
@@ -162,6 +162,7 @@ This document describes the current behavior in your canonical flow files under 
 ## Notes
 - This summary is based on the current unpacked canonical flow JSON in the repo.
 - If cloud flows are changed in Power Automate but not exported/unpacked yet, cloud behavior may be newer than this file.
+
 
 
 

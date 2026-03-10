@@ -962,3 +962,20 @@ Log each session with:
   - `rg -n "Send_signed_form_copy_to_candidate_\(V2\)|emailMessage/To|CandidateEmail"` on BGV_4 JSON
 - Next actions and blockers:
   - Next action: trigger one BGV_4 run and verify both employer and candidate receive the same signed form attachment.
+
+## 2026-03-10 (BGV_6 remap correction using live Graph IDs)
+- Current status:
+  - Corrected BGV_6 Teams escalation destination after verifying actual Team/Channel IDs from Microsoft Graph.
+- Completed tasks:
+  - Verified live Teams IDs via Graph:
+    - `DLR Recruitment Ops` team: `4475a565-7f2b-4df1-91cd-c8e3df8f805a`
+    - `BGV` channel: `19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - Updated linked behavior docs:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` check on updated BGV_6 JSON
+  - `rg -n "groupId|channelId"` on BGV_6 JSON
+- Next actions and blockers:
+  - Next action: trigger BGV_6 escalation and verify post appears in `DLR Recruitment Ops > BGV`.
