@@ -1130,3 +1130,29 @@ Log each session with:
   - `git diff -- README.md docs/collaboration_setup_guide.md docs/ms365_authentication_runbook.md docs/progress.md`
 - Next actions and blockers:
   - No blocker. Next action: commit only the docs updates when ready.
+
+## 2026-03-10 (Cloud sync: BGV_4 employer email update)
+- Current status:
+  - Synced latest cloud flow definitions after manual BGV_4 employer email edits in Power Automate.
+- Completed tasks:
+  - Exported and unpacked latest unmanaged solution from cloud into canonical path.
+  - Confirmed updated BGV_4 employer send action subject/body text is now reflected in canonical JSON.
+  - Synced resulting canonical workflow files updated by the cloud export:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json.data.xml`
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Other/Customizations.xml`
+    - `flows/power-automate/unpacked/Other/Solution.xml`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `pac auth who`
+  - `pac solution export ...`
+  - `pac solution unpack ...`
+  - `git diff` review for canonical flow artifacts.
+- Next actions and blockers:
+  - Next action: commit and push synced canonical artifacts.
