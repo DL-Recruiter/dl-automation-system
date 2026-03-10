@@ -1057,3 +1057,32 @@ Log each session with:
   - `rg` checks on updated BGV_5 email body fields and mapping references
 - Next actions and blockers:
   - Next action: run one normal and one high-severity BGV_5 submission to verify both recruiter emails render EmployerName correctly.
+
+## 2026-03-10 (Temporary 5-minute test mode for BGV_3 and BGV_6 reminders)
+- Current status:
+  - Enabled temporary high-frequency test mode so reminder behavior can be validated within ~2 hours.
+- Completed tasks:
+  - Updated canonical flows:
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - Recurrence changes:
+    - BGV_3: `Day/1` -> `Minute/5`
+    - BGV_6: `Day/1` -> `Minute/5`
+  - BGV_3 test timeline:
+    - `DaysSinceLink` switched from day-units to minute-units (ticks divisor `600000000`)
+    - Reminder send window: `5` to `120` minutes since link created
+    - Repeat-reminder guard: allow resend when `LastAuthReminderAt <= utcNow()-10 minutes`
+    - Escalation window: `30` to `120` minutes since link created
+  - BGV_6 test timeline:
+    - Reminder 1: `HRRequestSentAt <= utcNow()-10 minutes`
+    - Reminder 2: `Reminder1At <= utcNow()-20 minutes`
+    - Escalation: `Reminder2At <= utcNow()-20 minutes`
+    - Final reminder: `HRRequestSentAt <= utcNow()-90 minutes`
+  - Rollback values (post-test):
+    - BGV_3 recurrence back to `Day/1`; day-based thresholds back to `1..5` day window and day-5 escalation
+    - BGV_6 recurrence back to `Day/1`; thresholds back to `2d / 3d / 1d / 11d`
+- Validation commands run:
+  - `ConvertFrom-Json` checks on updated BGV_3 and BGV_6 JSON
+  - `rg` checks for recurrence and `addMinutes(...)` threshold updates
+- Next actions and blockers:
+  - Next action: run live 2-hour test cycle and then revert to production timeline once validated.

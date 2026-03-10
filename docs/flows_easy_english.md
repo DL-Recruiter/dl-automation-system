@@ -75,6 +75,7 @@ This document describes the current behavior in your canonical flow files under 
   - On day 5 unresolved cases, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email.
   - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
 - Main outcome: Unsigned candidate authorization forms are actively chased and escalated.
+  - Temporary test mode (2026-03-10): recurrence is every 5 minutes and reminder/escalation windows are compressed to minute-based thresholds for validation runs.
 
 ### `BGV_4_SendToEmployer_Clean`
 - Trigger: Recurrence every 30 minutes.
@@ -154,6 +155,7 @@ This document describes the current behavior in your canonical flow files under 
   - Shared-mailbox sender is `recruitmentops@dlresources.com.sg`.
   - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
+  - Temporary test mode (2026-03-10): recurrence is every 5 minutes and reminder/escalation thresholds are compressed to minute-based thresholds for a <=2 hour end-to-end test cycle.
 
 ## How the Flows Connect
 - Candidate signature track:
