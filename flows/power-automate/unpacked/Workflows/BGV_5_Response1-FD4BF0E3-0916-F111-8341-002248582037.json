@@ -392,7 +392,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varNotifyBody",
-                        "value": "[Low] Infomration provided was not fully accurate. \n\nSelected issues: @{outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029']}\n\nExplanations: \n-Employment Peiod: @{outputs('Get_response_details')?['body/r9a95095b3d7d4d9f8bc985025614bd79']}\n-Job Title/Position: @{outputs('Get_response_details')?['body/r83027392ccb043e2a637b06ff4b54ac8']}\n-Renumeration Package: @{outputs('Get_response_details')?['body/r4061a9d19aae45d9915d2f508a5c3ea9']}\n-Other abonormalities: @{outputs('Get_response_details')?['body/ra15c799c557d42d1bcee1de947c29466']}"
+                        "value": "[Low] Information provided was not fully accurate. \n\nSelected issues: @{outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029']}\n\nExplanations: \n-Employment Period: @{outputs('Get_response_details')?['body/r9a95095b3d7d4d9f8bc985025614bd79']}\n-Job Title/Position: @{outputs('Get_response_details')?['body/r83027392ccb043e2a637b06ff4b54ac8']}\n-Remuneration Package: @{outputs('Get_response_details')?['body/r4061a9d19aae45d9915d2f508a5c3ea9']}\n-Other abnormalities: @{outputs('Get_response_details')?['body/ra15c799c557d42d1bcee1de947c29466']}"
                       }
                     }
                   },
@@ -587,7 +587,7 @@
                         "parameters": {
                           "emailMessage/To": "recruitmentops@dlresources.com.sg",
                           "emailMessage/Subject": "HIGH BGV FLAG - @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}, @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}",
-                          "emailMessage/Body": "<p class=\"editor-paragraph\">A High Severity BGV issue has been flagged. <br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br><br>Severity: High<br><br>Details: @{variables('varNotifyBody')}</p>",
+                          "emailMessage/Body": "<p class=\"editor-paragraph\">A High Severity BGV issue has been flagged. <br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br>Employer HR Email: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerHR_Email']}<br><br>Severity: High<br><br>Details: @{variables('varNotifyBody')}</p>",
                           "emailMessage/Importance": "Normal",
                           "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg"
                         },

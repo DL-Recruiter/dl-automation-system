@@ -255,7 +255,7 @@
                             "parameters": {
                               "emailMessage/To": "@if(contains(trim(string(outputs('Get_item')?['body/CandidateEmail'])),'@'),trim(string(outputs('Get_item')?['body/CandidateEmail'])),'recruitmentops@dlresources.com.sg')",
                               "emailMessage/Subject": "Copy of Signed Authorization Form - @{outputs('Get_item')?['body/FullName']}",
-                              "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{outputs('Get_item')?['body/FullName']},</p><br><p class=\"editor-paragraph\">This is a copy of your signed authorization form that was sent for background verification.</p><br><p class=\"editor-paragraph\">Please keep this for your reference.</p><br><p class=\"editor-paragraph\">Thank you.<br>DL Resources Recruitment Team</p>",
+                              "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{outputs('Get_item')?['body/FullName']},</p><br><p class=\"editor-paragraph\">This is a copy of your signed authorization form that was sent for background verification.</p><br><p class=\"editor-paragraph\">Please keep this for your reference.</p><br><p class=\"editor-paragraph\">Please open with Word to view your signed copy.</p><br><p class=\"editor-paragraph\">Thank you.<br>DL Resources Recruitment Team</p>",
                               "emailMessage/Attachments": [
                                 {
                                   "Name": "@variables('AuthFileName')",
@@ -372,4 +372,3 @@
   },
   "schemaVersion": "1.0.0.0"
 }
-

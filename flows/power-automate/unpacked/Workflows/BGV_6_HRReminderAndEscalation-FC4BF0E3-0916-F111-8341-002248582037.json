@@ -46,8 +46,8 @@
         "Recurrence": {
           "type": "Recurrence",
           "recurrence": {
-            "frequency": "Minute",
-            "interval": 5,
+            "frequency": "Day",
+            "interval": 1,
             "startTime": "2026-02-03T01:00:00Z"
           }
         }
@@ -98,7 +98,7 @@
                   {
                     "lessOrEquals": [
                       "@items('Apply_to_each')?['HRRequestSentAt']",
-                      "@addMinutes(utcNow(),-10)"
+                      "@addDays(utcNow(),-2)"
                     ]
                   }
                 ]
@@ -180,7 +180,7 @@
                   {
                     "lessOrEquals": [
                       "@items('Apply_to_each')?['Reminder1At']",
-                      "@addMinutes(utcNow(),-20)"
+                      "@addDays(utcNow(),-3)"
                     ]
                   }
                 ]
@@ -261,7 +261,7 @@
                   {
                     "lessOrEquals": [
                       "@items('Apply_to_each')?['Reminder2At']",
-                      "@addMinutes(utcNow(),-20)"
+                      "@addDays(utcNow(),-1)"
                     ]
                   }
                 ]
@@ -319,7 +319,7 @@
                   {
                     "lessOrEquals": [
                       "@items('Apply_to_each')?['HRRequestSentAt']",
-                      "@addMinutes(utcNow(),-90)"
+                      "@addDays(utcNow(),-11)"
                     ]
                   }
                 ]

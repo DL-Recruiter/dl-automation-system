@@ -1086,3 +1086,26 @@ Log each session with:
   - `rg` checks for recurrence and `addMinutes(...)` threshold updates
 - Next actions and blockers:
   - Next action: run live 2-hour test cycle and then revert to production timeline once validated.
+
+## 2026-03-10 (Revert reminder test mode + targeted BGV_3/4/5 message updates)
+- Current status:
+  - Reverted reminder flows to original production timing and applied requested message/recipient fixes.
+- Completed tasks:
+  - Reverted reminder timing to original production schedule in:
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - Updated BGV_3 Day 5 alert recipient:
+    - `emailMessage/To = recruitmentops@dlresources.com.sg`
+  - Updated BGV_4 signed-copy email body:
+    - added line: `Please open with Word to view your signed copy.`
+  - Updated BGV_5 low-severity notify text spelling:
+    - `Information`, `Employment Period`, `Remuneration`, `abnormalities`
+  - Updated BGV_5 high-severity flagged email body to include:
+    - `Employer HR Email: @{...EmployerHR_Email}`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` checks for BGV_3, BGV_4, BGV_5, BGV_6 workflow JSON.
+  - `git diff` review of the four workflow files and linked docs.
+- Next actions and blockers:
+  - Next action: commit/push and import with PAC publish to make these updates live.

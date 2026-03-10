@@ -72,10 +72,9 @@ This document describes the current behavior in your canonical flow files under 
   - Uses `LastAuthReminderAt` consistently to avoid duplicate same-day reminders.
   - Day-5 escalation check now evaluates the computed `DaysSinceLink` expression correctly.
   - Reminder update no longer flips `ConsentCaptured`; it only stamps reminder timestamp fields.`\n  - Outer reminder gate now checks `AuthorisationSigned` instead of `ConsentCaptured` so stale consent flags do not block pending reminders.
-  - On day 5 unresolved cases, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email.
+  - On day 5 unresolved cases, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email to `recruitmentops@dlresources.com.sg`.
   - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
 - Main outcome: Unsigned candidate authorization forms are actively chased and escalated.
-  - Temporary test mode (2026-03-10): recurrence is every 5 minutes and reminder/escalation windows are compressed to minute-based thresholds for validation runs.
 
 ### `BGV_4_SendToEmployer_Clean`
 - Trigger: Recurrence every 30 minutes.
@@ -96,7 +95,7 @@ This document describes the current behavior in your canonical flow files under 
   - Uses the matching `BGV_FormData` row as the first source for company name/address/UEN in the employer email body, so EMP1/EMP2/EMP3 show the correct declared company details.
   - Employer email intro sentence now uses dynamic candidate full name plus the dynamic company field, while keeping declared-details and verification-link sections unchanged.
   - Finds authorization file, attaches it, and emails employer HR.
-  - Sends the same signed authorization attachment to the candidate email (`BGV_Candidates.CandidateEmail`) for reference.
+  - Sends the same signed authorization attachment to the candidate email (`BGV_Candidates.CandidateEmail`) for reference, with a note to open it in Word to view the signed copy.
   - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
   - Employer email subject now uses the mapped dynamic company field.
   - Employer email wording uses dynamic candidate/company values while preserving the existing declared-details and verification-link sections.
@@ -129,7 +128,7 @@ This document describes the current behavior in your canonical flow files under 
   - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including `F2_ReasonForLeaving`.
   - Keeps required SharePoint fields (including `Title`) when updating `BGV_FormData`, preventing save/runtime validation errors.
   - Sends Teams alert when notify flag is true.
-  - Sends internal high-severity email when severity is `High`.
+  - Sends internal high-severity email when severity is `High`, including employer name and employer HR email in the body.
   - Recruiter-facing BGV_5 emails now include `EmployerName` in the email body context.
   - All email notifications in this flow are routed via shared mailbox and addressed to `recruitmentops@dlresources.com.sg`.
   - Teams notification target for this flow is `DLR Recruitment Ops > BGV`:
@@ -155,7 +154,6 @@ This document describes the current behavior in your canonical flow files under 
   - Shared-mailbox sender is `recruitmentops@dlresources.com.sg`.
   - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
-  - Temporary test mode (2026-03-10): recurrence is every 5 minutes and reminder/escalation thresholds are compressed to minute-based thresholds for a <=2 hour end-to-end test cycle.
 
 ## How the Flows Connect
 - Candidate signature track:
