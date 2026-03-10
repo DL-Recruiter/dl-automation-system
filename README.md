@@ -1,60 +1,103 @@
 # DL Automation System (BGV)
 
-Power Automate solution repository for `BGV_System` with canonical unpacked flow artifacts, operational scripts, and documentation.
+This repository is the source-controlled working copy of the
+`BGV_System` Power Automate solution.
 
-## Purpose
-- Keep Power Automate solution artifacts in source control.
-- Standardize daily sync/edit/deploy workflow for team members and Codex sessions.
-- Enforce linked documentation updates when flow behavior changes.
+Use it when you need to:
 
-## Short Answer: Do I Need To Sync First?
-Yes. Always sync first.
+- sync the latest BGV flows from Power Automate into Git
+- inspect or patch the canonical unpacked flow files
+- deploy approved changes back into the environment
+- keep flow logic and supporting documentation aligned
 
-Use this command at start of day before editing/testing:
+## What The BGV Automation Does
+
+The BGV process has two main tracks:
+
+- candidate authorization
+- employer verification
+
+At a high level, the system works like this:
+
+1. `BGV_0_CandidateDeclaration` starts the case when a candidate submits
+   the declaration form.
+1. The system creates candidate records, employer request rows,
+   normalized form-data rows, and the authorization document.
+1. `BGV_1_Detect_Authorization_Signature` checks whether the candidate
+   has signed the authorization form.
+1. `BGV_2_Postsignature` removes broad sharing after the signed form is
+   confirmed.
+1. `BGV_4_SendToEmployer_Clean` sends the signed authorization and the
+   prefilled employer verification form to HR.
+1. `BGV_5_Response1` processes the employer's reply, updates records,
+   and alerts recruiters when needed.
+1. `BGV_3_AuthReminder_5Days` and
+   `BGV_6_HRReminderAndEscalation` chase delayed candidate or employer
+   responses.
+
+The main working data locations are:
+
+- `BGV_Candidates` for candidate progress
+- `BGV_Requests` for employer request tracking
+- `BGV_FormData` for normalized Form 1 and Form 2 values
+- `BGV Records` for authorization documents and candidate files
+
+## If You Only Remember Four Rules
+
+1. Always sync first before editing anything.
+1. Always run `pac auth who` before any PAC command.
+1. Edit only the canonical flow files in
+   `flows/power-automate/unpacked/Workflows/`.
+1. Local JSON edits are not live until you `pack` and `import` the
+   solution back into Power Automate.
+
+## Start Of Day
+
+Run this command before editing, testing, or asking Codex to patch a
+flow:
+
 ```powershell
 powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/
 ```
 
-If `pac auth who` shows the correct user but `pac solution export` fails with `No active environment set`, either:
-- reselect a PAC profile created with `--environment`, or
-- pass `-EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/` to the sync script as shown above.
+Then confirm your identity and working tree:
 
-## One-Time Setup
-1. Open repo in VS Code at `C:\bgv_project`.
-2. Ensure required tools exist in terminal:
-   - `git`
-   - `pac`
-3. (Optional but recommended) Ensure Python launcher exists for scripts/tests:
-   - `py`
-4. Confirm PAC identity:
-   ```powershell
-   pac auth who
-   ```
+```powershell
+pac auth who
+git status --short --branch
+```
 
-## What `bgv_daily_sync.ps1` Actually Does
-`scripts/active/bgv_daily_sync.ps1` is the start-of-day refresh script.
+If `pac auth who` shows the correct user but `pac solution export` fails
+with `No active environment set`, either:
 
-Step by step:
-1. Checks prerequisites:
-   - validates `git` and `pac` are available
-   - confirms current folder is a git repo
-2. Shows active Power Platform login:
-   - runs `pac auth who`
-3. Pulls latest Git changes:
-   - runs `git pull --ff-only`
-4. Exports latest tenant solution:
-   - exports `BGV_System` to `artifacts/exports/BGV_System_unmanaged.zip`
-   - uses the active PAC environment or the explicit `-EnvironmentUrl` override
-5. Unpacks solution into editable source-controlled files:
-   - `flows/power-automate/unpacked/`
-6. Optionally runs tests:
-   - only when `-RunTests` is passed
+- reselect a PAC profile created with `--environment`
+- rerun the sync command with
+  `-EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
 
-What it does NOT do:
-- does not auto `git add/commit/push`
-- does not auto deploy/import solution back to environment
+## What The Daily Sync Script Does
 
-Typical commands:
+`scripts/active/bgv_daily_sync.ps1` is the standard start-of-day refresh
+script.
+
+It does this in order:
+
+1. checks that `git` and `pac` are available
+1. confirms the repo path is valid
+1. shows the active Power Platform login with `pac auth who`
+1. runs `git pull --ff-only`
+1. exports `BGV_System` into
+   `artifacts/exports/BGV_System_unmanaged.zip`
+1. unpacks the solution into `flows/power-automate/unpacked/`
+1. optionally runs tests if `-RunTests` is passed
+
+It does not:
+
+- commit changes
+- push to GitHub
+- deploy changes back into Power Automate
+
+Common command variants:
+
 ```powershell
 powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/
 ```
@@ -63,211 +106,329 @@ powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde
 powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/ -RunTests
 ```
 
-If Python is not on PATH:
 ```powershell
 powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/ -RunTests -PythonExe C:\path\to\python.exe
 ```
 
-## Mandatory Flow Edit Rules
-- Edit cloud flows only in canonical path:
-  - `flows/power-automate/unpacked/Workflows/`
-- Treat non-canonical duplicates as read-only unless explicitly requested:
-  - `power-automate/`
-  - root `BGV_*.json` exports (if present)
+After sync, review the diff before assuming the behavior changed:
 
-## How To Deploy Flow Changes Back To Power Automate
-After edits are done:
+```powershell
+git diff -- flows/power-automate/unpacked/Workflows/
+```
+
+If the diff only shows end-of-file newline changes such as
+`No newline at end of file`, treat that as export formatting noise
+rather than a logic change.
+
+## One-Time Setup
+
+1. Open the repo in VS Code at `C:\bgv_project`.
+1. Make sure these tools exist in the terminal:
+
+   - `git`
+   - `pac`
+   - `py` or `python` for tests and helper scripts
+
+1. Confirm PAC identity:
+
+   ```powershell
+   pac auth who
+   ```
+
+1. If needed, create or reselect the intended PAC profile.
+
+The two user accounts normally involved are:
+
+- `edwin.teo@dlresources.com.sg`
+- `recruitment@dlresources.com.sg`
+
+## Canonical Files You May Edit
+
+Edit cloud flows only in:
+
+- `flows/power-automate/unpacked/Workflows/`
+
+Treat these as read-only duplicates unless explicitly requested:
+
+- `power-automate/`
+- root `BGV_*.json` exports if they exist
+
+Why this matters:
+
+- the unpacked workflow files are the source-controlled version used for
+  review and deployment
+- editing duplicate exports creates confusion and makes later syncs
+  overwrite your work
+
+## Common User Tasks
+
+### 1) Start Work Safely
+
+1. Run the daily sync command.
+1. Run `pac auth who`.
+1. Check the working tree:
+
+   ```powershell
+   git status --short
+   ```
+
+1. If the sync introduced real logic changes from the cloud, review them
+   before editing.
+
+### 2) Ask Codex To Investigate A Failed Flow
+
+Give Codex:
+
+- the flow name
+- the run ID
+- the expected behavior
+- the current failure behavior
+- whether Codex should deploy after patching
+
+Codex can then:
+
+- inspect run details
+- identify the failing action
+- patch the canonical JSON
+- pack and import the updated solution if requested
+
+### 3) Patch And Deploy A Flow
+
+Standard sequence:
+
+1. sync first
+1. patch only the canonical file
+1. validate the JSON
+1. pack the solution
+1. import the solution
+1. rerun a live test
+
+Deployment commands:
+
 ```powershell
 pac solution pack --zipfile .\artifacts\exports\BGV_System_unmanaged.repack.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true
 pac solution import --path .\artifacts\exports\BGV_System_unmanaged.repack.zip --publish-changes --force-overwrite
 ```
 
-## Run History Utilities (VS Code Terminal)
+### 4) Share Changes With Teammates
+
+Commit and push only the intended files:
+
+```powershell
+git status --short
+git add <file1> <file2> ...
+git commit -m "bgv: <short summary>"
+git push
+```
+
+Teammates should pull before starting:
+
+```powershell
+git pull --ff-only
+```
+
+## Run History Utilities
+
 Single-flow verification:
+
 ```powershell
 py scripts/active/verify_flow_runs.py
 ```
 
-All canonical flows (combined report):
+All canonical flows in one report:
+
 ```powershell
 py scripts/active/pull_all_flow_runs.py
 ```
 
 Default output file:
+
 - `out/flow_run_history_latest.json`
 
-## Common Task Playbooks
-### 1) Start Work Safely
-1. Run daily sync script with the environment override if your PAC profile does not already have an active environment.
-2. Confirm active account with `pac auth who`.
-3. Confirm working tree before edits:
-   ```powershell
-   git status --short
-   ```
+Use these scripts when you need to confirm whether a deployment worked
+or inspect recent run behavior without opening each flow manually.
 
-### 2) Investigate a Failed Flow Run
-1. Provide flow name + run ID to Codex.
-2. Codex pulls action-level run details via API/CLI.
-3. Codex identifies exact failing action and root cause.
-4. If approved, Codex patches canonical flow JSON and deploys.
+## GitHub Workflow
 
-### 3) Patch + Deploy with Codex
-1. Ask Codex to patch specific flow.
-2. Codex edits canonical file only.
-3. Codex validates JSON/smoke checks.
-4. Codex runs `pac solution pack` + `pac solution import`.
-5. You re-test and send new run ID.
+Use this sequence whenever you finish a change:
 
-### 4) Share Changes with Team
-1. Commit and push:
-   ```powershell
-   git add .
-   git commit -m "bgv: <summary>"
-   git push
-   ```
-2. Teammate pulls latest:
+1. confirm latest baseline
+
    ```powershell
    git pull --ff-only
    ```
 
-## How To Push To GitHub (Safe Sequence)
-Use this sequence every time you finish a change:
+1. check what changed
 
-1. Confirm latest baseline:
-   ```powershell
-   git pull --ff-only
-   ```
-2. Check what changed:
    ```powershell
    git status --short
    ```
-3. Stage only intended files:
+
+1. stage only the intended files
+
    ```powershell
    git add <file1> <file2> ...
    ```
-4. Commit with a clear message:
+
+1. commit with a clear message
+
    ```powershell
    git commit -m "bgv: <what changed>"
    ```
-5. Push:
-   - if working on `master`:
-     ```powershell
-     git push origin master
-     ```
-   - if working on a feature branch:
-     ```powershell
-     git push origin <branch-name>
-     ```
-6. Verify CI result in GitHub (especially `Linked Docs Guard`).
 
-## End-to-End Delivery: GitHub -> Power Automate -> Live Production
-Use this when you want to move changes safely from source control into runtime environments.
+1. push
 
-### A) From Local To GitHub (source of truth update)
+   ```powershell
+   git push origin master
+   ```
+
+1. verify GitHub checks, especially `Linked Docs Guard`
+
+## End-To-End Delivery
+
+Use this when you need to move changes from source control into the live
+Power Automate environment.
+
+### A) Local To GitHub
+
 1. Sync and verify:
+
    ```powershell
    powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/
    pac auth who
    git status --short --branch
    ```
-2. Commit and push:
+
+1. Commit and push:
+
    ```powershell
    git add <intended-files>
    git commit -m "bgv: <change summary>"
    git push origin master
    ```
-3. Confirm GitHub checks pass (`Linked Docs Guard` at minimum).
 
-### B) From GitHub To Power Automate (same environment deployment)
-This deploys your committed canonical unpacked files.
+1. Confirm GitHub checks pass.
+
+### B) GitHub To Power Automate
+
+This applies the committed canonical unpacked files back into the same
+environment.
 
 1. Pull latest:
+
    ```powershell
    git pull --ff-only
    ```
-2. Confirm target identity/environment before deploying:
+
+1. Confirm target identity:
+
    ```powershell
    pac auth who
    ```
-3. (Recommended) Export backup of current environment state before import:
+
+1. Export a backup before import:
+
    ```powershell
    pac solution export --name BGV_System --path .\artifacts\exports\BGV_System_predeploy_backup.zip --managed false --overwrite
    ```
-4. Pack from canonical unpacked source:
+
+1. Pack from canonical source:
+
    ```powershell
    pac solution pack --zipfile .\artifacts\exports\BGV_System_unmanaged.repack.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true
    ```
-5. Import and publish:
+
+1. Import and publish:
+
    ```powershell
    pac solution import --path .\artifacts\exports\BGV_System_unmanaged.repack.zip --publish-changes --force-overwrite
    ```
-6. Post-deploy smoke check:
+
+1. Smoke check:
+
    - ensure the 7 `BGV_*` flows are `On`
    - run at least one known test scenario
    - confirm run history has no immediate failures
 
-### C) Promote To Live Production (recommended controlled path)
-If production is a different environment, avoid direct ad-hoc edits in production.
+### C) Promote To Production
 
-1. Confirm production PAC profile/environment:
+If production is a different environment, avoid editing directly in
+production.
+
+1. Select the production PAC profile:
+
    ```powershell
    pac auth select --name <PROD_PROFILE>
    pac auth who
    ```
-2. Take production backup export first:
+
+1. Export a production backup:
+
    ```powershell
    pac solution export --name BGV_System --path .\artifacts\exports\BGV_System_prod_predeploy_backup.zip --managed false --overwrite
    ```
-3. Import approved package to production:
+
+1. Import the approved package:
+
    ```powershell
    pac solution import --path .\artifacts\exports\BGV_System_unmanaged.repack.zip --publish-changes --force-overwrite
    ```
-4. Run production smoke tests:
+
+1. Run smoke tests:
+
    - one candidate declaration
    - one employer response path
-   - verify reminder flows remain healthy
-5. Record deployment in `docs/progress.md` (date, package used, result, rollback point).
+   - reminder flow health checks
 
-### Rollback (if production issue found)
-Fastest safe rollback:
-1. Re-import known good backup package:
-   ```powershell
-   pac solution import --path .\artifacts\exports\BGV_System_prod_predeploy_backup.zip --publish-changes --force-overwrite
-   ```
-2. Re-test critical path (`BGV_0` -> `BGV_5`) and confirm recovery.
+1. Record the deployment in `docs/progress.md`.
 
-### UI-only Tasks (keep minimal)
-CLI-first remains default. Use portal only for:
-- creating/signing-in connection instances
+### Rollback
+
+If production has a problem, re-import the last known good backup:
+
+```powershell
+pac solution import --path .\artifacts\exports\BGV_System_prod_predeploy_backup.zip --publish-changes --force-overwrite
+```
+
+Then retest the critical path from `BGV_0` through `BGV_5`.
+
+## UI-Only Tasks
+
+CLI-first remains the default.
+
+Use the Power Automate portal only for:
+
+- creating or signing into connection instances
 - sharing flows with co-owner permissions
 - rebinding broken connection references when needed
 
-## Best Practices Checklist
+After UI-only changes, sync the solution back into this repo so Git
+stays current.
+
+## Best Practices
+
 - Always run `pac auth who` before any PAC command.
-- Always sync first (`bgv_daily_sync.ps1`) before editing flows.
-- If sync fails with `No active environment set`, rerun with `-EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/` or reselect the correct PAC profile.
-- Edit only canonical flow files:
-  - `flows/power-automate/unpacked/Workflows/`
-- Keep changes minimal and task-focused; avoid broad refactors during production fixes.
-- Never commit secrets or `.env`; keep credentials local only.
-- When flow JSON changes, update linked docs in the same task:
-  - `docs/progress.md` and at least one behavior doc.
-- Validate before deploy:
-  - JSON parse checks on edited flow files.
-  - script syntax checks where applicable.
-- Deploy intentionally with pack/import; do not assume local edits are live.
-- Review sync diffs before documenting behavior changes. End-of-file newline-only diffs from export/unpack are formatting noise, not logic changes.
-- After test runs, capture and share:
-  - flow name
-  - run ID
-  - failed action
-  - error message
-- If unsure which account is active or which path is canonical, stop and verify first.
+- Always sync first before editing flows.
+- If sync fails with `No active environment set`, rerun with
+  `-EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/` or reselect
+  the correct PAC profile.
+- Edit only canonical workflow files in
+  `flows/power-automate/unpacked/Workflows/`.
+- Keep changes small and task-focused.
+- Never commit `.env`, secrets, or tokens.
+- When flow JSON changes, update `docs/progress.md` and at least one
+  linked behavior document in the same task.
+- Validate before deploy with JSON checks, script checks, or focused
+  tests.
+- Do not assume local edits are live until the solution is packed and
+  imported.
+- If you are unsure which account or environment is active, stop and
+  verify first.
 
-## Linked Documentation Policy (Auto Enforced)
-When canonical flow JSON changes, docs must be updated in same change.
+## Linked Documentation Policy
 
-Required:
+When canonical flow JSON changes, the same change must also update:
+
 - `docs/progress.md`
 - plus at least one behavior doc:
   - `System_SPEC.md`
@@ -275,18 +436,22 @@ Required:
   - `docs/architecture_flows.md`
 
 CI guard:
+
 - `.github/workflows/linked-docs-guard.yml`
 - `scripts/active/enforce_linked_docs.py`
 
-## Recommended Prompt Format for Codex
-When requesting fixes, include:
+## Recommended Prompt Format For Codex
+
+When requesting a fix, include:
+
 - flow name
 - run ID
 - expected behavior
 - current failure behavior
-- whether Codex should deploy after patch
+- whether Codex should deploy after patching
 
 Example:
+
 ```text
 Patch BGV_5_Response1 filter for RequestID mismatch.
 Run ID: <run-id>
@@ -296,8 +461,11 @@ After patch, deploy to BGV_System and verify latest run.
 ```
 
 ## Key Documents
+
 - `AGENTS.md`
 - `CODEX_PLAYBOOK.md`
 - `System_SPEC.md`
 - `docs/collaboration_setup_guide.md`
+- `docs/flows_easy_english.md`
+- `docs/architecture_flows.md`
 - `docs/progress.md`
