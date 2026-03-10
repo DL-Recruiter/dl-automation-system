@@ -1004,3 +1004,20 @@ Log each session with:
   - `rg` checks to confirm broken references were removed
 - Next actions and blockers:
   - Next action: run one controlled reminder test for each flow (BGV_3 daily reminder and BGV_6 reminder/escalation timeline) and confirm expected branch execution in run history.
+
+## 2026-03-10 (BGV_3 non-sending reminder root-cause fix)
+- Current status:
+  - Identified why BGV_3 reminders were still not sending for some pending candidates.
+- Root cause:
+  - Outer BGV_3 gate used `ConsentCaptured`; legacy rows with this flag set could bypass reminder branch even while status remained pending.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+  - Changed outer gate condition to use `AuthorisationSigned == true` check (true -> skip, false/null -> continue reminder logic).
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` check on updated BGV_3 JSON
+  - `rg -n "AuthorisationSigned|ConsentCaptured"` on BGV_3 JSON
+- Next actions and blockers:
+  - Next action: run BGV_3 once with a pending candidate and confirm `Send_an_email_(V2)` executes.

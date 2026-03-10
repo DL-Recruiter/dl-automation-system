@@ -267,8 +267,8 @@
                 "and": [
                   {
                     "equals": [
-                      "@items('Apply_to_each')?['ConsentCaptured']",
-                      true
+                      "@toLower(string(items('Apply_to_each')?['AuthorisationSigned']))",
+                      "true"
                     ]
                   }
                 ]

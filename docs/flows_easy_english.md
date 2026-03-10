@@ -71,7 +71,7 @@ This document describes the current behavior in your canonical flow files under 
   - Sends reminder emails between day 1 and day 5 (max once per day).
   - Uses `LastAuthReminderAt` consistently to avoid duplicate same-day reminders.
   - Day-5 escalation check now evaluates the computed `DaysSinceLink` expression correctly.
-  - Reminder update no longer flips `ConsentCaptured`; it only stamps reminder timestamp fields.
+  - Reminder update no longer flips `ConsentCaptured`; it only stamps reminder timestamp fields.`\n  - Outer reminder gate now checks `AuthorisationSigned` instead of `ConsentCaptured` so stale consent flags do not block pending reminders.
   - On day 5 unresolved cases, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email.
   - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
 - Main outcome: Unsigned candidate authorization forms are actively chased and escalated.
@@ -166,6 +166,7 @@ This document describes the current behavior in your canonical flow files under 
 ## Notes
 - This summary is based on the current unpacked canonical flow JSON in the repo.
 - If cloud flows are changed in Power Automate but not exported/unpacked yet, cloud behavior may be newer than this file.
+
 
 
 
