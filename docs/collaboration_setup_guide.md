@@ -1,6 +1,6 @@
 # BGV Collaboration Setup Guide (Edwin + Recruitment)
 
-Updated: 2026-03-02
+Updated: 2026-03-10
 
 This guide explains how to work safely on BGV flows with two accounts:
 - `edwin.teo@dlresources.com.sg` (development/admin)
@@ -8,17 +8,26 @@ This guide explains how to work safely on BGV flows with two accounts:
 
 ## 1) One-Time Setup on Edwin Machine
 
+Before any Git or PAC command, confirm you are in the correct BGV repo.
+This prevents accidental work in the wrong GitHub project when multiple
+repos are open in VS Code or different terminals.
+
 ### 1.1 Confirm repo and branch
 ```powershell
-git -C C:\bgv_project remote -v
-git -C C:\bgv_project branch --show-current
-git -C C:\bgv_project status --short --branch
+Get-Location
+git remote -v
+git status --short --branch
 ```
 
 Expected:
+- local path is `C:\DLR Automation VS Studio Code\bgv_project`
 - remote points to `https://github.com/DL-Recruiter/dl-automation-system.git`
 - branch is `master`
 - working tree is clean
+
+If any of these checks do not match, stop and open the correct repo
+folder before running `git pull`, `git commit`, `git push`,
+`pac solution ...`, or the daily sync script.
 
 ### 1.2 Confirm active PAC identity before any changes
 ```powershell
@@ -31,6 +40,10 @@ If identity is wrong, switch it:
 pac auth select --name <PROFILE_NAME>
 pac auth who
 ```
+
+If `pac auth who` shows the correct user but export commands still fail with `No active environment set`, the selected
+profile is not currently bound to an active environment. Reselect a profile created with `--environment` or pass the
+explicit environment URL to the sync/export commands.
 
 ### 1.3 Create profile names (optional but recommended)
 Use device code sign-in so no password is stored in scripts:
@@ -61,44 +74,56 @@ Why:
 
 ### Step A: Pull latest before work
 ```powershell
-cd C:\bgv_project
+Get-Location
+git remote -v
+git status --short --branch
 git pull --ff-only
 ```
+
+Only continue if the repo path and remote match the BGV project.
 
 ### Step B: Export and unpack latest tenant solution
 ```powershell
 pac auth who
-pac solution export --name BGV_System --path .\artifacts\exports\BGV_System_unmanaged.zip --managed false --overwrite
+pac solution export --environment https://orgde64dc49.crm5.dynamics.com/ --name BGV_System --path .\artifacts\exports\BGV_System_unmanaged.zip --managed false --overwrite
 pac solution unpack --zipfile .\artifacts\exports\BGV_System_unmanaged.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true
 ```
 
 ### One-command daily sync (recommended)
 Use the helper script to run identity check + pull + export + unpack:
 ```powershell
-powershell -File scripts/active/bgv_daily_sync.ps1
+powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/
 ```
 
 Optional with tests:
 ```powershell
-powershell -File scripts/active/bgv_daily_sync.ps1 -RunTests
+powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/ -RunTests
 ```
 
 If `python` is not available in PATH, pass full executable path:
 ```powershell
-powershell -File scripts/active/bgv_daily_sync.ps1 -RunTests -PythonExe C:\path\to\python.exe
+powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/ -RunTests -PythonExe C:\path\to\python.exe
 ```
+
+After sync, review the resulting flow diff before updating behavior docs:
+```powershell
+git diff -- flows/power-automate/unpacked/Workflows/
+```
+
+If the diff only shows `No newline at end of file`, treat it as formatting-only export noise rather than a flow logic
+change.
 
 ### Step C: Edit canonical flow files (manual or Codex)
 - Only edit files under `flows/power-automate/unpacked/Workflows/`.
 
 ### Step D: Validate locally
 ```powershell
-python -m pytest -q tests
+py -m pytest -q tests
 ```
 
 Optional verification script:
 ```powershell
-python scripts/active/verify_flow_runs.py
+py scripts/active/verify_flow_runs.py
 ```
 
 ### Step E: Commit and push
@@ -176,6 +201,18 @@ pac auth create --name <PROFILE_NAME> --deviceCode --environment https://orgde64
 ### Problem: flow edits disappear after teammate update
 - Root cause: edits were made in non-canonical duplicate paths.
 - Fix: revert duplicate-path edits and reapply in canonical folder only.
+
+### Problem: `pac solution export` says no active environment is set
+- Check current PAC profile:
+```powershell
+pac auth list
+pac auth who
+```
+- Fix by selecting the environment-bound profile or passing the explicit environment URL:
+```powershell
+pac auth select --name <PROFILE_NAME>
+powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/
+```
 
 ### Problem: import succeeds but flow fails at runtime
 - Check connection references and owner permissions first.

@@ -1,6 +1,6 @@
 # MS365 Authentication Runbook (BGV)
 
-Updated: 2026-03-03
+Updated: 2026-03-10
 
 This document is the single reference for authentication setup across:
 - Power Platform (`pac`)
@@ -69,6 +69,10 @@ Before each CLI operation:
 pac auth who
 ```
 
+If `pac auth who` shows the expected user but `pac solution export` still reports `No active environment set`, either
+reselect the PAC profile created with `--environment` or pass the explicit environment URL into the sync/export
+command.
+
 ### 3.3 Azure login
 ```powershell
 az login
@@ -113,8 +117,24 @@ m365 status
 
 Run before editing/deploying flows:
 ```powershell
+Get-Location
+git remote -v
+git status --short --branch
 pac auth who
 az account show
+```
+
+Expected for this project:
+- local path is `C:\DLR Automation VS Studio Code\bgv_project`
+- remote is `https://github.com/DL-Recruiter/dl-automation-system.git`
+- branch is usually `master`
+
+If the repo path or remote does not match, stop and open the correct
+BGV repo before running Git, PAC, or sync commands.
+
+Recommended sync command for this repo:
+```powershell
+powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/
 ```
 
 If touching SharePoint lists directly:
@@ -156,6 +176,14 @@ Wrong PAC account active:
 pac auth list
 pac auth select --name <profile>
 pac auth who
+```
+
+Correct user but no active PAC environment:
+```powershell
+pac auth select --name BGV_EDWIN
+# or
+pac auth select --name BGV_RECRUITMENT
+powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/
 ```
 
 PnP fails due missing app context:

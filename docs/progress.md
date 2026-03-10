@@ -1087,25 +1087,46 @@ Log each session with:
 - Next actions and blockers:
   - Next action: run live 2-hour test cycle and then revert to production timeline once validated.
 
-## 2026-03-10 (Revert reminder test mode + targeted BGV_3/4/5 message updates)
+## 2026-03-10 (Daily sync review and operator-doc alignment)
 - Current status:
-  - Reverted reminder flows to original production timing and applied requested message/recipient fixes.
+  - Ran the daily sync successfully after adding the explicit Power Platform environment URL override.
+  - Reviewed the newly synced canonical flow diffs and confirmed they were formatting-only export changes, not behavior changes.
 - Completed tasks:
-  - Reverted reminder timing to original production schedule in:
-    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
-    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
-  - Updated BGV_3 Day 5 alert recipient:
-    - `emailMessage/To = recruitmentops@dlresources.com.sg`
-  - Updated BGV_4 signed-copy email body:
-    - added line: `Please open with Word to view your signed copy.`
-  - Updated BGV_5 low-severity notify text spelling:
-    - `Information`, `Employment Period`, `Remuneration`, `abnormalities`
-  - Updated BGV_5 high-severity flagged email body to include:
-    - `Employer HR Email: @{...EmployerHR_Email}`
-  - Updated linked behavior doc:
+  - Ran:
+    - `powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+  - Verified the synced flow changes under `flows/power-automate/unpacked/Workflows/` only removed trailing final newlines (`No newline at end of file` diff markers).
+  - Updated operator docs so daily sync instructions match the command that actually succeeded in this environment:
+    - `README.md`
+    - `docs/collaboration_setup_guide.md`
+    - `docs/ms365_authentication_runbook.md`
+  - Added guidance covering:
+    - how to recover when `pac solution export` fails with `No active environment set`
+    - recommended use of `-EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+    - when a sync diff is formatting-only and does not require behavior-doc updates
+  - Intentionally left behavior docs unchanged because no flow logic changed:
     - `docs/flows_easy_english.md`
+    - `docs/architecture_flows.md`
+    - `System_SPEC.md`
 - Validation commands run:
-  - `ConvertFrom-Json` checks for BGV_3, BGV_4, BGV_5, BGV_6 workflow JSON.
-  - `git diff` review of the four workflow files and linked docs.
+  - `git diff --stat`
+  - `git diff -- flows/power-automate/unpacked/Workflows/`
+  - `powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+  - `git status --short --branch`
 - Next actions and blockers:
-  - Next action: commit/push and import with PAC publish to make these updates live.
+  - Next action: if desired, update `scripts/active/bgv_daily_sync.ps1` to default from `POWER_PLATFORM_ENV_URL` so operators do not need to pass `-EnvironmentUrl` manually.
+
+## 2026-03-10 (README repo-verification safeguard)
+- Current status:
+  - Added explicit instructions to help operators and Codex confirm they are working in the correct BGV Git repo before running any Git or PAC command.
+- Completed tasks:
+  - Updated `README.md`.
+  - Added a dedicated repo-verification section with the expected local path, GitHub remote, and normal branch name for this project.
+  - Added repo-verification steps to the top-level rules, start-of-day flow, and GitHub workflow checklist.
+  - Mirrored the same safeguard into:
+    - `docs/collaboration_setup_guide.md`
+    - `docs/ms365_authentication_runbook.md`
+  - Corrected the outdated local path reference `C:\bgv_project` to the actual repo path `C:\DLR Automation VS Studio Code\bgv_project` in the collaboration guide.
+- Validation commands run:
+  - `git diff -- README.md docs/collaboration_setup_guide.md docs/ms365_authentication_runbook.md docs/progress.md`
+- Next actions and blockers:
+  - No blocker. Next action: commit only the docs updates when ready.
