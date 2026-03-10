@@ -153,7 +153,7 @@
                 "and": [
                   {
                     "equals": [
-                      "@outputs('Update_item')?['body/VerificationStatus/Value']",
+                      "@items('Apply_to_each')?['VerificationStatus/Value']",
                       "Sent"
                     ]
                   },
@@ -212,9 +212,9 @@
                   "inputs": {
                     "parameters": {
                       "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg",
-                      "emailMessage/To": "@outputs('Update_item')?['body/EmployerHR_Email']",
+                      "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                       "emailMessage/Subject": "2nd Reminder: Employment Verification Request from D L Resources\n",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">Hello @{outputs('Update_item')?['body/EmployerName']},</p><br><p class=\"editor-paragraph\">This is a second reminder to complete the employment verification for @{outputs('Update_item')?['body/CandidateItemID_x003a__x0020_Ful/Value']}. @{outputs('Update_item')?['body/CandidateItemID_x003a__x0020_Ful/Value']} has provied us your contact to conduct this background check.<br><br>Kindly access the link below and fill in the form as soon as possible:<br>@{outputs('Update_item')?['body/uniquelinktoemployers']}<br><br>Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">Hello @{items('Apply_to_each')?['EmployerName']},</p><br><p class=\"editor-paragraph\">This is a second reminder to complete the employment verification for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}. @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has provied us your contact to conduct this background check.<br><br>Kindly access the link below and fill in the form as soon as possible:<br>@{items('Apply_to_each')?['uniquelinktoemployers']}<br><br>Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
                       "emailMessage/Importance": "Normal"
                     },
                     "host": {
@@ -275,7 +275,7 @@
                       "location": "Channel",
                       "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
                       "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
-                      "body/messageBody": "<p class=\"editor-paragraph\">BGV Escalation - Employer Not Responding</p><br><p class=\"editor-paragraph\">Candidate ID : @{outputs('Update_item_1')?['body/CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name : @{outputs('Update_item')?['body/FullName']}</p><p class=\"editor-paragraph\">Employer : @{outputs('Update_item_1')?['body/EmployerName']}</p><p class=\"editor-paragraph\">Employer HR Email : @{outputs('Update_item_1')?['body/EmployerHR_Email']}</p><br><p class=\"editor-paragraph\">Two reminders have been sent and no response was received. <br>Please follow up manually.</p>"
+                      "body/messageBody": "<p class=\"editor-paragraph\">BGV Escalation - Employer Not Responding</p><br><p class=\"editor-paragraph\">Candidate ID : @{items('Apply_to_each')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name : @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}</p><p class=\"editor-paragraph\">Employer : @{items('Apply_to_each')?['EmployerName']}</p><p class=\"editor-paragraph\">Employer HR Email : @{items('Apply_to_each')?['EmployerHR_Email']}</p><br><p class=\"editor-paragraph\">Two reminders have been sent and no response was received. <br>Please follow up manually.</p>"
                     },
                     "host": {
                       "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
@@ -330,9 +330,9 @@
                   "inputs": {
                     "parameters": {
                       "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg",
-                      "emailMessage/To": "@outputs('Update_item_1')?['body/EmployerHR_Email']",
+                      "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                       "emailMessage/Subject": "Final Reminder: Employment Verification Request ",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">This is a final reminder for the background check regarding:@{outputs('Update_item')?['body/CandidateItemID_x003a__x0020_Ful/Value']}.</p><br><p class=\"editor-paragraph\">@{outputs('Update_item')?['body/CandidateItemID_x003a__x0020_Ful/Value']} has authorise us to do a background check. He/She has provided us your contact. We kindly ask that you help us to fill in the following form :</p><p class=\"editor-paragraph\">@{outputs('Update_item_1')?['body/uniquelinktoemployers']}</p>",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">This is a final reminder for the background check regarding:@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.</p><br><p class=\"editor-paragraph\">@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has authorise us to do a background check. He/She has provided us your contact. We kindly ask that you help us to fill in the following form :</p><p class=\"editor-paragraph\">@{items('Apply_to_each')?['uniquelinktoemployers']}</p>",
                       "emailMessage/Importance": "Normal"
                     },
                     "host": {
@@ -348,7 +348,7 @@
                     "parameters": {
                       "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
                       "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
-                      "id": "@outputs('Update_item_1')?['body/ID']",
+                      "id": "@items('Apply_to_each')?['ID']",
                       "item/Reminder3At": "@utcNow()"
                     },
                     "host": {

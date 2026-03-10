@@ -122,7 +122,6 @@
                                     "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
                                     "table": "7b78dcaf-8744-478b-a40f-633ed7becff3",
                                     "id": "@items('Apply_to_each')?['ID']",
-                                    "item/ConsentCaptured": true,
                                     "item/LastAuthReminderAt": "@utcNow()"
                                   },
                                   "host": {
@@ -141,8 +140,8 @@
                                       "parameters": {
                                         "poster": "Flow bot",
                                         "location": "Channel",
-                                        "body/recipient/groupId": "b680487c-a11c-44f4-9de6-8813d3e2951b",
-                                        "body/recipient/channelId": "19:NcAD8P3aERodeV2-NR6D9OBEOnwZI62MVLgNoBrSIl01@thread.tacv2",
+                                        "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
+                                        "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
                                         "body/messageBody": "<p class=\"editor-paragraph\">Day 5 - Authorization form NOT SUBMITTED</p><br><p class=\"editor-paragraph\">Candidate : @{items('Apply_to_each')?['FullName']}</p><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each')?['CandidateID']}</p><p class=\"editor-paragraph\"><br>Authorization Link: @{items('Apply_to_each')?['AuthorizationLink']}</p>"
                                       },
                                       "host": {
@@ -189,7 +188,7 @@
                                   "and": [
                                     {
                                       "equals": [
-                                        "outputs('DaysSinceLink') ",
+                                        "@outputs('DaysSinceLink')",
                                         5
                                       ]
                                     }
@@ -205,13 +204,13 @@
                               "or": [
                                 {
                                   "equals": [
-                                    "@empty(items('Apply_to_each')?['LastAuthReminderSentAt']) ",
+                                    "@empty(items('Apply_to_each')?['LastAuthReminderAt']) ",
                                     true
                                   ]
                                 },
                                 {
                                   "equals": [
-                                    "@not(equals(formatDateTime(items('Apply_to_each')?['LastAuthReminderSentAt'],'yyyy-MM-dd'), formatDateTime(utcNow(),'yyyy-MM-dd'))) ",
+                                    "@not(equals(formatDateTime(items('Apply_to_each')?['LastAuthReminderAt'],'yyyy-MM-dd'), formatDateTime(utcNow(),'yyyy-MM-dd'))) ",
                                     true
                                   ]
                                 }
@@ -290,4 +289,3 @@
   },
   "schemaVersion": "1.0.0.0"
 }
-

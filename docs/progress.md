@@ -979,3 +979,28 @@ Log each session with:
   - `rg -n "groupId|channelId"` on BGV_6 JSON
 - Next actions and blockers:
   - Next action: trigger BGV_6 escalation and verify post appears in `DLR Recruitment Ops > BGV`.
+
+## 2026-03-10 (BGV_3 and BGV_6 reminder condition repair after cloud sync)
+- Current status:
+  - Synced latest cloud solution first (export/unpack), then repaired reminder condition mappings in BGV_3 and BGV_6.
+- Completed tasks:
+  - Performed PAC-first sync from cloud:
+    - `pac solution export --name BGV_System ...`
+    - `pac solution unpack ...`
+  - Updated canonical flows:
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - BGV_3 fixes:
+    - corrected day-5 escalation expression to `@outputs('DaysSinceLink')`
+    - aligned reminder field checks to `LastAuthReminderAt` (removed stale `LastAuthReminderSentAt` usage)
+    - removed incorrect `item/ConsentCaptured = true` update from reminder stamp action
+  - BGV_6 fixes:
+    - replaced unstable dependencies on `outputs('Update_item')` / `outputs('Update_item_1')` with current-loop values `items('Apply_to_each')` in reminder conditions and notification bodies
+    - updated final reminder item patch target ID to `@items('Apply_to_each')?['ID']`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` checks for updated BGV_3 and BGV_6 JSON files
+  - `rg` checks to confirm broken references were removed
+- Next actions and blockers:
+  - Next action: run one controlled reminder test for each flow (BGV_3 daily reminder and BGV_6 reminder/escalation timeline) and confirm expected branch execution in run history.

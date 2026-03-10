@@ -69,6 +69,9 @@ This document describes the current behavior in your canonical flow files under 
   - Gets candidates with `Status = Pending Authorization Form Signature`.
   - Computes days since authorization link creation.
   - Sends reminder emails between day 1 and day 5 (max once per day).
+  - Uses `LastAuthReminderAt` consistently to avoid duplicate same-day reminders.
+  - Day-5 escalation check now evaluates the computed `DaysSinceLink` expression correctly.
+  - Reminder update no longer flips `ConsentCaptured`; it only stamps reminder timestamp fields.
   - On day 5 unresolved cases, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email.
   - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
 - Main outcome: Unsigned candidate authorization forms are actively chased and escalated.
@@ -146,6 +149,7 @@ This document describes the current behavior in your canonical flow files under 
     - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
     - `channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
   - Shared-mailbox sender is `recruitmentops@dlresources.com.sg`.
+  - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
 
 ## How the Flows Connect
