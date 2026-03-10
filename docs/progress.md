@@ -1021,3 +1021,21 @@ Log each session with:
   - `rg -n "AuthorisationSigned|ConsentCaptured"` on BGV_3 JSON
 - Next actions and blockers:
   - Next action: run BGV_3 once with a pending candidate and confirm `Send_an_email_(V2)` executes.
+
+## 2026-03-10 (BGV_5 Teams channel aligned to DLR Recruitment Ops > BGV)
+- Current status:
+  - Aligned BGV_5 Teams post destination to the same `DLR Recruitment Ops > BGV` channel used by BGV_6.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Updated Teams destination values in BGV_5:
+    - `body/recipient/groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
+    - `body/recipient/channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
+  - Re-validated BGV_6 mapping remains correct to the same IDs.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` checks on BGV_5 and BGV_6 JSON
+  - `rg -n "body/recipient/groupId|body/recipient/channelId"` on BGV_5 and BGV_6
+- Next actions and blockers:
+  - Next action: trigger one BGV_5 high-severity response and one BGV_6 escalation to confirm both posts appear in `DLR Recruitment Ops > BGV`.

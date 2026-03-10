@@ -545,8 +545,8 @@
                         "parameters": {
                           "poster": "Flow bot",
                           "location": "Channel",
-                          "body/recipient/groupId": "b680487c-a11c-44f4-9de6-8813d3e2951b",
-                          "body/recipient/channelId": "19:NcAD8P3aERodeV2-NR6D9OBEOnwZI62MVLgNoBrSIl01@thread.tacv2",
+                          "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
+                          "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
                           "body/messageBody": "<p class=\"editor-paragraph\">BGV Response Submitted for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}</p><br><p class=\"editor-paragraph\">Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}, @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerHR_Email']}</p><br><p class=\"editor-paragraph\">Request ID: @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}</p><p class=\"editor-paragraph\">Severity: @{variables('varSeverity')}</p><p class=\"editor-paragraph\">Outcome: @{variables('varOutcome')}</p><br><p class=\"editor-paragraph\">Details: <br>@{variables('varNotifyBody')}</p><br>"
                         },
                         "host": {

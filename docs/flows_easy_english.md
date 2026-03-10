@@ -130,7 +130,9 @@ This document describes the current behavior in your canonical flow files under 
   - Sends Teams alert when notify flag is true.
   - Sends internal high-severity email when severity is `High`.
   - All email notifications in this flow are routed via shared mailbox and addressed to `recruitmentops@dlresources.com.sg`.
-  - Teams notification target for this flow is updated to the new Team/Channel destination.
+  - Teams notification target for this flow is `DLR Recruitment Ops > BGV`:
+    - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
+    - `channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
 - Main outcome: Employer response is automatically triaged, stored, and escalated when needed.
 
 ### `BGV_6_HRReminderAndEscalation`
