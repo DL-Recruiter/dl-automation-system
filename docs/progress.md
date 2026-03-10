@@ -1156,3 +1156,22 @@ Log each session with:
   - `git diff` review for canonical flow artifacts.
 - Next actions and blockers:
   - Next action: commit and push synced canonical artifacts.
+
+## 2026-03-10 (Cloud sync: BGV_4 employer email update refresh)
+- Current status:
+  - Synced another manual BGV_4 employer email edit from cloud to canonical repo artifacts.
+- Completed tasks:
+  - Exported and unpacked the latest unmanaged `BGV_System` solution.
+  - Confirmed only canonical BGV_4 workflow JSON changed in this refresh:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - Confirmed BGV_4 employer email body now includes the newest cloud-edited HR instruction text while preserving existing dynamic mappings.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `pac auth who`
+  - `pac solution export ...`
+  - `pac solution unpack ...`
+  - `git status --short`
+  - `git diff -- ...BGV_4...json`
+- Next actions and blockers:
+  - Next action: commit and push synced canonical artifacts.
