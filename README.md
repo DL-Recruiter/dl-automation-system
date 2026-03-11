@@ -42,8 +42,14 @@ The main working data locations are:
 - `BGV_FormData` for normalized Form 1 and Form 2 values
 - `BGV Records` for authorization documents and candidate files
 
-## If You Only Remember Four Rules
+For a beginner-friendly explanation of what each SharePoint list is for
+and what its important columns mean, start with
+`docs/sharepoint_list_user_guide.md`.
 
+## If You Only Remember Five Rules
+
+1. Always verify you are in the correct repo before any Git or PAC
+   command.
 1. Always sync first before editing anything.
 1. Always run `pac auth who` before any PAC command.
 1. Edit only the canonical flow files in
@@ -51,10 +57,56 @@ The main working data locations are:
 1. Local JSON edits are not live until you `pack` and `import` the
    solution back into Power Automate.
 
+## Before Any Git Or PAC Command, Verify The Repo
+
+This matters because you may have more than one GitHub repo open in VS
+Code or in different terminals. If you run `git pull`, `git commit`,
+`git push`, `pac solution ...`, or the daily sync script in the wrong
+folder, you will update the wrong project.
+
+Run these checks first:
+
+```powershell
+Get-Location
+git remote -v
+git status --short --branch
+```
+
+What you should expect in this project:
+
+- local path should be `C:\DLR Automation VS Studio Code\bgv_project`
+- `origin` should be
+  `https://github.com/DL-Recruiter/dl-automation-system.git`
+- working branch is usually `master`
+
+Only continue if all three checks match this BGV project.
+
+If any check does not match:
+
+1. stop immediately
+1. do not run `git pull`, `git commit`, `git push`, `pac solution ...`,
+   or `powershell -File scripts/active/bgv_daily_sync.ps1`
+1. open the correct repo folder first
+1. rerun the three checks
+
+Good prompt examples for Codex:
+
+- `Work in C:\DLR Automation VS Studio Code\bgv_project`
+- `Use repo DL-Recruiter/dl-automation-system on master`
+- `Before pushing, confirm repo path, remote, and branch`
+
 ## Start Of Day
 
-Run this command before editing, testing, or asking Codex to patch a
-flow:
+First verify the repo:
+
+```powershell
+Get-Location
+git remote -v
+git status --short --branch
+```
+
+Then run this command before editing, testing, or asking Codex to patch
+a flow:
 
 ```powershell
 powershell -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/
@@ -122,7 +174,8 @@ rather than a logic change.
 
 ## One-Time Setup
 
-1. Open the repo in VS Code at `C:\bgv_project`.
+1. Open the repo in VS Code at
+   `C:\DLR Automation VS Studio Code\bgv_project`.
 1. Make sure these tools exist in the terminal:
 
    - `git`
@@ -251,6 +304,14 @@ or inspect recent run behavior without opening each flow manually.
 ## GitHub Workflow
 
 Use this sequence whenever you finish a change:
+
+1. verify the repo first
+
+   ```powershell
+   Get-Location
+   git remote -v
+   git status --short --branch
+   ```
 
 1. confirm latest baseline
 
@@ -466,6 +527,7 @@ After patch, deploy to BGV_System and verify latest run.
 - `CODEX_PLAYBOOK.md`
 - `System_SPEC.md`
 - `docs/collaboration_setup_guide.md`
+- `docs/sharepoint_list_user_guide.md`
 - `docs/flows_easy_english.md`
 - `docs/architecture_flows.md`
 - `docs/progress.md`

@@ -12,6 +12,7 @@ Generated `.NET` build/test outputs such as `bin/`, `obj/`, and `TestResults/` a
 - `AGENTS.md` - Mandatory operating rules and safety constraints for coding agents.
 - `CODEX_PLAYBOOK.md` - Agent workflow/playbook for context loading, edits, validation, and reporting.
 - `Codex Agent Playbook Template.docx` - Reference template document.
+- `BGV_Report_Summary_Template.docx` - Working Word template for additive BGV report summaries built from verified Form 1 and Form 2 question mappings.
 - `Repository Template.docx` - Reference template document.
 - `System Specification Template.docx` - Reference template document.
 - `System_SPEC.md` - Source-of-truth system specification for behavior, rules, and contracts.
@@ -32,6 +33,7 @@ Generated `.NET` build/test outputs such as `bin/`, `obj/`, and `TestResults/` a
 - `docs/flows_easy_english.md` - Plain-language explanation of BGV_0 to BGV_6 business logic.
 - `docs/progress.md` - Chronological change log with validation commands, blockers, and next actions.
 - `docs/repo_inventory.md` - Full tracked-file inventory with purpose descriptions.
+- `docs/sharepoint_list_user_guide.md` - Beginner-friendly user guide to the main BGV SharePoint stores and their important business columns.
 
 ## Flow Export Files
 - `flows/main.flow.json` - Placeholder metadata for main flow export.

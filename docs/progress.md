@@ -1176,6 +1176,117 @@ Log each session with:
 - Next actions and blockers:
   - Next action: commit and push synced canonical artifacts.
 
+## 2026-03-10 (Beginner SharePoint list user guide)
+- Current status:
+  - Added a new beginner-friendly document so future users can
+    understand what the main BGV SharePoint lists are for and what their
+    important columns mean.
+- Completed tasks:
+  - Added:
+    - `docs/sharepoint_list_user_guide.md`
+  - The new guide explains the automation-facing business columns for:
+    - `BGV_Candidates`
+    - `BGV_Requests`
+    - `BGV_FormData`
+    - `BGV Records` document library
+  - For each store, documented:
+    - what the store is for
+    - what the important columns mean
+    - which flows mainly write the column
+    - which flows mainly read the column
+  - Linked the new guide from:
+    - `README.md`
+    - `docs/file_index.md`
+    - `docs/repo_inventory.md`
+  - Kept the guide focused on automation-facing business columns rather
+    than trying to guess every default SharePoint system field.
+- Validation commands run:
+  - `git diff -- README.md docs/sharepoint_list_user_guide.md docs/file_index.md docs/repo_inventory.md docs/progress.md`
+  - `npx markdownlint-cli2 docs/sharepoint_list_user_guide.md`
+- Next actions and blockers:
+  - Existing markdownlint issues remain in older files such as
+    `README.md`, `docs/file_index.md`, and `docs/repo_inventory.md`, but
+    those are pre-existing and were not expanded as part of this task.
+  - If needed later, add a separate live-schema document for full
+    SharePoint column dumps including default system metadata.
+
+## 2026-03-10 (`Severity/Value` explanation added to user guide)
+- Current status:
+  - Expanded the beginner SharePoint guide to explain how
+    `Severity/Value` is calculated in the employer-response flow.
+- Completed tasks:
+  - Updated `docs/sharepoint_list_user_guide.md`.
+  - Added a dedicated explanation section for `BGV_Requests.Severity`
+    covering:
+    - default starting state
+    - High / Medium / Low priority order
+    - why the contact-request answer does not change severity by itself
+    - where the matching notes/result are stored
+  - Clarified that `BGV_FormData.F2_Severity/Value` is the copied final
+    severity from the same scoring logic.
+- Validation commands run:
+  - `npx markdownlint-cli2 docs/sharepoint_list_user_guide.md`
+- Next actions and blockers:
+  - No blocker.
+
+## 2026-03-10 (BGV_5 severity model updated: remove Low, inaccurate info -> Medium)
+- Current status:
+  - Updated the canonical employer-response flow so the old `Low`
+    severity path is no longer used.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Changed the inaccurate-information rule from:
+    - `Low` only when severity was empty
+  - To:
+    - `Medium` when severity is not already `High`
+  - Updated the inaccurate-information path so it now:
+    - sets `varSeverity = Medium` when not already High
+    - sets `varOutcome = Needs Clarification`
+    - sets `varNotifyTeams = true`
+    - appends a `[Medium]` note instead of a `[Low]` note
+  - Confirmed notes are still written to:
+    - `BGV_Requests.Notes`
+    - `BGV_FormData.F2_Notes` when the matching FormData row exists
+  - Updated linked docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+    - `docs/sharepoint_list_user_guide.md`
+- Validation commands run:
+  - `ConvertFrom-Json` check on updated `BGV_5_Response1` JSON
+  - `rg -n "Low|Medium|F2_Notes|Notes|Please contact me for further clarification"` on updated flow/docs
+  - `npx markdownlint-cli2 docs/sharepoint_list_user_guide.md`
+- Next actions and blockers:
+  - Next action: deploy the updated canonical flow and run one employer
+    response test for each case:
+    - inaccurate info only -> expect `Medium`
+    - MAS or disciplinary trigger -> expect `High`
+    - contact-request only -> expect note + notification without
+      changing severity by itself
+
+## 2026-03-10 (Document how HR form answers are captured in the user guide)
+- Current status:
+  - Added a beginner-friendly reference section to explain where common
+    HR Form 2 answers are stored today.
+- Completed tasks:
+  - Updated:
+    - `docs/sharepoint_list_user_guide.md`
+  - Added a new table covering:
+    - structured capture into `F2_*` fields
+    - notes-only capture into `BGV_Requests.Notes` and
+      `BGV_FormData.F2_Notes`
+    - raw-JSON-only capture in `BGV_FormData.Form2RawJson`
+  - Explicitly documented the current behavior for:
+    - inaccurate-information multi-select answers
+    - company-details discrepancy fields
+    - MAS and disciplinary free-text fields
+    - `Other comments we should know about`
+    - `Please contact me for further clarification`
+- Validation commands run:
+  - `npx markdownlint-cli2 docs/sharepoint_list_user_guide.md`
+- Next actions and blockers:
+  - No blocker.
+
 ## 2026-03-11 (Temporary 4-hour reminder test mode re-enabled for BGV_3 and BGV_6)
 - Current status:
   - Re-enabled temporary high-frequency reminder timing so both reminder flows can be validated live within a 4-hour window and rolled back cleanly afterward.
@@ -1259,3 +1370,181 @@ Log each session with:
   - `pac solution import ... --publish-changes --force-overwrite`
 - Next actions and blockers:
   - Next action: trigger one BGV_4 send cycle and confirm the live employer form link arrives with the expected prefilled values.
+
+## 2026-03-11 (HR form Q8/Q9 mapping correction from prefilled URL)
+- Current status:
+  - Corrected the HR form inventory so the company-details section matches
+    the latest user-provided Microsoft Forms prefilled URL.
+- Completed tasks:
+  - Updated `docs/data_mapping_dictionary.md`.
+  - Corrected the question numbering for the early company-details block:
+    - Q7 = company-details accuracy yes/no (`r2d39255c2449439096683ca0e39241b0`)
+    - Q8 = company-details discrepancy multi-select (`rd05170e51ac34fef95f5464cf348bedc`)
+    - Q9 = company-details discrepancy explanation (`ra03058e9bbfd40d28014b0c669e92434`)
+  - Clarified that these keys are currently known from the prefilled URL
+    but are not wired in canonical flow JSON.
+- Validation commands run:
+  - `rg -n "rd05170e51ac34fef95f5464cf348bedc|ra03058e9bbfd40d28014b0c669e92434|Q7|Q8|Q9" docs/data_mapping_dictionary.md`
+- Next actions and blockers:
+  - Next action: if needed, capture the exact Microsoft Forms designer
+    labels for Q7-Q9 from the live form editor or PDF export and replace
+    the current inferred wording.
+
+## 2026-03-11 (BGV report summary template added to local repo)
+- Current status:
+  - Added the existing Word summary template into the local `bgv_project`
+    repo so it is available alongside the mapping docs it depends on.
+- Completed tasks:
+  - Copied `BGV_Report_Summary_Template.docx` from:
+    - `C:\Users\EdwinTeo\Desktop\bgv_project\BGV_Report_Summary_Template.docx`
+  - Added the copied file to the repo root:
+    - `BGV_Report_Summary_Template.docx`
+  - Updated repo index docs:
+    - `docs/file_index.md`
+    - `docs/repo_inventory.md`
+  - Kept flow JSON and SharePoint behavior docs unchanged in this task
+    because this change only adds the report template artifact and does
+    not change runtime automation behavior.
+- Validation commands run:
+  - `Get-Item BGV_Report_Summary_Template.docx | Select-Object FullName,Length,LastWriteTime`
+  - DOCX text extraction check on `word/document.xml` to confirm the
+    copied file contains the expected `BGV Report Summary Template`
+    heading and the corrected Q8/Q9/Q15 sections.
+- Next actions and blockers:
+  - Next action: if desired, update `docs/data_mapping_dictionary.md`
+    further so its visible Form 2 inventory fully mirrors every field
+    already listed in the Word template.
+
+## 2026-03-11 (BGV report summary template rebuilt with key-based placeholders)
+- Current status:
+  - Rebuilt the local Word summary template into a simpler single-report
+    layout for both Microsoft Forms using the verified form IDs already
+    available in the repo.
+- Completed tasks:
+  - Updated `BGV_Report_Summary_Template.docx`.
+  - Replaced generic `Form2.Q1`-style placeholders with key-based
+    placeholders such as:
+    - `{{Form1.rfe96c622120343f294de908deb0e849d}}`
+    - `{{Form2.rd05170e51ac34fef95f5464cf348bedc}}`
+    - `{{Form2.r72b23e4aa192405091846e1279085029}}`
+  - Added both source Microsoft Form IDs near the top of the template.
+  - Preserved the requested additive-path wording:
+    - new Azure Function-generated `.docx`
+    - saved into `BGV Records`
+    - no current `BGV_5` Word-template action
+    - no live cloud template upload / file ID mapping in this task
+  - Kept Form 1 limited to non-repeating fields only.
+  - Kept a short manual-review note for unresolved upload-style fields.
+- Validation commands run:
+  - DOCX text extraction check on `word/document.xml` to confirm:
+    - requested additive-path sentence is present
+    - both Form IDs are present
+    - key-based response placeholders for Form 1 and Form 2 are present
+  - `Get-Item BGV_Report_Summary_Template.docx | Select-Object FullName,Length,LastWriteTime`
+- Next actions and blockers:
+  - Next action: if needed, align the remaining Form 2 question labels in
+    `docs/data_mapping_dictionary.md` to the same visible-question layout
+    now used by the Word template.
+
+## 2026-03-11 (Local-only save state confirmed)
+- Current status:
+  - Confirmed the latest documentation and report-template changes are
+    saved locally in the working tree and intentionally not committed yet.
+- Completed tasks:
+  - Confirmed local on-disk state for:
+    - `BGV_Report_Summary_Template.docx`
+    - `docs/data_mapping_dictionary.md`
+    - `docs/file_index.md`
+    - `docs/repo_inventory.md`
+    - `docs/progress.md`
+  - Confirmed the untracked local files currently kept for later commit:
+    - `BGV_Report_Summary_Template.docx`
+    - `docs/sharepoint_list_user_guide.md`
+  - Confirmed no Git commit was created in this task.
+- Validation commands run:
+  - `git status --short`
+- Next actions and blockers:
+  - Next action: stage and commit the intended files when ready.
+
+## 2026-03-11 (Separate GitHub sync clone created and local repo integrated)
+- Current status:
+  - Created a separate local clone of the current GitHub repo and merged
+    the relevant remote changes into the active working repo without
+    creating a commit.
+- Completed tasks:
+  - Cloned current GitHub `master` into:
+    - `C:\DLR Automation VS Studio Code\bgv_project_github_sync`
+  - Compared the sync clone against the active working tree and isolated
+    the files that still differed from current GitHub state.
+  - Synced these canonical workflow files to the current GitHub version:
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - Preserved local `BGV_5` severity/note work while integrating the
+    current GitHub high-severity email-body wording into:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Merged linked documentation so the working repo now contains:
+    - the missing remote cloud-sync entries in `docs/progress.md`
+    - updated behavior wording in `docs/flows_easy_english.md`
+- Validation commands run:
+  - `git fetch origin`
+  - `git rev-list --left-right --count HEAD...origin/master`
+  - file-hash / text comparisons between the active repo and `bgv_project_github_sync`
+  - three-way merge feasibility checks against `HEAD` for docs and workflow files
+- Next actions and blockers:
+  - Next action: review the newly integrated unstaged workflow/doc changes
+    before deciding whether to stage them for a later commit.
+
+## 2026-03-11 (BGV_5 inaccurate-information path reverted to GitHub Low behavior)
+- Current status:
+  - Reverted the local-only `BGV_5` inaccurate-information path from the
+    earlier `Medium + Needs Clarification + notify` behavior back to
+    the current GitHub `Low` behavior, while leaving `BGV_4` unchanged.
+- Completed tasks:
+  - Updated the canonical workflow file:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Restored the inaccurate-information branch to:
+    - set `Severity = Low` only when `varSeverity` is still empty
+    - stop setting `Outcome = Needs Clarification` for that branch
+    - stop setting `varNotifyTeams = true` for that branch
+    - append the GitHub-style `[Low]` note body
+  - Aligned the linked behavior docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+    - `docs/sharepoint_list_user_guide.md`
+- Validation commands run:
+  - `ConvertFrom-Json` on the updated canonical `BGV_5` file
+  - `rg -n "Low|Medium|Needs Clarification|Notify_Teams_4|Outcome_4|Information inaccurate" ...`
+- Next actions and blockers:
+  - Next action: decide whether to keep the temporary
+    `bgv_project_github_sync` clone after the final Git history
+    integration is complete.
+
+## 2026-03-11 (Q11 mapping doc corrected and local branch rebased onto origin/master)
+- Current status:
+  - Corrected the documented Form 2 `Q11` behavior and integrated the
+    7 remote GitHub commits into the active repo by rebasing the local
+    work on top of `origin/master`.
+- Completed tasks:
+  - Updated `docs/data_mapping_dictionary.md` so Form 2 `Q11`
+    (`r513ad5ab3a14453286bdb910820985ec`) is described as response-only:
+    - not currently prefilled by `BGV_4`
+    - entered manually by employer HR in Form 2
+    - stored in `BGV_FormData.F2_ReasonForLeaving`
+  - Created a local checkpoint commit before rebase:
+    - `04926c9 docs: integrate local BGV updates before upstream rebase`
+  - Rebased that local commit onto the current `origin/master`.
+  - Resolved rebase conflicts by keeping the current GitHub production
+    reminder logic for:
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+    - `docs/flows_easy_english.md`
+  - Rebuilt `docs/progress.md` so it contains both:
+    - the 7 remote-commit log entries already on GitHub
+    - the local documentation/template/mapping entries created in this repo
+- Validation commands run:
+  - `git fetch origin`
+  - `git pull --rebase origin master`
+  - `git hash-object ...BGV_3...json` compared with `git show origin/master:...BGV_3...json`
+- Next actions and blockers:
+  - Next action: complete rebase finalization, run final repo validation,
+    and review the new local `master` state before any push.

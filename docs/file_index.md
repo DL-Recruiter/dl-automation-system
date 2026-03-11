@@ -22,12 +22,14 @@
 - `AGENTS.md` - Agent operating constraints and mandatory repository rules.
 - `CODEX_PLAYBOOK.md` - Codex workflow protocol for safe, minimal, validated edits.
 - `System_SPEC.md` - Source-of-truth system specification for behavior and rules.
+- `BGV_Report_Summary_Template.docx` - Word template for additive Azure Function-generated BGV report summaries using verified Form 1/Form 2 question keys.
 - `docs/architecture_flows.md` - Flow/connector integration and PAC CLI guidance.
 - `docs/collaboration_setup_guide.md` - Step-by-step collaboration guide for Edwin and Recruitment accounts.
 - `docs/data_mapping_dictionary.md` - Canonical field-level mapping and data dictionary for Forms, SharePoint lists, document library, and flows BGV_0 to BGV_6.
 - `docs/flows_easy_english.md` - Plain-language explanation of BGV_0 to BGV_6 process flow.
 - `docs/progress.md` - Ongoing status log for completed tasks and next actions.
 - `docs/repo_inventory.md` - Full tracked-file inventory with file-by-file purpose descriptions.
+- `docs/sharepoint_list_user_guide.md` - Beginner-friendly guide to the main BGV SharePoint stores and their important business columns.
 - `.github/workflows/linked-docs-guard.yml` - CI guard that enforces linked documentation updates when canonical flow JSON files are changed.
 - `flows/main.flow.json` - Placeholder export metadata for main flow.
 - `flows/flowrunlogs-exporter.flow.json` - Placeholder export metadata for FlowRunLogs exporter flow.
