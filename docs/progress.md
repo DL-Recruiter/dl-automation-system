@@ -1571,3 +1571,32 @@ Log each session with:
 - Next actions and blockers:
   - Next action: if the Form 2 layout changes again, re-verify the
     `(Declared By Candidate)` labels before changing `BGV_4` prefill logic.
+
+## 2026-03-11 (GitHub push and production import for Form 2 Q11 doc alignment)
+- Current status:
+  - Pushed the latest local repo state to GitHub and imported the
+    canonical `BGV_System` solution to the configured production
+    environment from the unpacked workflow source.
+- Completed tasks:
+  - Pushed `master` to GitHub:
+    - local deployed code commit: `a5fc3b3`
+  - Verified PAC identity before deployment:
+    - `edwin.teo@dlresources.com.sg`
+  - Exported a production pre-deploy backup:
+    - `artifacts/exports/BGV_System_prod_predeploy_backup_20260311_131235.zip`
+  - Packed the canonical solution from:
+    - `flows/power-automate/unpacked`
+  - Imported and published:
+    - `artifacts/exports/BGV_System_unmanaged.repack.zip`
+  - Confirmed the import completed successfully and Power Platform
+    reported that the original workflow definition was replaced.
+- Validation commands run:
+  - `git push origin master`
+  - `pac auth who`
+  - `pac solution export --environment https://orgde64dc49.crm5.dynamics.com/ --name BGV_System --path .\artifacts\exports\BGV_System_prod_predeploy_backup_20260311_131235.zip --managed false --overwrite`
+  - `pac solution pack --zipfile .\artifacts\exports\BGV_System_unmanaged.repack.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_unmanaged.repack.zip --publish-changes --force-overwrite`
+- Next actions and blockers:
+  - Next action: run live smoke checks for one candidate declaration,
+    one employer response path, and reminder-flow health in Power
+    Automate run history.
