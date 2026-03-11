@@ -62,7 +62,8 @@
     - `ra6ab2e26d2d84a92b33148fc4694773a` -> declared last drawn salary (`BGV_FormData.F1_LastDrawnSalary`)
     - `r49ca8a655f5e4bcba0e8f75d4475ad77` -> declared last position held (`BGV_FormData.F1_JobTitle`)
   - The employer email body also includes declared company details for operator visibility.
-  - `r513ad5ab3a14453286bdb910820985ec` (reason for leaving) is intentionally not prefilled because the current Candidate Declaration form metadata does not contain a reason/leaving source question.
+  - In the current HR Form 2 layout, questions explicitly labeled `(Declared By Candidate)` are the intended prefill targets in `BGV_4`.
+  - `r513ad5ab3a14453286bdb910820985ec` (`Q11` reason for leaving) is not one of those current prefill targets. It is an employer-entered response field, so `BGV_4` intentionally leaves it blank and `BGV_5` stores the submitted answer later.
 - Important limitation:
   - Microsoft Forms static text placeholders (for example `{{Employer_Name}}`) are not dynamically replaced by Power Automate.
   - Dynamic values must come through actual form question prefill fields (the `r...` query parameters above).

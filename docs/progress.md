@@ -1548,3 +1548,26 @@ Log each session with:
 - Next actions and blockers:
   - Next action: complete rebase finalization, run final repo validation,
     and review the new local `master` state before any push.
+
+## 2026-03-11 (Form 2 Q11 logic corrected from HR PDF review)
+- Current status:
+  - Corrected the current Form 2 documentation logic so `Q11` is treated
+    as an employer-entered response field, not a `(Declared By Candidate)`
+    prefill field.
+- Completed tasks:
+  - Updated:
+    - `docs/data_mapping_dictionary.md`
+    - `docs/architecture_flows.md`
+  - Clarified the current rule from the HR Form 2 PDF:
+    - Form 2 questions explicitly labeled `(Declared By Candidate)` are
+      the intended prefill targets in `BGV_4`
+    - `Q11` is no longer one of those declared-by-candidate fields
+    - `Q11` remains blank in the runtime prefilled URL and is answered
+      manually by employer HR
+    - the submitted response is still stored in
+      `BGV_FormData.F2_ReasonForLeaving`
+- Validation commands run:
+  - `rg -n "Declared By Candidate|Reason For Leaving|Q11|r513ad5ab3a14453286bdb910820985ec" docs/data_mapping_dictionary.md docs/architecture_flows.md`
+- Next actions and blockers:
+  - Next action: if the Form 2 layout changes again, re-verify the
+    `(Declared By Candidate)` labels before changing `BGV_4` prefill logic.

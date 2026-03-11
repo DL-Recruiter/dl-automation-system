@@ -158,7 +158,8 @@ Flow action: `BGV_4 / FinalVerificationLink`.
 | `r49ca8a655f5e4bcba0e8f75d4475ad77` | Declared last position held | `BGV_FormData.F1_JobTitle` |
 
 Note:
-- Candidate reason-for-leaving prefill (`r513ad5ab3a14453286bdb910820985ec`) is not currently appended to `BGV_4` `FinalVerificationLink`, so Form 2 `Q11` remains blank for employer HR unless they fill it manually.
+- In the current HR Form 2 layout, questions explicitly labeled `(Declared By Candidate)` are the intended prefill targets in `BGV_4`.
+- Form 2 `Q11` (`r513ad5ab3a14453286bdb910820985ec`) is no longer a `(Declared By Candidate)` field, so it is intentionally not appended to `BGV_4` `FinalVerificationLink` and remains blank for employer HR unless they fill it manually.
 - All values are URL-encoded with `encodeUriComponent(...)`.
 
 ## 7) Field Mapping: Form 2 -> SharePoint (BGV_5)
@@ -179,7 +180,7 @@ Note:
 | `r72b23e4aa192405091846e1279085029` | Selected issues | `BGV_FormData.F2_SelectedIssues` | direct |
 | `rafe3ada4157c49fb9e555cd0fb53bd59` | Re-employ yes/no | `BGV_FormData.F2_EmployerWouldReEmploy` | `equals(value,'Yes')` (boolean) |
 | `r5f7ebc3390bc4699b160504c65254c3e` | Re-employ reason | `BGV_FormData.F2_ReEmployReason` | direct |
-| `r513ad5ab3a14453286bdb910820985ec` | Candidate reason for leaving (employer-submitted) | `BGV_FormData.F2_ReasonForLeaving` | direct (coalesce to empty string) |
+| `r513ad5ab3a14453286bdb910820985ec` | Reason for leaving (employer-entered response) | `BGV_FormData.F2_ReasonForLeaving` | direct (coalesce to empty string) |
 | Derived runtime values | Scoring output | `BGV_FormData.F2_Severity/Value`, `F2_Outcome`, `F2_Notes` | from variables |
 | Full Form 2 response JSON | Snapshot | `BGV_FormData.Form2RawJson` | `string(outputs('Get_response_details')?['body'])` |
 | Timestamp | Submission timestamp | `BGV_FormData.Form2SubmittedAt` | `utcNow()` |
@@ -258,7 +259,7 @@ Legend:
 | 8 | If company details are not accurate, select inaccurate fields | `rd05170e51ac34fef95f5464cf348bedc` (from user-provided prefill URL) | Key known; not wired in canonical flow JSON | N/A |
 | 9 | Explain the company-details discrepancy | `ra03058e9bbfd40d28014b0c669e92434` (from user-provided prefill URL) | Key known; not wired in canonical flow JSON | N/A |
 | 10 | Employment Period (Declared By Candidate) | `r0bef44c0d22d493f95a33484875b951e` (from user-provided prefill URL) | Prefill | `BGV_4` writes `start to end` if both dates exist, else uses the single available date |
-| 11 | Reason For Leaving (Declared By Candidate) | `r513ad5ab3a14453286bdb910820985ec` | Stored only | Not currently prefilled by `BGV_4`; employer HR enters this manually in Form 2, and the submitted response is stored in `BGV_FormData.F2_ReasonForLeaving` |
+| 11 | Reason For Leaving | `r513ad5ab3a14453286bdb910820985ec` | Stored only | Employer HR enters this manually in Form 2; it is not a current `(Declared By Candidate)` prefill field, and the submitted response is stored in `BGV_FormData.F2_ReasonForLeaving` |
 | 12 | Last Drawn Renumeration Package (Declared By Candidate) | `ra6ab2e26d2d84a92b33148fc4694773a` (from user-provided prefill URL) | Prefill | `BGV_4` uses `BGV_FormData.F1_LastDrawnSalary` |
 | 13 | Last Position Held (Declared By Candidate) | `r49ca8a655f5e4bcba0e8f75d4475ad77` (from user-provided prefill URL) | Prefill | `BGV_4` uses `BGV_FormData.F1_JobTitle` |
 | 14 | Employment details section field (question text not yet captured in repo) | Not present in current canonical flow JSON | Not wired | N/A |
@@ -319,6 +320,7 @@ This section records the color-circled field pairings requested by user for pref
 
 Related note:
 - HR Q4 `RequestID` remains auto-filled from `BGV_Requests.RequestID` (`rd745d133eb7f4611b59ea051f980f97a`) and is already implemented.
-- HR Q11 `Reason For Leaving (Declared By Candidate)` (`r513ad5ab3a14453286bdb910820985ec`) is not currently wired into the runtime `BGV_4` prefill URL.
+- HR questions explicitly labeled `(Declared By Candidate)` in the current Form 2 PDF are the prefill targets wired into `BGV_4`.
+- HR Q11 `Reason For Leaving` (`r513ad5ab3a14453286bdb910820985ec`) is not one of those current prefill fields.
   - Employer HR sees this Form 2 question blank unless they type a response manually.
   - The submitted Form 2 answer is still captured downstream in `BGV_FormData.F2_ReasonForLeaving`.
