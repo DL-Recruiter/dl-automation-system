@@ -46,8 +46,8 @@
         "Recurrence": {
           "type": "Recurrence",
           "recurrence": {
-            "frequency": "Minute",
-            "interval": 5,
+            "frequency": "Day",
+            "interval": 1,
             "startTime": "2026-02-03T01:00:00Z"
           }
         }
@@ -85,20 +85,20 @@
                   },
                   {
                     "equals": [
-                      "@items('Apply_to_each')?['Reminder1At']",
-                      ""
+                      "@empty(items('Apply_to_each')?['Reminder1At'])",
+                      true
                     ]
                   },
                   {
                     "equals": [
-                      "@items('Apply_to_each')?['ResponseReceivedAt']",
-                      ""
+                      "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
+                      true
                     ]
                   },
                   {
                     "lessOrEquals": [
                       "@items('Apply_to_each')?['HRRequestSentAt']",
-                      "@addMinutes(utcNow(),-5)"
+                      "@addDays(utcNow(),-2)"
                     ]
                   }
                 ]
@@ -159,28 +159,26 @@
                   },
                   {
                     "equals": [
-                      "@items('Apply_to_each')?['ResponseReceivedAt']",
-                      ""
+                      "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
+                      true
                     ]
                   },
                   {
-                    "not": {
-                      "equals": [
-                        "@items('Apply_to_each')?['Reminder1At']",
-                        ""
-                      ]
-                    }
+                    "equals": [
+                      "@empty(items('Apply_to_each')?['Reminder1At'])",
+                      false
+                    ]
                   },
                   {
                     "equals": [
-                      "@items('Apply_to_each')?['Reminder2At']",
-                      ""
+                      "@empty(items('Apply_to_each')?['Reminder2At'])",
+                      true
                     ]
                   },
                   {
                     "lessOrEquals": [
                       "@items('Apply_to_each')?['Reminder1At']",
-                      "@addMinutes(utcNow(),-5)"
+                      "@addDays(utcNow(),-3)"
                     ]
                   }
                 ]
@@ -246,22 +244,20 @@
                   },
                   {
                     "equals": [
-                      "@items('Apply_to_each')?['ResponseReceivedAt']",
-                      ""
+                      "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
+                      true
                     ]
                   },
                   {
-                    "not": {
-                      "equals": [
-                        "@items('Apply_to_each')?['Reminder2At']",
-                        ""
-                      ]
-                    }
+                    "equals": [
+                      "@empty(items('Apply_to_each')?['Reminder2At'])",
+                      false
+                    ]
                   },
                   {
                     "lessOrEquals": [
                       "@items('Apply_to_each')?['Reminder2At']",
-                      "@addMinutes(utcNow(),-5)"
+                      "@addDays(utcNow(),-1)"
                     ]
                   }
                 ]
@@ -306,20 +302,20 @@
                   },
                   {
                     "equals": [
-                      "@items('Apply_to_each')?['ResponseReceivedAt']",
-                      ""
+                      "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
+                      true
                     ]
                   },
                   {
                     "equals": [
-                      "@items('Apply_to_each')?['Reminder3At']",
-                      ""
+                      "@empty(items('Apply_to_each')?['Reminder3At'])",
+                      true
                     ]
                   },
                   {
                     "lessOrEquals": [
                       "@items('Apply_to_each')?['HRRequestSentAt']",
-                      "@addMinutes(utcNow(),-20)"
+                      "@addDays(utcNow(),-11)"
                     ]
                   }
                 ]

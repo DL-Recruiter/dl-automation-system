@@ -45,13 +45,13 @@
       "triggers": {
         "Recurrence": {
           "recurrence": {
-            "frequency": "Minute",
-            "interval": "5",
+            "frequency": "Day",
+            "interval": "1",
             "startTime": "2026-02-05T09:00:00Z"
           },
           "evaluatedRecurrence": {
-            "frequency": "Minute",
-            "interval": "5",
+            "frequency": "Day",
+            "interval": "1",
             "startTime": "2026-02-05T09:00:00Z"
           },
           "type": "Recurrence"
@@ -86,7 +86,7 @@
                     "actions": {
                       "DaysSinceLink": {
                         "type": "Compose",
-                        "inputs": "@div( \n\n  sub(ticks(utcNow()), ticks(items('Apply_to_each')?['AuthorizationLinkCreatedAt'])), \n\n  600000000 \n\n) "
+                        "inputs": "@div( \n\n  sub(ticks(utcNow()), ticks(items('Apply_to_each')?['AuthorizationLinkCreatedAt'])), \n\n  864000000000 \n\n) "
                       },
                       "Condition_2": {
                         "actions": {
@@ -132,70 +132,6 @@
                                   "authentication": "@parameters('$authentication')"
                                 }
                               },
-                              "Condition_4_-_escalation_check": {
-                                "actions": {
-                                  "Post_message_in_a_chat_or_channel": {
-                                    "type": "OpenApiConnection",
-                                    "inputs": {
-                                      "parameters": {
-                                        "poster": "Flow bot",
-                                        "location": "Channel",
-                                        "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
-                                        "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
-                                        "body/messageBody": "<p class=\"editor-paragraph\">Day 5 - Authorization form NOT SUBMITTED</p><br><p class=\"editor-paragraph\">Candidate : @{items('Apply_to_each')?['FullName']}</p><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each')?['CandidateID']}</p><p class=\"editor-paragraph\"><br>Authorization Link: @{items('Apply_to_each')?['AuthorizationLink']}</p>"
-                                      },
-                                      "host": {
-                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
-                                        "connectionName": "shared_teams",
-                                        "operationId": "PostMessageToConversation"
-                                      },
-                                      "authentication": "@parameters('$authentication')"
-                                    }
-                                  },
-                                  "Send_an_email_(V2)_1": {
-                                    "runAfter": {
-                                      "Post_message_in_a_chat_or_channel": [
-                                        "Succeeded"
-                                      ]
-                                    },
-                                    "type": "OpenApiConnection",
-                                    "inputs": {
-                                      "parameters": {
-                                        "emailMessage/To": "recruitmentops@dlresources.com.sg",
-                                        "emailMessage/Subject": "[Day 5 ALERT} Authorization Form Not Submitted ",
-                                        "emailMessage/Body": "<p class=\"editor-paragraph\">Hi Team,</p><br><p class=\"editor-paragraph\">Candidate has not completed the Authorization Form after 5 days of reminder. Please ask applicant to fill it up.</p><br><p class=\"editor-paragraph\">Candidate: @{outputs('Update_item_-_lastauthremindersentat')?['body/FullName']}<br>Candidate ID: @{outputs('Update_item_-_lastauthremindersentat')?['body/CandidateID']}</p><p class=\"editor-paragraph\">Candidate Email: @{outputs('Update_item_-_lastauthremindersentat')?['body/CandidateEmail']}<br>Status: @{items('Apply_to_each')?['Status/Value']}<br><br>Authorization Link: @{outputs('Update_item_-_lastauthremindersentat')?['body/AuthorizationLink']}</p>",
-                                        "emailMessage/Importance": "Normal",
-                                        "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg"
-                                      },
-                                      "host": {
-                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
-                                        "connectionName": "shared_office365",
-                                        "operationId": "SharedMailboxSendEmailV2"
-                                      },
-                                      "authentication": "@parameters('$authentication')"
-                                    }
-                                  }
-                                },
-                                "runAfter": {
-                                  "Update_item_-_lastauthremindersentat": [
-                                    "Succeeded"
-                                  ]
-                                },
-                                "else": {
-                                  "actions": {}
-                                },
-                                "expression": {
-                                  "and": [
-                                    {
-                                      "equals": [
-                                        "@outputs('DaysSinceLink')",
-                                        20
-                                      ]
-                                    }
-                                  ]
-                                },
-                                "type": "If"
-                              }
                             },
                             "else": {
                               "actions": {}
@@ -210,7 +146,7 @@
                                 },
                                 {
                                   "equals": [
-                                    "@lessOrEquals(items('Apply_to_each')?['LastAuthReminderAt'], addMinutes(utcNow(),-5))",
+                                    "@not(equals(formatDateTime(items('Apply_to_each')?['LastAuthReminderAt'],'yyyy-MM-dd'), formatDateTime(utcNow(),'yyyy-MM-dd'))) ",
                                     true
                                   ]
                                 }
@@ -232,13 +168,80 @@
                             {
                               "greaterOrEquals": [
                                 "@outputs('DaysSinceLink')",
-                                5
+                                1
                               ]
                             },
                             {
                               "lessOrEquals": [
                                 "@outputs('DaysSinceLink')",
-                                240
+                                5
+                              ]
+                            }
+                          ]
+                        },
+                        "type": "If"
+                      },
+                      "Condition_4_-_escalation_check": {
+                        "actions": {
+                          "Post_message_in_a_chat_or_channel": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "poster": "Flow bot",
+                                "location": "Channel",
+                                "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
+                                "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
+                                "body/messageBody": "<p class=\"editor-paragraph\">Day 5 - Authorization form NOT SUBMITTED</p><br><p class=\"editor-paragraph\">Candidate : @{items('Apply_to_each')?['FullName']}</p><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each')?['CandidateID']}</p><p class=\"editor-paragraph\"><br>Authorization Link: @{items('Apply_to_each')?['AuthorizationLink']}</p>"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                                "connectionName": "shared_teams",
+                                "operationId": "PostMessageToConversation"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          },
+                          "Send_an_email_(V2)_1": {
+                            "runAfter": {
+                              "Post_message_in_a_chat_or_channel": [
+                                "Succeeded",
+                                "Failed",
+                                "TimedOut",
+                                "Skipped"
+                              ]
+                            },
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "emailMessage/To": "recruitmentops@dlresources.com.sg",
+                                "emailMessage/Subject": "[Day 5 ALERT} Authorization Form Not Submitted ",
+                                "emailMessage/Body": "<p class=\"editor-paragraph\">Hi Team,</p><br><p class=\"editor-paragraph\">Candidate has not completed the Authorization Form after 5 days of reminder. Please ask applicant to fill it up.</p><br><p class=\"editor-paragraph\">Candidate: @{items('Apply_to_each')?['FullName']}<br>Candidate ID: @{items('Apply_to_each')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Email: @{items('Apply_to_each')?['CandidateEmail']}<br>Status: @{items('Apply_to_each')?['Status/Value']}<br><br>Authorization Link: @{items('Apply_to_each')?['AuthorizationLink']}</p>",
+                                "emailMessage/Importance": "Normal",
+                                "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                                "connectionName": "shared_office365",
+                                "operationId": "SharedMailboxSendEmailV2"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          }
+                        },
+                        "runAfter": {
+                          "Condition_2": [
+                            "Succeeded"
+                          ]
+                        },
+                        "else": {
+                          "actions": {}
+                        },
+                        "expression": {
+                          "and": [
+                            {
+                              "equals": [
+                                "@outputs('DaysSinceLink')",
+                                5
                               ]
                             }
                           ]

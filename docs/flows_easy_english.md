@@ -64,21 +64,18 @@ This document describes the current behavior in your canonical flow files under 
 - Main outcome: Signed authorization files are no longer broadly shared.
 
 ### `BGV_3_AuthReminder_5Days`
-- Trigger: Temporary test recurrence every 5 minutes.
+- Trigger: Daily recurrence.
 - What it does:
   - Gets candidates with `Status = Pending Authorization Form Signature`.
-  - Computes minutes since authorization link creation for the current temporary test window.
-  - Sends reminder emails every 5 minutes from minute 5 up to minute 240 while the candidate is still pending.
-  - Uses `LastAuthReminderAt` consistently to avoid duplicate sends inside the same 5-minute window.
-  - Temporary escalation check now evaluates the computed `DaysSinceLink` expression at minute 20.
+  - Computes days since authorization link creation.
+  - Sends reminder emails between day 1 and day 5, max once per day.
+  - Uses `LastAuthReminderAt` consistently to avoid duplicate same-day reminders.
+  - Reminder updates only stamp `LastAuthReminderAt`; they do not change candidate status to signed/obtained.
   - Reminder update no longer flips `ConsentCaptured`; it only stamps reminder timestamp fields.`\n  - Outer reminder gate now checks `AuthorisationSigned` instead of `ConsentCaptured` so stale consent flags do not block pending reminders.
-  - On the temporary minute-20 unresolved case, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email to `recruitmentops@dlresources.com.sg`.
+  - Day-5 escalation now runs independently of whether a same-day reminder email was sent, so stale `LastAuthReminderAt` values do not suppress escalation.
+  - Day-5 escalation email now uses current candidate item values directly and still sends even if the Teams post step fails.
+  - On day 5 unresolved cases, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email to `recruitmentops@dlresources.com.sg`.
   - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
-- Temporary rollback values:
-  - Recurrence back to `Day / 1`
-  - Time-unit divisor back to `864000000000`
-  - Reminder window back to day `1` through day `5`
-  - Escalation back to day `5`
 - Main outcome: Unsigned candidate authorization forms are actively chased and escalated.
 
 ### `BGV_4_SendToEmployer_Clean`
@@ -142,13 +139,13 @@ This document describes the current behavior in your canonical flow files under 
 - Main outcome: Employer response is automatically triaged, stored, and escalated when needed.
 
 ### `BGV_6_HRReminderAndEscalation`
-- Trigger: Temporary test recurrence every 5 minutes.
+- Trigger: Daily recurrence.
 - Selection baseline: requests with `VerificationStatus = Sent` and still no response.
 - Reminder/escalation timeline:
-  - Reminder 1: 5+ minutes after `HRRequestSentAt`.
-  - Reminder 2: 5+ minutes after `Reminder1At`.
-  - Escalation post to recruiters: 5+ minutes after `Reminder2At` with no response.
-  - Final reminder: 20+ minutes after `HRRequestSentAt` when `Reminder3At` is empty.
+  - Reminder 1: when HR request is at least 2 days old.
+  - Reminder 2: 3+ days after Reminder 1.
+  - Escalation post to recruiters: 1+ day after Reminder 2 with no response.
+  - Final reminder: when HR request is 11+ days old and `Reminder3At` is empty.
 - What it updates:
   - Reminder timestamps (`Reminder1At`, `Reminder2At`, `Reminder3At`)
   - Shared-mailbox reminder emails
@@ -157,13 +154,8 @@ This document describes the current behavior in your canonical flow files under 
     - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
     - `channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
   - Shared-mailbox sender is `recruitmentops@dlresources.com.sg`.
+  - Reminder conditions now use `empty(...)`-safe checks for SharePoint date fields so null/blank timestamps do not block reminder branches unexpectedly.
   - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
-- Temporary rollback values:
-  - Recurrence back to `Day / 1`
-  - Reminder 1 back to `2` days from `HRRequestSentAt`
-  - Reminder 2 back to `3` days from `Reminder1At`
-  - Escalation back to `1` day from `Reminder2At`
-  - Final reminder back to `11` days from `HRRequestSentAt`
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
 
 ## How the Flows Connect

@@ -1205,3 +1205,32 @@ Log each session with:
   - `git diff -- flows/...BGV_3... flows/...BGV_6... docs/flows_easy_english.md docs/progress.md`
 - Next actions and blockers:
   - Next action: pack/import via PAC, then run live tests against one pending candidate and one pending HR request.
+
+## 2026-03-11 (BGV_3 and BGV_6 reminder flows reverted to production timing and repaired)
+- Current status:
+  - Reverted the temporary reminder test mode and repaired the production reminder logic defects that were causing skipped reminder emails and inconsistent escalation behavior.
+- Completed tasks:
+  - Updated canonical flows:
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - BGV_3 repairs:
+    - reverted recurrence from `Minute / 5` back to `Day / 1`
+    - reverted `DaysSinceLink` from minute-based ticks back to day-based ticks (`864000000000`)
+    - reverted reminder window from minute `5..240` back to day `1..5`
+    - reverted same-day resend guard to the original date-based check
+    - moved day-5 escalation out of the reminder-send branch so escalation no longer depends on that day's reminder email being sent
+    - changed day-5 escalation email to use current candidate values directly instead of the reminder update action output
+    - allowed day-5 escalation email to continue even if the Teams post fails
+    - confirmed the reminder update still only stamps `LastAuthReminderAt` and does not set candidate status to `Obtained Authorization Form Signature`
+  - BGV_6 repairs:
+    - reverted recurrence from `Minute / 5` back to `Day / 1`
+    - reverted thresholds back to `2d / 3d / 1d / 11d`
+    - replaced brittle `""` date comparisons with `empty(...)` checks for `Reminder1At`, `Reminder2At`, `Reminder3At`, and `ResponseReceivedAt`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` checks on updated BGV_3 and BGV_6 JSON
+  - `Get-ChildItem flows/power-automate/unpacked/Workflows/*.json | ... ConvertFrom-Json`
+  - `git diff -- flows/...BGV_3... flows/...BGV_6...`
+- Next actions and blockers:
+  - Next action: push/import repaired production reminder flows, then verify one pending candidate and one pending employer request against live run history.
