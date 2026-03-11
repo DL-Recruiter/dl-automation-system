@@ -1600,3 +1600,46 @@ Log each session with:
   - Next action: run live smoke checks for one candidate declaration,
     one employer response path, and reminder-flow health in Power
     Automate run history.
+
+## 2026-03-11 (Post-import live verification from shell)
+- Current status:
+  - Verified the imported `BGV_System` workflows are present and active
+    in the target environment from the current shell, but could not run
+    full run-history or form-submission smoke tests because the required
+    live verification credentials and UI-only submission path are not
+    available here.
+- Completed tasks:
+  - Verified PAC identity again before live checks:
+    - `edwin.teo@dlresources.com.sg`
+  - Queried the target environment and confirmed the deployed workflow
+    records for the main automation flows are present and active:
+    - `BGV_0_CandidateDeclaration`
+    - `BGV_1_Detect_Authorization_Signature`
+    - `BGV_2_Postsignature`
+    - `BGV_3_AuthReminder_5Days`
+    - `BGV_4_SendToEmployer_Clean`
+    - `BGV_5_Response1`
+    - `BGV_6_HRReminderAndEscalation`
+  - Confirmed those workflow records show fresh `modifiedon` timestamps
+    from the March 11, 2026 import window.
+  - Confirmed the extra `BGV_A_CandidateSubmission` record remains
+    `Draft` and is not part of the 7 active production flows.
+  - Confirmed the repo run-history scripts cannot be executed from this
+    shell as-is because no `FLOW_VERIFY_*` environment variables or
+    local `.env` file are configured.
+- Validation commands run:
+  - `pac auth who`
+  - `pac env list`
+  - `pac env fetch --environment https://orgde64dc49.crm5.dynamics.com/ --xmlFile <temp workflow fetch xml>`
+  - `pac env fetch --environment https://orgde64dc49.crm5.dynamics.com/ --xmlFile <temp workflow modifiedon fetch xml>`
+  - `Get-ChildItem Env:FLOW_VERIFY_*`
+- Next actions and blockers:
+  - Blocker: no configured `FLOW_VERIFY_TENANT_ID`, `FLOW_VERIFY_CLIENT_ID`,
+    `FLOW_VERIFY_CLIENT_SECRET`, or `FLOW_VERIFY_ENVIRONMENT_ID` for the
+    run-history scripts in this shell.
+  - Blocker: live Microsoft Forms candidate/employer submissions remain
+    a manual/UI path and were not triggered from this shell.
+  - Next action: submit one live candidate declaration and one live
+    employer response manually, then inspect Power Automate run history
+    in the portal or configure the `FLOW_VERIFY_*` app credentials so
+    `py scripts/active/pull_all_flow_runs.py` can be used non-interactively.
