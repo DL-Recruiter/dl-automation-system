@@ -1234,3 +1234,28 @@ Log each session with:
   - `git diff -- flows/...BGV_3... flows/...BGV_6...`
 - Next actions and blockers:
   - Next action: push/import repaired production reminder flows, then verify one pending candidate and one pending employer request against live run history.
+
+## 2026-03-11 (BGV_4 prefilled employer form mapping restored to cloud from canonical source)
+- Current status:
+  - Verified the canonical `BGV_4_SendToEmployer_Clean` flow still contained the expected Microsoft Forms prefill mapping, then re-imported the solution so the live Power Automate version matches GitHub again.
+- Completed tasks:
+  - Inspected canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - Confirmed `FinalVerificationLink` still maps the employer verification form prefill fields for:
+    - candidate full name
+    - identification number
+    - request ID
+    - employer name
+    - employer UEN
+    - employer address
+    - employment period
+    - last drawn salary
+    - job title
+  - Repacked and re-imported the current canonical solution to restore those mappings to the cloud flow.
+- Validation commands run:
+  - `rg -n "FinalVerificationLink|r4930|r27b6|rd745|rccaf|rcf35|r19aa|r0bef|ra6ab|r49ca" ...BGV_4...json`
+  - `ConvertFrom-Json` on canonical BGV_4 JSON
+  - `pac solution pack ...`
+  - `pac solution import ... --publish-changes --force-overwrite`
+- Next actions and blockers:
+  - Next action: trigger one BGV_4 send cycle and confirm the live employer form link arrives with the expected prefilled values.
