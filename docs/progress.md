@@ -1643,3 +1643,110 @@ Log each session with:
     employer response manually, then inspect Power Automate run history
     in the portal or configure the `FLOW_VERIFY_*` app credentials so
     `py scripts/active/pull_all_flow_runs.py` can be used non-interactively.
+
+## 2026-03-11 (VS Code migration toolchain install)
+- Current status:
+  - Installed the missing local CLI/module pieces needed for a more
+    VS Code-driven Microsoft 365 migration workflow.
+- Completed tasks:
+  - Confirmed the already-installed VS Code extensions relevant to the
+    BGV Power Platform/Azure workflow:
+    - `microsoft-isvexptools.powerplatform-vscode`
+    - `ms-vscode.powershell`
+    - `ms-azuretools.vscode-azurefunctions`
+    - `ms-azuretools.vscode-azureresourcegroups`
+    - `ms-vscode.azurecli`
+    - `daniellaskewitz.power-platform-connectors`
+    - `richardwilson.powerplatform-connector-linter`
+  - Installed additional relevant VS Code extensions:
+    - `adamwojcikit.cli-for-microsoft-365-extension`
+    - `ms-azuretools.vscode-azurestorage`
+  - Installed `CLI for Microsoft 365` globally for the current user via
+    npm.
+  - Installed `Microsoft.Graph` PowerShell modules for the current user
+    from `PSGallery`.
+  - Verified the following local tools are now available together:
+    - `pac`
+    - `az`
+    - `func`
+    - `m365`
+    - `PnP.PowerShell`
+    - `Microsoft.Graph`
+- Validation commands run:
+  - `node -v`
+  - `npm -v`
+  - `npm config get prefix`
+  - `Get-PSRepository`
+  - `& 'C:\Users\EdwinTeo\AppData\Local\Programs\Microsoft VS Code\bin\code.cmd' --list-extensions --show-versions`
+  - `npm install -g @pnp/cli-microsoft365@latest`
+  - `Install-Module Microsoft.Graph -Scope CurrentUser -Repository PSGallery -Force -AllowClobber`
+  - `m365 --version`
+  - `Get-Module -ListAvailable Microsoft.Graph, Microsoft.Graph.Authentication`
+  - `Get-Command Connect-MgGraph, Get-MgSite`
+  - `code.cmd --install-extension adamwojcikit.cli-for-microsoft-365-extension`
+  - `code.cmd --install-extension ms-azuretools.vscode-azurestorage`
+  - `code.cmd --list-extensions --show-versions`
+- Next actions and blockers:
+  - Next action: use the newly available `m365`, `PnP.PowerShell`, and
+    `Microsoft.Graph` tooling to design a scripted migration path from
+    `https://dlresourcespl88.sharepoint.com/sites/dlrespl` to
+    `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570`.
+  - Next action: refactor hardcoded SharePoint/list/library/template
+    bindings in the BGV solution into deploy-time settings before any
+    production cutover.
+
+## 2026-03-11 (Collaborator VS Code toolchain guide and Codex sign-in SOP)
+- Current status:
+  - Added a shareable collaborator setup guide covering the approved
+    VS Code extension set, terminal toolchain, one-time installation,
+    and Codex-assisted daily sign-in workflow for the BGV repo.
+- Completed tasks:
+  - Added `docs/vscode_ms365_toolchain_guide.md` with:
+    - current BGV baseline values and accounts
+    - approved VS Code extensions and CLI/module stack
+    - validated local version snapshot
+    - one-time installation commands
+    - extension-to-auth mapping
+    - human-vs-Codex responsibility split
+    - standard Codex-assisted sign-in SOP for `pac`, `az`, `m365`,
+      `PnP.PowerShell`, and `Microsoft.Graph`
+    - collaborator access checklist
+    - recommended Codex prompts
+    - troubleshooting and official reference links
+  - Updated `docs/ms365_authentication_runbook.md` to align with the new
+    toolchain guide and add `Microsoft.Graph` install/login guidance.
+  - Updated `README.md` one-time setup section to point collaborators to
+    the new toolchain guide and auth runbook.
+  - Updated `docs/file_index.md` and `docs/repo_inventory.md` so the
+    new guide and expanded auth runbook are discoverable.
+- Validation commands run:
+  - `code.cmd --list-extensions --show-versions`
+  - `Get-Command pac, az, func, m365, git`
+  - `Get-Module -ListAvailable PnP.PowerShell, Microsoft.Graph`
+  - `dotnet --version`
+  - `py --version`
+  - `Select-String -Path README.md, docs/ms365_authentication_runbook.md, docs/vscode_ms365_toolchain_guide.md -Pattern "Codex-assisted sign-in|Microsoft.Graph|CLI for Microsoft 365|vscode_ms365_toolchain_guide"`
+- Next actions and blockers:
+  - Next action: run the first live `m365` and `Microsoft.Graph`
+    sign-in validation with browser/device prompts and record the exact
+    post-login verification commands/results.
+  - Next action: turn the documented daily preflight into a reusable
+    bootstrap script once the live sign-in behavior is confirmed.
+
+## 2026-03-11 (Reading-order guide for first-time setup and daily SOP)
+- Current status:
+  - Added a short master guide that tells collaborators which repo docs
+    to read and in what order for first-time setup, daily work,
+    migration tasks, troubleshooting, and deployment.
+- Completed tasks:
+  - Added `docs/first_time_and_daily_sop_guide.md`.
+  - Updated `README.md` so first-time users are pointed to that guide
+    before the deeper setup and auth docs.
+  - Updated `docs/file_index.md` and `docs/repo_inventory.md` so the new
+    reading-order guide is discoverable.
+- Validation commands run:
+  - `Select-String -Path README.md, docs/first_time_and_daily_sop_guide.md -Pattern "first_time_and_daily_sop_guide|first-time|daily work"`
+  - `Select-String -Path docs/file_index.md, docs/repo_inventory.md -Pattern "first_time_and_daily_sop_guide"`
+- Next actions and blockers:
+  - Next action: use the new reading-order guide as the first document to
+    share with collaborators before machine setup or sign-in validation.

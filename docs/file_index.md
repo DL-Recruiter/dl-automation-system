@@ -26,10 +26,13 @@
 - `docs/architecture_flows.md` - Flow/connector integration and PAC CLI guidance.
 - `docs/collaboration_setup_guide.md` - Step-by-step collaboration guide for Edwin and Recruitment accounts.
 - `docs/data_mapping_dictionary.md` - Canonical field-level mapping and data dictionary for Forms, SharePoint lists, document library, and flows BGV_0 to BGV_6.
+- `docs/first_time_and_daily_sop_guide.md` - Reading-order guide that tells collaborators which repo documents to use for first-time setup, daily SOP, migration, troubleshooting, and deployment.
 - `docs/flows_easy_english.md` - Plain-language explanation of BGV_0 to BGV_6 process flow.
+- `docs/ms365_authentication_runbook.md` - Authentication reference for PAC, Azure, PnP PowerShell, CLI for Microsoft 365, and Microsoft Graph.
 - `docs/progress.md` - Ongoing status log for completed tasks and next actions.
 - `docs/repo_inventory.md` - Full tracked-file inventory with file-by-file purpose descriptions.
 - `docs/sharepoint_list_user_guide.md` - Beginner-friendly guide to the main BGV SharePoint stores and their important business columns.
+- `docs/vscode_ms365_toolchain_guide.md` - End-to-end collaborator setup guide for VS Code extensions, CLI tools, PowerShell modules, and Codex-assisted sign-in SOPs.
 - `.github/workflows/linked-docs-guard.yml` - CI guard that enforces linked documentation updates when canonical flow JSON files are changed.
 - `flows/main.flow.json` - Placeholder export metadata for main flow.
 - `flows/flowrunlogs-exporter.flow.json` - Placeholder export metadata for FlowRunLogs exporter flow.

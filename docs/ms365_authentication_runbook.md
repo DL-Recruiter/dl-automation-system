@@ -7,8 +7,12 @@ This document is the single reference for authentication setup across:
 - Azure (`az`)
 - SharePoint list administration (PnP PowerShell)
 - Microsoft 365 CLI (`m365`, optional)
+- Microsoft Graph PowerShell (`Microsoft.Graph`, optional)
 
 Use this when setting up a new machine or re-establishing access.
+
+For the full VS Code extension + CLI/module setup workflow, see:
+- `docs/vscode_ms365_toolchain_guide.md`
 
 ## 1) Shared Baseline Values
 
@@ -43,6 +47,12 @@ PnP PowerShell auth:
 `m365` CLI auth (optional):
 - Used for Microsoft 365 admin/content tasks through CLI for Microsoft 365.
 
+Microsoft Graph PowerShell auth (optional):
+- Used for inventory, validation, and selected scripted Microsoft 365
+  tasks when Graph is more appropriate than SharePoint-specific tooling.
+- Prefer read-only Graph scopes first and only request write scopes for
+  migration tasks that actually need them.
+
 ## 3) One-Time Setup Per Machine
 
 ### 3.1 Verify tool availability
@@ -50,11 +60,13 @@ PnP PowerShell auth:
 pac auth list
 az account show
 Get-Module -ListAvailable PnP.PowerShell
+Get-Module -ListAvailable Microsoft.Graph
 ```
 
 Optional:
 ```powershell
 m365 status
+Get-MgContext
 ```
 
 ### 3.2 Create/select Power Platform profiles
@@ -113,6 +125,25 @@ m365 login --authType browser
 m365 status
 ```
 
+### 3.6 Microsoft Graph PowerShell (optional)
+If not installed:
+```powershell
+Install-Module Microsoft.Graph -Scope CurrentUser -Repository PSGallery -Force -AllowClobber
+```
+
+Read-only inventory/validation login:
+```powershell
+Connect-MgGraph -NoWelcome -Scopes "User.Read","Sites.Read.All","Files.Read.All","Group.Read.All"
+Get-MgContext
+```
+
+If a migration task really needs write access, request it explicitly and
+only for that session:
+```powershell
+Connect-MgGraph -NoWelcome -Scopes "User.Read","Sites.ReadWrite.All","Files.ReadWrite.All","Group.Read.All"
+Get-MgContext
+```
+
 ## 4) Daily Preflight Checklist
 
 Run before editing/deploying flows:
@@ -122,6 +153,8 @@ git remote -v
 git status --short --branch
 pac auth who
 az account show
+m365 status
+Get-MgContext
 ```
 
 Expected for this project:
@@ -142,9 +175,14 @@ If touching SharePoint lists directly:
 Get-PnPConnection
 ```
 
-If using m365 CLI:
+If using `m365` CLI:
 ```powershell
 m365 status
+```
+
+If using Graph PowerShell:
+```powershell
+Get-MgContext
 ```
 
 ## 5) Account Switching Rules
@@ -192,4 +230,11 @@ PnP fails due missing app context:
 
 `m365` command not found:
 - Install `@pnp/cli-microsoft365` globally and reopen terminal.
+
+`Connect-MgGraph` / `Get-MgContext` not found:
+- Install `Microsoft.Graph` for the current user and reopen terminal.
+
+Graph login succeeds but the needed command still fails:
+- Check whether the current Graph context has the required scopes.
+- Reconnect with the minimal additional scopes required for that task.
 

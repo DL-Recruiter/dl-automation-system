@@ -176,6 +176,11 @@ rather than a logic change.
 
 1. Open the repo in VS Code at
    `C:\DLR Automation VS Studio Code\bgv_project`.
+1. If this is your first time in the project, start with:
+   - `docs/first_time_and_daily_sop_guide.md`
+1. For the full extension, CLI, module, and sign-in setup guide, read:
+   - `docs/vscode_ms365_toolchain_guide.md`
+   - `docs/ms365_authentication_runbook.md`
 1. Make sure these tools exist in the terminal:
 
    - `git`

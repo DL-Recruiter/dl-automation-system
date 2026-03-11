@@ -30,10 +30,13 @@ Generated `.NET` build/test outputs such as `bin/`, `obj/`, and `TestResults/` a
 - `docs/collaboration_setup_guide.md` - Collaboration SOP for auth profiles, daily sync, pack/import, and sharing steps.
 - `docs/data_mapping_dictionary.md` - Exact field-level mapping and data dictionary for current BGV flow/list/form wiring.
 - `docs/file_index.md` - Quick index of key repository folders and files.
+- `docs/first_time_and_daily_sop_guide.md` - Reading-order guide that tells collaborators which docs to use for first-time setup, daily work, migration, troubleshooting, and deployment.
 - `docs/flows_easy_english.md` - Plain-language explanation of BGV_0 to BGV_6 business logic.
+- `docs/ms365_authentication_runbook.md` - Authentication setup and daily verification reference for PAC, Azure, PnP PowerShell, CLI for Microsoft 365, and Graph PowerShell.
 - `docs/progress.md` - Chronological change log with validation commands, blockers, and next actions.
 - `docs/repo_inventory.md` - Full tracked-file inventory with purpose descriptions.
 - `docs/sharepoint_list_user_guide.md` - Beginner-friendly user guide to the main BGV SharePoint stores and their important business columns.
+- `docs/vscode_ms365_toolchain_guide.md` - Shareable collaborator guide for VS Code extensions, Microsoft 365 tooling, and Codex-assisted sign-in SOPs.
 
 ## Flow Export Files
 - `flows/main.flow.json` - Placeholder metadata for main flow export.
