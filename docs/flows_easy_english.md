@@ -49,7 +49,8 @@ This document describes the current behavior in your canonical flow files under 
   - Sends file content to Azure Function parser.
   - Reads parser output directly and does tolerant signature checks.
   - Filters parsed controls by tag/title containing `SignedYes` (and compatibility fallback `CandidateAuthorisation`).
-  - Marks signed if parser `signedYes` is true-like or any matched checkbox has `isChecked = true`.
+  - Marks signed when a matched `SignedYes` checkbox is actually checked.
+  - Uses parser `signedYes = true` only as a fallback for legacy cases where no matching checkbox controls are returned at all.
   - If signed, updates candidate record:
     - `AuthorisationSigned = true`
     - consent/status fields for signed authorization.
@@ -59,7 +60,7 @@ This document describes the current behavior in your canonical flow files under 
 - Trigger: Candidate item created or modified.
 - Condition: candidate status is `Obtained Authorization Form Signature`.
 - What it does:
-  - Finds related `.docx` files in authorization folder.
+  - Finds related files only inside the candidate's own authorization folder.
   - Stops sharing for those files.
 - Main outcome: Signed authorization files are no longer broadly shared.
 

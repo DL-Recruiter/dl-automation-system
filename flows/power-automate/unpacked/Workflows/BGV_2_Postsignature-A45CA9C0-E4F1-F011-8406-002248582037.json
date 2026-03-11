@@ -69,7 +69,7 @@
                 "parameters": {
                   "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
                   "table": "d411563f-2b1c-4fa5-90fc-ecc5f50941a1",
-                  "$filter": "File_x0020_Type eq 'docx'\n"
+                  "folderPath": "@outputs('Compose')"
                 },
                 "host": {
                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",

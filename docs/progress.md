@@ -1371,6 +1371,7 @@ Log each session with:
 - Next actions and blockers:
   - Next action: trigger one BGV_4 send cycle and confirm the live employer form link arrives with the expected prefilled values.
 
+<<<<<<< HEAD
 ## 2026-03-11 (HR form Q8/Q9 mapping correction from prefilled URL)
 - Current status:
   - Corrected the HR form inventory so the company-details section matches
@@ -1750,3 +1751,24 @@ Log each session with:
 - Next actions and blockers:
   - Next action: use the new reading-order guide as the first document to
     share with collaborators before machine setup or sign-in validation.
+## 2026-03-11 (BGV_1/BGV_2 stop-sharing hardened to signed-checkbox only)
+- Current status:
+  - Investigated premature authorization-link removal and tightened both the signature-detection and post-signature unshare scope.
+- Completed tasks:
+  - Updated canonical flows:
+    - `flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_2_Postsignature-A45CA9C0-E4F1-F011-8406-002248582037.json`
+  - BGV_1 changes:
+    - primary signed condition now relies on `Filter_array_-_SignedYes_Checked` length > 0
+    - parser `signedYes = true` now acts only as fallback when no matching `SignedYes` controls are returned at all
+    - this prevents a broad parser `signedYes` flag from marking current templates as signed when the checkbox is still unchecked
+  - BGV_2 changes:
+    - replaced broad library-wide `.docx` filter with `folderPath = @outputs('Compose')`
+    - unshare now targets only files inside `/BGV Records/Candidate Files/<CandidateID>/Authorization/`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` on updated BGV_1 and BGV_2 JSON
+  - `git diff -- ...BGV_1... ...BGV_2...`
+- Next actions and blockers:
+  - Next action: import the updated solution and test one unsigned authorization file plus one signed authorization file to confirm the link remains active until the checkbox is actually checked.

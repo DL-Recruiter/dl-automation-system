@@ -161,15 +161,41 @@
               "expression": {
                 "or": [
                   {
-                    "equals": [
-                      "@toLower(string(body('HTTP')?['signedYes']))",
-                      "true"
-                    ]
-                  },
-                  {
                     "greater": [
                       "@length(body('Filter_array_-_SignedYes_Checked'))",
                       0
+                    ]
+                  },
+                  {
+                    "and": [
+                      {
+                        "equals": [
+                          "@toLower(string(body('HTTP')?['signedYes']))",
+                          "true"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@length(body('Filter_array_-_SignedYes'))",
+                          0
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "and": [
+                      {
+                        "equals": [
+                          "@toLower(string(body('HTTP')?['signedYes']))",
+                          "true"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@length(coalesce(body('HTTP')?['controlsFound'], createArray()))",
+                          0
+                        ]
+                      }
                     ]
                   }
                 ]
