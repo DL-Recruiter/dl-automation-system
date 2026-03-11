@@ -45,13 +45,13 @@
       "triggers": {
         "Recurrence": {
           "recurrence": {
-            "frequency": "Day",
-            "interval": "1",
+            "frequency": "Minute",
+            "interval": "5",
             "startTime": "2026-02-05T09:00:00Z"
           },
           "evaluatedRecurrence": {
-            "frequency": "Day",
-            "interval": "1",
+            "frequency": "Minute",
+            "interval": "5",
             "startTime": "2026-02-05T09:00:00Z"
           },
           "type": "Recurrence"
@@ -86,7 +86,7 @@
                     "actions": {
                       "DaysSinceLink": {
                         "type": "Compose",
-                        "inputs": "@div( \n\n  sub(ticks(utcNow()), ticks(items('Apply_to_each')?['AuthorizationLinkCreatedAt'])), \n\n  864000000000 \n\n) "
+                        "inputs": "@div( \n\n  sub(ticks(utcNow()), ticks(items('Apply_to_each')?['AuthorizationLinkCreatedAt'])), \n\n  600000000 \n\n) "
                       },
                       "Condition_2": {
                         "actions": {
@@ -189,7 +189,7 @@
                                     {
                                       "equals": [
                                         "@outputs('DaysSinceLink')",
-                                        5
+                                        20
                                       ]
                                     }
                                   ]
@@ -210,7 +210,7 @@
                                 },
                                 {
                                   "equals": [
-                                    "@not(equals(formatDateTime(items('Apply_to_each')?['LastAuthReminderAt'],'yyyy-MM-dd'), formatDateTime(utcNow(),'yyyy-MM-dd'))) ",
+                                    "@lessOrEquals(items('Apply_to_each')?['LastAuthReminderAt'], addMinutes(utcNow(),-5))",
                                     true
                                   ]
                                 }
@@ -232,13 +232,13 @@
                             {
                               "greaterOrEquals": [
                                 "@outputs('DaysSinceLink')",
-                                1
+                                5
                               ]
                             },
                             {
                               "lessOrEquals": [
                                 "@outputs('DaysSinceLink')",
-                                5
+                                240
                               ]
                             }
                           ]

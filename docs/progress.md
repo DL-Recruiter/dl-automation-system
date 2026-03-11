@@ -1175,3 +1175,33 @@ Log each session with:
   - `git diff -- ...BGV_4...json`
 - Next actions and blockers:
   - Next action: commit and push synced canonical artifacts.
+
+## 2026-03-11 (Temporary 4-hour reminder test mode re-enabled for BGV_3 and BGV_6)
+- Current status:
+  - Re-enabled temporary high-frequency reminder timing so both reminder flows can be validated live within a 4-hour window and rolled back cleanly afterward.
+- Completed tasks:
+  - Updated canonical flows:
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - BGV_3 temporary test settings:
+    - recurrence changed to `Minute / 5`
+    - `DaysSinceLink` switched from day-based ticks to minute-based ticks (`600000000`)
+    - reminder send window changed to minute `5` through minute `240`
+    - resend guard changed to `LastAuthReminderAt <= utcNow()-5 minutes`
+    - escalation trigger changed to minute `20`
+  - BGV_6 temporary test settings:
+    - recurrence changed to `Minute / 5`
+    - Reminder 1 changed to `HRRequestSentAt <= utcNow()-5 minutes`
+    - Reminder 2 changed to `Reminder1At <= utcNow()-5 minutes`
+    - recruiter escalation changed to `Reminder2At <= utcNow()-5 minutes`
+    - final reminder changed to `HRRequestSentAt <= utcNow()-20 minutes`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+  - Rollback values preserved for later restoration:
+    - BGV_3 back to `Day / 1`, day-based ticks, day `1..5` reminder window, day `5` escalation
+    - BGV_6 back to `Day / 1`, `2d / 3d / 1d / 11d` thresholds
+- Validation commands run:
+  - `ConvertFrom-Json` checks on updated BGV_3 and BGV_6 JSON
+  - `git diff -- flows/...BGV_3... flows/...BGV_6... docs/flows_easy_english.md docs/progress.md`
+- Next actions and blockers:
+  - Next action: pack/import via PAC, then run live tests against one pending candidate and one pending HR request.
