@@ -6,7 +6,7 @@
           "name": "shared_sharepointonline"
         },
         "connection": {
-          "connectionReferenceLogicalName": "new_sharedsharepointonline_11e61"
+          "connectionReferenceLogicalName": "cr94d_sharedsharepointonline_96d5d"
         },
         "runtimeSource": "embedded"
       }
@@ -29,8 +29,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-              "table": "d411563f-2b1c-4fa5-90fc-ecc5f50941a1",
+              "dataset": "__BGV_SPO_SITE_URL__",
+              "table": "__BGV_LIBRARY_RECORDS_ID__",
               "folderPath": "/BGV Records/Candidate Files"
             },
             "host": {
@@ -86,8 +86,8 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                  "table": "7b78dcaf-8744-478b-a40f-633ed7becff3",
+                  "dataset": "__BGV_SPO_SITE_URL__",
+                  "table": "__BGV_LIST_CANDIDATES_ID__",
                   "$filter": "CandidateID eq '@{outputs('Extract_candidateID')}'",
                   "$top": 1
                 },
@@ -107,7 +107,7 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+                  "dataset": "__BGV_SPO_SITE_URL__",
                   "path": "@concat(triggerBody()?['{Path}'], triggerBody()?['{FilenameWithExtension}'])\r\n",
                   "inferContentType": true
                 },
@@ -135,7 +135,7 @@
             "HTTP": {
               "type": "Http",
               "inputs": {
-                "uri": "https://bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net/api/parseauthorizationcontrols?code=kAnie8Zeiq83_f9E4NZQMPfrxJasZfoo1iFQqbWZKQTpAzFuZCATcQ%3D%3D",
+                "uri": "__BGV_DOCX_PARSER_URI__",
                 "method": "POST",
                 "headers": {
                   "Content-Type": "application/json"
@@ -218,9 +218,10 @@
                       "type": "OpenApiConnection",
                       "inputs": {
                         "parameters": {
-                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                          "table": "7b78dcaf-8744-478b-a40f-633ed7becff3",
+                          "dataset": "__BGV_SPO_SITE_URL__",
+                          "table": "__BGV_LIST_CANDIDATES_ID__",
                           "id": "@first(body('Get_CandidateID_from_Auth_File')?['value'])?['ID'] ",
+                          "item/Title": "@first(body('Get_CandidateID_from_Auth_File')?['value'])?['Title']",
                           "item/ConsentTimestamp": "@utcNow()",
                           "item/Status/Value": "Obtained Authorization Form Signature",
                           "item/AuthorisationSigned": true

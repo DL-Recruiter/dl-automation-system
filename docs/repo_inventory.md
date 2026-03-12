@@ -43,6 +43,10 @@ Generated `.NET` build/test outputs such as `bin/`, `obj/`, and `TestResults/` a
 - `flows/flowrunlogs-exporter.flow.json` - Placeholder metadata for flow-run-logs exporter export.
 - `flows/power-automate/exports/BGV_System_1_0_0_2.zip` - Exported unmanaged solution package snapshot.
 
+## Deployment Settings Templates
+- `flows/power-automate/deployment-settings/test.settings.template.json` - Test-environment template for connection IDs and `BGV_*` token values used to materialize the green solution.
+- `flows/power-automate/deployment-settings/prod.settings.template.json` - Production-environment template for connection IDs and `BGV_*` token values used to materialize the green solution.
+
 ## Unpacked Solution Metadata Files
 - `flows/power-automate/unpacked/Other/Customizations.xml` - Unpacked customizations metadata.
 - `flows/power-automate/unpacked/Other/Solution.xml` - Unpacked solution metadata.
@@ -90,9 +94,18 @@ Generated `.NET` build/test outputs such as `bin/`, `obj/`, and `TestResults/` a
 
 ## Active Scripts
 - `scripts/active/bgv_daily_sync.ps1` - Daily automation helper for auth check, git pull, export, unpack, and optional test run.
+- `scripts/active/bgv_migration_inventory.ps1` - Inventories source and target SharePoint stores, blue-case migration manifest, template candidates, and target sharing posture.
+- `scripts/active/bgv_ensure_target_schema.ps1` - Idempotently creates or verifies the target BGV lists/library, template folder, and uploaded authorization template metadata.
+- `scripts/active/bgv_copy_site_data.ps1` - Copies selected candidate/request/form-data rows and related BGV Records files from blue to green with lookup remapping.
+- `scripts/active/bgv_build_deployment_settings.ps1` - Creates PAC connection settings, token values, and optional materialized green solution folders from templates plus target schema metadata.
+- `scripts/active/bgv_validate_target_migration.ps1` - Validates migrated row/file counts, compares random samples, and reruns the portability guard.
+- `scripts/active/check_bgv_portability.py` - Enforces that canonical flow JSON contains portability tokens instead of old blue-site literals.
 - `scripts/active/import_flow_exports.ps1` - Copies exported flow files into repository-standard flow paths.
 - `scripts/active/pull_all_flow_runs.py` - Pulls run history for all canonical flow JSON files and writes a combined report.
 - `scripts/active/verify_flow_runs.py` - Authenticates and fetches run history for a single configured flow endpoint.
+
+## Shared Modules
+- `shared/bgv_migration_common.ps1` - Shared helper module for migration logging, repo-root discovery, SharePoint inventory/manifests, field cloning, JSON output, and Graph template metadata capture.
 
 ## Test Files
 - `tests/fixtures/connections.mock.json` - Mock connection data fixture used by tests.
@@ -105,6 +118,7 @@ Generated `.NET` build/test outputs such as `bin/`, `obj/`, and `TestResults/` a
 - `tests/test_flow_connector_fixtures.py` - Validates expected connector/flow fixture relationships.
 - `tests/test_pull_all_flow_runs.py` - Tests canonical flow discovery and helper behavior for bulk run-history pull.
 - `tests/test_verify_flow_runs.py` - Tests token request, run-history fetch, and URL composition behavior.
+- `tests/test_check_bgv_portability.py` - Tests the BGV portability guard for banned literals and required tokens.
 
 Generated test-project outputs:
 - `tests/bgv-docx-parser.tests/bin/` - Local `dotnet build` / `dotnet test` output; intentionally untracked.

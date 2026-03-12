@@ -6,7 +6,7 @@
           "name": "shared_sharepointonline"
         },
         "connection": {
-          "connectionReferenceLogicalName": "new_sharedsharepointonline_11e61"
+          "connectionReferenceLogicalName": "cr94d_sharedsharepointonline_96d5d"
         },
         "runtimeSource": "embedded"
       }
@@ -29,8 +29,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-              "table": "7b78dcaf-8744-478b-a40f-633ed7becff3"
+              "dataset": "__BGV_SPO_SITE_URL__",
+              "table": "__BGV_LIST_CANDIDATES_ID__"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -67,9 +67,10 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                  "table": "d411563f-2b1c-4fa5-90fc-ecc5f50941a1",
-                  "folderPath": "@outputs('Compose')"
+                  "dataset": "__BGV_SPO_SITE_URL__",
+                  "table": "__BGV_LIBRARY_RECORDS_ID__",
+                  "folderPath": "@outputs('Compose')",
+                  "$filter": "File_x0020_Type eq 'docx'\n"
                 },
                 "host": {
                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -91,8 +92,8 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                      "table": "d411563f-2b1c-4fa5-90fc-ecc5f50941a1",
+                      "dataset": "__BGV_SPO_SITE_URL__",
+                      "table": "__BGV_LIBRARY_RECORDS_ID__",
                       "id": "@items('For_each')?['ID']"
                     },
                     "host": {

@@ -30,6 +30,62 @@
 - `BGV Records` (document library id `d411563f-2b1c-4fa5-90fc-ecc5f50941a1`):
   - Candidate files, including authorization documents used in outbound employer requests.
 
+### BGV Green Portability Layer
+- Canonical green-source flow files remain under:
+  - `flows/power-automate/unpacked/Workflows/`
+- Those canonical JSON files are now tokenized with `__BGV_*__` markers for:
+  - SharePoint site URL
+  - target list/library IDs
+  - Word template `source` / `drive` / `file`
+  - Form 1 / Form 2 IDs
+  - mailbox and Teams routing targets
+  - DOCX parser endpoint URI (includes function auth query token in deployment values only)
+- Portability guard:
+  - `scripts/active/check_bgv_portability.py`
+  - fails if old source-site literals or old production template/form/team/mailbox constants re-enter canonical flow JSON
+- Materialization step:
+  - `scripts/active/bgv_build_deployment_settings.ps1`
+  - generates:
+    - `out/deployment-settings/<env>.pac.settings.json`
+    - `out/deployment-settings/<env>.token-values.json`
+    - optional materialized packable solution folder via `-MaterializeTo`
+- Important rule:
+  - do not pack the raw tokenized `flows/power-automate/unpacked/` folder for green deployment
+  - pack the materialized folder produced by `bgv_build_deployment_settings.ps1`
+
+### Normalized Green Connection References
+- SharePoint:
+  - `cr94d_sharedsharepointonline_96d5d`
+- Microsoft Forms:
+  - `cr94d_sharedmicrosoftforms_a2caf`
+- Office 365 Outlook:
+  - `cr94d_sharedoffice365_bdd97`
+- Microsoft Teams:
+  - `cr94d_sharedteams_4466d`
+- Word Online (Business):
+  - `new_sharedwordonlinebusiness_2ff9a`
+
+This repo state removes the extra duplicate SharePoint and Forms
+connection references so the future green solution can bind one
+connection reference per connector type during deployment.
+
+### SharePoint Migration Automation Scripts
+- `scripts/active/bgv_migration_inventory.ps1`
+  - inventories source/target stores, classifies `legacy-open` vs
+    `closed-history`, reports target collisions, and checks target-site
+    sharing capability through CLI for Microsoft 365
+- `scripts/active/bgv_ensure_target_schema.ps1`
+  - idempotently creates/verifies the target `BGV_Candidates`,
+    `BGV_Requests`, `BGV_FormData`, `BGV Records`, and `BGV Templates`
+    locations and captures uploaded template Graph metadata
+- `scripts/active/bgv_copy_site_data.ps1`
+  - upserts rows by `CandidateID`, `RequestID`, and `RecordKey`
+  - remaps lookup item IDs after target rows are created
+  - copies candidate files in `BGV Records`
+- `scripts/active/bgv_validate_target_migration.ps1`
+  - checks row/file counts, compares random samples, and reruns the
+    portability guard before cutover or retirement of blue
+
 ### main
 - Definition file: `flows/main.flow.json`
 - Connector use:

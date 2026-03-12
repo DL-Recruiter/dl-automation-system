@@ -6,7 +6,7 @@
           "name": "shared_microsoftforms"
         },
         "connection": {
-          "connectionReferenceLogicalName": "new_sharedmicrosoftforms_c86c2"
+          "connectionReferenceLogicalName": "cr94d_sharedmicrosoftforms_a2caf"
         },
         "runtimeSource": "embedded"
       },
@@ -15,7 +15,7 @@
           "name": "shared_sharepointonline"
         },
         "connection": {
-          "connectionReferenceLogicalName": "new_sharedsharepointonline_11e61"
+          "connectionReferenceLogicalName": "cr94d_sharedsharepointonline_96d5d"
         },
         "runtimeSource": "embedded"
       },
@@ -56,7 +56,7 @@
           "type": "OpenApiConnectionWebhook",
           "inputs": {
             "parameters": {
-              "form_id": "cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUNlVFTjhUNjNWOTI4SEsxTVc0V1ZSV1o3Qi4u"
+              "form_id": "__BGV_FORM1_ID__"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_microsoftforms",
@@ -75,7 +75,7 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "form_id": "cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUNlVFTjhUNjNWOTI4SEsxTVc0V1ZSV1o3Qi4u",
+              "form_id": "__BGV_FORM1_ID__",
               "response_id": "@triggerOutputs()?['body/resourceData/responseId']"
             },
             "host": {
@@ -113,8 +113,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-              "table": "BGV Records",
+              "dataset": "__BGV_SPO_SITE_URL__",
+              "table": "__BGV_LIBRARY_RECORDS_ID__",
               "parameters/path": "Candidate Files/@{variables('varCandidateID')}"
             },
             "host": {
@@ -136,8 +136,9 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-              "table": "BGV_Candidates",
+              "dataset": "__BGV_SPO_SITE_URL__",
+              "table": "__BGV_LIST_CANDIDATES_ID__",
+              "item/Title": "@variables('varCandidateID')",
               "item/CandidateID": "@variables('varCandidateID')",
               "item/FullName": "@outputs('Get_response_details')?['body/rfe96c622120343f294de908deb0e849d']",
               "item/CandidateEmail": "@outputs('Get_response_details')?['body/rcd8057cd92b24b5594681a5b39c07e3d']",
@@ -167,8 +168,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-              "table": "d411563f-2b1c-4fa5-90fc-ecc5f50941a1",
+              "dataset": "__BGV_SPO_SITE_URL__",
+              "table": "__BGV_LIBRARY_RECORDS_ID__",
               "parameters/path": "Candidate Files/@{variables('varCandidateID')}/Authorization"
             },
             "host": {
@@ -190,9 +191,9 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "source": "sites/dlresourcespl88.sharepoint.com,a1e3e6dd-e1df-4fde-8716-956137c7d557,b823cd7e-ca43-4824-a574-6d84eea5cf94",
-              "drive": "b!3ebjod_h3k-HFpVhN8fVV37NI7hDyiRIpXRthO6lz5Q_VhHUHCulT5D87MX1CUGh",
-              "file": "016SGZG5PNMCLLHQOWHRFJZTFJ5JG55C7V",
+              "source": "__BGV_AUTH_TEMPLATE_SOURCE__",
+              "drive": "__BGV_AUTH_TEMPLATE_DRIVE_ID__",
+              "file": "__BGV_AUTH_TEMPLATE_FILE_ID__",
               "dynamicFileSchema/974713748": "@outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49']",
               "dynamicFileSchema/-1424797845": "@outputs('Get_response_details')?['body/rfe96c622120343f294de908deb0e849d']",
               "dynamicFileSchema/-206184337": "@outputs('Get_response_details')?['body/rf5b324c022804863a720ef13edeb9d9b']",
@@ -212,14 +213,14 @@
           "metadata": {
             "016SGZG5NYDHTWYGVEHBAJJ55N7V55HNXG": "/Templates/AuthorizationLetter_Template.docx",
             "operationMetadataId": "eea86399-9b39-4f42-904d-a81b4256ca44",
-            "016SGZG5PNMCLLHQOWHRFJZTFJ5JG55C7V": "/Templates/AuthorizationLetter_Template.docx"
+            "__BGV_AUTH_TEMPLATE_FILE_ID__": "/Templates/AuthorizationLetter_Template.docx"
           }
         },
         "_Create_the_filled_DOCX_in_Authorization_Folder": {
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+              "dataset": "__BGV_SPO_SITE_URL__",
               "folderPath": "/BGV Records/Candidate Files/@{variables('varCandidateID')}/Authorization",
               "name": "Authorization Form - @{variables('varCandidateID')}.docx",
               "body": "@body('Populate_a_Microsoft_Word_template')"
@@ -248,8 +249,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-              "table": "d411563f-2b1c-4fa5-90fc-ecc5f50941a1",
+              "dataset": "__BGV_SPO_SITE_URL__",
+              "table": "__BGV_LIBRARY_RECORDS_ID__",
               "id": "@outputs('_Create_the_filled_DOCX_in_Authorization_Folder')?['body/ItemId']",
               "permission/type": "edit",
               "permission/scope": "anonymous"
@@ -273,9 +274,10 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-              "table": "7b78dcaf-8744-478b-a40f-633ed7becff3",
+              "dataset": "__BGV_SPO_SITE_URL__",
+              "table": "__BGV_LIST_CANDIDATES_ID__",
               "id": "@outputs('Create_BGV_Candidates_Row')?['body/ID']",
+              "item/Title": "@variables('varCandidateID')",
               "item/Status/Value": "Pending Authorization Form Signature",
               "item/AuthorizationLink": "@outputs('Create_sharing_link_for_a_file_or_folder')?['body/link/webUrl']",
               "item/AuthorizationLinkCreatedAt": "@utcNow()"
@@ -299,8 +301,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-              "table": "7b78dcaf-8744-478b-a40f-633ed7becff3",
+              "dataset": "__BGV_SPO_SITE_URL__",
+              "table": "__BGV_LIST_CANDIDATES_ID__",
               "$filter": "CandidateID eq '@{variables('varCandidateID')}'"
             },
             "host": {
@@ -349,8 +351,8 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                  "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+                  "dataset": "__BGV_SPO_SITE_URL__",
+                  "table": "__BGV_LIST_REQUESTS_ID__",
                   "$filter": "@concat('RequestID eq ''REQ-', variables('varCandidateID'), '-EMP2''')",
                   "$top": 1
                 },
@@ -381,8 +383,9 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                      "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+                      "dataset": "__BGV_SPO_SITE_URL__",
+                      "table": "__BGV_LIST_REQUESTS_ID__",
+                      "item/Title": "@concat('REQ-', variables('varCandidateID'), '-EMP2')",
                       "item/CandidateID": "@variables('varCandidateID')",
                       "item/EmployerName": "@outputs('Get_response_details')?['body/r1bb545a59a184a8d8a688825a042a314']",
                       "item/EmployerHR_Email": "@outputs('Get_response_details')?['body/r32be5c779be8409da404c296b3262471']",
@@ -405,8 +408,8 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                      "table": "f5248a99-fdf1-4660-946a-d54e00575a40",
+                      "dataset": "__BGV_SPO_SITE_URL__",
+                      "table": "__BGV_LIST_FORMDATA_ID__",
                       "item/Title": "@concat(variables('varCandidateID'), '|EMP2')",
                       "item/RecordKey": "@concat(variables('varCandidateID'), '|EMP2')",
                       "item/CandidateID": "@variables('varCandidateID')",
@@ -491,8 +494,8 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                  "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+                  "dataset": "__BGV_SPO_SITE_URL__",
+                  "table": "__BGV_LIST_REQUESTS_ID__",
                   "$filter": "@concat('RequestID eq ''REQ-', variables('varCandidateID'), '-EMP3''')",
                   "$top": 1
                 },
@@ -523,8 +526,9 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                      "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+                      "dataset": "__BGV_SPO_SITE_URL__",
+                      "table": "__BGV_LIST_REQUESTS_ID__",
+                      "item/Title": "@concat('REQ-', variables('varCandidateID'), '-EMP3')",
                       "item/CandidateID": "@variables('varCandidateID')",
                       "item/EmployerName": "@outputs('Get_response_details')?['body/r3e674ff5973e4d54b9f96952de10cd37']",
                       "item/EmployerHR_Email": "@outputs('Get_response_details')?['body/r7032b42718eb4a84a88453304c2ee557']",
@@ -547,8 +551,8 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                      "table": "f5248a99-fdf1-4660-946a-d54e00575a40",
+                      "dataset": "__BGV_SPO_SITE_URL__",
+                      "table": "__BGV_LIST_FORMDATA_ID__",
                       "item/Title": "@concat(variables('varCandidateID'), '|EMP3')",
                       "item/RecordKey": "@concat(variables('varCandidateID'), '|EMP3')",
                       "item/CandidateID": "@variables('varCandidateID')",
@@ -618,8 +622,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-              "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+              "dataset": "__BGV_SPO_SITE_URL__",
+              "table": "__BGV_LIST_REQUESTS_ID__",
               "$filter": "@concat(\r\n  'RequestID eq ''REQ-',\r\n  variables('varCandidateID'),\r\n  '-EMP1'''\r\n)\r\n",
               "$top": 1
             },
@@ -655,8 +659,9 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                  "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+                  "dataset": "__BGV_SPO_SITE_URL__",
+                  "table": "__BGV_LIST_REQUESTS_ID__",
+                  "item/Title": "@concat('REQ-', variables('varCandidateID'), '-EMP1')",
                   "item/CandidateID": "@variables('varCandidateID')",
                   "item/EmployerName": "@outputs('Get_response_details')?['body/rd186af3305c44a399ff007602a528c90']",
                   "item/EmployerHR_Email": "@outputs('Get_response_details')?['body/r99f0629822f44e1990ee2e00b3c2b442']",
@@ -679,8 +684,8 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                  "table": "f5248a99-fdf1-4660-946a-d54e00575a40",
+                  "dataset": "__BGV_SPO_SITE_URL__",
+                  "table": "__BGV_LIST_FORMDATA_ID__",
                   "item/Title": "@concat(variables('varCandidateID'), '|EMP1')",
                   "item/RecordKey": "@concat(variables('varCandidateID'), '|EMP1')",
                   "item/CandidateID": "@variables('varCandidateID')",
@@ -737,7 +742,7 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg",
+              "emailMessage/MailboxAddress": "__BGV_SHARED_MAILBOX_ADDRESS__",
               "emailMessage/To": "@outputs('Get_response_details')?['body/rcd8057cd92b24b5594681a5b39c07e3d']",
               "emailMessage/Subject": "Please Sign: Authorization Form - @{variables('varCandidateID')}",
               "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{outputs('Get_response_details')?['body/rfe96c622120343f294de908deb0e849d']},</p><br><p class=\"editor-paragraph\">This authorization form allows us to proceed with your background verification check.</p><br><p class=\"editor-paragraph\">Please review the form, sign it, and ensure that you confirm your signature by ticking the checkbox in the form.</p><br><p class=\"editor-paragraph\">You may access the form using the link below:<br>@{outputs('Create_sharing_link_for_a_file_or_folder')?['body/link/webUrl']}</p><br><p class=\"editor-paragraph\">Kindly complete this as soon as possible to avoid delays in processing your background verification.</p><br><p class=\"editor-paragraph\">Thank you.</p><br><p class=\"editor-paragraph\">Best regards,<br>DL Resources Recruitment Team</p>",

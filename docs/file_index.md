@@ -7,6 +7,7 @@
 - `docs/` - Project documentation, progress logs, and repository indexes.
 - `DRAFT/` - Protected archive area; do not modify unless explicitly requested.
 - `flows/` - Power Automate flow exports and related metadata.
+- `flows/power-automate/deployment-settings/` - Test/prod template inputs for green-site deployment settings and token materialization.
 - `functions/` - Optional serverless function entry points.
 - `out/` - Runtime output and debug artifacts.
 - `scripts/` - Script workspace root.
@@ -36,6 +37,8 @@
 - `.github/workflows/linked-docs-guard.yml` - CI guard that enforces linked documentation updates when canonical flow JSON files are changed.
 - `flows/main.flow.json` - Placeholder export metadata for main flow.
 - `flows/flowrunlogs-exporter.flow.json` - Placeholder export metadata for FlowRunLogs exporter flow.
+- `flows/power-automate/deployment-settings/test.settings.template.json` - Test-environment connection/token template for green-site materialization.
+- `flows/power-automate/deployment-settings/prod.settings.template.json` - Production-environment connection/token template for green-site materialization.
 - `connectors/shared_flowrunops.powerplatform.json` - Placeholder export metadata for shared_flowrunops connector.
 - `connectors/new_flowrunops.connector.xml` - Placeholder Dataverse custom connector XML baseline.
 - `connectors/new_flowrunops.oauth.parameters.json` - Placeholder OAuth parameter definition for new_flowrunops.
@@ -50,14 +53,22 @@
 - `functions/bgv-docx-parser/Properties/launchSettings.json` - Local debug launch profile for the parser function app.
 - `scripts/active/import_flow_exports.ps1` - Helper to copy authenticated exported flow JSON files into `flows/` standard filenames.
 - `scripts/active/bgv_daily_sync.ps1` - One-command daily sync for PAC identity check, git pull, export, and unpack.
+- `scripts/active/bgv_migration_inventory.ps1` - Inventories source/target SharePoint stores, sharing state, and blue-case migration manifest.
+- `scripts/active/bgv_ensure_target_schema.ps1` - Idempotently provisions/verifies the target BGV SharePoint schema and uploads the authorization template.
+- `scripts/active/bgv_copy_site_data.ps1` - Copies selected BGV rows/files from blue to green with lookup remapping.
+- `scripts/active/bgv_build_deployment_settings.ps1` - Generates PAC settings, token values, and optional materialized green solution folders.
+- `scripts/active/bgv_validate_target_migration.ps1` - Validates migrated counts, samples, files, and portability guard status.
 - `scripts/active/verify_flow_runs.py` - Flow run-history verification script using OAuth and ARM/connector endpoint support.
 - `scripts/active/pull_all_flow_runs.py` - Pulls run history for all canonical flow JSON files and writes a combined report to `out/`.
 - `scripts/active/enforce_linked_docs.py` - Diff-based policy checker for linked documentation updates tied to flow JSON changes.
+- `scripts/active/check_bgv_portability.py` - Fails when canonical flow JSON still contains old blue-site literals instead of portability tokens.
+- `shared/bgv_migration_common.ps1` - Shared PowerShell helper module for BGV site migration inventory, schema, copy, and validation scripts.
 - `tests/fixtures/connections.mock.json` - Mocked flow/connector connection metadata for tests.
 - `tests/test_flow_connector_fixtures.py` - Fixture validation tests for connector/flow mappings.
 - `tests/test_verify_flow_runs.py` - Unit tests for flow verification token, run-history fetch, and metadata parsing.
 - `tests/test_pull_all_flow_runs.py` - Unit tests for canonical flow discovery and run-history query helpers.
 - `tests/test_enforce_linked_docs.py` - Unit tests for linked-doc CI policy logic.
+- `tests/test_check_bgv_portability.py` - Unit tests for banned-literal and required-token enforcement in canonical BGV flow JSON.
 - `tests/bgv-docx-parser.tests/bgv-docx-parser.tests.csproj` - .NET unit test project for the Azure Function parser services and utilities.
 - `tests/bgv-docx-parser.tests/AuthorizationMatchEvaluatorTests.cs` - Verifies current SignedYes/SignedNo matching and compatibility alias behavior.
 - `tests/bgv-docx-parser.tests/Base64UtilitiesTests.cs` - Verifies request base64 normalization and decoded-length estimation helpers.

@@ -142,6 +142,34 @@ Key relationships:
 - `CandidateID`: links `BGV_Candidates` <-> `BGV_Requests` <-> `BGV_FormData` <-> candidate folder path in `BGV Records`.
 - `RequestID`: links employer verification cycle between `BGV_Requests` and `BGV_FormData`.
 
+### BGV SharePoint Site Migration Portability Contract
+- Blue/source site:
+  - `https://dlresourcespl88.sharepoint.com/sites/dlrespl`
+- Green/target site:
+  - `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570`
+- Canonical cloud-flow JSON under `flows/power-automate/unpacked/Workflows/` is now portability-tokenized with `__BGV_*__` markers rather than hardcoded SharePoint, template, Forms, Teams, and mailbox identifiers.
+- Token categories currently covered:
+  - SharePoint site URL
+  - `BGV_Candidates`, `BGV_Requests`, `BGV_FormData`, and `BGV Records` IDs
+  - Word template `source`, `drive`, and `file` IDs
+  - Form 1 / Form 2 IDs
+  - shared mailbox, internal alert, employer fallback, Teams group, and Teams channel targets
+  - DOCX parser endpoint URI token (`BGV_DOCX_PARSER_URI`)
+- Canonical tokenized JSON is the reviewable source of truth, but it is not the direct deployment artifact for the green site.
+- `scripts/active/bgv_build_deployment_settings.ps1` is responsible for producing a materialized deployment folder by combining:
+  - connection-reference settings from PAC CLI
+  - token values from deployment templates
+  - optional target schema output from `scripts/active/bgv_ensure_target_schema.ps1`
+  - optional `BGV_*` shell environment variable overrides
+- SharePoint data migration business keys:
+  - upsert `BGV_Candidates` by `CandidateID`
+  - upsert `BGV_Requests` by `RequestID`
+  - upsert `BGV_FormData` by `RecordKey`
+  - remap lookup item IDs after the target-site rows are created
+- Migration classification contract:
+  - `legacy-open` if `AuthorisationSigned != true` or any related request has blank `ResponseReceivedAt`
+  - `closed-history` for all other candidate cases
+
 ## 5. Business Rules
 - Validate all required inputs before processing.
 - Apply deterministic transformations.
@@ -160,7 +188,8 @@ When rules change, perform an impact sweep across scripts, tests, and docs in th
 ## 7. Runtime Environment
 | Item | Value |
 | --- | --- |
-| Signed-in profile | `recruitment@dlresources.com.sg` |
+| Admin/ALM profile | `edwin.teo@dlresources.com.sg` |
+| Operations/collaborator profile | `recruitment@dlresources.com.sg` |
 | Power Platform environment URL | `https://orgde64dc49.crm5.dynamics.com/` |
 | Azure tenant | `__REPLACE_WITH_AZURE_TENANT_ID_OR_NAME__` |
 | Azure subscription | `__REPLACE_WITH_AZURE_SUBSCRIPTION_ID_OR_NAME__` |
@@ -169,6 +198,8 @@ Runtime tooling baseline:
 - Power Platform CLI (`pac`) is expected to already be installed and authenticated.
 - Azure CLI (`az`) is expected to already be installed and authenticated.
 - Azure Functions Core Tools (`func`) is expected to already be installed and authenticated.
+- CLI for Microsoft 365 (`m365`) is expected to already be installed and authenticated for SharePoint inventory/sharing checks.
+- Microsoft Graph PowerShell is expected to already be installed and authenticated for template metadata capture.
 - PnP.PowerShell is used for SharePoint list/schema administration.
 - Agents must not reauthenticate or install these tools unless explicitly requested by the user.
 
@@ -202,6 +233,29 @@ Connection/data-source automation baseline:
 | `DATAVERSE_INSTANCE_URL` | Dataverse instance URL for connector/app configuration | Yes | `https://orgde64dc49.crm5.dynamics.com/` |
 | `FUNCTION_ENDPOINT_URL` | Azure Function endpoint consumed by flow/app logic | Yes | `https://<functionapp>.azurewebsites.net/api/<endpoint>` |
 | `FUNCTION_KEY` | Value sent as `x-functions-key` when calling Azure Function API endpoint | Yes | `__REPLACE_WITH_FUNCTION_KEY__` |
+| `BGV_SOURCE_SPO_SITE_URL` | Blue/source SharePoint site used by migration inventory/copy scripts | Yes (for migration scripts) | `https://dlresourcespl88.sharepoint.com/sites/dlrespl` |
+| `BGV_TARGET_SPO_SITE_URL` | Green/target SharePoint site used by migration inventory/copy scripts | Yes (for migration scripts) | `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570` |
+| `BGV_SPO_SITE_URL` | Materialized SharePoint site token for green flow deployment | Yes (for green materialization) | `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570` |
+| `BGV_LIST_CANDIDATES_ID` | Target `BGV_Candidates` list ID token | Yes (for green materialization) | `__REPLACE_WITH_TARGET_BGV_CANDIDATES_LIST_ID__` |
+| `BGV_LIST_REQUESTS_ID` | Target `BGV_Requests` list ID token | Yes (for green materialization) | `__REPLACE_WITH_TARGET_BGV_REQUESTS_LIST_ID__` |
+| `BGV_LIST_FORMDATA_ID` | Target `BGV_FormData` list ID token | Yes (for green materialization) | `__REPLACE_WITH_TARGET_BGV_FORMDATA_LIST_ID__` |
+| `BGV_LIBRARY_RECORDS_ID` | Target `BGV Records` library ID token | Yes (for green materialization) | `__REPLACE_WITH_TARGET_BGV_RECORDS_LIBRARY_ID__` |
+| `BGV_AUTH_TEMPLATE_SOURCE` | Word template `source` token used by `BGV_0` | Yes (for green materialization) | `__REPLACE_WITH_TARGET_TEMPLATE_SOURCE__` |
+| `BGV_AUTH_TEMPLATE_DRIVE_ID` | Word template drive ID token used by `BGV_0` | Yes (for green materialization) | `__REPLACE_WITH_TARGET_TEMPLATE_DRIVE_ID__` |
+| `BGV_AUTH_TEMPLATE_FILE_ID` | Word template file ID token used by `BGV_0` | Yes (for green materialization) | `__REPLACE_WITH_TARGET_TEMPLATE_FILE_ID__` |
+| `BGV_FORM1_ID` | Green Microsoft Form 1 ID token | Yes (for green materialization) | `__REPLACE_WITH_GREEN_FORM1_ID__` |
+| `BGV_FORM2_ID` | Green Microsoft Form 2 ID token | Yes (for green materialization) | `__REPLACE_WITH_GREEN_FORM2_ID__` |
+| `BGV_SHARED_MAILBOX_ADDRESS` | Shared mailbox token used by alert/email actions | Yes (for green materialization) | `__REPLACE_WITH_SHARED_MAILBOX_ADDRESS__` |
+| `BGV_INTERNAL_ALERT_TO` | Internal alert recipient token | Yes (for green materialization) | `__REPLACE_WITH_INTERNAL_ALERT_TO_ADDRESS__` |
+| `BGV_EMPLOYER_FALLBACK_TO` | Employer fallback mailbox token | Yes (for green materialization) | `__REPLACE_WITH_EMPLOYER_FALLBACK_ADDRESS__` |
+| `BGV_TEAMS_GROUP_ID` | Teams group token used by reminder/escalation flows | Yes (for green materialization) | `__REPLACE_WITH_TEAMS_GROUP_ID__` |
+| `BGV_TEAMS_CHANNEL_ID` | Teams channel token used by reminder/escalation flows | Yes (for green materialization) | `__REPLACE_WITH_TEAMS_CHANNEL_ID__` |
+| `BGV_DOCX_PARSER_URI` | Parser endpoint URI token used by `BGV_1` HTTP action | Yes (for green materialization) | `https://<functionapp>.azurewebsites.net/api/parseauthorizationcontrols?code=<function-key>` |
+| `BGV_CONN_MICROSOFTFORMS_ID` | Optional override for Forms connection ID when generating PAC settings | No | `shared-microsoftform-<id>` |
+| `BGV_CONN_OFFICE365_ID` | Optional override for Office 365 connection ID when generating PAC settings | No | `<office365-connection-id>` |
+| `BGV_CONN_SHAREPOINT_ID` | Optional override for SharePoint connection ID when generating PAC settings | No | `<sharepoint-connection-id>` |
+| `BGV_CONN_TEAMS_ID` | Optional override for Teams connection ID when generating PAC settings | No | `shared-teams-<id>` |
+| `BGV_CONN_WORDONLINEBUSINESS_ID` | Optional override for Word Online (Business) connection ID when generating PAC settings | No | `shared-wordonlinebus-<id>` |
 | `FLOW_VERIFY_TENANT_ID` | Azure AD tenant for Flow Management API OAuth token request | Yes | `__REPLACE_WITH_AZURE_TENANT_ID__` |
 | `FLOW_VERIFY_CLIENT_ID` | OAuth client ID for flow verification app registration | Yes | `__REPLACE_WITH_APP_REGISTRATION_CLIENT_ID__` |
 | `FLOW_VERIFY_CLIENT_SECRET` | OAuth client secret for flow verification app registration | Yes | *(set in `.env` only)* |
@@ -219,6 +273,12 @@ Document runtime/deployment model when finalized:
 - Local scripts and docs.
 - Serverless function integration (`functions/`).
 - Power Automate exports (`flows/`) and connector definitions (`connectors/`).
+
+Current BGV migration deployment model:
+- Keep canonical unpacked flow JSON tokenized in source control.
+- Use `scripts/active/bgv_build_deployment_settings.ps1` plus `flows/power-automate/deployment-settings/*.settings.template.json` to generate deployment inputs.
+- Pack/import the materialized green folder, not the raw tokenized canonical folder.
+- Use `scripts/active/bgv_migration_inventory.ps1`, `scripts/active/bgv_ensure_target_schema.ps1`, `scripts/active/bgv_copy_site_data.ps1`, and `scripts/active/bgv_validate_target_migration.ps1` for SharePoint-side migration execution and validation.
 
 ## 10. Error Handling & Logging
 - Use structured, actionable error messages.

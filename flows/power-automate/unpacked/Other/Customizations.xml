@@ -44,30 +44,6 @@
       <statecode>0</statecode>
       <statuscode>1</statuscode>
     </connectionreference>
-    <connectionreference connectionreferencelogicalname="new_sharedmicrosoftforms_c86c2">
-      <connectionreferencedisplayname>Microsoft Forms BGVChecks-c86c2</connectionreferencedisplayname>
-      <connectorid>/providers/Microsoft.PowerApps/apis/shared_microsoftforms</connectorid>
-      <iscustomizable>1</iscustomizable>
-      <promptingbehavior>0</promptingbehavior>
-      <statecode>0</statecode>
-      <statuscode>1</statuscode>
-    </connectionreference>
-    <connectionreference connectionreferencelogicalname="new_sharedoffice365_d9a67">
-      <connectionreferencedisplayname>Office 365 Outlook BGVChecks-d9a67</connectionreferencedisplayname>
-      <connectorid>/providers/Microsoft.PowerApps/apis/shared_office365</connectorid>
-      <iscustomizable>1</iscustomizable>
-      <promptingbehavior>0</promptingbehavior>
-      <statecode>0</statecode>
-      <statuscode>1</statuscode>
-    </connectionreference>
-    <connectionreference connectionreferencelogicalname="new_sharedsharepointonline_11e61">
-      <connectionreferencedisplayname>SharePoint BGVChecks-11e61</connectionreferencedisplayname>
-      <connectorid>/providers/Microsoft.PowerApps/apis/shared_sharepointonline</connectorid>
-      <iscustomizable>1</iscustomizable>
-      <promptingbehavior>0</promptingbehavior>
-      <statecode>0</statecode>
-      <statuscode>1</statuscode>
-    </connectionreference>
     <connectionreference connectionreferencelogicalname="new_sharedwordonlinebusiness_2ff9a">
       <connectionreferencedisplayname>Word Online (Business) BGVChecks-2ff9a</connectionreferencedisplayname>
       <connectorid>/providers/Microsoft.PowerApps/apis/shared_wordonlinebusiness</connectorid>

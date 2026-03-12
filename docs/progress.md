@@ -6,6 +6,636 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-12 (Operational smoke validation + secret hardening)
+- Current status:
+  - Production target migration remains live, and automated smoke validation re-ran successfully.
+- Completed tasks:
+  - Re-ran migration validation (`Mode=All`) and setup parity verification against source/target SharePoint sites.
+  - Re-validated portability guard.
+  - Removed hardcoded Azure Function key URL from canonical flow JSON:
+    - `flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json`
+    - replaced with token `__BGV_DOCX_PARSER_URI__`.
+  - Extended portability/deployment token support for parser endpoint in:
+    - `scripts/active/check_bgv_portability.py`
+    - `scripts/active/bgv_build_deployment_settings.ps1`
+    - `flows/power-automate/deployment-settings/test.settings.template.json`
+    - `flows/power-automate/deployment-settings/prod.settings.template.json`
+    - `.env.example`
+    - `System_SPEC.md`
+    - `docs/architecture_flows.md`
+    - `docs/Sharepoint migration plan.md`
+- Validation commands run:
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_validate_target_migration.ps1 -Mode All -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_verify_setup_parity.ps1 -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+  - `py .\scripts\active\check_bgv_portability.py`
+- Results summary:
+  - `out/migration/validate_all.json`:
+    - counts match (`BGV_Candidates 5/5`, `BGV_Requests 8/8`, `BGV_FormData 68/68`, `BGV Records files 61/61`)
+    - sample mismatches: none
+    - portability guard: passed
+  - `out/migration/setup_parity.json`:
+    - `Passed=true`, `MismatchCount=0`
+- Next actions and blockers:
+  - Push final migration state to GitHub.
+  - Remaining manual operation unchanged: live user submission smoke path and communications/forms operational confirmation.
+
+## 2026-03-12 (Permission parity blocker resolved)
+- Current status:
+  - Resolved the final strict setup-parity blocker for `BGV Records` permissions.
+- Completed tasks:
+  - Verified target-site admin-effective rights and applied:
+    - `Set-PnPList -Identity "BGV Records" -BreakRoleInheritance -CopyRoleAssignments`
+  - Confirmed target `BGV Records` now has unique permissions (`HasUniqueRoleAssignments=True`).
+  - Reran setup parity verification; result now fully pass (`MismatchCount=0`).
+  - Updated `docs/Sharepoint migration plan.md` execution status/pending section to remove the previous permission blocker.
+- Validation commands run:
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; $conn=Connect-PnPOnline -Url 'https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570' -Interactive -ClientId '3e59bbcc-3e14-4837-b6e0-0a1870286f31' -Tenant '38597470-4753-461a-837f-ad8c14860b22' -ReturnConnection; Set-PnPList -Identity 'BGV Records' -BreakRoleInheritance -CopyRoleAssignments -Connection $conn -ErrorAction Stop; (Get-PnPList -Identity 'BGV Records' -Includes HasUniqueRoleAssignments -Connection $conn).HasUniqueRoleAssignments`
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_verify_setup_parity.ps1 -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+- Next actions and blockers:
+  - Remaining actions are operational signoff only:
+    - final production smoke-test evidence for `BGV_0`..`BGV_6`
+    - confirm Forms ownership/sharing and communications under same-link strategy.
+
+## 2026-03-12 (Forms strategy decision update: keep existing links)
+- Current status:
+  - Updated migration runbook to reflect the approved low-disruption Forms strategy.
+- Completed tasks:
+  - Updated `docs/Sharepoint migration plan.md` so cutover model explicitly keeps existing Microsoft Forms links/questions and applies backend-only redirection to target-bound flows.
+  - Removed outdated instructions that required disabling/decommissioning forms as part of cutover.
+  - Updated Step 3/8/9 and rollback wording to match same-link Forms operation.
+- Validation commands run:
+  - `Get-Content -Raw 'docs/Sharepoint migration plan.md'`
+  - `rg -n "Forms|forms|disable|retire|old intake|manual" 'docs/Sharepoint migration plan.md'`
+- Next actions and blockers:
+  - Next action: execute live smoke tests with current Forms links to verify end-to-end target-site writes for `BGV_0`..`BGV_6`.
+  - Blocker unchanged: `BGV Records` permission inheritance parity still requires elevated permission due `E_ACCESSDENIED`.
+
+## 2026-03-12 (Full parity replication + single-window production cutover)
+- Current status:
+  - Implemented and executed the full source-to-target replication path.
+  - Production BGV runtime is now live on target site bindings.
+- Completed tasks:
+  - Extended migration scripts for full-history replication:
+    - `scripts/active/bgv_copy_site_data.ps1`
+      - added/finished `-Mode All` behavior
+      - full row copy for `BGV_FormData` including orphan historical rows
+      - full `BGV Records` folder parity creation in `All` mode
+      - output now includes folder and skipped-row metrics
+    - `scripts/active/bgv_validate_target_migration.ps1`
+      - `All` mode validates full-key selection and full-file parity
+  - Added setup parity automation:
+    - `scripts/active/bgv_sync_target_setup.ps1`
+      - syncs settings/views
+      - creates missing view-required fields from source schema (including projected/calculated fields)
+      - syncs list `Title` required-state parity
+    - `scripts/active/bgv_verify_setup_parity.ps1`
+      - verifies counts, default-view fields, list settings, title-required parity, permission mode, and file counts
+      - emits `out/migration/setup_parity.json`
+  - Ran full-history copy and validation:
+    - `out/migration/copy_all.json`
+    - `out/migration/validate_all.json`
+    - parity result: candidates `5/5`, requests `8/8`, formdata `68/68`, records files `61/61`
+  - Resolved strict setup mismatches except one permission boundary:
+    - fixed missing `BGV_Requests` fields (`CandidateItemID_x003a__x0020_Ful`, `LinkDue`)
+    - fixed default-view parity
+    - fixed list `Title` required-state parity for BGV tracking lists
+    - remaining mismatch only: `BGV Records` unique permission mode (`E_ACCESSDENIED` on break inheritance)
+  - Completed prod settings/materialization and production import with target bindings:
+    - `scripts/active/bgv_build_deployment_settings.ps1` improved to:
+      - accept environment overrides for connection IDs
+      - emit `CopilotAgents` as array
+      - write materialized files as UTF-8 without BOM
+    - cutover artifacts:
+      - `out/migration/freeze_window.json`
+      - `artifacts/exports/BGV_System_pre_green_cutover_20260312_161406.zip`
+      - `artifacts/exports/BGV_System_green_prod_cutover_20260312_161626.zip`
+      - `artifacts/exports/BGV_System_green_prod_cutover_20260312_162627.zip`
+      - `artifacts/exports/BGV_System_green_prod_cutover_20260312_163244.zip`
+  - Activated production BGV flows and verified bindings:
+    - started `BGV_0`..`BGV_6` via Flow Management API
+    - runtime status artifact: `out/migration/production_flow_runtime_status_after_cutover.json`
+    - confirms all `BGV_0`..`BGV_6` are `Started`, all reference target site, none reference source site
+  - Hardened canonical flow JSON for SharePoint connector validation:
+    - added missing `item/Title` parameters to affected create/patch actions in:
+      - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+      - `flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json`
+      - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+      - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+      - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+      - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+- Validation commands run:
+  - PowerShell parser checks:
+    - `scripts/active/bgv_copy_site_data.ps1`
+    - `scripts/active/bgv_validate_target_migration.ps1`
+    - `scripts/active/bgv_sync_target_setup.ps1`
+    - `scripts/active/bgv_verify_setup_parity.ps1`
+    - `scripts/active/bgv_build_deployment_settings.ps1`
+  - Migration/data parity:
+    - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_copy_site_data.ps1 -Mode All -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+    - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_validate_target_migration.ps1 -Mode All -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+    - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_sync_target_setup.ps1 -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+    - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_verify_setup_parity.ps1 -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+  - Packaging/import/runtime:
+    - `pac auth who`
+    - `pac connection list --environment https://orgde64dc49.crm5.dynamics.com/`
+    - `powershell -ExecutionPolicy Bypass -File .\scripts\active\bgv_build_deployment_settings.ps1 -EnvironmentName prod -TargetSchemaPath .\out\migration\target_schema.json -OutputDirectory .\out\deployment-settings\final -MaterializeTo .\out\materialized\bgv_green_prod_cutover_final`
+    - `pac solution export --environment https://orgde64dc49.crm5.dynamics.com/ --name BGV_System --path .\artifacts\exports\BGV_System_pre_green_cutover_20260312_161406.zip --managed false --overwrite`
+    - `pac solution pack --zipfile .\artifacts\exports\BGV_System_green_prod_cutover_20260312_163244.zip --folder .\out\materialized\bgv_green_prod_cutover_final --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+    - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_green_prod_cutover_20260312_163244.zip --settings-file .\out\deployment-settings\final\prod.pac.settings.json --publish-changes --force-overwrite`
+  - Portability guard:
+    - `py scripts/active/check_bgv_portability.py`
+- Next actions and blockers:
+  - Manual-only closeout remains:
+    - disable/close old Microsoft Forms and retire old intake links in communications.
+  - One strict-parity blocker remains:
+    - `BGV Records` permission inheritance mode mismatch (`source unique`, `target inherited`) due `E_ACCESSDENIED` on `Set-PnPList -BreakRoleInheritance`.
+  - Recommended immediate post-cutover operations:
+    - execute end-to-end smoke tests on live `BGV_0` -> `BGV_6`
+    - archive signoff evidence and update user-facing runbook links.
+
+## 2026-03-12 (Production flow runtime truth check + ChatGPT upload pack)
+- Current status:
+  - SharePoint migration artifacts and data parity are complete, but
+    production runtime is not yet green-live.
+- Completed tasks:
+  - Queried production flow runtime state in
+    `Default-38597470-4753-461a-837f-ad8c14860b22` and generated:
+    - `out/migration/production_flow_runtime_status.json`
+  - Confirmed current production facts:
+    - all `BGV_*` flows are `Stopped`
+    - deployed flow definitions still reference source site
+      `https://dlresourcespl88.sharepoint.com/sites/dlrespl`
+    - no production flow definition currently references target site
+      `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570`
+  - Updated migration status docs to reflect that production green
+    cutover is still pending.
+  - Created a ChatGPT upload context pack:
+    - `docs/chatgpt_upload_pack_20260312.md`
+    - `out/migration/chatgpt_upload_pack_20260312_145312/`
+- Validation commands run:
+  - Flow runtime extraction and JSON artifact generation via Flow
+    Management API:
+    - `out/migration/production_flow_runtime_status.json`
+  - Spot checks:
+    - confirmed all `BGV_*` flow states are `Stopped`
+    - confirmed `HasTargetSiteRef=false`, `HasSourceSiteRef=true` for
+      deployed production flow definitions
+- Next actions and blockers:
+  - Next action: perform production green import/bind/enable runbook and
+    validate live target-site processing before declaring migration fully
+    complete.
+  - Manual blocker remains: old Microsoft Forms close/disable and old
+    intake link retirement in user channels.
+
+## 2026-03-12 (Schema completion + final settings + blue closeout execution)
+- Current status:
+  - Completed the requested end-phase migration sequence: target schema
+    generation, final deployment settings materialization, and blue
+    operational closeout execution.
+- Completed tasks:
+  - Patched `shared/bgv_migration_common.ps1` Graph template metadata
+    lookup to try multiple path variants (server-relative, site-relative,
+    drive-relative) so target template file metadata can be resolved
+    reliably.
+  - Ran `scripts/active/bgv_ensure_target_schema.ps1` successfully and
+    generated:
+    - `out/migration/target_schema.json`
+  - Ran final settings materialization using target schema:
+    - `scripts/active/bgv_build_deployment_settings.ps1 -EnvironmentName test -TargetSchemaPath out/migration/target_schema.json -OutputDirectory out/deployment-settings/final -MaterializeTo out/materialized/bgv_green_test_final`
+    - `scripts/active/bgv_build_deployment_settings.ps1 -EnvironmentName prod -TargetSchemaPath out/migration/target_schema.json -OutputDirectory out/deployment-settings/final -MaterializeTo out/materialized/bgv_green_prod_final`
+  - Executed blue-flow closeout in production environment
+    (`Default-38597470-4753-461a-837f-ad8c14860b22`) via Flow Management
+    API using Azure token auth:
+    - disabled `BGV_0` through `BGV_6`
+    - verified all seven target blue flows are `Stopped`
+  - Archived final blue solution backup:
+    - `artifacts/exports/BGV_System_blue_final_backup_20260312_022951.zip`
+  - Generated closeout audit artifact:
+    - `out/migration/closeout_report.json`
+- Validation commands run:
+  - PowerShell parser checks:
+    - `shared/bgv_migration_common.ps1`
+    - `scripts/active/bgv_ensure_target_schema.ps1`
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_ensure_target_schema.ps1 -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+  - `pac auth who`
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\active\bgv_build_deployment_settings.ps1 -EnvironmentName test -TargetSchemaPath .\out\migration\target_schema.json -OutputDirectory .\out\deployment-settings\final -MaterializeTo .\out\materialized\bgv_green_test_final`
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\active\bgv_build_deployment_settings.ps1 -EnvironmentName prod -TargetSchemaPath .\out\migration\target_schema.json -OutputDirectory .\out\deployment-settings\final -MaterializeTo .\out\materialized\bgv_green_prod_final`
+  - Flow-management closeout checks and operations:
+    - listed Power Automate environments
+    - listed `BGV_*` flows in default environment
+    - issued stop operations for `BGV_0`..`BGV_6`
+    - re-listed states to confirm `Stopped`
+  - `pac solution export --environment https://orgde64dc49.crm5.dynamics.com/ --name BGV_System --path .\artifacts\exports\BGV_System_blue_final_backup_20260312_022951.zip --managed false --overwrite`
+- Results summary:
+  - `out/migration/target_schema.json` exists and includes target
+    store/template graph metadata.
+  - Final test/prod deployment settings and materialized solution folders
+    are generated under `out/deployment-settings/final` and
+    `out/materialized/`.
+  - Blue flows (`BGV_0` to `BGV_6`) are now `Stopped`.
+  - Final blue backup is archived and closeout report is recorded.
+- Next actions and blockers:
+  - Manual portal action still required: disable/close blue Microsoft
+    Forms and retire any publicly distributed old intake links from user
+    channels.
+  - Step 6 test-environment smoke validation remains required for full
+    operational signoff.
+
+## 2026-03-12 (Migration review cross-check + remediation hardening)
+- Current status:
+  - Reviewed `docs/Sharepoint migration plan.md` against live migration
+    outputs and script behavior, then continued remediation to close data
+    integrity gaps observed during cross-check.
+- Completed tasks:
+  - Cross-check review findings:
+    - LegacyDrain row/file parity can pass while internal form-data ID
+      remap (`CandidateItemID`, `RecordItemID`) is still wrong unless
+      remap is applied for numeric field types.
+    - `out/migration/target_schema.json` is still missing because
+      `bgv_ensure_target_schema.ps1` did not complete Graph auth in this
+      terminal session.
+  - Repaired target lookup binding:
+    - `BGV_Requests.CandidateItemID` recreated on target and rebound to
+      target `BGV_Candidates` list.
+  - Hardened migration scripts:
+    - `scripts/active/bgv_copy_site_data.ps1`
+      - remap logic now supports numeric and lookup target field types
+      - file copy now translates source site paths to target site paths
+      - folder ensure now anchors under target web root and handles
+        existing folders idempotently
+    - `scripts/active/bgv_validate_target_migration.ps1`
+      - excludes remapped `BGV_FormData` ID fields from source-vs-target
+        sample equality checks
+  - Re-ran `LegacyDrain` copy + validate after fixes.
+  - Added execution-status snapshot to
+    `docs/Sharepoint migration plan.md`.
+- Validation commands run:
+  - PowerShell parser checks:
+    - `scripts/active/bgv_copy_site_data.ps1`
+    - `scripts/active/bgv_validate_target_migration.ps1`
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_copy_site_data.ps1 -Mode LegacyDrain -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_validate_target_migration.ps1 -Mode LegacyDrain -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+  - Target remap verification command:
+    - checked `BGV_FormData.CandidateItemID`/`RecordItemID` against
+      expected target item IDs (`FormDataRemapMismatchCount=0`)
+  - Artifact checks:
+    - `out/migration/copy_legacydrain.json`
+    - `out/migration/validate_legacydrain.json`
+- Results summary:
+  - LegacyDrain copy:
+    - `CandidateCount = 5`
+    - `RequestCount = 8`
+    - `FormDataCount = 8`
+    - `FileCount = 0` (idempotent rerun; files already present)
+    - `FailedFileCount = 0`
+  - LegacyDrain validation:
+    - `CandidateCountMatch = true`
+    - `RequestCountMatch = true`
+    - `FormDataCountMatch = true`
+    - `FileCountMatch = true`
+    - `PortabilityPassed = true`
+    - sample mismatches: all zero
+- Next actions and blockers:
+  - Blocker: still need successful Graph-authenticated run of
+    `bgv_ensure_target_schema.ps1` to produce
+    `out/migration/target_schema.json` for a fully closed Step 5 record.
+  - Next action: complete Step 6 (test-environment smoke validation) and
+    Step 8/9 operational retirement tasks (disable blue assets, archive
+    final blue backup, retire old intake links) after stakeholder signoff.
+
+## 2026-03-12 (LegacyDrain remediation complete: lookup binding + file parity)
+- Current status:
+  - Completed the requested remediation and reran `LegacyDrain` end-to-end.
+  - Target lookup binding for `BGV_Requests.CandidateItemID` is now fixed
+    to the target `BGV_Candidates` list.
+  - LegacyDrain now achieves full row and file parity.
+- Completed tasks:
+  - Repaired target lookup binding in SharePoint:
+    - removed/recreated `BGV_Requests.CandidateItemID` on target with
+      `List={65747b59-c6b0-4671-ae37-79e35ad84c48}`.
+    - repopulated lookup values for existing target `BGV_Requests` rows
+      from `CandidateID` -> target candidate item ID mapping.
+  - Updated `scripts/active/bgv_copy_site_data.ps1` to harden migration:
+    - normalized source/target server-relative folder paths for upload
+      operations.
+    - translated source file refs (`/sites/dlrespl/...`) to target refs
+      (`/sites/DLRRecruitmentOps570/...`) before duplicate checks and
+      writes.
+    - made folder-ensure logic idempotent against "already exists"
+      races during nested folder creation.
+    - retained warning-only handling for unsupported/misbound lookup
+      fields and per-file copy failures.
+  - Reran:
+    - `bgv_copy_site_data.ps1 -Mode LegacyDrain`
+    - `bgv_validate_target_migration.ps1 -Mode LegacyDrain`
+  - Confirmed no failed files after rerun.
+- Validation commands run:
+  - Target lookup inspection and repair commands for
+    `BGV_Requests.CandidateItemID` schema/list binding.
+  - PowerShell parser checks for `scripts/active/bgv_copy_site_data.ps1`.
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_copy_site_data.ps1 -Mode LegacyDrain -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_validate_target_migration.ps1 -Mode LegacyDrain -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+  - Artifact checks:
+    - `out/migration/copy_legacydrain.json`
+    - `out/migration/validate_legacydrain.json`
+- Results summary:
+  - Copy:
+    - `CandidateCount = 5`
+    - `RequestCount = 8`
+    - `FormDataCount = 8`
+    - `FileCount = 5`
+    - `FailedFileCount = 0`
+  - Validation:
+    - `CandidateCountMatch = true`
+    - `RequestCountMatch = true`
+    - `FormDataCountMatch = true`
+    - `FileCountMatch = true`
+    - `PortabilityPassed = true`
+    - sample mismatches:
+      - candidates: `0`
+      - requests: `0`
+      - formdata: `0`
+- Next actions and blockers:
+  - Blocker: none for LegacyDrain copy/validate parity in this run.
+  - Next action: if this is final cutover state, proceed with blue
+    retirement checklist (disable blue flows/forms, archive backup, and
+    close old intake links).
+
+## 2026-03-12 (LegacyDrain execution run)
+- Current status:
+  - Executed `LegacyDrain` migration copy and validation.
+  - Candidate/request/form-data row migration completed.
+  - File migration did not complete due access-denied errors on source
+    authorization files under `BGV Records`.
+- Completed tasks:
+  - Ran:
+    - `scripts/active/bgv_copy_site_data.ps1 -Mode LegacyDrain`
+    - `scripts/active/bgv_validate_target_migration.ps1 -Mode LegacyDrain`
+  - Updated `scripts/active/bgv_copy_site_data.ps1` runtime behavior:
+    - added lookup-target binding checks for `CandidateItemID` and
+      `RecordItemID`; script now warns and skips lookup remap when target
+      lookup fields are bound to non-target lists.
+    - added per-file copy error handling so file access failures are
+      recorded in output JSON and do not terminate the entire run.
+  - Generated migration artifacts:
+    - `out/migration/copy_legacydrain.json`
+    - `out/migration/validate_legacydrain.json`
+- Validation commands run:
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_copy_site_data.ps1 -Mode LegacyDrain -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_validate_target_migration.ps1 -Mode LegacyDrain -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+  - Artifact inspection via `ConvertFrom-Json` for:
+    - `out/migration/copy_legacydrain.json`
+    - `out/migration/validate_legacydrain.json`
+- Results summary:
+  - Copy:
+    - `CandidateCount = 5`
+    - `RequestCount = 8`
+    - `FormDataCount = 8`
+    - `FileCount = 0`
+    - `FailedFileCount = 5` (all `Access denied`)
+  - Validation:
+    - `CandidateCountMatch = true`
+    - `RequestCountMatch = true`
+    - `FormDataCountMatch = true`
+    - `FileCountMatch = false`
+    - `PortabilityPassed = true`
+    - sample mismatches:
+      - candidates: `0`
+      - requests: `8`
+      - formdata: `0`
+- Next actions and blockers:
+  - Blocker: target lookup fields in `BGV_Requests`/`BGV_FormData` are
+    still bound to source list IDs, so lookup remap was skipped to avoid
+    write failures.
+  - Blocker: source authorization files under `BGV Records` returned
+    `Access denied`, preventing file copy completion.
+  - Next action: repair target lookup bindings via schema remediation
+    (recreate misbound lookup fields against target lists), then rerun:
+    - `bgv_copy_site_data.ps1 -Mode LegacyDrain`
+    - `bgv_validate_target_migration.ps1 -Mode LegacyDrain`
+  - Next action: resolve file access permissions on source/target
+    `BGV Records` library paths and rerun LegacyDrain for file parity.
+
+## 2026-03-12 (Migration execution run: ClosedHistory + copy-script runtime fix)
+- Current status:
+  - Executed migration run commands in sequence for `ClosedHistory`.
+  - Copy/validate now run end-to-end after fixing a runtime payload
+    conversion bug in `bgv_copy_site_data.ps1`.
+  - Current manifest has no closed-history rows, so this run migrated
+    zero records/files by design.
+- Completed tasks:
+  - Ran migration preflight auth checks (`pac`, `m365`, `PnP` module).
+  - Attempted `bgv_ensure_target_schema.ps1`; script reached template
+    stage but was blocked by local Graph session constraints in this
+    terminal (`Connect-MgGraph` WAM parent-window handle issue).
+  - Ran `bgv_copy_site_data.ps1 -Mode ClosedHistory`; initial run failed
+    at payload serialization with `Argument types do not match`.
+  - Patched `scripts/active/bgv_copy_site_data.ps1` to normalize
+    `Generic.List` values to arrays via `.ToArray()` before writing JSON.
+  - Re-ran `bgv_copy_site_data.ps1 -Mode ClosedHistory` successfully.
+  - Ran `bgv_validate_target_migration.ps1 -Mode ClosedHistory`
+    successfully with portability guard pass.
+  - Confirmed output artifacts:
+    - `out/migration/copy_closedhistory.json`
+    - `out/migration/validate_closedhistory.json`
+- Validation commands run:
+  - `pac auth who`
+  - `m365 status`
+  - `Import-Module PnP.PowerShell -ErrorAction Stop`
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_ensure_target_schema.ps1 -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22` (blocked at Graph session requirement)
+  - PowerShell parser check for `scripts/active/bgv_copy_site_data.ps1` (pass)
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_copy_site_data.ps1 -Mode ClosedHistory -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22` (pass)
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_validate_target_migration.ps1 -Mode ClosedHistory -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22` (pass)
+  - Artifact checks:
+    - `Get-Content -Raw out\migration\copy_closedhistory.json | ConvertFrom-Json`
+    - `Get-Content -Raw out\migration\validate_closedhistory.json | ConvertFrom-Json`
+    - `Get-Content -Raw out\migration\inventory.json | ConvertFrom-Json`
+- Next actions and blockers:
+  - Blocker: `bgv_ensure_target_schema.ps1` requires active Microsoft
+    Graph PowerShell auth context for template metadata capture; current
+    terminal WAM interactive flow failed with parent-window-handle error.
+  - Observation: inventory manifest currently reports:
+    - `ClosedHistory`: 0 candidates / 0 requests / 0 record keys
+    - `LegacyOpen`: 5 candidates / 8 requests / 8 record keys
+  - Next action: decide whether to execute
+    `bgv_copy_site_data.ps1 -Mode LegacyDrain` now (moves active/open
+    cases), or defer until cutover criteria are met.
+
+## 2026-03-12 (Migration plan doc aligned with implemented scripts)
+- Current status:
+  - Reviewed `docs/Sharepoint migration plan.md` against the current
+    migration scripts and aligned stale statements to actual behavior.
+- Completed tasks:
+  - Updated `docs/Sharepoint migration plan.md` to reflect implemented
+    portability-token architecture (`__BGV_*__`) rather than
+    hardcoded-flow assumptions.
+  - Aligned step-by-step commands and expectations with actual scripts:
+    - `bgv_migration_inventory.ps1`
+    - `bgv_ensure_target_schema.ps1`
+    - `bgv_build_deployment_settings.ps1`
+    - `bgv_copy_site_data.ps1`
+    - `bgv_validate_target_migration.ps1`
+  - Added explicit references to generated artifacts and review gates:
+    - `out/migration/inventory.json`
+    - `out/migration/target_schema.json`
+    - materialized folder requirement for pack/import
+  - Clarified current behavior where relevant:
+    - inventory conflicts are reviewed via `TargetConflicts` output
+    - `bgv_copy_site_data.ps1` requires explicit `-Mode`
+    - validation script includes portability guard execution
+- Validation commands run:
+  - `Get-Content -Raw docs/Sharepoint migration plan.md`
+  - `Get-Content -Raw scripts/active/bgv_migration_inventory.ps1`
+  - `Get-Content -Raw scripts/active/bgv_ensure_target_schema.ps1`
+  - `Get-Content -Raw scripts/active/bgv_build_deployment_settings.ps1`
+  - `Get-Content -Raw scripts/active/bgv_copy_site_data.ps1`
+  - `Get-Content -Raw scripts/active/bgv_validate_target_migration.ps1`
+  - `rg -n "hardcodes|__BGV_|materialized|TargetConflicts|ClosedHistory|LegacyDrain" docs/Sharepoint migration plan.md`
+- Next actions and blockers:
+  - Next action: execute schema -> settings -> copy -> validate in
+    `ClosedHistory` mode, then repeat copy/validate for `LegacyDrain`
+    at cutover completion.
+  - Blocker: none in document/script alignment after this update.
+
+## 2026-03-12 (Migration inventory fix: m365 JSON line output handling)
+- Current status:
+  - Fixed the inventory failure at `Inspect target sharing capability`
+    caused by PowerShell argument transformation on JSON text parsing.
+  - `bgv_migration_inventory.ps1` now completes end-to-end and writes
+    the inventory artifact successfully.
+- Completed tasks:
+  - Updated `shared/bgv_migration_common.ps1`:
+    - hardened `ConvertFrom-BgvJson` so it accepts both single-string
+      JSON and multi-line enumerable CLI output (for example `string[]`
+      from `m365 ... --output json`).
+    - normalized enumerable command output into one JSON text block
+      before `ConvertFrom-Json`.
+  - Re-ran migration inventory using current source/target SharePoint
+    URLs and PnP app/tenant values.
+- Validation commands run:
+  - PowerShell parser check:
+    - `[System.Management.Automation.Language.Parser]::ParseFile('shared/bgv_migration_common.ps1', ...)`
+  - JSON parser smoke checks:
+    - `ConvertFrom-BgvJson` with single multi-line JSON string (pass)
+    - `ConvertFrom-BgvJson` with JSON line array (`string[]`) (pass)
+  - End-to-end inventory run (pass):
+    - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\bgv_migration_inventory.ps1 -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+- Next actions and blockers:
+  - Next action: continue migration sequence with
+    `scripts/active/bgv_ensure_target_schema.ps1`, then
+    `scripts/active/bgv_copy_site_data.ps1` and
+    `scripts/active/bgv_validate_target_migration.ps1` in `ClosedHistory`
+    mode first.
+  - Blocker: none for inventory generation after this parser fix.
+
+## 2026-03-11 (Migration resume preflight: local vs GitHub check + inventory run)
+- Current status:
+  - Resumed migration planning from the repository by validating local
+    state and attempting the first migration-runbook step
+    (`bgv_migration_inventory.ps1`).
+  - PAC identity is confirmed for the admin account, but Microsoft 365
+    CLI auth is not active in this shell yet.
+- Completed tasks:
+  - Checked local repository state:
+    - branch is `master`, currently behind local `origin/master` by 1
+      commit.
+    - migration-related files remain unstaged/modified locally.
+  - Checked configured GitHub remote URL:
+    - `https://github.com/DL-Recruiter/dl-automation-system.git`
+  - Ran migration inventory preflight with explicit source/target URLs,
+    tenant, and PnP client id.
+  - Confirmed inventory script progresses through:
+    - source/target SharePoint connection
+    - list/library inventory
+    - case manifest classification
+    - template candidate inspection
+  - Confirmed current hard blocker is at target-sharing inspection due
+    to missing Microsoft 365 CLI login state.
+- Validation commands run:
+  - `git status --short --branch`
+  - `git remote -v`
+  - `git log --oneline -n 8`
+  - `git rev-parse HEAD`
+  - `git rev-parse origin/master`
+  - `pac auth who` (confirmed `edwin.teo@dlresources.com.sg`)
+  - `m365 status` (logged out)
+  - `Import-Module PnP.PowerShell; .\scripts\active\bgv_migration_inventory.ps1 -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+- Next actions and blockers:
+  - Blocker: `m365` is logged out; inventory fails at target sharing
+    snapshot with: `CLI for Microsoft 365 is not logged in`.
+  - Blocker: direct live GitHub fetch/API in this shell returned auth
+    credential errors; local `origin/master` ref was used as baseline.
+  - Next action: run `m365 login --authType browser`, confirm with
+    `m365 status`, then rerun
+    `scripts/active/bgv_migration_inventory.ps1` to generate
+    `out/migration/inventory.json`.
+
+## 2026-03-11 (BGV SharePoint site migration implementation)
+- Current status:
+  - Implemented the repo-side blue/green migration baseline for moving
+    BGV from `https://dlresourcespl88.sharepoint.com/sites/dlrespl` to
+    `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570`.
+  - Canonical flow JSON is now portability-tokenized and guarded against
+    reintroducing old blue-site literals.
+- Completed tasks:
+  - Updated canonical flow files under
+    `flows/power-automate/unpacked/Workflows/` so SharePoint site/list/
+    library IDs, Word template IDs, Forms IDs, mailbox targets, and
+    Teams routing now use `__BGV_*__` portability tokens.
+  - Normalized the canonical connection references in
+    `flows/power-automate/unpacked/Other/Customizations.xml` so the
+    future green solution uses one SharePoint ref, one Forms ref, one
+    Outlook ref, one Teams ref, and the existing Word Online ref.
+  - Added migration automation scripts:
+    - `shared/bgv_migration_common.ps1`
+    - `scripts/active/bgv_migration_inventory.ps1`
+    - `scripts/active/bgv_ensure_target_schema.ps1`
+    - `scripts/active/bgv_copy_site_data.ps1`
+    - `scripts/active/bgv_build_deployment_settings.ps1`
+    - `scripts/active/bgv_validate_target_migration.ps1`
+    - `scripts/active/check_bgv_portability.py`
+  - Added deployment-settings templates:
+    - `flows/power-automate/deployment-settings/test.settings.template.json`
+    - `flows/power-automate/deployment-settings/prod.settings.template.json`
+  - Added portability guard tests:
+    - `tests/test_check_bgv_portability.py`
+  - Updated linked documentation and placeholders:
+    - `README.md`
+    - `System_SPEC.md`
+    - `docs/architecture_flows.md`
+    - `.env.example`
+    - `docs/file_index.md`
+    - `docs/repo_inventory.md`
+- Validation commands run:
+  - PowerShell parser checks for:
+    - `shared/bgv_migration_common.ps1`
+    - `scripts/active/bgv_migration_inventory.ps1`
+    - `scripts/active/bgv_ensure_target_schema.ps1`
+    - `scripts/active/bgv_copy_site_data.ps1`
+    - `scripts/active/bgv_build_deployment_settings.ps1`
+    - `scripts/active/bgv_validate_target_migration.ps1`
+  - `py -m py_compile scripts/active/check_bgv_portability.py tests/test_check_bgv_portability.py tests/test_enforce_linked_docs.py` (pass)
+  - `py scripts/active/check_bgv_portability.py --repo-root .` (pass)
+  - `Get-Content -Raw <each canonical BGV workflow JSON> | ConvertFrom-Json | Out-Null` (pass for all 7 flows)
+  - `pac solution create-settings --solution-folder .\flows\power-automate\unpacked --settings-file .\out\deployment-settings\validation.pac.settings.json` (pass)
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\active\bgv_build_deployment_settings.ps1 -EnvironmentName test -OutputDirectory .\out\deployment-settings\smoke -MaterializeTo .\out\materialized\bgv_green_test_smoke` (pass after Windows PowerShell JSON-compatibility fix)
+  - `py -m pytest tests/test_check_bgv_portability.py tests/test_enforce_linked_docs.py` (failed: `No module named pytest`)
+- Next actions and blockers:
+  - UI-only/manual work still remains outside repo automation:
+    - clone Form 1 / Form 2 for green test and green prod
+    - clone blue flows into a true `BGV_System_Green` solution in Power
+      Automate so they get new component IDs
+    - create or bind the target connection instances
+    - import and smoke test in the separate Power Platform test
+      environment
+  - Next action: run the inventory/schema/build/copy/validate scripts
+    against the real source and target sites after the required `m365`,
+    `PnP.PowerShell`, and `Microsoft.Graph` sign-ins are live in the
+    user shell.
+  - Blocker: local Python `pytest` is not installed in this shell, so
+    only `py_compile` validation was available for the new portability
+    test module.
+
 ## 2026-02-27
 - Current status:
   - Repository documentation updated with runtime environment, flow/connector architecture, and environment variable requirements.

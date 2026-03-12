@@ -48,8 +48,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-              "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+              "dataset": "__BGV_SPO_SITE_URL__",
+              "table": "__BGV_LIST_REQUESTS_ID__",
               "$filter": "VerificationStatus eq 'Pending' and HRRequestSentAt eq null"
             },
             "host": {
@@ -100,8 +100,8 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                  "table": "7b78dcaf-8744-478b-a40f-633ed7becff3",
+                  "dataset": "__BGV_SPO_SITE_URL__",
+                  "table": "__BGV_LIST_CANDIDATES_ID__",
                   "id": "@items('Apply_to_each_(Requests_Loop)')?['CandidateItemID/Id']"
                 },
                 "host": {
@@ -115,8 +115,8 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                  "table": "f5248a99-fdf1-4660-946a-d54e00575a40",
+                  "dataset": "__BGV_SPO_SITE_URL__",
+                  "table": "__BGV_LIST_FORMDATA_ID__",
                   "$filter": "@concat('RequestID eq ''', string(items('Apply_to_each_(Requests_Loop)')?['RequestID']), '''')",
                   "$top": 1
                 },
@@ -153,7 +153,7 @@
               "actions": {
                 "FinalVerificationLink": {
                   "type": "Compose",
-                  "inputs": "@concat('https://forms.office.com/Pages/ResponsePage.aspx?id=cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUN1c5NE0wWEI2Nk1OMDlJSkI0N0RXUTRHMS4u','&r4930fc603c0f4cada09832be79f2a76f=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],outputs('Get_item')?['body/FullName'],'')))),'&r27b6bdb850dd48339dc05df11d485470=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport'],outputs('Get_item')?['body/IdentificationNumberNRIC'],outputs('Get_item')?['body/IdentificationNumberPassport'],'')))),'&rd745d133eb7f4611b59ea051f980f97a=',encodeUriComponent(trim(string(items('Apply_to_each_(Requests_Loop)')?['RequestID']))),'&rccaf3632669648baaa335c12d4ea40bf=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'')))),'&rcf35c7cc008e472f9d0b84bde67cc1ff=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN']))),'&r19aae6e8163d4aaeb8a3f3f2d5329be2=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress']))),'&r0bef44c0d22d493f95a33484875b951e=',encodeUriComponent(if(and(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),'',if(or(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),formatDateTime(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate']),'yyyy-MM-dd'),concat(formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],'yyyy-MM-dd'),' to ',formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'],'yyyy-MM-dd'))))),'&ra6ab2e26d2d84a92b33148fc4694773a=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_LastDrawnSalary']))),'&r49ca8a655f5e4bcba0e8f75d4475ad77=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_JobTitle']))))"
+                  "inputs": "@concat('https://forms.office.com/Pages/ResponsePage.aspx?id=__BGV_FORM2_ID__','&r4930fc603c0f4cada09832be79f2a76f=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],outputs('Get_item')?['body/FullName'],'')))),'&r27b6bdb850dd48339dc05df11d485470=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport'],outputs('Get_item')?['body/IdentificationNumberNRIC'],outputs('Get_item')?['body/IdentificationNumberPassport'],'')))),'&rd745d133eb7f4611b59ea051f980f97a=',encodeUriComponent(trim(string(items('Apply_to_each_(Requests_Loop)')?['RequestID']))),'&rccaf3632669648baaa335c12d4ea40bf=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'')))),'&rcf35c7cc008e472f9d0b84bde67cc1ff=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN']))),'&r19aae6e8163d4aaeb8a3f3f2d5329be2=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress']))),'&r0bef44c0d22d493f95a33484875b951e=',encodeUriComponent(if(and(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),'',if(or(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),formatDateTime(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate']),'yyyy-MM-dd'),concat(formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],'yyyy-MM-dd'),' to ',formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'],'yyyy-MM-dd'))))),'&ra6ab2e26d2d84a92b33148fc4694773a=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_LastDrawnSalary']))),'&r49ca8a655f5e4bcba0e8f75d4475ad77=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_JobTitle']))))"
                 },
                 "AuthFolderPath": {
                   "type": "Compose",
@@ -168,8 +168,8 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                      "table": "d411563f-2b1c-4fa5-90fc-ecc5f50941a1",
+                      "dataset": "__BGV_SPO_SITE_URL__",
+                      "table": "__BGV_LIBRARY_RECORDS_ID__",
                       "folderPath": "@outputs('AuthFolderPath')"
                     },
                     "host": {
@@ -192,7 +192,7 @@
                       "type": "OpenApiConnection",
                       "inputs": {
                         "parameters": {
-                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
+                          "dataset": "__BGV_SPO_SITE_URL__",
                           "id": "@items('For_each')?['{Identifier}']",
                           "inferContentType": true
                         },
@@ -250,8 +250,8 @@
                           "type": "OpenApiConnection",
                           "inputs": {
                             "parameters": {
-                              "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg",
-                              "emailMessage/To": "@if(contains(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),'@'),trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),if(contains(trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'@'),trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'dlresplmain@dlresources.com.sg'))",
+                              "emailMessage/MailboxAddress": "__BGV_SHARED_MAILBOX_ADDRESS__",
+                              "emailMessage/To": "@if(contains(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),'@'),trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),if(contains(trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'@'),trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'__BGV_EMPLOYER_FALLBACK_TO__'))",
                               "emailMessage/Subject": "Request for Employment Verification - @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}",
                               "emailMessage/Body": "<p class=\"editor-paragraph\">Dear HR Department,<br><br>We are reaching out to the Human Resource Department of your company to conduct a Previous Employment Verification Check for</p><p class=\"editor-paragraph\">@{outputs('Get_item')?['body/FullName']}, who has listed your organisation (@{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}) as the relevant previous employer.</p><br><p class=\"editor-paragraph\">Declared company details from candidate:</p><p class=\"editor-paragraph\">- Company Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}<br>- Company Address: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['Employer_Address'],'(Not captured)')}<br>- Company UEN: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['Employer_UEN'],'(Not captured)')}</p><br><p class=\"editor-paragraph\"><br>We would greatly appreciate your assistance in completing the \"Previous Employment Verfication Form\" via the link provided below as soon as possible to support a smooth and timely onboarding process. Kindly also prepare your company stamp to be uploaded as a file for the form. (If you do not have a company stamp, you may upload a blank image.)</p><br><p class=\"editor-paragraph\">The following is the link to the form:<br><a href=\"@{outputs('FinalVerificationLink')}\" class=\"editor-link\"><br><br>Click here to complete verification</a><br><br>For your reference, we have attached a signed form from @{outputs('Get_item')?['body/FullName']} to authorise the release of the employment information. Please open the document via word.</p><br><p class=\"editor-paragraph\">Please be assured that all information provided will be treated with the strictest confidence and used solely for internal HR and employment verification purposes. Should you have any queries or require further clarifications, feel free to contact us by replying to this email.</p><br><p class=\"editor-paragraph\">Thank you for your time and we appreciate your verification.</p><br><p class=\"editor-paragraph\">Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
                               "emailMessage/Attachments": [
@@ -273,8 +273,8 @@
                           "type": "OpenApiConnection",
                           "inputs": {
                             "parameters": {
-                              "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg",
-                              "emailMessage/To": "@if(contains(trim(string(outputs('Get_item')?['body/CandidateEmail'])),'@'),trim(string(outputs('Get_item')?['body/CandidateEmail'])),'recruitmentops@dlresources.com.sg')",
+                              "emailMessage/MailboxAddress": "__BGV_SHARED_MAILBOX_ADDRESS__",
+                              "emailMessage/To": "@if(contains(trim(string(outputs('Get_item')?['body/CandidateEmail'])),'@'),trim(string(outputs('Get_item')?['body/CandidateEmail'])),'__BGV_INTERNAL_ALERT_TO__')",
                               "emailMessage/Subject": "Copy of Signed Authorization Form - @{outputs('Get_item')?['body/FullName']}",
                               "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{outputs('Get_item')?['body/FullName']},</p><br><p class=\"editor-paragraph\">This is a copy of your signed authorization form that was sent for background verification.</p><br><p class=\"editor-paragraph\">Please keep this for your reference.</p><br><p class=\"editor-paragraph\">Please open with Word to view your signed copy.</p><br><p class=\"editor-paragraph\">Thank you.<br>DL Resources Recruitment Team</p>",
                               "emailMessage/Attachments": [
@@ -301,9 +301,10 @@
                           "type": "OpenApiConnection",
                           "inputs": {
                             "parameters": {
-                              "dataset": "https://dlresourcespl88.sharepoint.com/sites/dlrespl",
-                              "table": "4acba8e0-46aa-4007-b752-b4aa88fee7f7",
+                              "dataset": "__BGV_SPO_SITE_URL__",
+                              "table": "__BGV_LIST_REQUESTS_ID__",
                               "id": "@items('Apply_to_each_(Requests_Loop)')?['ID']",
+                              "item/Title": "@items('Apply_to_each_(Requests_Loop)')?['Title']",
                               "item/HRRequestSentAt": "@utcNow()",
                               "item/VerificationStatus/Value": "Sent"
                             },

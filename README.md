@@ -217,6 +217,11 @@ Why this matters:
   review and deployment
 - editing duplicate exports creates confusion and makes later syncs
   overwrite your work
+- the canonical BGV flow JSON is now portability-tokenized for the site
+  migration with `__BGV_*__` markers
+- do not pack the raw tokenized folder for green deployment; first run
+  `scripts/active/bgv_build_deployment_settings.ps1 -MaterializeTo <folder>`
+  and pack the materialized copy instead
 
 ## Common User Tasks
 
@@ -470,6 +475,76 @@ Use the Power Automate portal only for:
 
 After UI-only changes, sync the solution back into this repo so Git
 stays current.
+
+## SharePoint Site Migration
+
+The migration from:
+
+- blue/source: `https://dlresourcespl88.sharepoint.com/sites/dlrespl`
+- green/target: `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570`
+
+is implemented in this repo as a blue/green, tokenized-source workflow.
+
+Key rules:
+
+- canonical flow JSON under `flows/power-automate/unpacked/Workflows/`
+  must stay tokenized
+- `scripts/active/check_bgv_portability.py` fails if old site/list/template/
+  form/team/mailbox literals re-enter the canonical flow files
+- `scripts/active/bgv_build_deployment_settings.ps1` generates:
+  - PAC connection settings JSON
+  - token values JSON
+  - optional materialized flow folder for pack/import
+
+Typical migration sequence:
+
+1. preflight inventory:
+
+   ```powershell
+   pac auth who
+   powershell -File scripts/active/bgv_migration_inventory.ps1
+   ```
+
+1. prepare target schema and upload the Word template:
+
+   ```powershell
+   powershell -File scripts/active/bgv_ensure_target_schema.ps1
+   ```
+
+1. generate deployment inputs for test or prod:
+
+   ```powershell
+   powershell -File scripts/active/bgv_build_deployment_settings.ps1 -EnvironmentName test -MaterializeTo .\out\materialized\bgv_green_test
+   ```
+
+1. pack/import from the materialized folder, not from the tokenized
+   canonical source:
+
+   ```powershell
+   pac solution pack --zipfile .\artifacts\exports\BGV_System_Green_test.zip --folder .\out\materialized\bgv_green_test --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true
+   ```
+
+1. move closed history first, then validate:
+
+   ```powershell
+   powershell -File scripts/active/bgv_copy_site_data.ps1 -Mode ClosedHistory
+   powershell -File scripts/active/bgv_validate_target_migration.ps1 -Mode ClosedHistory
+   ```
+
+1. after cutover, drain remaining legacy-open cases:
+
+   ```powershell
+   powershell -File scripts/active/bgv_copy_site_data.ps1 -Mode LegacyDrain
+   powershell -File scripts/active/bgv_validate_target_migration.ps1 -Mode LegacyDrain
+   ```
+
+Use these supporting files during the migration:
+
+- `flows/power-automate/deployment-settings/test.settings.template.json`
+- `flows/power-automate/deployment-settings/prod.settings.template.json`
+- `.env.example` for optional shell overrides of `BGV_*` token values
+- `docs/architecture_flows.md` and `System_SPEC.md` for the portability
+  contract and script responsibilities
 
 ## Best Practices
 
