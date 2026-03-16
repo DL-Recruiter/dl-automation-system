@@ -2770,3 +2770,37 @@ Log each session with:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
 - Next actions and blockers:
   - Blocker remains for `Q28` Other comments: the live Forms key is still not identified in repo evidence, so it remains preserved in `Form2RawJson` only until we capture that key from a live response body or current Forms metadata.
+## 2026-03-16 - BGV_5 notes mapping document
+
+- Added a dedicated documentation file:
+  - `docs/bgv5_notes_mapping.md`
+- Documented, in two separate tables, how `BGV_Requests.Notes` and `BGV_FormData.F2_Notes` are built from `BGV_5_Response1`
+- Clarified that both notes fields currently receive the same assembled `varNotifyBody` text
+- Documented that `Form2RawJson` is separate from the notes summary
+- Recorded the remaining known gap:
+  - `Other comments we should know about` is still preserved in `Form2RawJson` but not yet explicitly mapped into the notes summary
+
+## 2026-03-16 (BGV_5 BGV_Requests notes simplified while F2_Notes stays detailed)
+
+- Current status:
+  - Updated `BGV_5` so `BGV_Requests.Notes` now shows selected choice/checkbox answers clearly, while free-text explanation fields are replaced with a standard placeholder.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Added a second string variable:
+    - `varRequestNotesBody`
+  - Kept existing detailed internal note-building unchanged in:
+    - `varNotifyBody`
+  - Changed `BGV_Requests.Notes` to use:
+    - `@variables('varRequestNotesBody')`
+  - Left `BGV_FormData.F2_Notes` using:
+    - `@variables('varNotifyBody')`
+  - For `BGV_Requests.Notes`, implemented this rule:
+    - selected choice/checkbox answers remain visible
+    - free-text explanation fields now show `Please refer to the report summary for additional comments.`
+  - Updated the dedicated mapping guide:
+    - `docs/bgv5_notes_mapping.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Next action: import the updated solution and verify one live Form 2 response so `BGV_Requests.Notes` shows the simplified wording while `F2_Notes` keeps the detailed explanations.

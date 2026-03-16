@@ -187,6 +187,18 @@
                         "name": "varNotifyBody",
                         "value": "[High] MAS misconduct was reported : @{outputs('Get_response_details')?['body/r7bd26b4a7e94430dbda54f9e8b8212e4']}"
                       }
+                    },
+                    "Append_to_string_variable_-_Request_Notes_1": {
+                      "runAfter": {
+                        "Append_to_string_variable_-_Notify_Body_1": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varRequestNotesBody",
+                        "value": "[High] MAS misconduct was reported : @{outputs('Get_response_details')?['body/r7bd26b4a7e94430dbda54f9e8b8212e4']}"
+                      }
                     }
                   },
                   "else": {
@@ -248,6 +260,18 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varNotifyBody",
+                        "value": "[High] Disciplinary Actions was disclosed : @{outputs('Get_response_details')?['body/r35197d5910d2489db0d5786157b35295']}"
+                      }
+                    },
+                    "Append_to_string_variable_-_Request_Notes_2": {
+                      "runAfter": {
+                        "Append_to_string_variable_-_Notify_Body_2": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varRequestNotesBody",
                         "value": "[High] Disciplinary Actions was disclosed : @{outputs('Get_response_details')?['body/r35197d5910d2489db0d5786157b35295']}"
                       }
                     }
@@ -334,6 +358,18 @@
                         "name": "varNotifyBody",
                         "value": "[Medium] Employer would not re-employ the candidate.\n\nReason: @{outputs('Get_response_details')?['body/r5f7ebc3390bc4699b160504c65254c3e']}"
                       }
+                    },
+                    "Append_to_string_variable_-_Request_Notes_3": {
+                      "runAfter": {
+                        "Append_to_string_variable_-_Notify_Body_3": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varRequestNotesBody",
+                        "value": "[Medium] Employer would not re-employ the candidate.\n\nReason: Please refer to the report summary for additional comments."
+                      }
                     }
                   },
                   "runAfter": {
@@ -394,6 +430,18 @@
                         "name": "varNotifyBody",
                         "value": "[Low] Information provided was not fully accurate. \n\nSelected issues: @{outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029']}\n\nExplanations: \n-Employment Period: @{outputs('Get_response_details')?['body/r9a95095b3d7d4d9f8bc985025614bd79']}\n-Job Title/Position: @{outputs('Get_response_details')?['body/r83027392ccb043e2a637b06ff4b54ac8']}\n-Remuneration Package: @{outputs('Get_response_details')?['body/r4061a9d19aae45d9915d2f508a5c3ea9']}\n-Other abnormalities: @{outputs('Get_response_details')?['body/ra15c799c557d42d1bcee1de947c29466']}"
                       }
+                    },
+                    "Append_to_string_variable_-_Request_Notes_4": {
+                      "runAfter": {
+                        "Append_to_string_variable_-_Notify_Body_4": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varRequestNotesBody",
+                        "value": "[Low] Information provided was not fully accurate.\n\nSelected issues: @{outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029']}\n\nEmployment Period: Please refer to the report summary for additional comments.\nJob Title/Position: Please refer to the report summary for additional comments.\nRemuneration Package: Please refer to the report summary for additional comments.\nOther abnormalities: Please refer to the report summary for additional comments."
+                      }
                     }
                   },
                   "runAfter": {
@@ -436,6 +484,18 @@
                         "name": "varNotifyBody",
                         "value": "[Action Required] Employer requested follow up."
                       }
+                    },
+                    "Append_to_string_variable_-_Request_Notes_5": {
+                      "runAfter": {
+                        "Append_to_string_variable_4": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varRequestNotesBody",
+                        "value": "[Action Required] Employer requested follow up."
+                      }
                     }
                   },
                   "runAfter": {
@@ -465,6 +525,18 @@
                       "inputs": {
                         "name": "varNotifyBody",
                         "value": "\n\n[Company Details] Accuracy: @{coalesce(outputs('Get_response_details')?['body/r2d39255c2449439096683ca0e39241b0'],'(blank)')}\nSelected fields: @{coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'(blank)')}\nExplanation: @{coalesce(outputs('Get_response_details')?['body/ra03058e9bbfd40d28014b0c669e92434'],'(blank)')}"
+                      }
+                    },
+                    "Append_to_string_variable_-_Request_Notes_Company_Details": {
+                      "runAfter": {
+                        "Append_to_string_variable_-_Notify_Body_Company_Details": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varRequestNotesBody",
+                        "value": "\n\n[Company Details] Accuracy: @{coalesce(outputs('Get_response_details')?['body/r2d39255c2449439096683ca0e39241b0'],'(blank)')}\nSelected fields: @{coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'(blank)')}\nExplanation: Please refer to the report summary for additional comments."
                       }
                     }
                   },
@@ -523,7 +595,7 @@
                       "item/Title": "@items('Apply_to_each')?['Title']",
                       "item/ResponseReceivedAt": "@utcNow()",
                       "item/Outcome/Value": "@variables('varOutcome')",
-                      "item/Notes": "@variables('varNotifyBody')",
+                      "item/Notes": "@variables('varRequestNotesBody')",
                       "item/Status/Value": "Completed",
                       "item/Severity/Value": "@variables('varSeverity')"
                     },
@@ -769,7 +841,7 @@
         },
         "Initialize_variable_-_Notify_Teams": {
           "runAfter": {
-            "Initialize_variable_-_Notify_Body": [
+            "Initialize_variable_-_Request_Notes_Body": [
               "Succeeded"
             ]
           },
@@ -795,6 +867,22 @@
             "variables": [
               {
                 "name": "varNotifyBody",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initialize_variable_-_Request_Notes_Body": {
+          "runAfter": {
+            "Initialize_variable_-_Notify_Body": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varRequestNotesBody",
                 "type": "string"
               }
             ]
