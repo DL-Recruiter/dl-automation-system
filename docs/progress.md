@@ -2699,3 +2699,21 @@ Log each session with:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
 - Next actions and blockers:
   - Next action: import the updated solution, then verify one live employer email link to confirm NRIC appears only in the NRIC field and Passport appears only in the Passport field.
+
+## 2026-03-16 (BGV_4 live Forms passport key refreshed)
+- Current status:
+  - Investigated why the employer HR form was still opening blank and confirmed the live Microsoft Forms Passport field key had changed from the older stored value in `BGV_4`.
+- Completed tasks:
+  - Reviewed the user-provided current prefilled Forms URL and extracted the live Passport query key:
+    - old key: `r0c342001cdd8463181c36dba2a8933ad`
+    - new key: `r425242341d6143c7a29307136debe938`
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - Replaced the stale Passport prefill parameter in `FinalVerificationLink` with the new live Forms key while preserving all other existing prefilled values.
+  - Updated mapping docs:
+    - `docs/data_mapping_dictionary.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Next action: import the updated solution and verify a fresh employer email link.
+  - Residual risk: if other Forms question IDs were also regenerated later, those keys would need the same refresh from a new prefilled URL sample.
