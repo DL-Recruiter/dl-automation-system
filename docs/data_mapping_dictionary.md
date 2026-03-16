@@ -181,6 +181,9 @@ Note:
 | `rafe3ada4157c49fb9e555cd0fb53bd59` | Re-employ yes/no | `BGV_FormData.F2_EmployerWouldReEmploy` | `equals(value,'Yes')` (boolean) |
 | `r5f7ebc3390bc4699b160504c65254c3e` | Re-employ reason | `BGV_FormData.F2_ReEmployReason` | direct |
 | `r513ad5ab3a14453286bdb910820985ec` | Reason for leaving (employer-entered response) | `BGV_FormData.F2_ReasonForLeaving` | direct (coalesce to empty string) |
+| `r2d39255c2449439096683ca0e39241b0` | Company-details accuracy yes/no | `BGV_FormData.F2_Notes` | appended into notes text when company-details discrepancy section is used |
+| `rd05170e51ac34fef95f5464cf348bedc` | Company-details inaccurate fields | `BGV_FormData.F2_Notes` | appended into notes text when present |
+| `ra03058e9bbfd40d28014b0c669e92434` | Company-details explanation | `BGV_FormData.F2_Notes` | appended into notes text when present |
 | Derived runtime values | Scoring output | `BGV_FormData.F2_Severity/Value`, `F2_Outcome`, `F2_Notes` | from variables |
 | Full Form 2 response JSON | Snapshot | `BGV_FormData.Form2RawJson` | `string(outputs('Get_response_details')?['body'])` |
 | Timestamp | Submission timestamp | `BGV_FormData.Form2SubmittedAt` | `utcNow()` |
@@ -257,9 +260,9 @@ Legend:
 | 4 | RequestID (auto-filled) | `rd745d133eb7f4611b59ea051f980f97a` | Prefill + Read + Stored | Request lookup key; stored in `BGV_FormData.RequestID` |
 | 5 | Company Name (Declared by Candidate) | `rccaf3632669648baaa335c12d4ea40bf` | Prefill | Context for employer; not stored from Form 2 response |
 | 6 | Company UEN (Declared by Candidate) | `rcf35c7cc008e472f9d0b84bde67cc1ff` (from user-provided prefill URL) | Prefill | `BGV_4` uses `BGV_FormData.F1_EmployerUEN` |
-| 7 | Information accurate for declared company details | `r2d39255c2449439096683ca0e39241b0` (from user-provided prefill URL) | Key known; not wired in canonical flow JSON | N/A |
-| 8 | If company details are not accurate, select inaccurate fields | `rd05170e51ac34fef95f5464cf348bedc` (from user-provided prefill URL) | Key known; not wired in canonical flow JSON | N/A |
-| 9 | Explain the company-details discrepancy | `ra03058e9bbfd40d28014b0c669e92434` (from user-provided prefill URL) | Key known; not wired in canonical flow JSON | N/A |
+| 7 | Information accurate for declared company details | `r2d39255c2449439096683ca0e39241b0` (from user-provided prefill URL) | Read + persisted in notes | Stored in `BGV_Requests.Notes` and `BGV_FormData.F2_Notes` when company-details discrepancy section is used |
+| 8 | If company details are not accurate, select inaccurate fields | `rd05170e51ac34fef95f5464cf348bedc` (from user-provided prefill URL) | Read + persisted in notes | Stored in `BGV_Requests.Notes` and `BGV_FormData.F2_Notes` when present |
+| 9 | Explain the company-details discrepancy | `ra03058e9bbfd40d28014b0c669e92434` (from user-provided prefill URL) | Read + persisted in notes | Stored in `BGV_Requests.Notes` and `BGV_FormData.F2_Notes` when present |
 | 10 | Employment Period (Declared By Candidate) | `r0bef44c0d22d493f95a33484875b951e` (from user-provided prefill URL) | Prefill | `BGV_4` writes `start to end` if both dates exist, else uses the single available date |
 | 11 | Reason For Leaving | `r513ad5ab3a14453286bdb910820985ec` | Stored only | Employer HR enters this manually in Form 2; it is not a current `(Declared By Candidate)` prefill field, and the submitted response is stored in `BGV_FormData.F2_ReasonForLeaving` |
 | 12 | Last Drawn Renumeration Package (Declared By Candidate) | `ra6ab2e26d2d84a92b33148fc4694773a` (from user-provided prefill URL) | Prefill | `BGV_4` uses `BGV_FormData.F1_LastDrawnSalary` |
@@ -278,7 +281,7 @@ Legend:
 | 25 | Kindly provide details, if there were disciplinary actions taken | `r35197d5910d2489db0d5786157b35295` | Read | High-severity notes text |
 | 26 | Would you re-employ him/her? | `rafe3ada4157c49fb9e555cd0fb53bd59` | Read + Stored | `BGV_FormData.F2_EmployerWouldReEmploy` (boolean) and medium-severity rule |
 | 27 | Reason for not wanting to re-employ him/her | `r5f7ebc3390bc4699b160504c65254c3e` | Read + Stored | `BGV_FormData.F2_ReEmployReason`; notes text |
-| 28 | Other comments we should know about | Not present in current canonical flow JSON | Not wired | N/A |
+| 28 | Other comments we should know about | Not present in current canonical flow JSON | Raw JSON only (key still unknown in repo) | Present in `BGV_FormData.Form2RawJson` when submitted, but not yet normalized because the live Forms key still needs to be identified |
 | 29 | Full Name of Person Completing This Form | Not present in current canonical flow JSON | Not wired | N/A |
 | 30 | Job Title | Not present in current canonical flow JSON | Not wired | N/A |
 | 31 | Contact details for clarification/follow-up | Not present in current canonical flow JSON | Not wired | N/A |
@@ -291,9 +294,7 @@ Known current direct Form 2 storage fields in `BGV_FormData`:
 - `F2_EmployerWouldReEmploy` <- `rafe3ada4157c49fb9e555cd0fb53bd59`
 - `F2_ReEmployReason` <- `r5f7ebc3390bc4699b160504c65254c3e`
 - Additional observed keys from latest prefill URL (not wired yet):
-  - `r2d39255c2449439096683ca0e39241b0` (`Q7` company-details accuracy yes/no)
-  - `rd05170e51ac34fef95f5464cf348bedc` (`Q8` company-details discrepancy multi-select)
-  - `ra03058e9bbfd40d28014b0c669e92434` (`Q9` company-details discrepancy explanation)
+  - `Q28` Other comments key still needs to be identified from a live response payload or current Forms runtime metadata
 
 Important:
 - Candidate Declaration source keys above were verified from the live Forms runtime metadata endpoint (`prefetchFormUrl`) on `2026-03-04`.

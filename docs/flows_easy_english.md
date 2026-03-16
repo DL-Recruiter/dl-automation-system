@@ -142,6 +142,11 @@ This document describes the current behavior in your canonical flow files under 
     - `ResponseReceivedAt`
     - `Severity`, `Outcome`, `Notes`
   - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including `F2_ReasonForLeaving`.
+  - `Form2RawJson` stores the full submitted Form 2 payload, not just the normalized subset.
+  - Company-details discrepancy answers are now also copied into notes storage when present:
+    - company-details accuracy
+    - selected inaccurate company-detail fields
+    - company-details explanation
   - Keeps required SharePoint fields (including `Title`) when updating `BGV_FormData`, preventing save/runtime validation errors.
   - Sends Teams alert when notify flag is true.
   - Sends internal high-severity email when severity is `High`, including employer name and employer HR email in the body.

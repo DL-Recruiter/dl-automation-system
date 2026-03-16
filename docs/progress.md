@@ -2739,3 +2739,34 @@ Log each session with:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
 - Next actions and blockers:
   - Next action: import the updated solution and verify a fresh employer form link from a live BGV_4 email.
+
+## 2026-03-16 (BGV_5 company-details discrepancy answers copied into notes)
+- Current status:
+  - Reviewed Form 2 response storage in `BGV_5` and confirmed `Form2RawJson` already stores the full submission body, while several company-details discrepancy answers were still only preserved there and not copied into the normalized notes path.
+- Completed tasks:
+  - Confirmed current direct normalized Form 2 storage already includes:
+    - `F2_InformationAccurate`
+    - `F2_SelectedIssues`
+    - `F2_EmployerWouldReEmploy`
+    - `F2_ReEmployReason`
+    - `F2_ReasonForLeaving`
+    - `F2_Severity`
+    - `F2_Outcome`
+    - `F2_Notes`
+    - `Form2RawJson`
+  - Confirmed these company-details section questions were not previously copied into normalized notes:
+    - `r2d39255c2449439096683ca0e39241b0` (company-details accuracy)
+    - `rd05170e51ac34fef95f5464cf348bedc` (selected inaccurate company-detail fields)
+    - `ra03058e9bbfd40d28014b0c669e92434` (company-details explanation)
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Added `Condition_-_Company_Details_Discrepancy` so those answers are appended into `varNotifyBody` whenever that section is used.
+  - Because `varNotifyBody` is written to both `BGV_Requests.Notes` and `BGV_FormData.F2_Notes`, the company-details discrepancy answers are now stored in both places as well as remaining in `Form2RawJson`.
+  - Updated linked docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+    - `docs/sharepoint_list_user_guide.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Blocker remains for `Q28` Other comments: the live Forms key is still not identified in repo evidence, so it remains preserved in `Form2RawJson` only until we capture that key from a live response body or current Forms metadata.

@@ -307,14 +307,14 @@ the raw response snapshot.
 | Discrepancy in job title / position | Notes body | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
 | Discrepancy in remuneration package | Notes body | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
 | Other abnormalities such as unable to verify all information | Notes body | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
-| Discrepancy in company details | Raw JSON only | `BGV_FormData.Form2RawJson` |
-| Company-details inaccurate checkbox section | Raw JSON only | `BGV_FormData.Form2RawJson` |
-| Company-details explanation box | Raw JSON only | `BGV_FormData.Form2RawJson` |
+| Discrepancy in company details | Notes body and raw JSON | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes`; `BGV_FormData.Form2RawJson` |
+| Company-details inaccurate checkbox section | Notes body and raw JSON | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes`; `BGV_FormData.Form2RawJson` |
+| Company-details explanation box | Notes body and raw JSON | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes`; `BGV_FormData.Form2RawJson` |
 | MAS incident details | Notes body | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
 | Disciplinary-action details | Notes body | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
 | Would re-employ? | Structured field | `BGV_FormData.F2_EmployerWouldReEmploy` |
 | Reason for not re-employing | Structured field and notes body | `BGV_FormData.F2_ReEmployReason`; may also appear in `Notes` / `F2_Notes` |
-| Other comments we should know about | Raw JSON only | `BGV_FormData.Form2RawJson` |
+| Other comments we should know about | Raw JSON only until live Forms key is identified | `BGV_FormData.Form2RawJson` |
 | Please contact me for further clarification | Notes body and notification trigger | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes`; internal notification content |
 
 Important practical points:
