@@ -217,7 +217,7 @@ Note:
 | Flow | Data target | Fields updated/read |
 | --- | --- | --- |
 | `BGV_1_Detect_Authorization_Signature` | `BGV_Candidates` | Reads by `CandidateID`; sets `ConsentTimestamp=utcNow()`, `Status='Obtained Authorization Form Signature'`, `AuthorisationSigned=true`. |
-| `BGV_2_Postsignature` | `BGV Records` library | Reads authorization `.docx` files; performs `Stop sharing` operation on matched files. |
+| `BGV_2_Postsignature` | `BGV Records` library | Reads authorization `.docx` files, locks all content controls via `LockAuthorizationControls` function, overwrites file content with locked DOCX, then performs `Stop sharing` on matched files. |
 | `BGV_3_AuthReminder_5Days` | `BGV_Candidates` | Reads rows where `Status='Pending Authorization Form Signature'`; uses `AuthorizationLinkCreatedAt`, `AuthorizationLink`; updates `LastAuthReminderAt`. |
 | `BGV_4_SendToEmployer_Clean` | `BGV_Requests` | Reads pending requests; reads candidate auth status; updates `HRRequestSentAt=utcNow()`, `VerificationStatus='Sent'`. |
 | `BGV_6_HRReminderAndEscalation` | `BGV_Requests` | Reads rows where `Status='Sent'`; uses `ResponseReceivedAt`, `Reminder1At`, `Reminder2At`, `Reminder3At`; updates `Reminder1At`, `Reminder2At`, `Reminder3At`. |
@@ -229,6 +229,8 @@ Note:
 | Candidate folder creation | `Candidate Files/{CandidateID}` created by `BGV_0 / Create_Candidate_Folder` |
 | Authorization subfolder | `Candidate Files/{CandidateID}/Authorization` created by `BGV_0 / Create_Authorization_Sub_Folder` |
 | Authorization document file | `Authorization Form - {CandidateID}.docx` created from Word template |
+| Authorization template ID controls | `IdentificationNumberNRIC` content control: candidate NRIC else `N/A`; `IdentificationNumberPassport` content control: `N/A` when NRIC exists, else candidate Passport, else `N/A` |
+| Authorization consent checkbox | Template includes bottom text `Yes, I authorized` with checkbox content-control tag `SignedYes` for parser-compatible signed/unchecked detection in `BGV_1` |
 | Share link | Document share link written to `BGV_Candidates.AuthorizationLink` |
 | Signature lifecycle | `BGV_1` parses signed document; `BGV_2` stops sharing after signature status is set |
 

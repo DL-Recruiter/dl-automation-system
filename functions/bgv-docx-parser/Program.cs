@@ -10,6 +10,7 @@ var host = new HostBuilder()
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
         services.AddSingleton<IDocxCheckboxExtractor, OpenXmlDocxCheckboxExtractor>();
+        services.AddSingleton<IDocxContentControlLocker, OpenXmlDocxContentControlLocker>();
         services.AddSingleton<IAuthorizationMatchEvaluator, AuthorizationMatchEvaluator>();
         services.AddSingleton<IDrawingDetectionService, OpenXmlDrawingDetectionService>();
     })

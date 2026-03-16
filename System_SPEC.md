@@ -118,6 +118,53 @@ Governance:
 - `413 Request Entity Too Large` - request body or decoded DOCX exceeds enforced limits.
 - `500 Internal Server Error` - unexpected failure.
 
+### LockAuthorizationControls
+Purpose:
+- Locks all Word content controls in a candidate authorization DOCX after signature capture.
+- Returns a locked DOCX payload for flow overwrite so Developer-mode edits of controls are blocked.
+
+HTTP method and path:
+- `GET /api/LockAuthorizationControls`
+- `POST /api/LockAuthorizationControls`
+
+Authentication:
+- Azure Function endpoint protected by `AuthorizationLevel.Function`.
+- Callers must send the function key via `x-functions-key`.
+
+**Request Fields (`POST`):**
+| Field | Description | Type | Required? |
+| --- | --- | --- | --- |
+| `fileName` | Source DOCX filename for logging/traceability. | string | No |
+| `docxBase64` | Base64-encoded DOCX payload to lock. | string | Yes |
+
+**GET health response (`200 OK`):**
+```json
+{
+  "status": "ok",
+  "message": "Use POST with JSON { fileName, docxBase64 }."
+}
+```
+
+**Response (`200 OK`):**
+```json
+{
+  "fileName": "candidate.docx",
+  "lockedControlsCount": 5,
+  "lockedDocxBase64": "<base64-docx>",
+  "note": "All content controls are locked with sdtContentLocked to prevent editing/deletion in Developer mode."
+}
+```
+
+**Lock behavior:**
+- Applies `w:lock w:val=\"sdtContentLocked\"` to each content control in the DOCX package.
+- Intended runtime usage: flow overwrites the existing authorization file with the returned `lockedDocxBase64`.
+
+**Error Codes:**
+- `400 Bad Request` - invalid input or DOCX parse/lock failure.
+- `401 Unauthorized` - invalid or missing function key.
+- `413 Request Entity Too Large` - request body or decoded DOCX exceeds enforced limits.
+- `500 Internal Server Error` - unexpected failure.
+
 ## 4. Data Models & Structures
 Document key data shapes used by scripts, functions, and flows:
 - Input payload schema
@@ -250,7 +297,7 @@ Connection/data-source automation baseline:
 | `BGV_EMPLOYER_FALLBACK_TO` | Employer fallback mailbox token | Yes (for green materialization) | `__REPLACE_WITH_EMPLOYER_FALLBACK_ADDRESS__` |
 | `BGV_TEAMS_GROUP_ID` | Teams group token used by reminder/escalation flows | Yes (for green materialization) | `__REPLACE_WITH_TEAMS_GROUP_ID__` |
 | `BGV_TEAMS_CHANNEL_ID` | Teams channel token used by reminder/escalation flows | Yes (for green materialization) | `__REPLACE_WITH_TEAMS_CHANNEL_ID__` |
-| `BGV_DOCX_PARSER_URI` | Parser endpoint URI token used by `BGV_1` HTTP action | Yes (for green materialization) | `https://<functionapp>.azurewebsites.net/api/parseauthorizationcontrols?code=<function-key>` |
+| `BGV_DOCX_PARSER_URI` | Parser endpoint URI token used by `BGV_1` and as the base URI transformed by `BGV_2` to call `lockauthorizationcontrols` | Yes (for green materialization) | `https://<functionapp>.azurewebsites.net/api/parseauthorizationcontrols?code=<function-key>` |
 | `BGV_CONN_MICROSOFTFORMS_ID` | Optional override for Forms connection ID when generating PAC settings | No | `shared-microsoftform-<id>` |
 | `BGV_CONN_OFFICE365_ID` | Optional override for Office 365 connection ID when generating PAC settings | No | `<office365-connection-id>` |
 | `BGV_CONN_SHAREPOINT_ID` | Optional override for SharePoint connection ID when generating PAC settings | No | `<sharepoint-connection-id>` |

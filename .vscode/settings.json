@@ -1,5 +1,11 @@
 {
     "sarif-viewer.connectToGithubCodeScanning": "off",
     "chat.agentsControl.enabled": true,
-    "chat.viewSessions.enabled": true
+    "chat.viewSessions.enabled": true,
+    "azureFunctions.projectSubpath": "functions\\bgv-docx-parser",
+    "azureFunctions.deploySubpath": "functions\\bgv-docx-parser/bin/Release/net8.0/publish",
+    "azureFunctions.projectLanguage": "C#",
+    "azureFunctions.projectRuntime": "~4",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.preDeployTask": "publish (functions)"
 }

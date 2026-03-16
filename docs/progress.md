@@ -90,6 +90,72 @@ Log each session with:
 - Next actions and blockers:
   - Next action: pack/import the updated solution and test one fresh candidate authorization email to confirm the generated document shows the checkbox and remains editable through the unique link.
 
+## 2026-03-15 (Post-signature content-control locking automation)
+- Current status:
+  - Implemented automatic authorization DOCX content-control locking after signature status is obtained.
+- Completed tasks:
+  - Added new Azure Function endpoint:
+    - `functions/bgv-docx-parser/LockAuthorizationControls.cs`
+    - `GET/POST /api/LockAuthorizationControls`
+  - Added DOCX locking service and DI registration:
+    - `functions/bgv-docx-parser/Services/IDocxContentControlLocker.cs`
+    - `functions/bgv-docx-parser/Services/OpenXmlDocxContentControlLocker.cs`
+    - `functions/bgv-docx-parser/Program.cs`
+    - lock mode applied: `w:lock w:val="sdtContentLocked"` across all content controls.
+  - Added lock endpoint response model:
+    - `functions/bgv-docx-parser/Models/LockContentControlsResponsePayload.cs`
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_2_Postsignature-A45CA9C0-E4F1-F011-8406-002248582037.json`
+    - `BGV_2` now:
+      - enumerates files in candidate authorization folder,
+      - gets file content,
+      - calls lock endpoint using parser URI token transform (`parseauthorizationcontrols` -> `lockauthorizationcontrols`),
+      - updates file content with locked DOCX (`UpdateFile`),
+      - then executes `Stop sharing`.
+  - Updated linked docs:
+    - `System_SPEC.md`
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+- Validation commands run:
+  - `dotnet build functions/bgv-docx-parser/bgv-docx-parser.csproj`
+  - `ConvertFrom-Json (Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_2_Postsignature-A45CA9C0-E4F1-F011-8406-002248582037.json) | Out-Null`
+  - `rg -n "LockAuthorizationControls|IDocxContentControlLocker|OpenXmlDocxContentControlLocker|UpdateFile|lockauthorizationcontrols" functions/bgv-docx-parser flows/power-automate/unpacked/Workflows/BGV_2_Postsignature-A45CA9C0-E4F1-F011-8406-002248582037.json System_SPEC.md docs/flows_easy_english.md docs/data_mapping_dictionary.md`
+- Next actions and blockers:
+  - Next action: deploy the updated Azure Function app and import the updated solution.
+  - Next action: run one signed authorization test and verify `BGV_2` updates file content successfully before unsharing.
+  - Residual risk: `UpdateFile` SharePoint connector operation is syntactically valid in flow JSON but still requires runtime verification in target tenant.
+
+## 2026-03-15 (Authorization template NRIC/Passport N/A fallback)
+- Current status:
+  - Updated both flow mapping and local template defaults so NRIC/Passport ID controls resolve to reciprocal `N/A` values.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - In `Populate_a_Microsoft_Word_template`:
+    - `IdentificationNumberNRIC` content control now receives candidate NRIC when present; otherwise `N/A`.
+    - `IdentificationNumberPassport` content control now receives `N/A` when NRIC is present; otherwise candidate passport when present; otherwise `N/A`.
+  - Updated linked behavior docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+  - Updated local template file defaults:
+    - `AuthorizationLetter_Template.docx`
+    - set `IdentificationNumberNRIC` and `IdentificationNumberPassport` content-control default text to `N/A`
+  - Updated local template file structure:
+    - added bottom checkbox line `Yes, I authorized` with content-control alias/tag `SignedYes`
+  - Added local backup before template edit:
+    - `out/template_backups/AuthorizationLetter_Template_before_template_edit_20260315_204037.docx`
+    - `out/template_backups/AuthorizationLetter_Template_before_checkbox_edit_20260315_210232.docx`
+- Validation commands run:
+  - `ConvertFrom-Json .\flows\power-automate\unpacked\Workflows\BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | Out-Null`
+  - `rg -n "dynamicFileSchema/974713748|dynamicFileSchema/-206184337|N/A" flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json docs/flows_easy_english.md docs/data_mapping_dictionary.md`
+  - DOCX content-control verification (Open XML `word/document.xml`) to confirm:
+    - `IdentificationNumberNRIC = N/A`
+    - `IdentificationNumberPassport = N/A`
+    - `SignedYes` checkbox content control is present with visible text `Yes, I authorized`
+- Next actions and blockers:
+  - Next action: run one candidate-form test with NRIC populated and one with passport populated to confirm generated authorization DOCX values in runtime.
+  - Note: runtime flow uses the template file stored in SharePoint (`BGV_0` Word action `source/drive/file`); if that cloud template differs from this local file, upload/replace the cloud template to apply template-level default changes there.
+
 ## 2026-03-13 (Daily sync script hardened for PAC ZIP-lock unpack failures)
 - Current status:
   - Patched the daily sync script so transient PAC unpack lock failures are no longer reported as successful runs.
@@ -2102,7 +2168,6 @@ Log each session with:
 - Next actions and blockers:
   - Next action: trigger one BGV_4 send cycle and confirm the live employer form link arrives with the expected prefilled values.
 
-<<<<<<< HEAD
 ## 2026-03-11 (HR form Q8/Q9 mapping correction from prefilled URL)
 - Current status:
   - Corrected the HR form inventory so the company-details section matches

@@ -22,6 +22,10 @@ This document describes the current behavior in your canonical flow files under 
   - Creates candidate row in `BGV_Candidates`.
   - Generates and saves authorization `.docx` from the target-site template in `DLR Recruitment Ops > BGV Records > Templates > AuthorizationLetter_Template.docx`, then shares it and emails candidate.
   - The authorization link is created as an anonymous edit link so the candidate can open and edit the Word document directly.
+  - When filling the authorization Word template ID content controls:
+    - NRIC control gets candidate NRIC, else `N/A`.
+    - Passport control gets `N/A` when NRIC exists; otherwise candidate Passport, else `N/A`.
+  - Authorization template includes a bottom checkbox line `Yes, I authorized` using content-control tag `SignedYes`.
   - Updates candidate status to pending signature.
   - Creates `BGV_Requests` rows for EMP1 always, and EMP2/EMP3 when those employer sections are filled.
   - Before creating each EMP slot row, checks whether that same slot RequestID already exists to avoid duplicate inserts.
@@ -63,8 +67,10 @@ This document describes the current behavior in your canonical flow files under 
 - Condition: candidate status is `Obtained Authorization Form Signature`.
 - What it does:
   - Finds related files only inside the candidate's own authorization folder.
+  - Reads each authorization `.docx` and sends it to `LockAuthorizationControls` function.
+  - Overwrites the same file content with the function-returned locked DOCX (content controls set to non-editable/non-deletable).
   - Stops sharing for those files.
-- Main outcome: Signed authorization files are no longer broadly shared.
+- Main outcome: Signed authorization files are locked against Developer-mode content-control edits and are no longer broadly shared.
 
 ### `BGV_3_AuthReminder_5Days`
 - Trigger: Daily recurrence.
