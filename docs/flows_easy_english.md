@@ -46,7 +46,7 @@ This document describes the current behavior in your canonical flow files under 
   - File name must match `Authorization Form - ... .docx`.
 - What it does:
   - Extracts `CandidateID` from file name.
-  - Loads matching candidate record.
+  - Loads matching candidate record from the `DLR Recruitment Ops` site `BGV_Candidates` list.
   - Sends file content to Azure Function parser.
   - Reads parser output directly and does tolerant signature checks.
   - Filters parsed controls by tag/title containing `SignedYes` (and compatibility fallback `CandidateAuthorisation`).

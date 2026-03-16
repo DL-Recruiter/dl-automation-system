@@ -6,6 +6,26 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-16 (BGV_1 SignedYes detection tightened on DLR Recruitment Ops site)
+- Current status:
+  - Tightened `BGV_1` so signed detection now prioritizes the actual `SignedYes` checkbox result and updates the candidate record on the `DLR Recruitment Ops` site.
+- Completed tasks:
+  - Reviewed canonical `BGV_1` trigger, parser call, filter actions, and SharePoint patch action.
+  - Confirmed all SharePoint actions in `BGV_1` already point to:
+    - `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570`
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json`
+  - Tightened `Signature_checkbox_condition` to:
+    - mark signed when `Filter_array_-_SignedYes_Checked` has at least one checked match
+    - use parser-level `signedYes = true` only when no `SignedYes`-style controls are returned at all
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `rg -n "SignedYes|CandidateAuthorisation|AuthorisationSigned|dataset|DLRRecruitmentOps570|ParseAuthorizationControls|PatchItem" <BGV_1_json>`
+  - `Get-Content -Raw <BGV_1_json> | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Next action: import the updated solution and test one fresh signed authorization save to confirm `BGV_1` updates `BGV_Candidates` on the `DLR Recruitment Ops` site only after the checkbox is actually checked.
+
 ## 2026-03-16 (BGV_0 authorization template rebound to BGV Records template copy)
 - Current status:
   - Fixed the candidate authorization document source in `BGV_0` so new candidate forms are generated from the target-site template copy that still contains the `SignedYes` checkbox.

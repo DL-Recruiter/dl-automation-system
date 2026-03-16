@@ -161,9 +161,19 @@
               "expression": {
                 "or": [
                   {
-                    "equals": [
-                      "@toLower(string(body('HTTP')?['signedYes']))",
-                      "true"
+                    "and": [
+                      {
+                        "equals": [
+                          "@toLower(string(body('HTTP')?['signedYes']))",
+                          "true"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@length(body('Filter_array_-_SignedYes'))",
+                          0
+                        ]
+                      }
                     ]
                   },
                   {
