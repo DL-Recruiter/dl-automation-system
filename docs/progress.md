@@ -2552,3 +2552,26 @@ Log each session with:
   - `git diff -- ...BGV_1... ...BGV_2...`
 - Next actions and blockers:
   - Next action: import the updated solution and test one unsigned authorization file plus one signed authorization file to confirm the link remains active until the checkbox is actually checked.
+
+## 2026-03-16 (BGV_1 HTTP unauthorized traced to Function App auth gate)
+- Current status:
+  - Investigated continued `HTTP` failure in `BGV_1_Detect_Authorization_Signature` after the parser/schema fixes and confirmed the blocker was Azure App Service Authentication intercepting the request before the function key was evaluated.
+- Completed tasks:
+  - Verified the Function App auth configuration on `bgv-docx-parser`:
+    - `enabled = true`
+    - `requireAuthentication = true`
+    - `unauthenticatedClientAction = RedirectToLoginPage`
+  - Confirmed the function key embedded in the flow still matches the live Azure function key for `ParseAuthorizationControls`.
+  - Directly tested the parser endpoint and observed Microsoft login HTML instead of function JSON, confirming EasyAuth interception rather than a parser failure.
+  - Updated the live `authsettingsV2` resource for the Function App so requests are no longer blocked at the app-auth layer:
+    - `properties.globalValidation.requireAuthentication = false`
+    - `properties.globalValidation.unauthenticatedClientAction = AllowAnonymous`
+  - Retested the endpoint after the change and confirmed it now reaches the function runtime, returning parser-side validation errors (`docxBase64 is not valid base64`) instead of `Unauthorized` / login redirect behavior.
+- Validation commands run:
+  - `az webapp auth show --resource-group DefaultResourceGroup-SEA --name bgv-docx-parser -o json`
+  - `az resource show --ids /subscriptions/1a62d797-41ab-4b87-a235-23b1aa1ab252/resourceGroups/DefaultResourceGroup-SEA/providers/Microsoft.Web/sites/bgv-docx-parser/config/authsettingsV2 -o json`
+  - `az resource update --ids /subscriptions/1a62d797-41ab-4b87-a235-23b1aa1ab252/resourceGroups/DefaultResourceGroup-SEA/providers/Microsoft.Web/sites/bgv-docx-parser/config/authsettingsV2 --set properties.globalValidation.requireAuthentication=false properties.globalValidation.unauthenticatedClientAction=AllowAnonymous -o json`
+  - `Invoke-RestMethod` / `curl.exe` POST checks against `https://bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net/api/parseauthorizationcontrols?...`
+- Next actions and blockers:
+  - Next action: re-run the failed `BGV_1` item or wait for the next file-change trigger to confirm the live flow now clears the HTTP step.
+  - Blocker removed: the HTTP request is no longer being rejected by Azure App Service Authentication.
