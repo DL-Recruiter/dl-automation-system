@@ -2673,3 +2673,29 @@ Log each session with:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
 - Next actions and blockers:
   - Next action: import the updated solution and run one fresh signed authorization save to confirm the candidate link expires immediately after detection while `BGV_4` still proceeds later from `AuthorisationSigned = true`.
+
+## 2026-03-16 (BGV_4 employer prefill split for NRIC vs Passport)
+- Current status:
+  - Corrected the employer HR form prefill so candidate NRIC and Passport now go into separate Microsoft Forms fields instead of collapsing into the NRIC field.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - Changed `FinalVerificationLink` prefill logic so:
+    - NRIC field `r27b6bdb850dd48339dc05df11d485470` uses only `F1_IDNumberNRIC -> IdentificationNumberNRIC`
+    - Passport field `r0c342001cdd8463181c36dba2a8933ad` uses only `F1_IDNumberPassport -> IdentificationNumberPassport`
+  - Kept all other existing employer-prefill questions intact:
+    - Candidate name
+    - Request ID
+    - Employer name
+    - Employer UEN
+    - Employer address
+    - Employment period
+    - Last drawn salary
+    - Job title
+  - Updated linked docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Next action: import the updated solution, then verify one live employer email link to confirm NRIC appears only in the NRIC field and Passport appears only in the Passport field.
