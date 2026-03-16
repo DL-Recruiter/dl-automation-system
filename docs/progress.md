@@ -6,6 +6,23 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-13 (Daily sync script hardened for PAC ZIP-lock unpack failures)
+- Current status:
+  - Patched the daily sync script so transient PAC unpack lock failures are no longer reported as successful runs.
+- Completed tasks:
+  - Updated `scripts/active/bgv_daily_sync.ps1`:
+    - native command output is now captured and echoed back to the console
+    - command output can now be treated as failure even when the process exits `0`
+    - `pac solution unpack` now retries on ZIP-lock messages:
+      - `cannot access the file`
+      - `being used by another process`
+    - unpack retry policy set to 5 retries with 5-second delay
+  - Updated this progress log entry for traceability.
+- Validation commands run:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/ -SkipPull`
+- Next actions and blockers:
+  - Next action: if ZIP-lock retries still fail intermittently, move the export ZIP to a less-contended local temp path outside OneDrive before unpack.
+
 ## 2026-03-12 (Operational smoke validation + secret hardening)
 - Current status:
   - Production target migration remains live, and automated smoke validation re-ran successfully.

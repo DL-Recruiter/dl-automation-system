@@ -37,22 +37,61 @@ function Invoke-Checked {
         [string]$FilePath,
         [Parameter(Mandatory = $true)]
         [string[]]$Arguments,
-        [string]$WorkingDirectory = ""
+        [string]$WorkingDirectory = "",
+        [string[]]$TreatOutputAsFailurePatterns = @(),
+        [int]$RetryCount = 0,
+        [int]$RetryDelaySeconds = 0
     )
 
-    if ($WorkingDirectory) {
-        Push-Location $WorkingDirectory
-    }
-    try {
-        & $FilePath @Arguments
-        if ($LASTEXITCODE -ne 0) {
-            throw "Command failed with exit code ${LASTEXITCODE}: $FilePath $($Arguments -join ' ')"
-        }
-    }
-    finally {
+    for ($attempt = 0; $attempt -le $RetryCount; $attempt++) {
+        $outputLines = @()
+        $lastExitCode = 0
+
         if ($WorkingDirectory) {
-            Pop-Location
+            Push-Location $WorkingDirectory
         }
+        try {
+            $outputLines = & $FilePath @Arguments 2>&1 | ForEach-Object { $_.ToString() }
+            $lastExitCode = $LASTEXITCODE
+        }
+        finally {
+            if ($WorkingDirectory) {
+                Pop-Location
+            }
+        }
+
+        foreach ($line in $outputLines) {
+            Write-Host $line
+        }
+
+        $matchedPattern = $null
+        foreach ($pattern in $TreatOutputAsFailurePatterns) {
+            if ($outputLines -match $pattern) {
+                $matchedPattern = $pattern
+                break
+            }
+        }
+
+        if (($lastExitCode -eq 0) -and (-not $matchedPattern)) {
+            return
+        }
+
+        $failureReason = if ($lastExitCode -ne 0) {
+            "Command failed with exit code ${lastExitCode}: $FilePath $($Arguments -join ' ')"
+        }
+        else {
+            "Command output matched failure pattern '$matchedPattern': $FilePath $($Arguments -join ' ')"
+        }
+
+        if ($attempt -lt $RetryCount) {
+            Write-Info "Retrying after failure ($($attempt + 1)/$RetryCount): $failureReason"
+            if ($RetryDelaySeconds -gt 0) {
+                Start-Sleep -Seconds $RetryDelaySeconds
+            }
+            continue
+        }
+
+        throw $failureReason
     }
 }
 
@@ -116,7 +155,7 @@ else {
 if (-not $SkipUnpack) {
     Write-Step "Unpack solution"
     $unpackArgs = @("solution", "unpack", "--zipfile", $ExportZipPath, "--folder", $UnpackFolderPath, "--packagetype", "Unmanaged", "--allowDelete", "true", "--allowWrite", "true", "--clobber", "true")
-    Invoke-Checked -FilePath "pac" -Arguments $unpackArgs
+    Invoke-Checked -FilePath "pac" -Arguments $unpackArgs -TreatOutputAsFailurePatterns @("cannot access the file", "being used by another process") -RetryCount 5 -RetryDelaySeconds 5
 }
 else {
     Write-Info "Skipping solution unpack"

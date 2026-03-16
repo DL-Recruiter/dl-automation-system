@@ -57,8 +57,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "__BGV_SPO_SITE_URL__",
-              "table": "__BGV_LIST_REQUESTS_ID__",
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+              "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
               "$filter": "VerificationStatus eq 'Sent'"
             },
             "host": {
@@ -108,8 +108,8 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "dataset": "__BGV_SPO_SITE_URL__",
-                      "table": "__BGV_LIST_REQUESTS_ID__",
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
                       "id": "@items('Apply_to_each')?['ID']",
                       "item/Title": "@items('Apply_to_each')?['Title']",
                       "item/Reminder1At": "@utcNow()"
@@ -130,7 +130,7 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "emailMessage/MailboxAddress": "__BGV_SHARED_MAILBOX_ADDRESS__",
+                      "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg",
                       "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                       "emailMessage/Subject": "Reminder: Employment Verification Request\n",
                       "emailMessage/Body": "<p class=\"editor-paragraph\"><br>Hello @{items('Apply_to_each')?['EmployerName']},<br><br>This is a reminder that we have sent you an employment verification for our candidate as part of our background verification check for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Id']}.<br><br>We kindly request for you to help us to fill up the information as soon as possible in the following link :</p><p class=\"editor-paragraph\">@{items('Apply_to_each')?['uniquelinktoemployers']}<br><br><br>Thank you.<br><br>Thanks &amp; Regards,<br>D L Reources Pte Ltd</p><br>",
@@ -189,8 +189,8 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "dataset": "__BGV_SPO_SITE_URL__",
-                      "table": "__BGV_LIST_REQUESTS_ID__",
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
                       "id": "@items('Apply_to_each')?['ID']",
                       "item/Title": "@items('Apply_to_each')?['Title']",
                       "item/Reminder2At": "@utcNow()"
@@ -211,7 +211,7 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "emailMessage/MailboxAddress": "__BGV_SHARED_MAILBOX_ADDRESS__",
+                      "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg",
                       "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                       "emailMessage/Subject": "2nd Reminder: Employment Verification Request from D L Resources\n",
                       "emailMessage/Body": "<p class=\"editor-paragraph\">Hello @{items('Apply_to_each')?['EmployerName']},</p><br><p class=\"editor-paragraph\">This is a second reminder to complete the employment verification for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}. @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has provied us your contact to conduct this background check.<br><br>Kindly access the link below and fill in the form as soon as possible:<br>@{items('Apply_to_each')?['uniquelinktoemployers']}<br><br>Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
@@ -271,8 +271,8 @@
                     "parameters": {
                       "poster": "Flow bot",
                       "location": "Channel",
-                      "body/recipient/groupId": "__BGV_TEAMS_GROUP_ID__",
-                      "body/recipient/channelId": "__BGV_TEAMS_CHANNEL_ID__",
+                      "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
+                      "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
                       "body/messageBody": "<p class=\"editor-paragraph\">BGV Escalation - Employer Not Responding</p><br><p class=\"editor-paragraph\">Candidate ID : @{items('Apply_to_each')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name : @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}</p><p class=\"editor-paragraph\">Employer : @{items('Apply_to_each')?['EmployerName']}</p><p class=\"editor-paragraph\">Employer HR Email : @{items('Apply_to_each')?['EmployerHR_Email']}</p><br><p class=\"editor-paragraph\">Two reminders have been sent and no response was received. <br>Please follow up manually.</p>"
                     },
                     "host": {
@@ -327,7 +327,7 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "emailMessage/MailboxAddress": "__BGV_SHARED_MAILBOX_ADDRESS__",
+                      "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg",
                       "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                       "emailMessage/Subject": "Final Reminder: Employment Verification Request ",
                       "emailMessage/Body": "<p class=\"editor-paragraph\">This is a final reminder for the background check regarding:@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.</p><br><p class=\"editor-paragraph\">@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has authorise us to do a background check. He/She has provided us your contact. We kindly ask that you help us to fill in the following form :</p><p class=\"editor-paragraph\">@{items('Apply_to_each')?['uniquelinktoemployers']}</p>",
@@ -344,8 +344,8 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "dataset": "__BGV_SPO_SITE_URL__",
-                      "table": "__BGV_LIST_REQUESTS_ID__",
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
                       "id": "@items('Apply_to_each')?['ID']",
                       "item/Title": "@items('Apply_to_each')?['Title']",
                       "item/Reminder3At": "@utcNow()"

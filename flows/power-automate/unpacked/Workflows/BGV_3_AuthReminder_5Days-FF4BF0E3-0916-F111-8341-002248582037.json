@@ -63,8 +63,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "__BGV_SPO_SITE_URL__",
-              "table": "__BGV_LIST_CANDIDATES_ID__",
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+              "table": "65747b59-c6b0-4671-ae37-79e35ad84c48",
               "$filter": "Status eq 'Pending Authorization Form Signature'"
             },
             "host": {
@@ -100,7 +100,7 @@
                                     "emailMessage/Subject": "Reminder: Please complete your authorization form",
                                     "emailMessage/Body": "<p class=\"editor-paragraph\"><br>This is a reminder to complete your authorization form required for verification step. Note: These reminder emails will stop when you have completed the form.</p><br><p class=\"editor-paragraph\">Link: @{items('Apply_to_each')?['AuthorizationLink']}<br><br>Thank you,</p><p class=\"editor-paragraph\">D L Resources</p>",
                                     "emailMessage/Importance": "Normal",
-                                    "emailMessage/MailboxAddress": "__BGV_SHARED_MAILBOX_ADDRESS__"
+                                    "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg"
                                   },
                                   "host": {
                                     "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
@@ -119,8 +119,8 @@
                                 "type": "OpenApiConnection",
                                 "inputs": {
                                   "parameters": {
-                                    "dataset": "__BGV_SPO_SITE_URL__",
-                                    "table": "__BGV_LIST_CANDIDATES_ID__",
+                                    "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                                    "table": "65747b59-c6b0-4671-ae37-79e35ad84c48",
                                     "id": "@items('Apply_to_each')?['ID']",
                                     "item/Title": "@items('Apply_to_each')?['Title']",
                                     "item/LastAuthReminderAt": "@utcNow()"
@@ -132,7 +132,7 @@
                                   },
                                   "authentication": "@parameters('$authentication')"
                                 }
-                              },
+                              }
                             },
                             "else": {
                               "actions": {}
@@ -190,8 +190,8 @@
                               "parameters": {
                                 "poster": "Flow bot",
                                 "location": "Channel",
-                                "body/recipient/groupId": "__BGV_TEAMS_GROUP_ID__",
-                                "body/recipient/channelId": "__BGV_TEAMS_CHANNEL_ID__",
+                                "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
+                                "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
                                 "body/messageBody": "<p class=\"editor-paragraph\">Day 5 - Authorization form NOT SUBMITTED</p><br><p class=\"editor-paragraph\">Candidate : @{items('Apply_to_each')?['FullName']}</p><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each')?['CandidateID']}</p><p class=\"editor-paragraph\"><br>Authorization Link: @{items('Apply_to_each')?['AuthorizationLink']}</p>"
                               },
                               "host": {
@@ -214,11 +214,11 @@
                             "type": "OpenApiConnection",
                             "inputs": {
                               "parameters": {
-                                "emailMessage/To": "__BGV_INTERNAL_ALERT_TO__",
+                                "emailMessage/To": "recruitmentops@dlresources.com.sg",
                                 "emailMessage/Subject": "[Day 5 ALERT} Authorization Form Not Submitted ",
                                 "emailMessage/Body": "<p class=\"editor-paragraph\">Hi Team,</p><br><p class=\"editor-paragraph\">Candidate has not completed the Authorization Form after 5 days of reminder. Please ask applicant to fill it up.</p><br><p class=\"editor-paragraph\">Candidate: @{items('Apply_to_each')?['FullName']}<br>Candidate ID: @{items('Apply_to_each')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Email: @{items('Apply_to_each')?['CandidateEmail']}<br>Status: @{items('Apply_to_each')?['Status/Value']}<br><br>Authorization Link: @{items('Apply_to_each')?['AuthorizationLink']}</p>",
                                 "emailMessage/Importance": "Normal",
-                                "emailMessage/MailboxAddress": "__BGV_SHARED_MAILBOX_ADDRESS__"
+                                "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg"
                               },
                               "host": {
                                 "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",

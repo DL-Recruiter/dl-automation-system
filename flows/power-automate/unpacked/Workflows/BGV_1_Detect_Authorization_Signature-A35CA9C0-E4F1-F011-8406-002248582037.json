@@ -29,8 +29,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "__BGV_SPO_SITE_URL__",
-              "table": "__BGV_LIBRARY_RECORDS_ID__",
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+              "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
               "folderPath": "/BGV Records/Candidate Files"
             },
             "host": {
@@ -86,8 +86,8 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "__BGV_SPO_SITE_URL__",
-                  "table": "__BGV_LIST_CANDIDATES_ID__",
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                  "table": "65747b59-c6b0-4671-ae37-79e35ad84c48",
                   "$filter": "CandidateID eq '@{outputs('Extract_candidateID')}'",
                   "$top": 1
                 },
@@ -107,7 +107,7 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "__BGV_SPO_SITE_URL__",
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
                   "path": "@concat(triggerBody()?['{Path}'], triggerBody()?['{FilenameWithExtension}'])\r\n",
                   "inferContentType": true
                 },
@@ -135,7 +135,7 @@
             "HTTP": {
               "type": "Http",
               "inputs": {
-                "uri": "__BGV_DOCX_PARSER_URI__",
+                "uri": "https://bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net/api/parseauthorizationcontrols?code=kAnie8Zeiq83_f9E4NZQMPfrxJasZfoo1iFQqbWZKQTpAzFuZCATcQ%3D%3D",
                 "method": "POST",
                 "headers": {
                   "Content-Type": "application/json"
@@ -161,41 +161,15 @@
               "expression": {
                 "or": [
                   {
+                    "equals": [
+                      "@toLower(string(body('HTTP')?['signedYes']))",
+                      "true"
+                    ]
+                  },
+                  {
                     "greater": [
                       "@length(body('Filter_array_-_SignedYes_Checked'))",
                       0
-                    ]
-                  },
-                  {
-                    "and": [
-                      {
-                        "equals": [
-                          "@toLower(string(body('HTTP')?['signedYes']))",
-                          "true"
-                        ]
-                      },
-                      {
-                        "equals": [
-                          "@length(body('Filter_array_-_SignedYes'))",
-                          0
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "and": [
-                      {
-                        "equals": [
-                          "@toLower(string(body('HTTP')?['signedYes']))",
-                          "true"
-                        ]
-                      },
-                      {
-                        "equals": [
-                          "@length(coalesce(body('HTTP')?['controlsFound'], createArray()))",
-                          0
-                        ]
-                      }
                     ]
                   }
                 ]
@@ -218,8 +192,8 @@
                       "type": "OpenApiConnection",
                       "inputs": {
                         "parameters": {
-                          "dataset": "__BGV_SPO_SITE_URL__",
-                          "table": "__BGV_LIST_CANDIDATES_ID__",
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "table": "65747b59-c6b0-4671-ae37-79e35ad84c48",
                           "id": "@first(body('Get_CandidateID_from_Auth_File')?['value'])?['ID'] ",
                           "item/Title": "@first(body('Get_CandidateID_from_Auth_File')?['value'])?['Title']",
                           "item/ConsentTimestamp": "@utcNow()",

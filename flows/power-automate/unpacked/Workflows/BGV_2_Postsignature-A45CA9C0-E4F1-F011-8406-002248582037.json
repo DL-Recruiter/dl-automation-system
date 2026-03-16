@@ -29,8 +29,8 @@
           "type": "OpenApiConnection",
           "inputs": {
             "parameters": {
-              "dataset": "__BGV_SPO_SITE_URL__",
-              "table": "__BGV_LIST_CANDIDATES_ID__"
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+              "table": "65747b59-c6b0-4671-ae37-79e35ad84c48"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -67,10 +67,9 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
-                  "dataset": "__BGV_SPO_SITE_URL__",
-                  "table": "__BGV_LIBRARY_RECORDS_ID__",
-                  "folderPath": "@outputs('Compose')",
-                  "$filter": "File_x0020_Type eq 'docx'\n"
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                  "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                  "folderPath": "@outputs('Compose')"
                 },
                 "host": {
                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -88,12 +87,80 @@
               "type": "Foreach",
               "foreach": "@outputs('Get_files_(properties_only)')?['body/value']",
               "actions": {
+                "Get_file_content": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "id": "@items('For_each')?['{Identifier}']",
+                      "inferContentType": true
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "GetFileContent",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  }
+                },
+                "Compose_Base64_for_Lock": {
+                  "type": "Compose",
+                  "inputs": "@base64(body('Get_file_content'))",
+                  "runAfter": {
+                    "Get_file_content": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "HTTP_-_Lock_Authorization_Content_Controls": {
+                  "type": "Http",
+                  "inputs": {
+                    "uri": "@replace('https://bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net/api/parseauthorizationcontrols?code=kAnie8Zeiq83_f9E4NZQMPfrxJasZfoo1iFQqbWZKQTpAzFuZCATcQ%3D%3D','parseauthorizationcontrols','lockauthorizationcontrols')",
+                    "method": "POST",
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "body": {
+                      "fileName": "@{items('For_each')?['{FilenameWithExtension}']}",
+                      "docxBase64": "@{outputs('Compose_Base64_for_Lock')}"
+                    }
+                  },
+                  "runAfter": {
+                    "Compose_Base64_for_Lock": [
+                      "Succeeded"
+                    ]
+                  },
+                  "runtimeConfiguration": {
+                    "contentTransfer": {
+                      "transferMode": "Chunked"
+                    }
+                  }
+                },
+                "Update_file_content_with_locked_controls": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "id": "@items('For_each')?['{Identifier}']",
+                      "body": "@base64ToBinary(body('HTTP_-_Lock_Authorization_Content_Controls')?['lockedDocxBase64'])"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "UpdateFile",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  },
+                  "runAfter": {
+                    "HTTP_-_Lock_Authorization_Content_Controls": [
+                      "Succeeded"
+                    ]
+                  }
+                },
                 "Stop_sharing_an_item_or_a_file": {
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "dataset": "__BGV_SPO_SITE_URL__",
-                      "table": "__BGV_LIBRARY_RECORDS_ID__",
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
                       "id": "@items('For_each')?['ID']"
                     },
                     "host": {
@@ -101,6 +168,11 @@
                       "operationId": "UnshareItem",
                       "connectionName": "shared_sharepointonline"
                     }
+                  },
+                  "runAfter": {
+                    "Update_file_content_with_locked_controls": [
+                      "Succeeded"
+                    ]
                   }
                 }
               },
