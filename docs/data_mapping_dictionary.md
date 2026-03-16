@@ -147,8 +147,8 @@ Flow action: `BGV_4 / FinalVerificationLink`.
 | Form 2 prefill query key | Source expression in flow | Source fallback order |
 | --- | --- | --- |
 | `r4930fc603c0f4cada09832be79f2a76f` | Candidate full name | `BGV_FormData.F1_CandidateFullName` -> `BGV_Candidates.FullName` |
-| `r27b6bdb850dd48339dc05df11d485470` | Candidate identification number (NRIC field) | `BGV_FormData.F1_IDNumberNRIC` -> `BGV_Candidates.IdentificationNumberNRIC` |
-| `r425242341d6143c7a29307136debe938` | Candidate Passport | `BGV_FormData.F1_IDNumberPassport` -> `BGV_Candidates.IdentificationNumberPassport` |
+| `r27b6bdb850dd48339dc05df11d485470` | Candidate identification number (NRIC field) | NRIC value when present; otherwise `N/A` |
+| `r425242341d6143c7a29307136debe938` | Candidate Passport | Passport value only when NRIC is absent; otherwise `N/A` |
 | `rd745d133eb7f4611b59ea051f980f97a` | Request ID | `BGV_Requests.RequestID` |
 | `rccaf3632669648baaa335c12d4ea40bf` | Declared company name | `BGV_FormData.F1_EmployerName` -> `BGV_Requests.EmployerName` |
 | `rcf35c7cc008e472f9d0b84bde67cc1ff` | Declared company UEN | `BGV_FormData.F1_EmployerUEN` |
@@ -252,8 +252,8 @@ Legend:
 | Q# | Form question label | Forms key evidence | Current wiring | SharePoint target / use |
 | --- | --- | --- | --- | --- |
 | 1 | Candidate Full Name | `r4930fc603c0f4cada09832be79f2a76f` | Prefill | Context for employer; not stored from Form 2 response |
-| 2 | Candidate Identification (NRIC) | `r27b6bdb850dd48339dc05df11d485470` | Prefill | Context for employer; not stored from Form 2 response |
-| 3 | Candidate Identification (Passport) | `r425242341d6143c7a29307136debe938` | Prefill | Context for employer; not stored from Form 2 response |
+| 2 | Candidate Identification (NRIC) | `r27b6bdb850dd48339dc05df11d485470` | Prefill | Shows NRIC when candidate used NRIC; otherwise shows `N/A` |
+| 3 | Candidate Identification (Passport) | `r425242341d6143c7a29307136debe938` | Prefill | Shows Passport when candidate used Passport; otherwise shows `N/A` |
 | 4 | RequestID (auto-filled) | `rd745d133eb7f4611b59ea051f980f97a` | Prefill + Read + Stored | Request lookup key; stored in `BGV_FormData.RequestID` |
 | 5 | Company Name (Declared by Candidate) | `rccaf3632669648baaa335c12d4ea40bf` | Prefill | Context for employer; not stored from Form 2 response |
 | 6 | Company UEN (Declared by Candidate) | `rcf35c7cc008e472f9d0b84bde67cc1ff` (from user-provided prefill URL) | Prefill | `BGV_4` uses `BGV_FormData.F1_EmployerUEN` |
@@ -311,8 +311,8 @@ This section records the color-circled field pairings requested by user for pref
 | Candidate form question | Candidate key status | HR form question | HR key status | Current implementation status |
 | --- | --- | --- | --- | --- |
 | Q1 `CandidateFullName` | Known: `rfe96c622120343f294de908deb0e849d` | Q1 `Candidate Full Name` | Known: `r4930fc603c0f4cada09832be79f2a76f` | Implemented in `BGV_4` prefill |
-| Q4 `IdentificationNumberNRIC` | Known: `rd2fba2b09afd478ba21df420406c9b49` | Q2 `Candidate Identification (NRIC)` | Known: `r27b6bdb850dd48339dc05df11d485470` | Implemented in `BGV_4` prefill |
-| Q5 `IdentificationNumberPassport` | Known: `rf5b324c022804863a720ef13edeb9d9b` | Q3 `Candidate Identification (Passport)` | Known: `r425242341d6143c7a29307136debe938` | Implemented in `BGV_4` prefill |
+| Q4 `IdentificationNumberNRIC` | Known: `rd2fba2b09afd478ba21df420406c9b49` | Q2 `Candidate Identification (NRIC)` | Known: `r27b6bdb850dd48339dc05df11d485470` | Implemented in `BGV_4` prefill; otherwise `N/A` |
+| Q5 `IdentificationNumberPassport` | Known: `rf5b324c022804863a720ef13edeb9d9b` | Q3 `Candidate Identification (Passport)` | Known: `r425242341d6143c7a29307136debe938` | Implemented in `BGV_4` prefill; otherwise `N/A` |
 | Q6 `E1 - Company Name` | Known: `rd186af3305c44a399ff007602a528c90` | Q5 `Company Name (Declared by Candidate)` | Known: `rccaf3632669648baaa335c12d4ea40bf` | Implemented in `BGV_4` prefill |
 | Q7 `E1 - Company UEN` | Verified: `re5312de7ff5641e38b9fe30752de0721` (candidate runtime metadata) | Q6 `Company UEN (Declared by Candidate)` | Known from prefill URL: `rcf35c7cc008e472f9d0b84bde67cc1ff` | Implemented in `BGV_4` prefill |
 | Q8 `E1 - Company Address` | Verified: `re91050593c81419580fe2e7b6dc58d19` (candidate runtime metadata) | Q7 `Company Address (Declared by Candidate)` | Known from prefill URL: `r19aae6e8163d4aaeb8a3f3f2d5329be2` | Implemented in `BGV_4` prefill |

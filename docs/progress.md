@@ -2717,3 +2717,25 @@ Log each session with:
 - Next actions and blockers:
   - Next action: import the updated solution and verify a fresh employer email link.
   - Residual risk: if other Forms question IDs were also regenerated later, those keys would need the same refresh from a new prefilled URL sample.
+
+## 2026-03-16 (BGV_4 NRIC/Passport prefill fallback to N/A)
+- Current status:
+  - Updated the employer HR form prefill so the unused identification field now shows `N/A` instead of staying blank.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - Changed `FinalVerificationLink` logic so:
+    - if candidate used NRIC:
+      - NRIC field shows the NRIC value
+      - Passport field shows `N/A`
+    - if candidate used Passport:
+      - NRIC field shows `N/A`
+      - Passport field shows the Passport value
+    - if neither value is available, both resolve safely to `N/A`
+  - Updated linked docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Next action: import the updated solution and verify a fresh employer form link from a live BGV_4 email.

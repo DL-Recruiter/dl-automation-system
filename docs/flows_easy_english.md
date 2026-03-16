@@ -99,8 +99,8 @@ This document describes the current behavior in your canonical flow files under 
   - Loads matching `BGV_FormData` row by `RequestID`.
   - Builds prefilled HR verification form URL with:
     - Candidate name
-    - Candidate NRIC mapped into the HR form NRIC field
-    - Candidate Passport mapped into the HR form Passport field
+    - Candidate NRIC mapped into the HR form NRIC field; when NRIC is absent it shows `N/A`
+    - Candidate Passport mapped into the HR form Passport field; when NRIC is present it shows `N/A`
     - Request ID
     - Employer name
     - Employer UEN
