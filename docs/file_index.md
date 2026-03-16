@@ -47,6 +47,7 @@
 - `functions/bgv-docx-parser/ParseAuthorizationControls.cs` - HTTP-trigger DOCX checkbox parser that also returns additive Level A drawing-detection results.
 - `functions/bgv-docx-parser/Models/` - Request/response, evaluation, and Level A drawing-detection models for the DOCX parser function.
 - `functions/bgv-docx-parser/Services/` - OpenXML extraction, authorization-matching, and Level A drawing-detection services used by the function endpoint.
+- `functions/bgv-docx-parser/Services/OpenXmlDocxCheckboxExtractor.cs` - Extracts checkbox content controls across main document, header, footer, glossary, footnotes, and endnotes parts.
 - `functions/bgv-docx-parser/Utilities/` - Shared helper utilities for JSON options, request body reading, and base64 validation.
 - `functions/bgv-docx-parser/host.json` - Host logging and Application Insights settings for the parser function app.
 - `functions/bgv-docx-parser/global.json` - Local .NET SDK baseline for the parser function project.

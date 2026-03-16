@@ -81,7 +81,7 @@ Generated `.NET` build/test outputs such as `bin/`, `obj/`, and `TestResults/` a
 - `functions/bgv-docx-parser/Models/DrawingDetectionResult.cs` - Response model for additive Level A drawing-detection results.
 - `functions/bgv-docx-parser/Models/DrawingDetectionFinding.cs` - Structured drawing-detection finding model with kind, package part URI, and detail.
 - `functions/bgv-docx-parser/Services/IDocxCheckboxExtractor.cs` - Service contract for extracting checkbox content controls from DOCX bytes.
-- `functions/bgv-docx-parser/Services/OpenXmlDocxCheckboxExtractor.cs` - Current OpenXML implementation for extracting checkbox controls from the main document body.
+- `functions/bgv-docx-parser/Services/OpenXmlDocxCheckboxExtractor.cs` - Current OpenXML implementation for extracting checkbox controls across main document, header, footer, glossary, footnotes, and endnotes parts.
 - `functions/bgv-docx-parser/Services/IAuthorizationMatchEvaluator.cs` - Service contract for SignedYes/SignedNo evaluation rules.
 - `functions/bgv-docx-parser/Services/AuthorizationMatchEvaluator.cs` - Centralized current matching policy including `CandidateAuthorisation` compatibility and substring fallback.
 - `functions/bgv-docx-parser/Services/IDrawingDetectionService.cs` - Service contract for additive Level A drawing detection against DOCX package content.

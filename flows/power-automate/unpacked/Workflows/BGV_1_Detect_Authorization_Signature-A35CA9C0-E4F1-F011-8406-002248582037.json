@@ -296,10 +296,16 @@
                       "type": "string"
                     },
                     "signedYes": {
-                      "type": "boolean"
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
                     },
                     "signedNo": {
-                      "type": "boolean"
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
                     },
                     "controlsFound": {
                       "type": "array",
@@ -307,20 +313,21 @@
                         "type": "object",
                         "properties": {
                           "tag": {
-                            "type": "string"
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           },
                           "title": {
-                            "type": "string"
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           },
                           "isChecked": {
                             "type": "boolean"
                           }
-                        },
-                        "required": [
-                          "tag",
-                          "title",
-                          "isChecked"
-                        ]
+                        }
                       }
                     },
                     "note": {

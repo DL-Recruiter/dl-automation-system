@@ -12,12 +12,9 @@ public sealed class OpenXmlDocxCheckboxExtractor : IDocxCheckboxExtractor
         using var stream = new MemoryStream(docBytes);
         using var doc = WordprocessingDocument.Open(stream, false);
 
-        IEnumerable<SdtElement> sdtNodes = doc.MainDocumentPart?.Document?.Descendants<SdtElement>()
-            ?? Enumerable.Empty<SdtElement>();
-
         var controls = new List<CheckboxControl>();
 
-        foreach (SdtElement sdt in sdtNodes)
+        foreach (SdtElement sdt in EnumerateCheckboxContainers(doc))
         {
             bool? isChecked = TryGetCheckboxState(sdt);
             if (isChecked is null)
@@ -31,6 +28,34 @@ public sealed class OpenXmlDocxCheckboxExtractor : IDocxCheckboxExtractor
         }
 
         return controls;
+    }
+
+    private static IEnumerable<SdtElement> EnumerateCheckboxContainers(WordprocessingDocument doc)
+    {
+        OpenXmlPartRootElement?[] partRoots =
+        [
+            doc.MainDocumentPart?.Document,
+            doc.MainDocumentPart?.FootnotesPart?.Footnotes,
+            doc.MainDocumentPart?.EndnotesPart?.Endnotes,
+            doc.MainDocumentPart?.GlossaryDocumentPart?.GlossaryDocument
+        ];
+
+        IEnumerable<OpenXmlPartRootElement> headerRoots = doc.MainDocumentPart?.HeaderParts
+            .Select(static part => part.Header)
+            .Where(static root => root is not null)!
+            ?? Enumerable.Empty<OpenXmlPartRootElement>();
+
+        IEnumerable<OpenXmlPartRootElement> footerRoots = doc.MainDocumentPart?.FooterParts
+            .Select(static part => part.Footer)
+            .Where(static root => root is not null)!
+            ?? Enumerable.Empty<OpenXmlPartRootElement>();
+
+        return partRoots
+            .Where(static root => root is not null)
+            .Select(static root => root!)
+            .Concat(headerRoots)
+            .Concat(footerRoots)
+            .SelectMany(static root => root.Descendants<SdtElement>());
     }
 
     private static bool? TryGetCheckboxState(SdtElement sdt)

@@ -74,6 +74,18 @@ public class ParserIntegrationTests
         Assert.Empty(controlsFound);
     }
 
+    [Fact]
+    public void Header_Checkbox_Is_Extracted_And_Evaluated()
+    {
+        byte[] docBytes = DocxTestFactory.CreateDocumentWithHeaderCheckbox(
+            new DocxTestFactory.CheckboxDefinition("SignedYes", "SignedYes", true));
+
+        (IReadOnlyCollection<CheckboxControl> controlsFound, AuthorizationEvaluationResult evaluation) = Parse(docBytes);
+
+        Assert.Single(controlsFound);
+        Assert.True(evaluation.SignedYes);
+    }
+
     private (IReadOnlyCollection<CheckboxControl> ControlsFound, AuthorizationEvaluationResult Evaluation) Parse(byte[] docBytes)
     {
         IReadOnlyCollection<CheckboxControl> controlsFound = _extractor.Extract(docBytes);

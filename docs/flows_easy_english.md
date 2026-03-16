@@ -48,6 +48,7 @@ This document describes the current behavior in your canonical flow files under 
   - Extracts `CandidateID` from file name.
   - Loads matching candidate record from the `DLR Recruitment Ops` site `BGV_Candidates` list.
   - Sends file content to Azure Function parser.
+  - Parser now scans checkbox content controls across main document, header, footer, glossary, footnote, and endnote parts.
   - Reads parser output directly and does tolerant signature checks.
   - Filters parsed controls by tag/title containing `SignedYes` (and compatibility fallback `CandidateAuthorisation`).
   - Marks signed when a matched `SignedYes` checkbox is actually checked.

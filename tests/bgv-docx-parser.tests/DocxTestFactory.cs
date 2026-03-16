@@ -11,6 +11,42 @@ internal static class DocxTestFactory
         return CreateDocument(checkboxes, Array.Empty<PackageXmlPartDefinition>());
     }
 
+    public static byte[] CreateDocumentWithHeaderCheckbox(params CheckboxDefinition[] checkboxes)
+    {
+        using var stream = new MemoryStream();
+
+        using (WordprocessingDocument document = WordprocessingDocument.Create(
+                   stream,
+                   DocumentFormat.OpenXml.WordprocessingDocumentType.Document,
+                   true))
+        {
+            MainDocumentPart mainPart = document.AddMainDocumentPart();
+            mainPart.Document = new Document(new Body(new Paragraph(new Run(new Text("BGV authorization test document")))));
+
+            HeaderPart headerPart = mainPart.AddNewPart<HeaderPart>();
+            string headerRelationshipId = mainPart.GetIdOfPart(headerPart);
+            headerPart.Header = new Header();
+
+            foreach (CheckboxDefinition checkbox in checkboxes)
+            {
+                headerPart.Header.AppendChild(CreateCheckboxParagraph(checkbox));
+            }
+
+            SectionProperties sectionProperties = mainPart.Document.Body!.GetFirstChild<SectionProperties>() ?? mainPart.Document.Body.AppendChild(new SectionProperties());
+            sectionProperties.RemoveAllChildren<HeaderReference>();
+            sectionProperties.AppendChild(new HeaderReference
+            {
+                Type = HeaderFooterValues.Default,
+                Id = headerRelationshipId
+            });
+
+            headerPart.Header.Save();
+            mainPart.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
+
     public static byte[] CreateDocumentWithPackageXmlParts(params PackageXmlPartDefinition[] packageXmlParts)
     {
         return CreateDocument(Array.Empty<CheckboxDefinition>(), packageXmlParts);

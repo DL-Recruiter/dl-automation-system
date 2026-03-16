@@ -2427,6 +2427,35 @@ Log each session with:
     bindings in the BGV solution into deploy-time settings before any
     production cutover.
 
+## 2026-03-16 (BGV_1 parser widened and flow schema hardened)
+- Current status:
+  - Investigated a still-failing `BGV_1` authorization-parser run and found two concrete failure paths: the Azure DOCX parser only scanned the main document body, and the flow `Parse_JSON` schema rejected valid nullable parser fields.
+- Completed tasks:
+  - Updated `functions/bgv-docx-parser/Services/OpenXmlDocxCheckboxExtractor.cs` so checkbox extraction now scans:
+    - main document
+    - headers
+    - footers
+    - glossary document
+    - footnotes
+    - endnotes
+  - Added a new parser integration test for a `SignedYes` checkbox stored in a header part:
+    - `tests/bgv-docx-parser.tests/DocxTestFactory.cs`
+    - `tests/bgv-docx-parser.tests/ParserIntegrationTests.cs`
+  - Hardened the canonical `BGV_1` flow JSON `Parse_JSON` schema so it now accepts nullable:
+    - `signedYes`
+    - `signedNo`
+    - `controlsFound[].tag`
+    - `controlsFound[].title`
+  - Updated linked docs:
+    - `docs/flows_easy_english.md`
+    - `docs/file_index.md`
+    - `docs/repo_inventory.md`
+- Validation commands run:
+  - `dotnet test tests/bgv-docx-parser.tests/bgv-docx-parser.tests.csproj`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Next action: if the parser tests pass, publish the Azure Function app and re-import the updated `BGV_1` flow so the function fix and flow schema hardening are live together.
+
 ## 2026-03-11 (Collaborator VS Code toolchain guide and Codex sign-in SOP)
 - Current status:
   - Added a shareable collaborator setup guide covering the approved
