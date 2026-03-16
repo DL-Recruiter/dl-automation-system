@@ -2456,6 +2456,26 @@ Log each session with:
 - Next actions and blockers:
   - Next action: if the parser tests pass, publish the Azure Function app and re-import the updated `BGV_1` flow so the function fix and flow schema hardening are live together.
 
+## 2026-03-16 (BGV_1 fix deployed to Power Automate and Azure)
+- Current status:
+  - The `BGV_1` repair is now live in both places it depends on: the Power Automate flow definition and the Azure DOCX parser function app.
+- Completed tasks:
+  - Verified PAC identity before import:
+    - `recruitment@dlresources.com.sg`
+  - Packed and imported the updated unmanaged solution:
+    - `artifacts/exports/BGV_System_bgv1_fix.zip`
+  - Published the updated Azure Function project to:
+    - Function App: `bgv-docx-parser`
+    - Hostname: `bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net`
+  - Pushed the source change commit to GitHub:
+    - `8792b1e Fix BGV_1 parser coverage and schema handling`
+- Validation commands run:
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_bgv1_fix.zip --publish-changes --force-overwrite`
+  - `func azure functionapp publish bgv-docx-parser --dotnet-isolated`
+  - `git push origin master`
+- Next actions and blockers:
+  - Next action: run one fresh unsigned-save test and one checked-`SignedYes` save test in the live flow to confirm the parser now returns the checkbox correctly and the candidate row updates only after the checked save.
+
 ## 2026-03-11 (Collaborator VS Code toolchain guide and Codex sign-in SOP)
 - Current status:
   - Added a shareable collaborator setup guide covering the approved
