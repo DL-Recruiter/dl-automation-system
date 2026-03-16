@@ -6,6 +6,40 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-16 (BGV_0 authorization template rebound to BGV Records template copy)
+- Current status:
+  - Fixed the candidate authorization document source in `BGV_0` so new candidate forms are generated from the target-site template copy that still contains the `SignedYes` checkbox.
+- Completed tasks:
+  - Investigated the live target-site template bindings for `BGV_0`.
+  - Confirmed:
+    - current flow binding was using `Documents/BGV Templates/AuthorizationLetter_Template.docx`
+    - that file does not contain `SignedYes`
+    - the correct file is `BGV Records/Templates/AuthorizationLetter_Template.docx`
+    - that file does contain `SignedYes` and checkbox/control XML
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - Rebound `Populate_a_Microsoft_Word_template` to:
+    - drive `b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp`
+    - file `017QXH3HY4VD3KC5XPBVHKXU2XVJJNBW5I`
+  - Confirmed the candidate sharing action already remains editable:
+    - `CreateSharingLink`
+    - `permission/type = edit`
+    - `permission/scope = anonymous`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `az account show`
+  - `az account get-access-token --resource https://graph.microsoft.com --query accessToken -o tsv`
+  - Microsoft Graph drive lookup for:
+    - `BGV Records/Templates/AuthorizationLetter_Template.docx`
+    - `Documents/BGV Templates/AuthorizationLetter_Template.docx`
+  - Downloaded both target-site template files and verified DOCX contents:
+    - `BGV Records` copy: `SignedYes found`
+    - `Documents` copy: `SignedYes missing`
+  - `ConvertFrom-Json` on updated `BGV_0` JSON
+- Next actions and blockers:
+  - Next action: pack/import the updated solution and test one fresh candidate authorization email to confirm the generated document shows the checkbox and remains editable through the unique link.
+
 ## 2026-03-13 (Daily sync script hardened for PAC ZIP-lock unpack failures)
 - Current status:
   - Patched the daily sync script so transient PAC unpack lock failures are no longer reported as successful runs.
