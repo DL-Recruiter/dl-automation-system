@@ -61,7 +61,7 @@
           "actions": {
             "Compose": {
               "type": "Compose",
-              "inputs": "@{concat('/BGV Records/Candidate Files/', triggerBody()?['CandidateID'], '/Authorization/')}\n"
+              "inputs": "@{trim(concat('/BGV Records/Candidate Files/', triggerBody()?['CandidateID'], '/Authorization/'))}"
             },
             "Get_files_(properties_only)": {
               "type": "OpenApiConnection",

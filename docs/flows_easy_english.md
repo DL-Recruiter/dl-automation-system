@@ -66,6 +66,7 @@ This document describes the current behavior in your canonical flow files under 
 - Trigger: Candidate item created or modified.
 - Condition: candidate status is `Obtained Authorization Form Signature`.
 - What it does:
+  - Builds the candidate authorization folder path cleanly before listing files.
   - Finds related files only inside the candidate's own authorization folder.
   - Reads each authorization `.docx` and sends it to `LockAuthorizationControls` function.
   - Overwrites the same file content with the function-returned locked DOCX (content controls set to non-editable/non-deletable).

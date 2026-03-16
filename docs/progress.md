@@ -2640,3 +2640,21 @@ Log each session with:
 - Next actions and blockers:
   - Next action: re-run the failed `BGV_1` item or wait for the next file-change trigger to confirm the live flow now clears the HTTP step.
   - Blocker removed: the HTTP request is no longer being rejected by Azure App Service Authentication.
+
+## 2026-03-16 (BGV_2 post-signature folder lookup trimmed)
+- Current status:
+  - Investigated a `BGV_2_Postsignature` failure where `Get_files_(properties_only)` returned `Folder Not Found` while targeting the candidate authorization folder.
+- Completed tasks:
+  - Reviewed the canonical `BGV_2` folder-path compose step against the `BGV_0` candidate-folder creation logic.
+  - Found that the `Compose` action in `BGV_2` included a literal trailing newline after the folder-path expression, which could cause SharePoint folder lookup mismatches.
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_2_Postsignature-A45CA9C0-E4F1-F011-8406-002248582037.json`
+  - Changed the authorization-folder path compose expression to a trimmed value:
+    - `@{trim(concat('/BGV Records/Candidate Files/', triggerBody()?['CandidateID'], '/Authorization/'))}`
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `rg -n "Get_files_\\(properties_only\\)|folderPath|Compose|Authorization" flows/power-automate/unpacked/Workflows/BGV_2_Postsignature-A45CA9C0-E4F1-F011-8406-002248582037.json`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_2_Postsignature-A45CA9C0-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Next action: import the updated solution and re-run one signed candidate case to confirm `BGV_2` now lists the authorization folder contents and completes the lock/unshare path.
