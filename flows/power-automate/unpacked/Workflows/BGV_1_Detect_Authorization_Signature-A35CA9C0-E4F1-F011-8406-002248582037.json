@@ -216,6 +216,26 @@
                           "connectionName": "shared_sharepointonline"
                         }
                       }
+                    },
+                    "Stop_sharing_signed_authorization_file_immediately": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                          "id": "@triggerBody()?['ID']"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "UnshareItem",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      },
+                      "runAfter": {
+                        "Update_BGV_Candidates_SP_list_record": [
+                          "Succeeded"
+                        ]
+                      }
                     }
                   },
                   "else": {

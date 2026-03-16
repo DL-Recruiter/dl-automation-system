@@ -2658,3 +2658,18 @@ Log each session with:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_2_Postsignature-A45CA9C0-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
 - Next actions and blockers:
   - Next action: import the updated solution and re-run one signed candidate case to confirm `BGV_2` now lists the authorization folder contents and completes the lock/unshare path.
+
+## 2026-03-16 (BGV_1 immediate post-detection unshare)
+- Current status:
+  - Added an immediate unshare step in `BGV_1` so the candidate authorization link is revoked as soon as the signed checkbox is detected, instead of waiting for the follow-up cleanup flow alone.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json`
+  - Added `Stop_sharing_signed_authorization_file_immediately` after the candidate record patch step in the signed branch.
+  - Configured the new unshare action to target the current authorization file from the `BGV Records` library using the trigger item ID.
+  - Updated linked behavior doc:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_1_Detect_Authorization_Signature-A35CA9C0-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Next action: import the updated solution and run one fresh signed authorization save to confirm the candidate link expires immediately after detection while `BGV_4` still proceeds later from `AuthorisationSigned = true`.

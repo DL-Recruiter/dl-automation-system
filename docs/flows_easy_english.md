@@ -60,6 +60,7 @@ This document describes the current behavior in your canonical flow files under 
   - If signed, updates candidate record:
     - `AuthorisationSigned = true`
     - consent/status fields for signed authorization.
+  - Immediately stops sharing the current authorization file after signature detection succeeds, so the candidate link expires right away.
 - Main outcome: Signed authorization is detected and candidate is marked as signed without manual review.
 
 ### `BGV_2_Postsignature`
@@ -67,6 +68,7 @@ This document describes the current behavior in your canonical flow files under 
 - Condition: candidate status is `Obtained Authorization Form Signature`.
 - What it does:
   - Builds the candidate authorization folder path cleanly before listing files.
+  - Acts as the post-signature file cleanup/lock pass after the candidate has already been marked signed.
   - Finds related files only inside the candidate's own authorization folder.
   - Reads each authorization `.docx` and sends it to `LockAuthorizationControls` function.
   - Overwrites the same file content with the function-returned locked DOCX (content controls set to non-editable/non-deletable).
