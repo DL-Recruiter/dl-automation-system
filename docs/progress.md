@@ -2800,6 +2800,28 @@ Log each session with:
 - Next actions and blockers:
   - Next action: rerun the daily sync on the next cycle and confirm export/auth failures now stop the script before unpack begins.
 
+## 2026-03-17 (BGV_FormData F2_Notes aligned with simplified BGV_Requests notes logic)
+
+- Current status:
+  - Updated `BGV_5` so `BGV_FormData.F2_Notes` now uses the same simplified notes logic already applied to `BGV_Requests.Notes`.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Changed:
+    - `item/F2_Notes` from `@variables('varNotifyBody')`
+    - to `@variables('varRequestNotesBody')`
+  - Result:
+    - `BGV_Requests.Notes` and `BGV_FormData.F2_Notes` now both show:
+      - selected choice / checkbox answers directly
+      - textbox explanation areas as `Please refer to the report summary for additional comments.`
+  - Left `Form2RawJson` unchanged so the full response is still preserved.
+  - Updated:
+    - `docs/bgv5_notes_mapping.md`
+- Validation commands run:
+  - pending PAC import / JSON validation in this task
+- Next actions and blockers:
+  - Next action: validate JSON, import the updated solution, and push the synced change to GitHub.
+
 ## 2026-03-16 (BGV_5 BGV_Requests notes simplified while F2_Notes stays detailed)
 
 - Current status:

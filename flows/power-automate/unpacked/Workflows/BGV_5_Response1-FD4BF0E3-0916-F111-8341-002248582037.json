@@ -629,7 +629,7 @@
                           "item/F2_ReasonForLeaving": "@coalesce(outputs('Get_response_details')?['body/r513ad5ab3a14453286bdb910820985ec'],'')",
                           "item/F2_Severity/Value": "@variables('varSeverity')",
                           "item/F2_Outcome": "@variables('varOutcome')",
-                          "item/F2_Notes": "@variables('varNotifyBody')"
+                          "item/F2_Notes": "@variables('varRequestNotesBody')"
                         },
                         "host": {
                           "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
