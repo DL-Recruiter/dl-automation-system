@@ -368,7 +368,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varRequestNotesBody",
-                        "value": "[Medium] Employer would not re-employ the candidate.\n\nReason: Please refer to the report summary for additional comments."
+                        "value": "@concat('[Medium] Employer would not re-employ the candidate.',if(empty(coalesce(outputs('Get_response_details')?['body/r5f7ebc3390bc4699b160504c65254c3e'],'')),'','\\n\\nRe-employ reason filled: Please refer to the report summary for additional comments.'))"
                       }
                     }
                   },
@@ -440,7 +440,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varRequestNotesBody",
-                        "value": "[Low] Information provided was not fully accurate.\n\nSelected issues: @{outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029']}\n\nEmployment Period: Please refer to the report summary for additional comments.\nJob Title/Position: Please refer to the report summary for additional comments.\nRemuneration Package: Please refer to the report summary for additional comments.\nOther abnormalities: Please refer to the report summary for additional comments."
+                        "value": "@concat('[Low] Information provided was not fully accurate.\\n\\nSelected issues: ',coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'(blank)'),if(empty(coalesce(outputs('Get_response_details')?['body/r9a95095b3d7d4d9f8bc985025614bd79'],'')),'',concat('\\n\\nEmployment period explanation filled: Please refer to the report summary for additional comments.')),if(empty(coalesce(outputs('Get_response_details')?['body/r83027392ccb043e2a637b06ff4b54ac8'],'')),'',concat('\\nJob title explanation filled: Please refer to the report summary for additional comments.')),if(empty(coalesce(outputs('Get_response_details')?['body/r4061a9d19aae45d9915d2f508a5c3ea9'],'')),'',concat('\\nRemuneration explanation filled: Please refer to the report summary for additional comments.')),if(empty(coalesce(outputs('Get_response_details')?['body/ra15c799c557d42d1bcee1de947c29466'],'')),'',concat('\\nOther abnormalities explanation filled: Please refer to the report summary for additional comments.')))"
                       }
                     }
                   },
@@ -536,7 +536,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varRequestNotesBody",
-                        "value": "\n\n[Company Details] Accuracy: @{coalesce(outputs('Get_response_details')?['body/r2d39255c2449439096683ca0e39241b0'],'(blank)')}\nSelected fields: @{coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'(blank)')}\nExplanation: Please refer to the report summary for additional comments."
+                        "value": "@concat('\\n\\n[Company Details] Accuracy: ',coalesce(outputs('Get_response_details')?['body/r2d39255c2449439096683ca0e39241b0'],'(blank)'),'\\nSelected fields: ',coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'(blank)'),if(empty(coalesce(outputs('Get_response_details')?['body/ra03058e9bbfd40d28014b0c669e92434'],'')),'',concat('\\nCompany details explanation filled: Please refer to the report summary for additional comments.')))"
                       }
                     }
                   },
