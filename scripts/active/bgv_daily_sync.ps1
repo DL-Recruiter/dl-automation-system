@@ -146,7 +146,16 @@ if (-not [string]::IsNullOrWhiteSpace($EnvironmentUrl)) {
 if (-not $SkipExport) {
     Write-Step "Export solution"
     $exportArgs = @("solution", "export") + $envArgs + @("--name", $SolutionName, "--path", $ExportZipPath, "--managed", "false", "--overwrite")
-    Invoke-Checked -FilePath "pac" -Arguments $exportArgs
+    Invoke-Checked -FilePath "pac" -Arguments $exportArgs -TreatOutputAsFailurePatterns @(
+        "Failed to connect to Dataverse",
+        "Could not connect to the Dataverse organization",
+        "AADSTS",
+        "Authentication Requested but not configured correctly"
+    )
+
+    if (-not (Test-Path $ExportZipPath)) {
+        throw "Solution export did not produce the expected ZIP file: $ExportZipPath"
+    }
 }
 else {
     Write-Info "Skipping solution export"
@@ -154,6 +163,9 @@ else {
 
 if (-not $SkipUnpack) {
     Write-Step "Unpack solution"
+    if (-not (Test-Path $ExportZipPath)) {
+        throw "Cannot unpack because the export ZIP file does not exist: $ExportZipPath"
+    }
     $unpackArgs = @("solution", "unpack", "--zipfile", $ExportZipPath, "--folder", $UnpackFolderPath, "--packagetype", "Unmanaged", "--allowDelete", "true", "--allowWrite", "true", "--clobber", "true")
     Invoke-Checked -FilePath "pac" -Arguments $unpackArgs -TreatOutputAsFailurePatterns @("cannot access the file", "being used by another process") -RetryCount 5 -RetryDelaySeconds 5
 }

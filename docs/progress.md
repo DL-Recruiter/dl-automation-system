@@ -2780,6 +2780,26 @@ Log each session with:
 - Recorded the remaining known gap:
   - `Other comments we should know about` is still preserved in `Form2RawJson` but not yet explicitly mapped into the notes summary
 
+## 2026-03-17 (Daily sync export failure now stops immediately)
+
+- Current status:
+  - Hardened the daily sync script after a PAC token-expiry run falsely continued into unpack and still printed a successful completion message.
+- Completed tasks:
+  - Updated:
+    - `scripts/active/bgv_daily_sync.ps1`
+  - Added hard failure detection for PAC export output patterns:
+    - `Failed to connect to Dataverse`
+    - `Could not connect to the Dataverse organization`
+    - `AADSTS`
+    - `Authentication Requested but not configured correctly`
+  - Added explicit ZIP existence check immediately after export.
+  - Added explicit ZIP existence check before unpack.
+  - This prevents a failed export from cascading into a misleading unpack failure and false success message.
+- Validation commands run:
+  - `Get-Content -Raw scripts/active/bgv_daily_sync.ps1`
+- Next actions and blockers:
+  - Next action: rerun the daily sync on the next cycle and confirm export/auth failures now stop the script before unpack begins.
+
 ## 2026-03-16 (BGV_5 BGV_Requests notes simplified while F2_Notes stays detailed)
 
 - Current status:
