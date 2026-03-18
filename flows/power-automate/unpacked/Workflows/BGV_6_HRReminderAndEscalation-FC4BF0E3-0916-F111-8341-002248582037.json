@@ -130,7 +130,7 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg",
+                      "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
                       "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                       "emailMessage/Subject": "Reminder: Employment Verification Request\n",
                       "emailMessage/Body": "<p class=\"editor-paragraph\"><br>Hello @{items('Apply_to_each')?['EmployerName']},<br><br>This is a reminder that we have sent you an employment verification for our candidate as part of our background verification check for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Id']}.<br><br>We kindly request for you to help us to fill up the information as soon as possible in the following link :</p><p class=\"editor-paragraph\">@{items('Apply_to_each')?['uniquelinktoemployers']}<br><br><br>Thank you.<br><br>Thanks &amp; Regards,<br>D L Reources Pte Ltd</p><br>",
@@ -211,7 +211,7 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg",
+                      "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
                       "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                       "emailMessage/Subject": "2nd Reminder: Employment Verification Request from D L Resources\n",
                       "emailMessage/Body": "<p class=\"editor-paragraph\">Hello @{items('Apply_to_each')?['EmployerName']},</p><br><p class=\"editor-paragraph\">This is a second reminder to complete the employment verification for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}. @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has provied us your contact to conduct this background check.<br><br>Kindly access the link below and fill in the form as soon as possible:<br>@{items('Apply_to_each')?['uniquelinktoemployers']}<br><br>Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
@@ -327,7 +327,7 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
-                      "emailMessage/MailboxAddress": "recruitmentops@dlresources.com.sg",
+                      "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
                       "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                       "emailMessage/Subject": "Final Reminder: Employment Verification Request ",
                       "emailMessage/Body": "<p class=\"editor-paragraph\">This is a final reminder for the background check regarding:@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.</p><br><p class=\"editor-paragraph\">@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has authorise us to do a background check. He/She has provided us your contact. We kindly ask that you help us to fill in the following form :</p><p class=\"editor-paragraph\">@{items('Apply_to_each')?['uniquelinktoemployers']}</p>",

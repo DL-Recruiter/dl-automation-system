@@ -2847,6 +2847,28 @@ Log each session with:
 - Next actions and blockers:
   - Next action: validate JSON, import the updated solution, and push the synced change to GitHub.
 
+## 2026-03-18 (Shared mailbox and internal mailbox targets changed to recruitment@)
+
+- Current status:
+  - Updated the current canonical BGV flows so shared-mailbox sender addresses and direct internal recipients using `recruitmentops@dlresources.com.sg` now use `recruitment@dlresources.com.sg`.
+- Completed tasks:
+  - Updated canonical flows:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - Updated current-behavior documentation:
+    - `docs/flows_easy_english.md`
+  - Applied changes to:
+    - shared mailbox sender addresses
+    - direct internal `emailMessage/To` targets that still used `recruitmentops@dlresources.com.sg`
+    - BGV_4 candidate-email fallback target
+- Validation commands run:
+  - pending JSON validation / PAC import in this task
+- Next actions and blockers:
+  - Next action: validate JSON, import the updated solution, push to GitHub, and refresh the external `Flow Details` doc copy.
+
 ## 2026-03-16 (BGV_5 BGV_Requests notes simplified while F2_Notes stays detailed)
 
 - Current status:

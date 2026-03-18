@@ -39,7 +39,7 @@ This document describes the current behavior in your canonical flow files under 
     - `REQ-<CandidateID>-EMP2`
     - `REQ-<CandidateID>-EMP3`
   - Sets `SendAfterDate` as `utcNow()` for EMP1/EMP2/EMP3 request rows (consistent scheduling baseline).
-  - Sends candidate email via `Send an email from a shared mailbox (V2)` from `recruitmentops@dlresources.com.sg`.
+  - Sends candidate email via `Send an email from a shared mailbox (V2)` from `recruitment@dlresources.com.sg`.
   - Candidate authorization email body now uses personalized salutation (`Dear <Candidate Name>`) and explicit signing instructions while preserving dynamic name/link expressions.
 - Main outcome: Candidate onboarding data, request tracking, and structured Form 1 data are prepared in one run.
 
@@ -86,8 +86,8 @@ This document describes the current behavior in your canonical flow files under 
   - Reminder update no longer flips `ConsentCaptured`; it only stamps reminder timestamp fields.`\n  - Outer reminder gate now checks `AuthorisationSigned` instead of `ConsentCaptured` so stale consent flags do not block pending reminders.
   - Day-5 escalation now runs independently of whether a same-day reminder email was sent, so stale `LastAuthReminderAt` values do not suppress escalation.
   - Day-5 escalation email now uses current candidate item values directly and still sends even if the Teams post step fails.
-  - On day 5 unresolved cases, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email to `recruitmentops@dlresources.com.sg`.
-  - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
+  - On day 5 unresolved cases, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email to `recruitment@dlresources.com.sg`.
+  - Email sends are routed via shared mailbox `recruitment@dlresources.com.sg`.
 - Main outcome: Unsigned candidate authorization forms are actively chased and escalated.
 
 ### `BGV_4_SendToEmployer_Clean`
@@ -112,7 +112,7 @@ This document describes the current behavior in your canonical flow files under 
   - Employer email subject/body wording is synced to the latest cloud-edited template (including the newest HR instruction text), while preserving the existing dynamic mappings for declared-details and verification-link sections.
   - Finds authorization file, attaches it, and emails employer HR.
   - Sends the same signed authorization attachment to the candidate email (`BGV_Candidates.CandidateEmail`) for reference, with a note to open it in Word to view the signed copy.
-  - Email sends are routed via shared mailbox `recruitmentops@dlresources.com.sg`.
+  - Email sends are routed via shared mailbox `recruitment@dlresources.com.sg`.
   - Employer email subject now uses the mapped dynamic company field.
   - Employer email wording uses dynamic candidate/company values while preserving the existing declared-details and verification-link sections.
   - Recipient email resolution is guarded:
@@ -151,7 +151,7 @@ This document describes the current behavior in your canonical flow files under 
   - Sends Teams alert when notify flag is true.
   - Sends internal high-severity email when severity is `High`, including employer name and employer HR email in the body.
   - Recruiter-facing BGV_5 emails now include `EmployerName` in the email body context.
-  - All email notifications in this flow are routed via shared mailbox and addressed to `recruitmentops@dlresources.com.sg`.
+  - All email notifications in this flow are routed via shared mailbox and addressed to `recruitment@dlresources.com.sg`.
   - Teams notification target for this flow is `DLR Recruitment Ops > BGV`:
     - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
     - `channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
@@ -172,7 +172,7 @@ This document describes the current behavior in your canonical flow files under 
   - Teams escalation destination:
     - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
     - `channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
-  - Shared-mailbox sender is `recruitmentops@dlresources.com.sg`.
+  - Shared-mailbox sender is `recruitment@dlresources.com.sg`.
   - Reminder conditions now use `empty(...)`-safe checks for SharePoint date fields so null/blank timestamps do not block reminder branches unexpectedly.
   - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
