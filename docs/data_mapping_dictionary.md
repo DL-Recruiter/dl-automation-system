@@ -129,7 +129,8 @@ Notes:
 
 | Form 1 response key | Current usage | Target column | Flow action |
 | --- | --- | --- | --- |
-| `r0ed00b9df34d4ab6bb34235a2466ea5e` and `r0ed00b9df34d4ab6bb34235a2466ea5e>` | Used in EMP1 `SendAfterDate` logic. If criteria passes, uses candidate-provided value; otherwise falls back to `utcNow()`. | `BGV_Requests.SendAfterDate` | `Create_BGV_Request_Row` |
+| `r0ed00b9df34d4ab6bb34235a2466ea5e` | EMP1 current-employer defer answer (`Yes`/`No`). If `Yes`, `SendAfterDate` uses the EMP1 end-date field; otherwise it falls back to `utcNow()`. | `BGV_Requests.SendAfterDate` | `Create_BGV_Request_Row` |
+| `rad5353936be1480f9ffe08b3fde00739` | EMP1 employment period end date. Used as `SendAfterDate` only when the EMP1 current-employer defer answer is `Yes`. | `BGV_Requests.SendAfterDate`; `BGV_FormData.F1_EmploymentEndDate` | `Create_BGV_Request_Row`; `Create_BGV_FormData_Row_E1` |
 
 ### 5.4 Common payload snapshots in FormData
 

@@ -2893,3 +2893,24 @@ Log each session with:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
 - Next actions and blockers:
   - Next action: import the updated solution and verify one live Form 2 response so `BGV_Requests.Notes` shows the simplified wording while `F2_Notes` keeps the detailed explanations.
+## 2026-03-18 (EMP1 SendAfterDate restored to Form 1 defer rule)
+- Current status:
+  - Restored the intended EMP1 scheduling behavior so `SendAfterDate` now respects the candidate's current-employer defer choice from Form 1.
+- Completed tasks:
+  - Updated canonical flows:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - Changed EMP1 `SendAfterDate` mapping in `BGV_0`:
+    - if Form 1 Q17 is `Yes`, use `E1 - Employment Period End Date`
+    - otherwise use `utcNow()`
+  - Changed `BGV_4` so the `SendAfterDate` gate only blocks employer sending for `EMP1`.
+    - `EMP1` sends only when `SendAfterDate` is today or earlier
+    - `EMP2` and `EMP3` are not blocked by the defer-date gate
+  - Updated supporting docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+- Validation commands run:
+  - `ConvertFrom-Json` validation for updated canonical workflow JSON
+  - `pac auth who`
+- Next actions and blockers:
+  - Next action: import updated solution and run one live EMP1 case where Q17 = `Yes` to confirm the request waits until the recorded end date.

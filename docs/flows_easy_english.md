@@ -38,7 +38,10 @@ This document describes the current behavior in your canonical flow files under 
     - `REQ-<CandidateID>-EMP1`
     - `REQ-<CandidateID>-EMP2`
     - `REQ-<CandidateID>-EMP3`
-  - Sets `SendAfterDate` as `utcNow()` for EMP1/EMP2/EMP3 request rows (consistent scheduling baseline).
+  - Sets `SendAfterDate` for EMP1 using the Form 1 defer rule:
+    - if Q17 is `Yes`, uses `E1 - Employment Period End Date`
+    - otherwise uses `utcNow()`
+  - Sets `SendAfterDate` as `utcNow()` for EMP2/EMP3 request rows.
   - Sends candidate email via `Send an email from a shared mailbox (V2)` from `recruitment@dlresources.com.sg`.
   - Candidate authorization email body now uses personalized salutation (`Dear <Candidate Name>`) and explicit signing instructions while preserving dynamic name/link expressions.
 - Main outcome: Candidate onboarding data, request tracking, and structured Form 1 data are prepared in one run.
@@ -97,6 +100,9 @@ This document describes the current behavior in your canonical flow files under 
 - What it does (per request):
   - Loads candidate row and treats `AuthorisationSigned` as signed when value is boolean/string true.
   - Loads matching `BGV_FormData` row by `RequestID`.
+  - Applies the `SendAfterDate` gate only to EMP1:
+    - EMP1 sends only when `SendAfterDate` is today or earlier
+    - EMP2 and EMP3 are not blocked by the defer date
   - Builds prefilled HR verification form URL with:
     - Candidate name
     - Candidate NRIC mapped into the HR form NRIC field; when NRIC is absent it shows `N/A`

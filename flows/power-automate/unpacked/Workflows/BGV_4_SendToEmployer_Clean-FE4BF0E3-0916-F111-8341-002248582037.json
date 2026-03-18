@@ -239,7 +239,7 @@
                           },
                           {
                             "equals": [
-                              "@or(\r\n  empty(items('Apply_to_each_(Requests_Loop)')?['SendAfterDate']),\r\n  lessOrEquals(\r\n    formatDateTime(items('Apply_to_each_(Requests_Loop)')?['SendAfterDate'], 'yyyy-MM-dd'),\r\n    formatDateTime(utcNow(), 'yyyy-MM-dd')\r\n  )\r\n)",
+                              "@or(\r\n  not(endsWith(string(items('Apply_to_each_(Requests_Loop)')?['RequestID']), '-EMP1')),\r\n  empty(items('Apply_to_each_(Requests_Loop)')?['SendAfterDate']),\r\n  lessOrEquals(\r\n    formatDateTime(items('Apply_to_each_(Requests_Loop)')?['SendAfterDate'], 'yyyy-MM-dd'),\r\n    formatDateTime(utcNow(), 'yyyy-MM-dd')\r\n  )\r\n)",
                               "@true"
                             ]
                           }
