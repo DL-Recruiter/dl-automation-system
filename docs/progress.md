@@ -2914,3 +2914,27 @@ Log each session with:
   - `pac auth who`
 - Next actions and blockers:
   - Next action: import updated solution and run one live EMP1 case where Q17 = `Yes` to confirm the request waits until the recorded end date.
+## 2026-03-18 (BGV_5 selected issue explanations limited to checked options)
+- Current status:
+  - Tightened the low-severity Form 2 summary logic so only the explanation headings for the selected inaccurate-information options are shown.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Changed the detailed notification text (`varNotifyBody`) so it only lists:
+    - `Employment Period`
+    - `Job Title/Position`
+    - `Remuneration Package`
+    - `Other abnormalities`
+    when those options were actually selected in the inaccurate-information Form 2 question.
+  - Added compatibility for the live option label `Last Position Held` so it maps to the `Job Title/Position` explanation slot.
+  - Changed the summary notes text (`varRequestNotesBody`) so the `... explanation filled` lines only appear when:
+    - that option was selected, and
+    - its textbox actually contains a value
+  - Updated supporting docs:
+    - `docs/bgv5_notes_mapping.md`
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` validation for updated canonical workflow JSON
+  - `pac auth who`
+- Next actions and blockers:
+  - Next action: import updated solution and verify one live Form 2 response where only one inaccurate-information option is selected, to confirm the email/details block shows just that option.

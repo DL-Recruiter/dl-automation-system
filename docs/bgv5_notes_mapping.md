@@ -19,10 +19,10 @@ Important:
 | Disciplinary issue | If the employer indicates disciplinary findings | The selected disciplinary choice/detail is written directly into notes |
 | Re-employ decision | If the employer says they would not re-employ the candidate | The choice is shown. If the reason textbox was filled, notes now say `Re-employ reason filled: Please refer to the report summary for additional comments.` |
 | Information inaccurate | If the employer says the submitted information is not accurate | The selected inaccurate items are written directly into notes |
-| Employment period explanation | If this explanation is filled | Notes now say `Employment period explanation filled: Please refer to the report summary for additional comments.` |
-| Job title explanation | If this explanation is filled | Notes now say `Job title explanation filled: Please refer to the report summary for additional comments.` |
-| Remuneration explanation | If this explanation is filled | Notes now say `Remuneration explanation filled: Please refer to the report summary for additional comments.` |
-| Other abnormalities | If this explanation is filled | Notes now say `Other abnormalities explanation filled: Please refer to the report summary for additional comments.` |
+| Employment period explanation | If this explanation is filled and `Employment Period` was selected | Notes now say `Employment period explanation filled: Please refer to the report summary for additional comments.` |
+| Job title explanation | If this explanation is filled and the selected issues include `Last Position Held` / `Job Title/Position` | Notes now say `Job title explanation filled: Please refer to the report summary for additional comments.` |
+| Remuneration explanation | If this explanation is filled and `Remuneration Package` was selected | Notes now say `Remuneration explanation filled: Please refer to the report summary for additional comments.` |
+| Other abnormalities | If this explanation is filled and `Other abnormalities` was selected | Notes now say `Other abnormalities explanation filled: Please refer to the report summary for additional comments.` |
 | Contact me for clarification | If the employer asks to be contacted | A notes block saying clarification is requested |
 | Company-details accuracy | If company details are marked inaccurate | The selected accuracy answer is written directly into notes |
 | Discrepancy in company details | If the employer selected company-detail fields that are inaccurate | The selected discrepant fields are written directly into notes |
@@ -36,10 +36,10 @@ Important:
 | Disciplinary issue | If the employer indicates disciplinary findings | The selected disciplinary choice/detail is written directly into notes |
 | Re-employ decision | If the employer says they would not re-employ the candidate | The choice is shown. If the reason textbox was filled, notes now say `Re-employ reason filled: Please refer to the report summary for additional comments.` |
 | Information inaccurate | If the employer says the submitted information is not accurate | The selected inaccurate items are written directly into notes |
-| Employment period explanation | If this explanation is filled | Notes now say `Employment period explanation filled: Please refer to the report summary for additional comments.` |
-| Job title explanation | If this explanation is filled | Notes now say `Job title explanation filled: Please refer to the report summary for additional comments.` |
-| Remuneration explanation | If this explanation is filled | Notes now say `Remuneration explanation filled: Please refer to the report summary for additional comments.` |
-| Other abnormalities | If this explanation is filled | Notes now say `Other abnormalities explanation filled: Please refer to the report summary for additional comments.` |
+| Employment period explanation | If this explanation is filled and `Employment Period` was selected | Notes now say `Employment period explanation filled: Please refer to the report summary for additional comments.` |
+| Job title explanation | If this explanation is filled and the selected issues include `Last Position Held` / `Job Title/Position` | Notes now say `Job title explanation filled: Please refer to the report summary for additional comments.` |
+| Remuneration explanation | If this explanation is filled and `Remuneration Package` was selected | Notes now say `Remuneration explanation filled: Please refer to the report summary for additional comments.` |
+| Other abnormalities | If this explanation is filled and `Other abnormalities` was selected | Notes now say `Other abnormalities explanation filled: Please refer to the report summary for additional comments.` |
 | Contact me for clarification | If the employer asks to be contacted | A notes block saying clarification is requested |
 | Company-details accuracy | If company details are marked inaccurate | The selected accuracy answer is written directly into notes |
 | Discrepancy in company details | If the employer selected company-detail fields that are inaccurate | The selected discrepant fields are written directly into notes |

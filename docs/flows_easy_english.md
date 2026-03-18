@@ -149,6 +149,8 @@ This document describes the current behavior in your canonical flow files under 
     - `Severity`, `Outcome`, `Notes`
   - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including `F2_ReasonForLeaving`.
   - `Form2RawJson` stores the full submitted Form 2 payload, not just the normalized subset.
+  - For the low-severity inaccurate-information section, the detailed email/details block now only shows the explanation headings for the options that were actually selected.
+  - The low-severity note summary now only shows `... explanation filled` markers when that option was both selected and filled.
   - Company-details discrepancy answers are now also copied into notes storage when present:
     - company-details accuracy
     - selected inaccurate company-detail fields
