@@ -43,7 +43,7 @@ This document describes the current behavior in your canonical flow files under 
     - otherwise uses `utcNow()`
   - Sets `SendAfterDate` as `utcNow()` for EMP2/EMP3 request rows.
   - Sends candidate email via `Send an email from a shared mailbox (V2)` from `recruitment@dlresources.com.sg`.
-  - Candidate authorization email body now uses personalized salutation (`Dear <Candidate Name>`) and explicit signing instructions while preserving dynamic name/link expressions.
+  - Candidate authorization email body now uses personalized salutation (`Dear <Candidate Name>`) and explicit signing instructions while preserving dynamic name/link expressions, including a note that a copy of the signed form will be emailed to the candidate later.
 - Main outcome: Candidate onboarding data, request tracking, and structured Form 1 data are prepared in one run.
 
 ### `BGV_1_Detect_Authorization_Signature`

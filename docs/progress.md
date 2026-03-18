@@ -2938,3 +2938,18 @@ Log each session with:
   - `pac auth who`
 - Next actions and blockers:
   - Next action: import updated solution and verify one live Form 2 response where only one inaccurate-information option is selected, to confirm the email/details block shows just that option.
+## 2026-03-18 (BGV_0 candidate email note for signed-copy follow-up)
+- Current status:
+  - Updated the first candidate authorization email so it now tells the candidate that a copy of the signed form will be emailed later.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - Added this sentence into the same signing-instructions paragraph:
+    - `Note: A copy of your signed form will be sent to your email later on.`
+  - Updated supporting docs:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` validation for updated canonical workflow JSON
+  - `pac auth who`
+- Next actions and blockers:
+  - Next action: import updated solution and trigger one fresh candidate email to confirm the wording is visible in the first outbound message.
