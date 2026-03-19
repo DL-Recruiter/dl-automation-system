@@ -3069,3 +3069,24 @@ Log each session with:
 - Next actions and blockers:
   - Next action: verify one completed employer response generates the correct `RS_Emp*` report under the candidate folder with populated content controls.
   - Residual risk: the new fill endpoint is anonymous until a durable key-management path is added for that route.
+## 2026-03-19 (BGV_7 SharePoint connection binding repaired)
+- Current status:
+  - Investigated the BGV_7 activation banner and confirmed the flow was blocked by a SharePoint connection-reference binding that `recruitment@dlresources.com.sg` could not use.
+- Completed tasks:
+  - Confirmed active PAC identity before repair:
+    - `recruitment@dlresources.com.sg`
+  - Reviewed canonical flow and verified `BGV_7` uses:
+    - connection reference logical name `cr94d_sharedsharepointonline_96d5d`
+  - Confirmed the user's valid SharePoint connection ID from PAC:
+    - `shared-sharepointonl-dfd1c8f6-cb4a-4603-b128-fc5e1f199d6b`
+  - Generated a temporary PAC settings file from the current solution.
+  - Re-imported the current solution with the SharePoint connection reference explicitly rebound to the working `recruitment@` SharePoint connection.
+  - Cleaned up the temporary settings artifact after successful import.
+- Validation commands run:
+  - `pac auth who`
+  - `pac connection list`
+  - `pac solution create-settings --solution-folder .\flows\power-automate\unpacked --settings-file .\out\deployment-settings\bgv7_rebind.settings.json`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_report_summary.zip --settings-file .\out\deployment-settings\bgv7_rebind.settings.json --publish-changes --force-overwrite`
+- Next actions and blockers:
+  - Next action: refresh the BGV_7 flow page and turn the flow on.
+  - Note: the import repaired the inaccessible SharePoint binding; the flow still needs to be switched on because it is a scheduled flow and imports land in the off state.
