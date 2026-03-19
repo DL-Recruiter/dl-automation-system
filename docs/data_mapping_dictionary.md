@@ -132,6 +132,7 @@ Notes:
 | --- | --- | --- | --- |
 | `r0ed00b9df34d4ab6bb34235a2466ea5e` | EMP1 current-employer defer answer (`Yes`/`No`). If `Yes`, `SendAfterDate` uses the EMP1 end-date field; otherwise it falls back to `utcNow()`. | `BGV_Requests.SendAfterDate` | `Create_BGV_Request_Row` |
 | `rad5353936be1480f9ffe08b3fde00739` | EMP1 employment period end date. Used as `SendAfterDate` only when the EMP1 current-employer defer answer is `Yes`. | `BGV_Requests.SendAfterDate`; `BGV_FormData.F1_EmploymentEndDate` | `Create_BGV_Request_Row`; `Create_BGV_FormData_Row_E1` |
+| Derived from NRIC empty/not empty | Candidate ID type provided | `BGV_Candidates.IDTypeProvided` = `NRIC` when the NRIC field is filled, otherwise `Passport` | `Create_BGV_Candidates_Row` |
 
 ### 5.4 Common payload snapshots in FormData
 
@@ -314,6 +315,13 @@ Generation behavior:
   - `F1_CandidateEmail`
   - `F1_IDNumberNRIC`
   - `F1_IDNumberPassport`
+- For the Employment Details discrepancy section, the mapper first uses:
+  - `Form2.Q17` discrepancy in employment period
+  - `Form2.Q18` discrepancy in job title/position
+  - `Form2.Q19` discrepancy in remuneration package
+  - `Form2.Q20` other abnormalities/comments
+- If one of those fields is blank but the related issue was selected in `Form2.Q16`, the mapper falls back to:
+  - `Form2.Q10` general employer inaccuracy comments
 - It sends those payloads plus the template DOCX to Azure Function `FillReportSummaryControls`.
 - The function fills live Word content controls and saves:
   - `RS_Emp1.docx`

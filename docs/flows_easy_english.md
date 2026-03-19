@@ -94,6 +94,21 @@ This document describes the current behavior in your canonical flow files under 
   - Email sends are routed via shared mailbox `recruitment@dlresources.com.sg`.
 - Main outcome: Unsigned candidate authorization forms are actively chased and escalated.
 
+### `BGV_Candidates` field usage snapshot
+- `JobTitle`
+  - Not used by the current canonical flows.
+- `ConsentCaptured`
+  - Still written as `true` when `BGV_0` creates the candidate row.
+  - Not used by the current reminder/send/signature gates.
+- `ConsentEvidence`
+  - Not used by the current canonical flows.
+- `IDTypeProvided`
+  - Written by `BGV_0` as:
+    - `NRIC` when the candidate filled the NRIC field in Form 1
+    - otherwise `Passport`
+- `AuthorizationLinkExpiredAt`
+  - Not used by the current canonical flows.
+
 ### `BGV_4_SendToEmployer_Clean`
 - Trigger: Recurrence every 30 minutes.
 - Selection:
@@ -204,6 +219,9 @@ This document describes the current behavior in your canonical flow files under 
     - `F1_IDNumberNRIC`
     - `F1_IDNumberPassport`
   - Sends the template plus employer raw JSON and Form 1 data to the Azure Function endpoint `FillReportSummaryControls`.
+  - For Employment Details discrepancy boxes, the mapper:
+    - uses the specific employer discrepancy fields when they are present
+    - falls back to the general employer inaccuracy-comments field when a selected discrepancy field is blank
   - The Azure Function fills Word content controls by live template tag, including:
     - Form 1 candidate basics:
       - `Form1.CandidateFullName`

@@ -86,9 +86,47 @@ public sealed class ReportSummaryValueMapper : IReportSummaryValueMapper
             replacements[tag] = GetNormalizedFormValue(form2Values, key);
         }
 
+        ApplyInaccuracyFallbacks(replacements);
         replacements["Form2.Q31FileName"] = GetUploadFileNames(form2Values);
 
         return replacements;
+    }
+
+    private static void ApplyInaccuracyFallbacks(IDictionary<string, string> replacements)
+    {
+        string selectedIssues = replacements.TryGetValue("Form2.Q16", out string? selected) ? selected : string.Empty;
+        string generalDetails = replacements.TryGetValue("Form2.Q10", out string? details) ? details : string.Empty;
+
+        if (string.IsNullOrWhiteSpace(generalDetails))
+        {
+            return;
+        }
+
+        ApplySingleFallback(replacements, "Form2.Q17", selectedIssues, "Employment Period", generalDetails);
+        ApplySingleFallback(replacements, "Form2.Q18", selectedIssues, "Last Position Held", generalDetails);
+        ApplySingleFallback(replacements, "Form2.Q18", selectedIssues, "Job Title/Position", generalDetails);
+        ApplySingleFallback(replacements, "Form2.Q19", selectedIssues, "Remuneration Package", generalDetails);
+        ApplySingleFallback(replacements, "Form2.Q20", selectedIssues, "Other abnormalities", generalDetails);
+    }
+
+    private static void ApplySingleFallback(
+        IDictionary<string, string> replacements,
+        string targetTag,
+        string selectedIssues,
+        string selectedIssueLabel,
+        string fallbackValue)
+    {
+        if (!replacements.TryGetValue(targetTag, out string? currentValue) || !string.IsNullOrWhiteSpace(currentValue))
+        {
+            return;
+        }
+
+        if (!selectedIssues.Contains(selectedIssueLabel, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        replacements[targetTag] = fallbackValue;
     }
 
     private static IReadOnlyDictionary<string, string> ParseFlatStringMap(string? rawJson)

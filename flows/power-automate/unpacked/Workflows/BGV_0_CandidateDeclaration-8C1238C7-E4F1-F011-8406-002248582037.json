@@ -147,6 +147,7 @@
               "item/CreatedDate": "@utcNow()",
               "item/IdentificationNumberPassport": "@outputs('Get_response_details')?['body/rf5b324c022804863a720ef13edeb9d9b']",
               "item/IdentificationNumberNRIC": "@outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49']",
+              "item/IDTypeProvided/Value": "@if(not(empty(outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49'])),'NRIC','Passport')",
               "item/{ContentType}/Id": "0x0100E0621C02A8D0D243940C59EBF81136500059EFDD3D7C7F2A4DBB73BD7372B4FC38"
             },
             "host": {

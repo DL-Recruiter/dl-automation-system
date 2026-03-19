@@ -3139,3 +3139,31 @@ Log each session with:
   - pending in this task
 - Next actions and blockers:
   - Next action: publish the function, import the updated solution, and verify that one completed employer form submission produces `RS_EmpN.docx`.
+
+## 2026-03-19 (BGV_Candidates IDTypeProvided + report discrepancy fallback)
+- Current status:
+  - Added the missing `BGV_Candidates.IDTypeProvided` mapping and tightened the report-summary discrepancy mapping so employer comments still populate the Employment Details section when the specific discrepancy box is blank.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - Added candidate-row mapping in `BGV_0`:
+    - `IDTypeProvided = NRIC` when the Form 1 NRIC field is filled
+    - otherwise `Passport`
+  - Verified current `BGV_Candidates` field usage:
+    - `JobTitle` not used by canonical flows
+    - `ConsentCaptured` still written by `BGV_0`, but not used by current reminder/signature gates
+    - `ConsentEvidence` not used
+    - `AuthorizationLinkExpiredAt` not used
+    - `LastAuthReminderAt` is actively used by `BGV_3` as a same-day reminder dedupe/stamp field
+  - Updated report-summary mapper:
+    - `Form2.Q17` / `Q18` / `Q19` / `Q20` keep their direct employer discrepancy mappings
+    - if one is blank and the related issue was selected in `Form2.Q16`, the mapper falls back to `Form2.Q10`
+  - Added test coverage for the discrepancy fallback in:
+    - `tests/bgv-docx-parser.tests/ReportSummaryFillerTests.cs`
+  - Updated docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+- Validation commands run:
+  - pending in this task
+- Next actions and blockers:
+  - Next action: publish/import the updates and verify one employer response with discrepancy comments fills the Employment Details section in `RS_EmpN.docx`.

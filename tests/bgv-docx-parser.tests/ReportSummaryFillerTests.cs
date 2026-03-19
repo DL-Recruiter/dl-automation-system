@@ -71,6 +71,27 @@ public class ReportSummaryFillerTests
     }
 
     [Fact]
+    public void Mapper_Uses_General_Inaccuracy_Details_As_Fallback_For_Selected_Employment_Issues()
+    {
+        string form2RawJson = JsonSerializer.Serialize(new Dictionary<string, string?>
+        {
+            ["r72b23e4aa192405091846e1279085029"] = "[\"Employment Period\",\"Last Position Held\"]",
+            ["ra03058e9bbfd40d28014b0c669e92434"] = "Employer noted declared dates and title do not match payroll records.",
+            ["r9a95095b3d7d4d9f8bc985025614bd79"] = string.Empty,
+            ["r83027392ccb043e2a637b06ff4b54ac8"] = string.Empty
+        });
+
+        IReadOnlyDictionary<string, string> mappings = _mapper.BuildMappings(null, form2RawJson);
+
+        Assert.Equal(
+            "Employer noted declared dates and title do not match payroll records.",
+            mappings["Form2.Q17"]);
+        Assert.Equal(
+            "Employer noted declared dates and title do not match payroll records.",
+            mappings["Form2.Q18"]);
+    }
+
+    [Fact]
     public void Filler_Replaces_Content_Control_Text_By_Tag()
     {
         byte[] template = CreateTextControlDocument(new Dictionary<string, string>
