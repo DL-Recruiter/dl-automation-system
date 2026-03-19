@@ -112,7 +112,7 @@ This document describes the current behavior in your canonical flow files under 
 ### `BGV_4_SendToEmployer_Clean`
 - Trigger: Recurrence every 30 minutes.
 - Selection:
-  - Reads `BGV_Requests` where `VerificationStatus = Pending` and `HRRequestSentAt` is null.
+  - Reads `BGV_Requests` where `VerificationStatus = Not Sent` and `HRRequestSentAt` is null.
 - What it does (per request):
   - Loads candidate row and treats `AuthorisationSigned` as signed when value is boolean/string true.
   - Loads matching `BGV_FormData` row by `RequestID`.
@@ -142,10 +142,10 @@ This document describes the current behavior in your canonical flow files under 
     - else use `BGV_Requests.EmployerHR_Email` when it is email-formatted
     - else fallback to `dlresplmain@dlresources.com.sg` to avoid runtime send failure.
   - Updates request row:
-    - `VerificationStatus = Sent`
+    - `VerificationStatus = Email Sent`
     - `HRRequestSentAt = utcNow()`
     - `LinktoEmployers = FinalVerificationLink`
-  - `LinkDue` is a SharePoint calculated column, not a flow-written field:
+  - `LinkDue` is a SharePoint calculated column, not a flow-written field and not used by any canonical flow:
     - `Due` when `SendAfterDate` is blank
     - `Due` when `SendAfterDate <= Today`
     - `Not Due` when `SendAfterDate > Today`
@@ -161,13 +161,13 @@ This document describes the current behavior in your canonical flow files under 
   - Applies risk logic:
     - MAS misconduct not `No / Not Applicable` -> High.
     - Disciplinary issue `Yes` -> High.
-    - Employer would not re-employ (`Q15 = No`) -> at least Medium.
-    - Information inaccurate (`Q8 = No`) -> Low if no higher severity already set.
+    - Employer would not re-employ (`Q26 = No`) -> High.
+    - Employment details inaccurate (`Q15 = No`) -> Medium if no higher severity already set.
+    - Company details inaccurate (`Q8 = No`) -> Low if no higher severity already set.
     - Other comments (`Q27`) -> Neutral if no higher severity already set.
     - Contact requested -> action-required notify flag.
   - Writes final result to `BGV_Requests`:
-    - `VerificationStatus = Completed`
-    - `Status = Completed`
+    - `VerificationStatus = Responded`
     - `ResponseReceivedAt`
     - `Severity`, `Outcome`, `Notes`
   - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including `F2_ReasonForLeaving`.
@@ -191,7 +191,7 @@ This document describes the current behavior in your canonical flow files under 
 
 ### `BGV_6_HRReminderAndEscalation`
 - Trigger: Daily recurrence.
-- Selection baseline: requests with `VerificationStatus = Sent` and still no response.
+- Selection baseline: requests with `HRRequestSentAt` present and `ResponseReceivedAt` still empty.
 - Reminder/escalation timeline:
   - Reminder 1: when HR request is at least 2 days old.
   - Reminder 2: 3+ days after Reminder 1.
@@ -199,6 +199,10 @@ This document describes the current behavior in your canonical flow files under 
   - Final reminder: when HR request is 11+ days old and `Reminder3At` is empty.
 - What it updates:
   - Reminder timestamps (`Reminder1At`, `Reminder2At`, `Reminder3At`)
+  - `VerificationStatus` lifecycle:
+    - `Reminder 1 Sent`
+    - `Reminder 2 Sent`
+    - `Reminder 3 Sent`
   - Shared-mailbox reminder emails
   - Teams escalation message for unresolved cases
   - Teams escalation destination:
@@ -213,7 +217,7 @@ This document describes the current behavior in your canonical flow files under 
 ### `BGV_7_Generate_Report_Summary`
 - Trigger: Recurrence every 30 minutes.
 - Selection:
-  - Reads `BGV_Requests` where either `Status = Completed` or `VerificationStatus = Completed`.
+  - Reads `BGV_Requests` where `VerificationStatus = Responded`.
   - Only continues for rows with a non-empty `ResponseReceivedAt` and a `RequestID` ending in an employer slot such as `EMP1`.
 - What it does:
   - Reads the live Word template by path:

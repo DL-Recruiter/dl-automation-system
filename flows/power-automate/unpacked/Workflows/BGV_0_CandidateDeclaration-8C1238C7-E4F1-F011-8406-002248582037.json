@@ -393,7 +393,7 @@
                       "item/CandidateItemID/Id": "@outputs('CandidateItemId')",
                       "item/RequestID": "@concat('REQ-', variables('varCandidateID'), '-EMP2')",
                       "item/SendAfterDate": "@utcNow()",
-                      "item/VerificationStatus/Value": "Pending"
+                              "item/VerificationStatus/Value": "Not Sent"
                     },
                     "host": {
                       "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -536,7 +536,7 @@
                       "item/CandidateItemID/Id": "@outputs('CandidateItemId')",
                       "item/RequestID": "@concat('REQ-', variables('varCandidateID'), '-EMP3')",
                       "item/SendAfterDate": "@utcNow()",
-                      "item/VerificationStatus/Value": "Pending"
+                              "item/VerificationStatus/Value": "Not Sent"
                     },
                     "host": {
                       "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -669,7 +669,7 @@
                   "item/CandidateItemID/Id": "@outputs('CandidateItemId')",
                   "item/RequestID": "@concat('REQ-', variables('varCandidateID'), '-EMP1')",
                   "item/SendAfterDate": "@if(and(equals(toLower(trim(string(outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e']))), 'yes'), not(empty(outputs('Get_response_details')?['body/rad5353936be1480f9ffe08b3fde00739']))), outputs('Get_response_details')?['body/rad5353936be1480f9ffe08b3fde00739'], utcNow())",
-                  "item/VerificationStatus/Value": "Pending"
+                              "item/VerificationStatus/Value": "Not Sent"
                 },
                 "host": {
                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",

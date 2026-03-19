@@ -3204,3 +3204,54 @@ Log each session with:
   - pending in this task
 - Next actions and blockers:
   - Next action: publish/import the updates and verify one employer response with discrepancy comments fills the Employment Details section in `RS_EmpN.docx`.
+
+## 2026-03-19 (VerificationStatus lifecycle + severity remap)
+- Current status:
+  - Aligned the request lifecycle around `VerificationStatus` only and removed the active flow dependency on the duplicate `Status` field.
+  - Adjusted severity rules to match the latest employer-form logic:
+    - High = MAS issue, disciplinary issue, or re-employment answer `No`
+    - Medium = employment details inaccurate (`Q15 = No`) when no High trigger exists
+    - Low = company details inaccurate (`Q8 = No`) when no higher trigger exists
+    - Neutral = only `Q27` other comments when no higher trigger exists
+- Completed tasks:
+  - Updated canonical flows:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json`
+  - Remapped `VerificationStatus` lifecycle to:
+    - `Not Sent`
+    - `Email Sent`
+    - `Reminder 1 Sent`
+    - `Reminder 2 Sent`
+    - `Reminder 3 Sent`
+    - `Responded`
+  - Removed flow-side writes/reads of `BGV_Requests.Status`:
+    - `BGV_5` now sets only `VerificationStatus = Responded`
+    - `BGV_7` now keys off `VerificationStatus = Responded`
+  - Confirmed `LinkDue` remains a SharePoint calculated column only and is not written/read by canonical flows.
+  - Updated docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+- Validation commands run:
+  - `pac auth who`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `m365 spo field set --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --internalName VerificationStatus --Choices [...]`
+  - `m365 spo listitem set ... --VerificationStatus ...` (bulk migration of existing request rows)
+  - `pac solution pack --zipfile .\\artifacts\\exports\\BGV_System_status_verification_sync.zip --folder .\\flows\\power-automate\\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\\artifacts\\exports\\BGV_System_status_verification_sync.zip --publish-changes --force-overwrite`
+- Next actions and blockers:
+  - Completed live SharePoint `VerificationStatus` choice update and migrated existing rows to:
+    - `Not Sent`
+    - `Email Sent`
+    - `Reminder 1 Sent`
+    - `Reminder 2 Sent`
+    - `Reminder 3 Sent`
+    - `Responded`
+  - Next action: optional UI cleanup only.
+    - `VerificationStatus` custom pill formatting still references the older labels (`Pending`, `Sent`, etc.), so list display colors can be refreshed later if desired.
+    - `Status` is no longer used by canonical flows; safest next step is to hide it first, observe one live cycle, then delete it only if you still want it removed.

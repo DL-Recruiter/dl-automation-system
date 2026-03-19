@@ -304,7 +304,7 @@
                           "type": "SetVariable",
                           "inputs": {
                             "name": "varSeverity",
-                            "value": "Medium"
+                            "value": "High"
                           }
                         }
                       },
@@ -356,7 +356,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varNotifyBody",
-                        "value": "[Medium] Employer would not re-employ the candidate.\n\nReason: @{outputs('Get_response_details')?['body/r5f7ebc3390bc4699b160504c65254c3e']}"
+                        "value": "[High] Employer would not re-employ the candidate.\n\nReason: @{outputs('Get_response_details')?['body/r5f7ebc3390bc4699b160504c65254c3e']}"
                       }
                     },
                     "Append_to_string_variable_-_Request_Notes_3": {
@@ -368,7 +368,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varRequestNotesBody",
-                        "value": "[Medium] Employer would not re-employ the candidate."
+                        "value": "[High] Employer would not re-employ the candidate."
                       }
                     }
                   },
@@ -400,7 +400,7 @@
                           "type": "SetVariable",
                           "inputs": {
                             "name": "varSeverity",
-                            "value": "Low"
+                            "value": "Medium"
                           }
                         }
                       },
@@ -428,7 +428,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varNotifyBody",
-                        "value": "@concat('[Low] Information provided was not fully accurate.\\n\\nSelected issues: ',coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'(blank)'),if(or(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Employment Period'),contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Last Position Held'),contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Job Title/Position'),contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Remuneration Package'),contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Other abnormalities')),concat('\\n\\nExplanations:',if(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Employment Period'),concat('\\n-Employment Period: ',coalesce(outputs('Get_response_details')?['body/r9a95095b3d7d4d9f8bc985025614bd79'],'')),''),if(or(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Last Position Held'),contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Job Title/Position')),concat('\\n-Job Title/Position: ',coalesce(outputs('Get_response_details')?['body/r83027392ccb043e2a637b06ff4b54ac8'],'')),''),if(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Remuneration Package'),concat('\\n-Remuneration Package: ',coalesce(outputs('Get_response_details')?['body/r4061a9d19aae45d9915d2f508a5c3ea9'],'')),''),if(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Other abnormalities'),concat('\\n-Other abnormalities: ',coalesce(outputs('Get_response_details')?['body/ra15c799c557d42d1bcee1de947c29466'],'')),'')),''))"
+                        "value": "@concat('[Medium] Employment details were not fully accurate.\\n\\nSelected issues: ',coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'(blank)'),if(or(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Employment Period'),contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Last Position Held'),contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Job Title/Position'),contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Remuneration Package'),contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Other abnormalities')),concat('\\n\\nExplanations:',if(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Employment Period'),concat('\\n-Employment Period: ',coalesce(outputs('Get_response_details')?['body/r9a95095b3d7d4d9f8bc985025614bd79'],'')),''),if(or(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Last Position Held'),contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Job Title/Position')),concat('\\n-Job Title/Position: ',coalesce(outputs('Get_response_details')?['body/r83027392ccb043e2a637b06ff4b54ac8'],'')),''),if(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Remuneration Package'),concat('\\n-Remuneration Package: ',coalesce(outputs('Get_response_details')?['body/r4061a9d19aae45d9915d2f508a5c3ea9'],'')),''),if(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Other abnormalities'),concat('\\n-Other abnormalities: ',coalesce(outputs('Get_response_details')?['body/ra15c799c557d42d1bcee1de947c29466'],'')),'')),''))"
                       }
                     },
                     "Append_to_string_variable_-_Request_Notes_4": {
@@ -440,7 +440,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varRequestNotesBody",
-                        "value": "@concat('[Low] Information provided was not fully accurate.\\n\\nSelected issues: ',coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'(blank)'))"
+                        "value": "@concat('[Medium] Employment details were not fully accurate.\\n\\nSelected issues: ',coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'(blank)'))"
                       }
                     }
                   },
@@ -520,11 +520,41 @@
                 },
                 "Condition_-_Company_Details_Discrepancy": {
                   "actions": {
+                    "Condition_-_Severity_Low_Company_Details": {
+                      "actions": {
+                        "Set_variable_-_Severity_Company_Details": {
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "varSeverity",
+                            "value": "Low"
+                          }
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@empty(variables('varSeverity'))",
+                              true
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "If"
+                    },
                     "Append_to_string_variable_-_Notify_Body_Company_Details": {
+                      "runAfter": {
+                        "Condition_-_Severity_Low_Company_Details": [
+                          "Succeeded"
+                        ]
+                      },
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varNotifyBody",
-                        "value": "\n\n[Company Details] Accuracy: @{coalesce(outputs('Get_response_details')?['body/r2d39255c2449439096683ca0e39241b0'],'(blank)')}\nSelected fields: @{coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'(blank)')}\nExplanation: @{coalesce(outputs('Get_response_details')?['body/ra03058e9bbfd40d28014b0c669e92434'],'(blank)')}"
+                        "value": "\n\n[Low] Company details were not fully accurate.\nAccuracy: @{coalesce(outputs('Get_response_details')?['body/r2d39255c2449439096683ca0e39241b0'],'(blank)')}\nSelected fields: @{coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'(blank)')}\nExplanation: @{coalesce(outputs('Get_response_details')?['body/ra03058e9bbfd40d28014b0c669e92434'],'(blank)')}"
                       }
                     },
                     "Append_to_string_variable_-_Request_Notes_Company_Details": {
@@ -536,7 +566,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varRequestNotesBody",
-                        "value": "@concat('\\n\\n[Company Details] Accuracy: ',coalesce(outputs('Get_response_details')?['body/r2d39255c2449439096683ca0e39241b0'],'(blank)'),'\\nSelected fields: ',coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'(blank)'))"
+                        "value": "@concat('\\n\\n[Low] Company details were not fully accurate.\\nAccuracy: ',coalesce(outputs('Get_response_details')?['body/r2d39255c2449439096683ca0e39241b0'],'(blank)'),'\\nSelected fields: ',coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'(blank)'))"
                       }
                     }
                   },
@@ -750,9 +780,8 @@
                       "item/ResponseReceivedAt": "@utcNow()",
                       "item/Outcome/Value": "@variables('varOutcome')",
                       "item/Notes": "@variables('varRequestNotesBody')",
-                      "item/Status/Value": "Completed",
                       "item/Severity/Value": "@variables('varSeverity')",
-                      "item/VerificationStatus/Value": "Completed"
+                      "item/VerificationStatus/Value": "Responded"
                     },
                     "host": {
                       "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -909,7 +938,7 @@
                     "parameters": {
                       "emailMessage/To": "recruitment@dlresources.com.sg",
                       "emailMessage/Subject": "BGV Reponse Received - @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']},@{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">The employer verification response has been received for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br><br>Status : Completed<br><br>Severity: @{variables('varSeverity')} -- Please check the form for clarifications</p>",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">The employer verification response has been received for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br><br>Verification Status: Responded<br><br>Severity: @{variables('varSeverity')} -- Please check the form for clarifications</p>",
                       "emailMessage/Importance": "Normal",
                       "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg"
                     },

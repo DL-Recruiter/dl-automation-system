@@ -59,7 +59,7 @@
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
               "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-              "$filter": "VerificationStatus eq 'Sent'"
+              "$filter": "HRRequestSentAt ne null and ResponseReceivedAt eq null"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -104,12 +104,6 @@
                 "and": [
                   {
                     "equals": [
-                      "@items('Apply_to_each')?['VerificationStatus/Value']",
-                      "Sent"
-                    ]
-                  },
-                  {
-                    "equals": [
                       "@empty(items('Apply_to_each')?['Reminder1At'])",
                       true
                     ]
@@ -137,7 +131,8 @@
                       "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
                       "id": "@items('Apply_to_each')?['ID']",
                       "item/Title": "@items('Apply_to_each')?['Title']",
-                      "item/Reminder1At": "@utcNow()"
+                      "item/Reminder1At": "@utcNow()",
+                      "item/VerificationStatus/Value": "Reminder 1 Sent"
                     },
                     "host": {
                       "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -184,12 +179,6 @@
                 "and": [
                   {
                     "equals": [
-                      "@items('Apply_to_each')?['VerificationStatus/Value']",
-                      "Sent"
-                    ]
-                  },
-                  {
-                    "equals": [
                       "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
                       true
                     ]
@@ -223,7 +212,8 @@
                       "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
                       "id": "@items('Apply_to_each')?['ID']",
                       "item/Title": "@items('Apply_to_each')?['Title']",
-                      "item/Reminder2At": "@utcNow()"
+                      "item/Reminder2At": "@utcNow()",
+                      "item/VerificationStatus/Value": "Reminder 2 Sent"
                     },
                     "host": {
                       "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -268,12 +258,6 @@
               "type": "If",
               "expression": {
                 "and": [
-                  {
-                    "equals": [
-                      "@items('Apply_to_each')?['VerificationStatus/Value']",
-                      "Sent"
-                    ]
-                  },
                   {
                     "equals": [
                       "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
@@ -328,12 +312,6 @@
                 "and": [
                   {
                     "equals": [
-                      "@items('Apply_to_each')?['VerificationStatus/Value']",
-                      "Sent"
-                    ]
-                  },
-                  {
-                    "equals": [
                       "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
                       true
                     ]
@@ -378,7 +356,8 @@
                       "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
                       "id": "@items('Apply_to_each')?['ID']",
                       "item/Title": "@items('Apply_to_each')?['Title']",
-                      "item/Reminder3At": "@utcNow()"
+                      "item/Reminder3At": "@utcNow()",
+                      "item/VerificationStatus/Value": "Reminder 3 Sent"
                     },
                     "host": {
                       "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",

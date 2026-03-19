@@ -50,7 +50,7 @@
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
               "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-              "$filter": "VerificationStatus eq 'Pending' and HRRequestSentAt eq null"
+              "$filter": "VerificationStatus eq 'Not Sent' and HRRequestSentAt eq null"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -306,7 +306,7 @@
                               "id": "@items('Apply_to_each_(Requests_Loop)')?['ID']",
                               "item/Title": "@items('Apply_to_each_(Requests_Loop)')?['Title']",
                               "item/HRRequestSentAt": "@utcNow()",
-                              "item/VerificationStatus/Value": "Sent",
+                              "item/VerificationStatus/Value": "Email Sent",
                               "item/uniquelinktoemployers": "@outputs('FinalVerificationLink')"
                             },
                             "host": {

@@ -67,7 +67,7 @@
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
               "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-              "$filter": "Status eq 'Completed' or VerificationStatus eq 'Completed'"
+              "$filter": "VerificationStatus eq 'Responded'"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
