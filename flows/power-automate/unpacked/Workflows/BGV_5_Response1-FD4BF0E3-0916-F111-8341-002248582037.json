@@ -368,7 +368,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varRequestNotesBody",
-                        "value": "@concat('[Medium] Employer would not re-employ the candidate.',if(empty(coalesce(outputs('Get_response_details')?['body/r5f7ebc3390bc4699b160504c65254c3e'],'')),'','\\n\\nRe-employ reason filled: Please refer to the report summary for additional comments.'))"
+                        "value": "[Medium] Employer would not re-employ the candidate."
                       }
                     }
                   },
@@ -440,7 +440,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varRequestNotesBody",
-                        "value": "@concat('[Low] Information provided was not fully accurate.\\n\\nSelected issues: ',coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'(blank)'),if(and(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Employment Period'),not(empty(coalesce(outputs('Get_response_details')?['body/r9a95095b3d7d4d9f8bc985025614bd79'],'')))),concat('\\n\\nEmployment period explanation filled: Please refer to the report summary for additional comments.'),''),if(and(or(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Last Position Held'),contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Job Title/Position')),not(empty(coalesce(outputs('Get_response_details')?['body/r83027392ccb043e2a637b06ff4b54ac8'],'')))),concat('\\nJob title explanation filled: Please refer to the report summary for additional comments.'),''),if(and(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Remuneration Package'),not(empty(coalesce(outputs('Get_response_details')?['body/r4061a9d19aae45d9915d2f508a5c3ea9'],'')))),concat('\\nRemuneration explanation filled: Please refer to the report summary for additional comments.'),''),if(and(contains(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'Other abnormalities'),not(empty(coalesce(outputs('Get_response_details')?['body/ra15c799c557d42d1bcee1de947c29466'],'')))),concat('\\nOther abnormalities explanation filled: Please refer to the report summary for additional comments.'),''))"
+                        "value": "@concat('[Low] Information provided was not fully accurate.\\n\\nSelected issues: ',coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'(blank)'))"
                       }
                     }
                   },
@@ -536,7 +536,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varRequestNotesBody",
-                        "value": "@concat('\\n\\n[Company Details] Accuracy: ',coalesce(outputs('Get_response_details')?['body/r2d39255c2449439096683ca0e39241b0'],'(blank)'),'\\nSelected fields: ',coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'(blank)'),if(empty(coalesce(outputs('Get_response_details')?['body/ra03058e9bbfd40d28014b0c669e92434'],'')),'',concat('\\nCompany details explanation filled: Please refer to the report summary for additional comments.')))"
+                        "value": "@concat('\\n\\n[Company Details] Accuracy: ',coalesce(outputs('Get_response_details')?['body/r2d39255c2449439096683ca0e39241b0'],'(blank)'),'\\nSelected fields: ',coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'(blank)'))"
                       }
                     }
                   },
@@ -580,9 +580,81 @@
                   },
                   "type": "If"
                 },
-                "Update_item_-_of_BGV_Request": {
+                "Condition_-_Additional_Comments_Summary": {
+                  "actions": {
+                    "Append_to_string_variable_-_Request_Notes_Additional_Comments": {
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varRequestNotesBody",
+                        "value": "\n\nPlease refer to the report summary for additional comments."
+                      }
+                    }
+                  },
                   "runAfter": {
                     "Condition_-_Contact": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "expression": {
+                    "or": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@coalesce(outputs('Get_response_details')?['body/r5f7ebc3390bc4699b160504c65254c3e'],'')",
+                            ""
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@coalesce(outputs('Get_response_details')?['body/r9a95095b3d7d4d9f8bc985025614bd79'],'')",
+                            ""
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@coalesce(outputs('Get_response_details')?['body/r83027392ccb043e2a637b06ff4b54ac8'],'')",
+                            ""
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@coalesce(outputs('Get_response_details')?['body/r4061a9d19aae45d9915d2f508a5c3ea9'],'')",
+                            ""
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@coalesce(outputs('Get_response_details')?['body/ra15c799c557d42d1bcee1de947c29466'],'')",
+                            ""
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@coalesce(outputs('Get_response_details')?['body/ra03058e9bbfd40d28014b0c669e92434'],'')",
+                            ""
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "type": "If"
+                },
+                "Update_item_-_of_BGV_Request": {
+                  "runAfter": {
+                    "Condition_-_Additional_Comments_Summary": [
                       "Succeeded"
                     ]
                   },

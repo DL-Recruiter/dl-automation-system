@@ -9,6 +9,8 @@ Important:
 
 - `BGV_Requests.Notes` and `BGV_FormData.F2_Notes` now use the same simplified summary logic.
 - Both fields now receive the cleaner operational summary version from `varRequestNotesBody`.
+- If any mapped long-comment field is filled, notes add one shared line only:
+  - `Please refer to the report summary for additional comments.`
 - `Form2RawJson` is different. It stores the full raw Form 2 response body, not the summarized notes text below.
 
 ## BGV_Requests.Notes
@@ -17,16 +19,16 @@ Important:
 | --- | --- | --- |
 | MAS declaration issue | If the employer indicates a MAS-related issue | The selected MAS choice/detail is written directly into notes |
 | Disciplinary issue | If the employer indicates disciplinary findings | The selected disciplinary choice/detail is written directly into notes |
-| Re-employ decision | If the employer says they would not re-employ the candidate | The choice is shown. If the reason textbox was filled, notes now say `Re-employ reason filled: Please refer to the report summary for additional comments.` |
+| Re-employ decision | If the employer says they would not re-employ the candidate | The choice is shown directly in notes |
 | Information inaccurate | If the employer says the submitted information is not accurate | The selected inaccurate items are written directly into notes |
-| Employment period explanation | If this explanation is filled and `Employment Period` was selected | Notes now say `Employment period explanation filled: Please refer to the report summary for additional comments.` |
-| Job title explanation | If this explanation is filled and the selected issues include `Last Position Held` / `Job Title/Position` | Notes now say `Job title explanation filled: Please refer to the report summary for additional comments.` |
-| Remuneration explanation | If this explanation is filled and `Remuneration Package` was selected | Notes now say `Remuneration explanation filled: Please refer to the report summary for additional comments.` |
-| Other abnormalities | If this explanation is filled and `Other abnormalities` was selected | Notes now say `Other abnormalities explanation filled: Please refer to the report summary for additional comments.` |
+| Employment period explanation | If this explanation is filled and `Employment Period` was selected | Notes add the shared line `Please refer to the report summary for additional comments.` |
+| Job title explanation | If this explanation is filled and the selected issues include `Last Position Held` / `Job Title/Position` | Notes add the shared line `Please refer to the report summary for additional comments.` |
+| Remuneration explanation | If this explanation is filled and `Remuneration Package` was selected | Notes add the shared line `Please refer to the report summary for additional comments.` |
+| Other abnormalities | If this explanation is filled and `Other abnormalities` was selected | Notes add the shared line `Please refer to the report summary for additional comments.` |
 | Contact me for clarification | If the employer asks to be contacted | A notes block saying clarification is requested |
 | Company-details accuracy | If company details are marked inaccurate | The selected accuracy answer is written directly into notes |
 | Discrepancy in company details | If the employer selected company-detail fields that are inaccurate | The selected discrepant fields are written directly into notes |
-| Company-details explanation | If the employer explains the company-details discrepancy | Notes now say `Company details explanation filled: Please refer to the report summary for additional comments.` |
+| Company-details explanation | If the employer explains the company-details discrepancy | Notes add the shared line `Please refer to the report summary for additional comments.` |
 
 ## BGV_FormData.F2_Notes
 
@@ -34,16 +36,16 @@ Important:
 | --- | --- | --- |
 | MAS declaration issue | If the employer indicates a MAS-related issue | The selected MAS choice/detail is written directly into notes |
 | Disciplinary issue | If the employer indicates disciplinary findings | The selected disciplinary choice/detail is written directly into notes |
-| Re-employ decision | If the employer says they would not re-employ the candidate | The choice is shown. If the reason textbox was filled, notes now say `Re-employ reason filled: Please refer to the report summary for additional comments.` |
+| Re-employ decision | If the employer says they would not re-employ the candidate | The choice is shown directly in notes |
 | Information inaccurate | If the employer says the submitted information is not accurate | The selected inaccurate items are written directly into notes |
-| Employment period explanation | If this explanation is filled and `Employment Period` was selected | Notes now say `Employment period explanation filled: Please refer to the report summary for additional comments.` |
-| Job title explanation | If this explanation is filled and the selected issues include `Last Position Held` / `Job Title/Position` | Notes now say `Job title explanation filled: Please refer to the report summary for additional comments.` |
-| Remuneration explanation | If this explanation is filled and `Remuneration Package` was selected | Notes now say `Remuneration explanation filled: Please refer to the report summary for additional comments.` |
-| Other abnormalities | If this explanation is filled and `Other abnormalities` was selected | Notes now say `Other abnormalities explanation filled: Please refer to the report summary for additional comments.` |
+| Employment period explanation | If this explanation is filled and `Employment Period` was selected | Notes add the shared line `Please refer to the report summary for additional comments.` |
+| Job title explanation | If this explanation is filled and the selected issues include `Last Position Held` / `Job Title/Position` | Notes add the shared line `Please refer to the report summary for additional comments.` |
+| Remuneration explanation | If this explanation is filled and `Remuneration Package` was selected | Notes add the shared line `Please refer to the report summary for additional comments.` |
+| Other abnormalities | If this explanation is filled and `Other abnormalities` was selected | Notes add the shared line `Please refer to the report summary for additional comments.` |
 | Contact me for clarification | If the employer asks to be contacted | A notes block saying clarification is requested |
 | Company-details accuracy | If company details are marked inaccurate | The selected accuracy answer is written directly into notes |
 | Discrepancy in company details | If the employer selected company-detail fields that are inaccurate | The selected discrepant fields are written directly into notes |
-| Company-details explanation | If the employer explains the company-details discrepancy | Notes now say `Company details explanation filled: Please refer to the report summary for additional comments.` |
+| Company-details explanation | If the employer explains the company-details discrepancy | Notes add the shared line `Please refer to the report summary for additional comments.` |
 
 ## Practical Summary
 
@@ -55,7 +57,7 @@ Important:
 
 ## Known Gap
 
-`Other comments we should know about` is not currently added into the notes summary unless it is only visible in `Form2RawJson`.
+`Other comments we should know about` is not currently added into the notes summary because its live Forms key is still not identified in the repo.
 
 That means:
 

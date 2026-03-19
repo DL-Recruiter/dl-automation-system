@@ -2980,3 +2980,24 @@ Log each session with:
   - `ConvertFrom-Json` validation for representative workflow JSON
 - Next actions and blockers:
   - Next action: none; local repo, GitHub, and PAC-exported source are aligned after committing the sync artifacts.
+## 2026-03-19 (BGV_5 notes collapsed to one shared report-summary line)
+- Current status:
+  - Simplified `BGV_Requests.Notes` and `BGV_FormData.F2_Notes` so long-comment fields no longer produce multiple `...filled` markers.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - Removed per-field long-comment note markers from:
+    - re-employ reason
+    - inaccurate-information explanation fields
+    - company-details explanation
+  - Added one shared line to notes when any mapped long-comment field is filled:
+    - `Please refer to the report summary for additional comments.`
+  - Ensured that shared line is appended only once even when multiple mapped comment fields are filled.
+  - Updated docs:
+    - `docs/bgv5_notes_mapping.md`
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `ConvertFrom-Json` validation for updated canonical workflow JSON
+  - `pac auth who`
+- Next actions and blockers:
+  - Blocker remains for Form 2 `Q28 / Other comments we should know about`: the live Forms key is still unknown in the repo, so it remains raw-JSON-only until we capture that key from a live payload or current Forms metadata.
