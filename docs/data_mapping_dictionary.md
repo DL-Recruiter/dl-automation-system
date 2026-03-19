@@ -37,7 +37,7 @@ When mappings change:
 2. For each request row, flow reads the linked candidate from `BGV_Candidates` using `CandidateItemID/Id`.
 3. Flow builds `FinalVerificationLink` (HR Verification Form prefilled URL) using request/candidate values with `BGV_FormData` as preferred source where available.
 4. Flow emails `BGV_Requests.EmployerHR_Email` with the prefilled HR verification link and signed authorization file.
-5. Flow updates request row in SharePoint: `HRRequestSentAt=utcNow()`, `VerificationStatus='Sent'`.
+5. Flow updates request row in SharePoint: `HRRequestSentAt=utcNow()`, `VerificationStatus='Sent'`, `uniquelinktoemployers=FinalVerificationLink`.
 6. Later, `BGV_5_Response1` receives the HR form submission and uses prefilling key `rd745...` (RequestID) to find and update the same request row.
 
 ### 2.1.2 Field mapping for the requested systems
@@ -51,7 +51,7 @@ When mappings change:
 | `BGV_Requests` | `EmployerName` | `rccaf3632669648baaa335c12d4ea40bf` | Included in prefilled `FinalVerificationLink` sent by email |
 | `BGV_Requests` | `EmployerHR_Email` | N/A | `BGV_4` email recipient (`Send an email (V2)`) |
 | `BGV_Requests` | `HRRequestSentAt` | N/A | Updated by `BGV_4` to `utcNow()` after email send |
-| `BGV_Requests` | `VerificationStatus` | N/A | Updated by `BGV_4` from `Pending` to `Sent` |
+| `BGV_Requests` | `VerificationStatus` | N/A | Updated by `BGV_4` from `Pending` to `Sent`, then by `BGV_5` to `Completed` |
 
 Notes:
 - In `BGV_4`, prefill source order is `BGV_FormData` first, then fallback to `BGV_Candidates`/`BGV_Requests`.
@@ -172,7 +172,7 @@ Note:
 | Form 2 response key | Usage | Target column(s) | Flow action(s) |
 | --- | --- | --- | --- |
 | `rd745d133eb7f4611b59ea051f980f97a` | Request lookup key | Lookup filter on `BGV_Requests.RequestID` (`startswith`) and `BGV_FormData.RequestID` (`eq`) | `Get_items`; `Get_items_(BGV_FormData)` |
-| Derived runtime values | Scoring output | `BGV_Requests.Severity/Value`, `Outcome/Value`, `Notes`, `Status/Value='Completed'`, `ResponseReceivedAt=utcNow()` | `Update_item_-_of_BGV_Request` |
+| Derived runtime values | Scoring output | `BGV_Requests.Severity/Value`, `Outcome/Value`, `Notes`, `Status/Value='Completed'`, `VerificationStatus/Value='Completed'`, `ResponseReceivedAt=utcNow()` | `Update_item_-_of_BGV_Request` |
 
 ### 7.2 Form 2 fields persisted into BGV_FormData
 
@@ -202,6 +202,7 @@ Note:
 | `rafe3ada4157c49fb9e555cd0fb53bd59` | Re-employ check (`== 'No'`) -> Medium severity (unless already High) |
 | `r5f7ebc3390bc4699b160504c65254c3e` | Reason text appended to re-employ notification body |
 | `r9594fab1bfa04c90883b1dffd7f4549e` | Accuracy check (`== 'No'`) -> Low severity when severity still empty |
+| `rab9c2a586db943b18ac02367d3b1d3f7` | Other comments present -> Neutral severity when severity still empty; also triggers the one-line notes summary marker |
 | `r72b23e4aa192405091846e1279085029` | Selected issues included in low-severity note text |
 | `r9a95095b3d7d4d9f8bc985025614bd79` | Employment period explanation text |
 | `r83027392ccb043e2a637b06ff4b54ac8` | Job title explanation text |
@@ -225,8 +226,8 @@ Note:
 | `BGV_1_Detect_Authorization_Signature` | `BGV_Candidates` | Reads by `CandidateID`; sets `ConsentTimestamp=utcNow()`, `Status='Obtained Authorization Form Signature'`, `AuthorisationSigned=true`. |
 | `BGV_2_Postsignature` | `BGV Records` library | Reads authorization `.docx` files, locks all content controls via `LockAuthorizationControls` function, overwrites file content with locked DOCX, then performs `Stop sharing` on matched files. |
 | `BGV_3_AuthReminder_5Days` | `BGV_Candidates` | Reads rows where `Status='Pending Authorization Form Signature'`; uses `AuthorizationLinkCreatedAt`, `AuthorizationLink`; updates `LastAuthReminderAt`. |
-| `BGV_4_SendToEmployer_Clean` | `BGV_Requests` | Reads pending requests; reads candidate auth status; updates `HRRequestSentAt=utcNow()`, `VerificationStatus='Sent'`. |
-| `BGV_6_HRReminderAndEscalation` | `BGV_Requests` | Reads rows where `Status='Sent'`; uses `ResponseReceivedAt`, `Reminder1At`, `Reminder2At`, `Reminder3At`; updates `Reminder1At`, `Reminder2At`, `Reminder3At`. |
+| `BGV_4_SendToEmployer_Clean` | `BGV_Requests` | Reads pending requests; reads candidate auth status; updates `HRRequestSentAt=utcNow()`, `VerificationStatus='Sent'`, `uniquelinktoemployers=FinalVerificationLink`. |
+| `BGV_6_HRReminderAndEscalation` | `BGV_Requests` | Reads rows where `VerificationStatus='Sent'`; uses `ResponseReceivedAt`, `Reminder1At`, `Reminder2At`, `Reminder3At`; updates `Reminder1At`, `Reminder2At`, `Reminder3At`. |
 | `BGV_7_Generate_Report_Summary` | `BGV Records` document library | Reads `ReportSummary_Template.docx` by path, fills it using `BGV_FormData.Form2RawJson` plus Form 1 data from `Form1RawJson` when present or normalized `F1_*` fields as fallback, and writes `RS_EmpN.docx` into `Candidate Files/{CandidateID}/`. |
 
 ## 9) BGV Records (Document Library) Data Path

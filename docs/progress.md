@@ -173,6 +173,43 @@ Log each session with:
 - Next actions and blockers:
   - Next action: if ZIP-lock retries still fail intermittently, move the export ZIP to a less-contended local temp path outside OneDrive before unpack.
 
+## 2026-03-19 (BGV_Requests status/link semantics tightened)
+- Current status:
+  - Aligned `BGV_Requests` lifecycle semantics and storage with the live employer-send / employer-response behavior.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+  - `BGV_4` now stores the same generated employer Microsoft Forms URL into:
+    - `BGV_Requests.LinktoEmployers` (`uniquelinktoemployers`)
+  - Confirmed the live `LinkDue` column is SharePoint-calculated, not flow-written:
+    - formula: `=IF(ISBLANK(SendAfterDate),"Due",IF(SendAfterDate<=TODAY(),"Due","Not Due"))`
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - `BGV_5` now writes:
+    - `VerificationStatus = Completed`
+    - `Status = Completed`
+    when an employer response is processed successfully.
+  - Updated severity ladder in `BGV_5`:
+    - `High`: MAS misconduct not `No / Not Applicable`
+    - `High`: disciplinary issue = `Yes`
+    - `Medium`: employer would not re-employ (`Q15 = No`)
+    - `Low`: information accurate = `No` (`Q8 = No`) when no higher severity already exists
+    - `Neutral`: other comments (`Q27`) when no higher severity already exists
+  - Added `Q27` into the one-line notes summary trigger:
+    - `Please refer to the report summary for additional comments.`
+    - still deduplicated so it appears only once even when multiple comment fields are filled
+  - Updated docs:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `m365 spo field list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --output json`
+  - `pac auth who`
+  - `pac solution pack --zipfile .\\artifacts\\exports\\BGV_System_requests_logic_update.zip --folder .\\flows\\power-automate\\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\\artifacts\\exports\\BGV_System_requests_logic_update.zip --publish-changes --force-overwrite`
+- Next actions and blockers:
+  - Next action: verify one fresh employer send writes `LinktoEmployers` and one fresh employer response stamps both status columns to `Completed`.
+
 ## 2026-03-12 (Operational smoke validation + secret hardening)
 - Current status:
   - Production target migration remains live, and automated smoke validation re-ran successfully.

@@ -306,7 +306,8 @@
                               "id": "@items('Apply_to_each_(Requests_Loop)')?['ID']",
                               "item/Title": "@items('Apply_to_each_(Requests_Loop)')?['Title']",
                               "item/HRRequestSentAt": "@utcNow()",
-                              "item/VerificationStatus/Value": "Sent"
+                              "item/VerificationStatus/Value": "Sent",
+                              "item/uniquelinktoemployers": "@outputs('FinalVerificationLink')"
                             },
                             "host": {
                               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",

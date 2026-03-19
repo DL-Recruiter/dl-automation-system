@@ -580,6 +580,80 @@
                   },
                   "type": "If"
                 },
+                "Condition_-_Other_Comments": {
+                  "actions": {
+                    "Condition_-_Severity_Neutral": {
+                      "actions": {
+                        "Set_variable_-_Severity_6": {
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "varSeverity",
+                            "value": "Neutral"
+                          }
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@empty(variables('varSeverity'))",
+                              true
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "If"
+                    },
+                    "Append_to_string_variable_-_Notify_Body_Other_Comments": {
+                      "runAfter": {
+                        "Condition_-_Severity_Neutral": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varNotifyBody",
+                        "value": "[Neutral] Other comments were provided.\n\nComment: @{outputs('Get_response_details')?['body/rab9c2a586db943b18ac02367d3b1d3f7']}"
+                      }
+                    },
+                    "Append_to_string_variable_-_Request_Notes_Other_Comments": {
+                      "runAfter": {
+                        "Append_to_string_variable_-_Notify_Body_Other_Comments": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varRequestNotesBody",
+                        "value": "[Neutral] Other comments were provided."
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Condition_-_Contact": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@coalesce(outputs('Get_response_details')?['body/rab9c2a586db943b18ac02367d3b1d3f7'],'')",
+                            ""
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "type": "If"
+                },
                 "Condition_-_Additional_Comments_Summary": {
                   "actions": {
                     "Append_to_string_variable_-_Request_Notes_Additional_Comments": {
@@ -591,7 +665,7 @@
                     }
                   },
                   "runAfter": {
-                    "Condition_-_Contact": [
+                    "Condition_-_Other_Comments": [
                       "Succeeded"
                     ]
                   },
@@ -647,6 +721,14 @@
                             ""
                           ]
                         }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@coalesce(outputs('Get_response_details')?['body/rab9c2a586db943b18ac02367d3b1d3f7'],'')",
+                            ""
+                          ]
+                        }
                       }
                     ]
                   },
@@ -669,7 +751,8 @@
                       "item/Outcome/Value": "@variables('varOutcome')",
                       "item/Notes": "@variables('varRequestNotesBody')",
                       "item/Status/Value": "Completed",
-                      "item/Severity/Value": "@variables('varSeverity')"
+                      "item/Severity/Value": "@variables('varSeverity')",
+                      "item/VerificationStatus/Value": "Completed"
                     },
                     "host": {
                       "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",

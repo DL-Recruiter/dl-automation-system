@@ -57,12 +57,11 @@ Important:
 
 ## Known Gap
 
-`Other comments we should know about` is not currently added into the notes summary because its live Forms key is still not identified in the repo.
+`Other comments we should know about` is now included in the one-line additional-comments rule.
 
 That means:
 
 - it is preserved in `Form2RawJson`
-- it is not yet explicitly mapped into `BGV_Requests.Notes`
-- it is not yet explicitly mapped into `BGV_FormData.F2_Notes`
-
-If the live Forms key for that question is identified, it can be added into both notes outputs.
+- it can trigger the shared notes line:
+  - `Please refer to the report summary for additional comments.`
+- that shared line still appears only once even if multiple long-comment fields are filled

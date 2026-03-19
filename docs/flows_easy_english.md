@@ -144,6 +144,11 @@ This document describes the current behavior in your canonical flow files under 
   - Updates request row:
     - `VerificationStatus = Sent`
     - `HRRequestSentAt = utcNow()`
+    - `LinktoEmployers = FinalVerificationLink`
+  - `LinkDue` is a SharePoint calculated column, not a flow-written field:
+    - `Due` when `SendAfterDate` is blank
+    - `Due` when `SendAfterDate <= Today`
+    - `Not Due` when `SendAfterDate > Today`
 - Main outcome: Only signed-authorized candidates are sent to employer HR, with rich prefill context.
 
 ### `BGV_5_Response1`
@@ -156,10 +161,12 @@ This document describes the current behavior in your canonical flow files under 
   - Applies risk logic:
     - MAS misconduct not `No / Not Applicable` -> High.
     - Disciplinary issue `Yes` -> High.
-    - Would not re-employ -> at least Medium.
-    - Information inaccurate -> Low if no higher severity already set.
+    - Employer would not re-employ (`Q15 = No`) -> at least Medium.
+    - Information inaccurate (`Q8 = No`) -> Low if no higher severity already set.
+    - Other comments (`Q27`) -> Neutral if no higher severity already set.
     - Contact requested -> action-required notify flag.
   - Writes final result to `BGV_Requests`:
+    - `VerificationStatus = Completed`
     - `Status = Completed`
     - `ResponseReceivedAt`
     - `Severity`, `Outcome`, `Notes`
@@ -167,7 +174,7 @@ This document describes the current behavior in your canonical flow files under 
   - `Form2RawJson` stores the full submitted Form 2 payload, not just the normalized subset.
   - For the low-severity inaccurate-information section, the detailed email/details block now only shows the explanation headings for the options that were actually selected.
   - Notes now add one shared line, `Please refer to the report summary for additional comments.`, when any mapped long-comment field is filled.
-  - That shared note line is only added once, even when multiple mapped comment fields are filled.
+  - That shared note line is only added once, even when multiple mapped comment fields are filled, including `Q27` other comments.
   - Company-details discrepancy answers are now also copied into notes storage when present:
     - company-details accuracy
     - selected inaccurate company-detail fields
