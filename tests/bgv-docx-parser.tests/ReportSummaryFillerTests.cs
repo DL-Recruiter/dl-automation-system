@@ -1,0 +1,113 @@
+using System.Text.Json;
+using bgv_docx_parser.Services;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Xunit;
+
+namespace bgv_docx_parser.tests;
+
+public class ReportSummaryFillerTests
+{
+    private readonly ReportSummaryValueMapper _mapper = new();
+    private readonly OpenXmlDocxContentControlValueFiller _filler = new();
+
+    [Fact]
+    public void Mapper_Builds_Live_Template_Replacements_And_Detects_Upload_File_Name()
+    {
+        string form1RawJson = JsonSerializer.Serialize(new Dictionary<string, string?>
+        {
+            ["rfe96c622120343f294de908deb0e849d"] = "Test Candidate",
+            ["rcd8057cd92b24b5594681a5b39c07e3d"] = "candidate@example.com",
+            ["rd2fba2b09afd478ba21df420406c9b49"] = "S1234567A",
+            ["rf5b324c022804863a720ef13edeb9d9b"] = string.Empty
+        });
+
+        string form2RawJson = JsonSerializer.Serialize(new Dictionary<string, string?>
+        {
+            ["rd745d133eb7f4611b59ea051f980f97a"] = "REQ-BGV-20260319-abcde-EMP1",
+            ["rccaf3632669648baaa335c12d4ea40bf"] = "Test Company",
+            ["rcf35c7cc008e472f9d0b84bde67cc1ff"] = "201912345Z",
+            ["r19aae6e8163d4aaeb8a3f3f2d5329be2"] = "123 Test Street",
+            ["rd05170e51ac34fef95f5464cf348bedc"] = "[\"Company UEN\"]",
+            ["r57e4baaeaafc4ffc8b3977149b18f2f2"] = "Yes",
+            ["uploadField"] = "[{\"name\":\"stamp.png\",\"link\":\"https://example.invalid/stamp.png\"}]"
+        });
+
+        IReadOnlyDictionary<string, string> mappings = _mapper.BuildMappings(form1RawJson, form2RawJson);
+
+        Assert.Equal("Test Candidate", mappings["Form1.CandidateFullName"]);
+        Assert.Equal("candidate@example.com", mappings["Form1.CandidateEmail"]);
+        Assert.Equal("S1234567A", mappings["Form1.IdentificationNumberNRIC"]);
+        Assert.Equal("N/A", mappings["Form1.IdentificationNumberPassport"]);
+        Assert.Equal("REQ-BGV-20260319-abcde-EMP1", mappings["Form2.Q4"]);
+        Assert.Equal("Test Company", mappings["Form2.Q5"]);
+        Assert.Equal("Yes", mappings["Form2.Q31"]);
+        Assert.Equal("stamp.png", mappings["Form2.Q31FileName"]);
+    }
+
+    [Fact]
+    public void Filler_Replaces_Content_Control_Text_By_Tag()
+    {
+        byte[] template = CreateTextControlDocument(new Dictionary<string, string>
+        {
+            ["Form1.CandidateFullName"] = "Click or tap here to enter text.",
+            ["Form2.Q4"] = "Click or tap here to enter text."
+        });
+
+        (byte[] filledDocxBytes, int filledCount) = _filler.Fill(
+            template,
+            new Dictionary<string, string>
+            {
+                ["Form1.CandidateFullName"] = "Test Candidate",
+                ["Form2.Q4"] = "REQ-BGV-20260319-abcde-EMP1"
+            });
+
+        Assert.Equal(2, filledCount);
+
+        string documentText = ExtractDocumentText(filledDocxBytes);
+        Assert.Contains("Test Candidate", documentText);
+        Assert.Contains("REQ-BGV-20260319-abcde-EMP1", documentText);
+        Assert.DoesNotContain("Click or tap here to enter text.", documentText);
+    }
+
+    private static byte[] CreateTextControlDocument(IReadOnlyDictionary<string, string> tags)
+    {
+        using var stream = new MemoryStream();
+
+        using (WordprocessingDocument document = WordprocessingDocument.Create(
+                   stream,
+                   DocumentFormat.OpenXml.WordprocessingDocumentType.Document,
+                   true))
+        {
+            MainDocumentPart mainPart = document.AddMainDocumentPart();
+            mainPart.Document = new Document(new Body());
+
+            Body body = mainPart.Document.Body!;
+            foreach ((string tag, string placeholder) in tags)
+            {
+                body.AppendChild(
+                    new Paragraph(
+                        new SdtRun(
+                            new SdtProperties(
+                                new Tag { Val = tag },
+                                new SdtAlias { Val = tag }),
+                            new SdtContentRun(
+                                new Run(new Text(placeholder))))));
+            }
+
+            mainPart.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
+
+    private static string ExtractDocumentText(byte[] docBytes)
+    {
+        using var stream = new MemoryStream(docBytes);
+        using WordprocessingDocument document = WordprocessingDocument.Open(stream, false);
+        IEnumerable<string> texts = document.MainDocumentPart?.Document?.Descendants<Text>()
+            .Select(static text => text.Text)
+            ?? Enumerable.Empty<string>();
+        return string.Join(" ", texts);
+    }
+}

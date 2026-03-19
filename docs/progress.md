@@ -3001,3 +3001,71 @@ Log each session with:
   - `pac auth who`
 - Next actions and blockers:
   - Blocker remains for Form 2 `Q28 / Other comments we should know about`: the live Forms key is still unknown in the repo, so it remains raw-JSON-only until we capture that key from a live payload or current Forms metadata.
+## 2026-03-19 (BGV_7 report summary generation flow added)
+- Current status:
+  - Added a new canonical flow and Azure Function endpoint to generate per-employer report-summary DOCX files from the live SharePoint template `ReportSummary_Template.docx`.
+- Completed tasks:
+  - Confirmed the user-provided local copy of the live template:
+    - `out/ReportSummary_Template.docx`
+  - Extracted the live template content-control tags and mapped them into two groups:
+    - Form 1 tags:
+      - `Form1.CandidateFullName`
+      - `Form1.CandidateEmail`
+      - `Form1.IdentificationNumberNRIC`
+      - `Form1.IdentificationNumberPassport`
+    - Form 2 tags:
+      - `Form2.Q4` through `Form2.Q31`
+      - `Form2.Q31FileName`
+  - Added new Azure Function endpoint:
+    - `functions/bgv-docx-parser/FillReportSummaryControls.cs`
+    - route:
+      - `GET/POST /api/fillreportsummarycontrols`
+  - Added request/response payload models:
+    - `functions/bgv-docx-parser/Models/ReportSummaryFillRequestPayload.cs`
+    - `functions/bgv-docx-parser/Models/ReportSummaryFillResponsePayload.cs`
+  - Added new service interfaces and implementations:
+    - `functions/bgv-docx-parser/Services/IDocxContentControlValueFiller.cs`
+    - `functions/bgv-docx-parser/Services/IReportSummaryValueMapper.cs`
+    - `functions/bgv-docx-parser/Services/OpenXmlDocxContentControlValueFiller.cs`
+    - `functions/bgv-docx-parser/Services/ReportSummaryValueMapper.cs`
+  - Registered the new services in:
+    - `functions/bgv-docx-parser/Program.cs`
+  - Added focused tests:
+    - `tests/bgv-docx-parser.tests/ReportSummaryFillerTests.cs`
+  - Added new canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json.data.xml`
+  - Updated solution metadata so `BGV_7` is part of the packed/imported solution:
+    - `flows/power-automate/unpacked/Other/Solution.xml`
+  - Implemented `BGV_7` runtime behavior:
+    - recurrence-triggered poll of completed `BGV_Requests`
+    - gate on non-empty `ResponseReceivedAt`
+    - match exact `RequestID` to `BGV_FormData`
+    - require both `Form1RawJson` and `Form2RawJson`
+    - fetch template from:
+      - `/BGV Records/Templates/ReportSummary_Template.docx`
+    - call the new fill endpoint with template bytes plus raw Form 1 / Form 2 JSON
+    - write result into candidate folder:
+      - `RS_Emp1.docx`
+      - `RS_Emp2.docx`
+      - `RS_Emp3.docx`
+    - update existing report file when already present, otherwise create it
+  - Updated docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+    - `docs/file_index.md`
+  - Published the Azure Function app and imported the updated solution into the live environment.
+  - Important implementation note:
+    - `fillreportsummarycontrols` currently runs with `AuthorizationLevel.Anonymous` so the live flow can call it without an additional key-discovery step.
+    - Existing parser/lock endpoints remain function-protected.
+- Validation commands run:
+  - `dotnet test tests/bgv-docx-parser.tests/bgv-docx-parser.tests.csproj`
+  - local scratch validation against `out/ReportSummary_Template.docx`
+  - `func azure functionapp publish bgv-docx-parser --dotnet-isolated`
+  - live POST smoke test to `/api/fillreportsummarycontrols`
+  - `pac auth who`
+  - `pac solution pack --zipfile .\artifacts\exports\BGV_System_report_summary.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_report_summary.zip --publish-changes --force-overwrite`
+- Next actions and blockers:
+  - Next action: verify one completed employer response generates the correct `RS_Emp*` report under the candidate folder with populated content controls.
+  - Residual risk: the new fill endpoint is anonymous until a durable key-management path is added for that route.

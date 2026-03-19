@@ -26,7 +26,7 @@
 - `BGV_Report_Summary_Template.docx` - Word template for additive Azure Function-generated BGV report summaries using verified Form 1/Form 2 question keys.
 - `docs/architecture_flows.md` - Flow/connector integration and PAC CLI guidance.
 - `docs/collaboration_setup_guide.md` - Step-by-step collaboration guide for Edwin and Recruitment accounts.
-- `docs/data_mapping_dictionary.md` - Canonical field-level mapping and data dictionary for Forms, SharePoint lists, document library, and flows BGV_0 to BGV_6.
+- `docs/data_mapping_dictionary.md` - Canonical field-level mapping and data dictionary for Forms, SharePoint lists, document library, and flows BGV_0 to BGV_7.
 - `docs/first_time_and_daily_sop_guide.md` - Reading-order guide that tells collaborators which repo documents to use for first-time setup, daily SOP, migration, troubleshooting, and deployment.
 - `docs/flows_easy_english.md` - Plain-language explanation of BGV_0 to BGV_6 process flow.
 - `docs/ms365_authentication_runbook.md` - Authentication reference for PAC, Azure, PnP PowerShell, CLI for Microsoft 365, and Microsoft Graph.
@@ -45,9 +45,16 @@
 - `functions/bgv-docx-parser/bgv-docx-parser.csproj` - .NET 8 isolated Azure Function project for DOCX authorization parsing.
 - `functions/bgv-docx-parser/Program.cs` - Azure Functions isolated-worker host bootstrap with Application Insights and parser/drawing service wiring.
 - `functions/bgv-docx-parser/ParseAuthorizationControls.cs` - HTTP-trigger DOCX checkbox parser that also returns additive Level A drawing-detection results.
+- `functions/bgv-docx-parser/FillReportSummaryControls.cs` - HTTP-trigger DOCX content-control filler for report-summary generation from Form 1 and Form 2 raw payloads.
 - `functions/bgv-docx-parser/Models/` - Request/response, evaluation, and Level A drawing-detection models for the DOCX parser function.
+- `functions/bgv-docx-parser/Models/ReportSummaryFillRequestPayload.cs` - Request payload contract for report-summary DOCX filling.
+- `functions/bgv-docx-parser/Models/ReportSummaryFillResponsePayload.cs` - Response payload contract for report-summary DOCX filling.
 - `functions/bgv-docx-parser/Services/` - OpenXML extraction, authorization-matching, and Level A drawing-detection services used by the function endpoint.
 - `functions/bgv-docx-parser/Services/OpenXmlDocxCheckboxExtractor.cs` - Extracts checkbox content controls across main document, header, footer, glossary, footnotes, and endnotes parts.
+- `functions/bgv-docx-parser/Services/IDocxContentControlValueFiller.cs` - Contract for filling Word content controls by tag/alias.
+- `functions/bgv-docx-parser/Services/IReportSummaryValueMapper.cs` - Contract for mapping Form 1/Form 2 raw JSON into report-summary template tags.
+- `functions/bgv-docx-parser/Services/OpenXmlDocxContentControlValueFiller.cs` - OpenXML service that fills Word content controls across main document, headers, and footers.
+- `functions/bgv-docx-parser/Services/ReportSummaryValueMapper.cs` - Maps verified Form 1/Form 2 keys to the live `ReportSummary_Template.docx` content controls.
 - `functions/bgv-docx-parser/Utilities/` - Shared helper utilities for JSON options, request body reading, and base64 validation.
 - `functions/bgv-docx-parser/host.json` - Host logging and Application Insights settings for the parser function app.
 - `functions/bgv-docx-parser/global.json` - Local .NET SDK baseline for the parser function project.
@@ -76,6 +83,7 @@
 - `tests/bgv-docx-parser.tests/DocxTestFactory.cs` - Deterministic DOCX sample generator for parser integration tests.
 - `tests/bgv-docx-parser.tests/DrawingDetectionServiceTests.cs` - Deterministic Level A drawing-detection tests for no-drawing, canvas/group, and ink package markers.
 - `tests/bgv-docx-parser.tests/ParserIntegrationTests.cs` - End-to-end tests covering current DOCX checkbox extraction plus SignedYes/SignedNo evaluation behavior.
+- `tests/bgv-docx-parser.tests/ReportSummaryFillerTests.cs` - Verifies live report-summary tag mapping and OpenXML content-control replacement.
 - `Repository Template.docx` - Source template document provided by user.
 - `System Specification Template.docx` - Source specification template provided by user.
 - `Codex Agent Playbook Template.docx` - Source playbook template provided by user.

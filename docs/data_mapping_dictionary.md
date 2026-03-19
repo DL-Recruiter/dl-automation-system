@@ -10,6 +10,7 @@ Last verified from canonical flow files:
 - `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
 - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
 - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+- `flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json`
 
 ## 1) Canonical Document To Maintain
 Use this file as the canonical field mapping document for this repo.
@@ -225,6 +226,7 @@ Note:
 | `BGV_3_AuthReminder_5Days` | `BGV_Candidates` | Reads rows where `Status='Pending Authorization Form Signature'`; uses `AuthorizationLinkCreatedAt`, `AuthorizationLink`; updates `LastAuthReminderAt`. |
 | `BGV_4_SendToEmployer_Clean` | `BGV_Requests` | Reads pending requests; reads candidate auth status; updates `HRRequestSentAt=utcNow()`, `VerificationStatus='Sent'`. |
 | `BGV_6_HRReminderAndEscalation` | `BGV_Requests` | Reads rows where `Status='Sent'`; uses `ResponseReceivedAt`, `Reminder1At`, `Reminder2At`, `Reminder3At`; updates `Reminder1At`, `Reminder2At`, `Reminder3At`. |
+| `BGV_7_Generate_Report_Summary` | `BGV Records` document library | Reads `ReportSummary_Template.docx` by path, fills it using `BGV_FormData.Form1RawJson` + `Form2RawJson`, and writes `RS_EmpN.docx` into `Candidate Files/{CandidateID}/`. |
 
 ## 9) BGV Records (Document Library) Data Path
 
@@ -281,21 +283,81 @@ Legend:
 | 24 | Was any disciplinary action taken against he/she during your employment | `r96d079f9858e40bab89ab0ea4ad23931` | Read | High-severity rule |
 | 25 | Kindly provide details, if there were disciplinary actions taken | `r35197d5910d2489db0d5786157b35295` | Read | High-severity notes text |
 | 26 | Would you re-employ him/her? | `rafe3ada4157c49fb9e555cd0fb53bd59` | Read + Stored | `BGV_FormData.F2_EmployerWouldReEmploy` (boolean) and medium-severity rule |
-| 27 | Reason for not wanting to re-employ him/her | `r5f7ebc3390bc4699b160504c65254c3e` | Read + Stored | `BGV_FormData.F2_ReEmployReason`; notes text |
-| 28 | Other comments we should know about | Not present in current canonical flow JSON | Raw JSON only (key still unknown in repo) | Present in `BGV_FormData.Form2RawJson` when submitted, but not yet normalized because the live Forms key still needs to be identified |
-| 29 | Full Name of Person Completing This Form | Not present in current canonical flow JSON | Not wired | N/A |
-| 30 | Job Title | Not present in current canonical flow JSON | Not wired | N/A |
-| 31 | Contact details for clarification/follow-up | Not present in current canonical flow JSON | Not wired | N/A |
-| 32 | HR declaration confirmation | `r57e4baaeaafc4ffc8b3977149b18f2f2` | Read | Triggers follow-up notification when value is "Please contact me for further clarification" |
-| 33 | Upload official company stamp for verification | Not present in current canonical flow JSON | Not wired | N/A |
+| 27 | Reason for not wanting to re-employ him/her | `r5f7ebc3390bc4699b160504c65254c3e` | Read + Stored + Report summary | `BGV_FormData.F2_ReEmployReason`; notes text; `BGV_7` maps this into `Form2.Q26` |
+| 28 | Other comments we should know about | `rab9c2a586db943b18ac02367d3b1d3f7` | Raw JSON + Report summary | `BGV_7` maps this into `Form2.Q27` from `Form2RawJson` |
+| 29 | Full Name of Person Completing This Form | `r1f2d7ec255b1430fbb2a6e56ce4042d1` | Report summary | `BGV_7` maps this into `Form2.Q28` from `Form2RawJson` |
+| 30 | Job Title | `r7b65617c391a48239b9f75dd239702c3` | Report summary | `BGV_7` maps this into `Form2.Q29` from `Form2RawJson` |
+| 31 | Contact details for clarification/follow-up | `reb80c95cd24242998cbc884c24254bed` | Report summary | `BGV_7` maps this into `Form2.Q30` from `Form2RawJson` |
+| 32 | HR declaration confirmation | `r57e4baaeaafc4ffc8b3977149b18f2f2` | Read + Report summary | Triggers follow-up notification when value is "Please contact me for further clarification"; `BGV_7` maps this into `Form2.Q31` |
+| 33 | Upload official company stamp for verification | file upload payload in `Form2RawJson` | Report summary | `BGV_7` extracts uploaded file name(s) into `Form2.Q31FileName` |
 
 Known current direct Form 2 storage fields in `BGV_FormData`:
 - `F2_InformationAccurate` <- `r9594fab1bfa04c90883b1dffd7f4549e`
 - `F2_SelectedIssues` <- `r72b23e4aa192405091846e1279085029`
 - `F2_EmployerWouldReEmploy` <- `rafe3ada4157c49fb9e555cd0fb53bd59`
 - `F2_ReEmployReason` <- `r5f7ebc3390bc4699b160504c65254c3e`
-- Additional observed keys from latest prefill URL (not wired yet):
-  - `Q28` Other comments key still needs to be identified from a live response payload or current Forms runtime metadata
+- Additional report-summary-only Form 2 keys now verified from the live SharePoint template and raw response mapping:
+  - `Q27` Other comments -> `rab9c2a586db943b18ac02367d3b1d3f7`
+  - `Q28` HR completer name -> `r1f2d7ec255b1430fbb2a6e56ce4042d1`
+  - `Q29` HR job title -> `r7b65617c391a48239b9f75dd239702c3`
+  - `Q30` HR contact details -> `reb80c95cd24242998cbc884c24254bed`
+
+## 13) Report Summary Template Mapping (BGV_7)
+
+Source template:
+- `DLR Recruitment Ops > BGV Records > Templates > ReportSummary_Template.docx`
+
+Generation behavior:
+- `BGV_7_Generate_Report_Summary` reads `BGV_FormData.Form1RawJson` and `BGV_FormData.Form2RawJson`.
+- It sends those payloads plus the template DOCX to Azure Function `FillReportSummaryControls`.
+- The function fills live Word content controls and saves:
+  - `RS_Emp1.docx`
+  - `RS_Emp2.docx`
+  - `RS_Emp3.docx`
+  inside `BGV Records/Candidate Files/<CandidateID>/`.
+
+### 13.1 Form 1 content controls
+
+| Template content control | Source |
+| --- | --- |
+| `Form1.CandidateFullName` | Form 1 key `rfe96c622120343f294de908deb0e849d` |
+| `Form1.CandidateEmail` | Form 1 key `rcd8057cd92b24b5594681a5b39c07e3d` |
+| `Form1.IdentificationNumberNRIC` | Form 1 key `rd2fba2b09afd478ba21df420406c9b49`; fallback `N/A` |
+| `Form1.IdentificationNumberPassport` | Form 1 key `rf5b324c022804863a720ef13edeb9d9b`; fallback `N/A` |
+
+### 13.2 Form 2 content controls
+
+| Template content control | Source Forms key | Meaning in live template |
+| --- | --- | --- |
+| `Form2.Q4` | `rd745d133eb7f4611b59ea051f980f97a` | RequestID |
+| `Form2.Q5` | `rccaf3632669648baaa335c12d4ea40bf` | Company Name |
+| `Form2.Q6` | `rcf35c7cc008e472f9d0b84bde67cc1ff` | Company UEN |
+| `Form2.Q7` | `r19aae6e8163d4aaeb8a3f3f2d5329be2` | Company Address |
+| `Form2.Q8` | `r2d39255c2449439096683ca0e39241b0` | Information Accurate |
+| `Form2.Q9` | `rd05170e51ac34fef95f5464cf348bedc` | Information Inaccuracy Regarding |
+| `Form2.Q10` | `ra03058e9bbfd40d28014b0c669e92434` | Details of Inaccuracy |
+| `Form2.Q11` | `r0bef44c0d22d493f95a33484875b951e` | Employment Period |
+| `Form2.Q12` | `r513ad5ab3a14453286bdb910820985ec` | Reason For Leaving |
+| `Form2.Q13` | `ra6ab2e26d2d84a92b33148fc4694773a` | Last Drawn Renumeration Package |
+| `Form2.Q14` | `r49ca8a655f5e4bcba0e8f75d4475ad77` | Last Position Held |
+| `Form2.Q15` | `r9594fab1bfa04c90883b1dffd7f4549e` | Information True |
+| `Form2.Q16` | `r72b23e4aa192405091846e1279085029` | Information Inaccuracy Regarding |
+| `Form2.Q17` | `r9a95095b3d7d4d9f8bc985025614bd79` | Discrepancy in Employment Period |
+| `Form2.Q18` | `r83027392ccb043e2a637b06ff4b54ac8` | Discrepancy in Job Title/Position |
+| `Form2.Q19` | `r4061a9d19aae45d9915d2f508a5c3ea9` | Discrepancy in remuneration package |
+| `Form2.Q20` | `ra15c799c557d42d1bcee1de947c29466` | Other abnormalities/comments |
+| `Form2.Q21` | `r7bd26b4a7e94430dbda54f9e8b8212e4` | Reported to MAS |
+| `Form2.Q22` | `rc50b684c30314c5d991ff39a0d3d0dd1` | Details of why candidate was reported |
+| `Form2.Q23` | `r96d079f9858e40bab89ab0ea4ad23931` | Disciplinary actions taken |
+| `Form2.Q24` | `r35197d5910d2489db0d5786157b35295` | Details of disciplinary actions |
+| `Form2.Q25` | `rafe3ada4157c49fb9e555cd0fb53bd59` | Would you re-employ |
+| `Form2.Q26` | `r5f7ebc3390bc4699b160504c65254c3e` | Details of not wanting to re-employ |
+| `Form2.Q27` | `rab9c2a586db943b18ac02367d3b1d3f7` | Other Comments |
+| `Form2.Q28` | `r1f2d7ec255b1430fbb2a6e56ce4042d1` | Name of HR |
+| `Form2.Q29` | `r7b65617c391a48239b9f75dd239702c3` | Job Title |
+| `Form2.Q30` | `reb80c95cd24242998cbc884c24254bed` | Contact Details |
+| `Form2.Q31` | `r57e4baaeaafc4ffc8b3977149b18f2f2` | Information is true and accurate |
+| `Form2.Q31FileName` | derived from upload metadata in `Form2RawJson` | Company stamp filename(s) or `No file uploaded` |
 
 Important:
 - Candidate Declaration source keys above were verified from the live Forms runtime metadata endpoint (`prefetchFormUrl`) on `2026-03-04`.

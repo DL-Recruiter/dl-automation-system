@@ -10,7 +10,8 @@ This document describes the current behavior in your canonical flow files under 
 5. Pending employer requests are sent out with a prefilled HR form link and signed authorization attachment.
 6. Employer submits the HR verification form.
 7. The response is scored for severity, request records are updated, and alerts are sent if needed.
-8. Scheduled reminder flows chase unsigned candidate forms and unanswered employer requests.
+8. A report summary document is generated per employer response and saved back into the candidate folder.
+9. Scheduled reminder flows chase unsigned candidate forms and unanswered employer requests.
 
 ## Flow-by-Flow Explanation
 
@@ -183,8 +184,38 @@ This document describes the current behavior in your canonical flow files under 
     - `channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
   - Shared-mailbox sender is `recruitment@dlresources.com.sg`.
   - Reminder conditions now use `empty(...)`-safe checks for SharePoint date fields so null/blank timestamps do not block reminder branches unexpectedly.
-  - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
+- Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
+
+### `BGV_7_Generate_Report_Summary`
+- Trigger: Recurrence every 30 minutes.
+- Selection:
+  - Reads `BGV_Requests` where `VerificationStatus = Completed`.
+  - Only continues for rows with a non-empty `ResponseReceivedAt` and a `RequestID` ending in an employer slot such as `EMP1`.
+- What it does:
+  - Reads the live Word template by path:
+    - `DLR Recruitment Ops > BGV Records > Templates > ReportSummary_Template.docx`
+  - Loads the matching `BGV_FormData` row by exact `RequestID`.
+  - Uses `Form1RawJson` and `Form2RawJson` from `BGV_FormData` as the source payloads.
+  - Sends the template plus both raw JSON payloads to the Azure Function endpoint `FillReportSummaryControls`.
+  - The Azure Function fills Word content controls by live template tag, including:
+    - Form 1 candidate basics:
+      - `Form1.CandidateFullName`
+      - `Form1.CandidateEmail`
+      - `Form1.IdentificationNumberNRIC`
+      - `Form1.IdentificationNumberPassport`
+    - Form 2 report summary fields:
+      - `Form2.Q4` through `Form2.Q31`
+      - `Form2.Q31FileName`
+  - Saves one report per employer slot into the candidate folder:
+    - `RS_Emp1.docx`
+    - `RS_Emp2.docx`
+    - `RS_Emp3.docx`
+  - Candidate folder path used:
+    - `BGV Records/Candidate Files/<CandidateID>/`
+  - If the report already exists, updates the file content in place.
+  - If the report does not exist yet, creates it.
+- Main outcome: Each completed employer verification now gets a report-summary DOCX generated from the real SharePoint template and stored in the correct candidate folder.
 
 ## How the Flows Connect
 - Candidate signature track:
@@ -193,6 +224,7 @@ This document describes the current behavior in your canonical flow files under 
   - `BGV_0` creates `BGV_Requests` + `BGV_FormData`
   - `BGV_4` sends prefilled HR request + attachment
   - `BGV_5` processes HR response and updates both lists
+  - `BGV_7` generates the per-employer report summary DOCX from the completed Form 2 response
 - Reminder/escalation track:
   - `BGV_3` for candidate signature delays
   - `BGV_6` for employer response delays

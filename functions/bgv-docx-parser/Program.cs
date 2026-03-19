@@ -11,8 +11,10 @@ var host = new HostBuilder()
         services.ConfigureFunctionsApplicationInsights();
         services.AddSingleton<IDocxCheckboxExtractor, OpenXmlDocxCheckboxExtractor>();
         services.AddSingleton<IDocxContentControlLocker, OpenXmlDocxContentControlLocker>();
+        services.AddSingleton<IDocxContentControlValueFiller, OpenXmlDocxContentControlValueFiller>();
         services.AddSingleton<IAuthorizationMatchEvaluator, AuthorizationMatchEvaluator>();
         services.AddSingleton<IDrawingDetectionService, OpenXmlDrawingDetectionService>();
+        services.AddSingleton<IReportSummaryValueMapper, ReportSummaryValueMapper>();
     })
     .Build();
 

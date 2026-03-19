@@ -6,7 +6,7 @@
       <LocalizedName description="BGV_System" languagecode="1033" />
     </LocalizedNames>
     <Descriptions />
-    <Version>1.0.0.2</Version>
+    <Version>1.0.0.3</Version>
     <Managed>0</Managed>
     <Publisher>
       <UniqueName>Cr42881</UniqueName>
@@ -85,6 +85,7 @@
       <RootComponent type="29" id="{fd4bf0e3-0916-f111-8341-002248582037}" behavior="0" />
       <RootComponent type="29" id="{fe4bf0e3-0916-f111-8341-002248582037}" behavior="0" />
       <RootComponent type="29" id="{ff4bf0e3-0916-f111-8341-002248582037}" behavior="0" />
+      <RootComponent type="29" id="{fb5cf0e3-0916-f111-8341-002248582037}" behavior="0" />
     </RootComponents>
     <MissingDependencies />
   </SolutionManifest>

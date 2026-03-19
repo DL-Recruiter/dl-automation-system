@@ -1,0 +1,309 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "api": {
+          "name": "shared_sharepointonline"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "cr94d_sharedsharepointonline_96d5d"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "type": "Recurrence",
+          "recurrence": {
+            "frequency": "Minute",
+            "interval": "30",
+            "startTime": "2026-03-19T02:30:00Z"
+          }
+        }
+      },
+      "actions": {
+        "Get_template_content_using_path": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+              "path": "/BGV Records/Templates/ReportSummary_Template.docx",
+              "inferContentType": true
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetFileContentByPath",
+              "connectionName": "shared_sharepointonline"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {}
+        },
+        "Compose_Template_Base64": {
+          "type": "Compose",
+          "inputs": "@base64(body('Get_template_content_using_path'))",
+          "runAfter": {
+            "Get_template_content_using_path": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Get_items_(Completed_Requests)": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+              "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+              "$filter": "VerificationStatus eq 'Completed'"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetItems",
+              "connectionName": "shared_sharepointonline"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Compose_Template_Base64": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Apply_to_each_(Completed_Requests)": {
+          "type": "Foreach",
+          "foreach": "@outputs('Get_items_(Completed_Requests)')?['body/value']",
+          "actions": {
+            "Condition_-_Ready_for_Report_Summary": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@empty(items('Apply_to_each_(Completed_Requests)')?['ResponseReceivedAt'])",
+                      false
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@empty(items('Apply_to_each_(Completed_Requests)')?['RequestID'])",
+                      false
+                    ]
+                  },
+                  {
+                    "contains": [
+                      "@items('Apply_to_each_(Completed_Requests)')?['RequestID']",
+                      "-EMP"
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Get_items_(BGV_FormData)": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                      "$filter": "@concat('RequestID eq ''', string(items('Apply_to_each_(Completed_Requests)')?['RequestID']), '''')",
+                      "$top": 1
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "GetItems",
+                      "connectionName": "shared_sharepointonline"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Condition_-_FormData_Found": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "greater": [
+                          "@length(body('Get_items_(BGV_FormData)')?['value'])",
+                          0
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Form1RawJson'])",
+                          false
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson'])",
+                          false
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "Compose_CandidateFolderPath": {
+                      "type": "Compose",
+                      "inputs": "@concat('/BGV Records/Candidate Files/', items('Apply_to_each_(Completed_Requests)')?['CandidateID'])"
+                    },
+                    "Compose_ReportFileName": {
+                      "type": "Compose",
+                      "inputs": "@concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')",
+                      "runAfter": {
+                        "Compose_CandidateFolderPath": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "HTTP_-_Fill_Report_Summary_Controls": {
+                      "type": "Http",
+                      "inputs": {
+                        "uri": "https://bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net/api/fillreportsummarycontrols",
+                        "method": "POST",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "body": {
+                          "fileName": "@outputs('Compose_ReportFileName')",
+                          "docxBase64": "@outputs('Compose_Template_Base64')",
+                          "form1RawJson": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Form1RawJson']",
+                          "form2RawJson": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson']"
+                        }
+                      },
+                      "runAfter": {
+                        "Compose_ReportFileName": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Get_files_(properties_only)": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                          "folderPath": "@outputs('Compose_CandidateFolderPath')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "GetFileItems",
+                          "connectionName": "shared_sharepointonline"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      },
+                      "runAfter": {
+                        "HTTP_-_Fill_Report_Summary_Controls": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Filter_array_-_Existing_Report": {
+                      "type": "Query",
+                      "inputs": {
+                        "from": "@outputs('Get_files_(properties_only)')?['body/value']",
+                        "where": "@equals(item()?['{Name}'], outputs('Compose_ReportFileName'))"
+                      },
+                      "runAfter": {
+                        "Get_files_(properties_only)": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Condition_-_Report_Exists": {
+                      "type": "If",
+                      "expression": {
+                        "greater": [
+                          "@length(body('Filter_array_-_Existing_Report'))",
+                          0
+                        ]
+                      },
+                      "actions": {
+                        "Update_report_summary_file": {
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                              "id": "@first(body('Filter_array_-_Existing_Report'))?['{Identifier}']",
+                              "body": "@base64ToBinary(body('HTTP_-_Fill_Report_Summary_Controls')?['filledDocxBase64'])"
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                              "operationId": "UpdateFile",
+                              "connectionName": "shared_sharepointonline"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        }
+                      },
+                      "else": {
+                        "actions": {
+                          "Create_report_summary_file": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                                "folderPath": "@outputs('Compose_CandidateFolderPath')",
+                                "name": "@outputs('Compose_ReportFileName')",
+                                "body": "@base64ToBinary(body('HTTP_-_Fill_Report_Summary_Controls')?['filledDocxBase64'])"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                                "operationId": "CreateFile",
+                                "connectionName": "shared_sharepointonline"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            },
+                            "runtimeConfiguration": {
+                              "contentTransfer": {
+                                "transferMode": "Chunked"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Filter_array_-_Existing_Report": [
+                          "Succeeded"
+                        ]
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Get_items_(BGV_FormData)": [
+                      "Succeeded"
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              }
+            }
+          },
+          "runAfter": {
+            "Get_items_(Completed_Requests)": [
+              "Succeeded"
+            ]
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}
