@@ -2953,3 +2953,30 @@ Log each session with:
   - `pac auth who`
 - Next actions and blockers:
   - Next action: import updated solution and trigger one fresh candidate email to confirm the wording is visible in the first outbound message.
+## 2026-03-19 (Daily sync export normalization)
+- Current status:
+  - Ran daily sync successfully against the live environment and reconciled the exported PAC artifacts back into Git.
+- Completed tasks:
+  - Verified PAC account before sync:
+    - `recruitment@dlresources.com.sg`
+  - Ran:
+    - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/active/bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+  - Export succeeded.
+  - Unpack hit the expected temporary ZIP lock once and then succeeded on retry.
+  - Captured the resulting sync-only artifact changes:
+    - workflow files normalized to no trailing newline:
+      - `BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+      - `BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+      - `BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+      - `BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+      - `BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+    - solution metadata version updated:
+      - `flows/power-automate/unpacked/Other/Customizations.xml`
+      - `flows/power-automate/unpacked/Other/Solution.xml`
+- Validation commands run:
+  - `git status --short --branch`
+  - `git diff -- flows/power-automate/unpacked/Workflows/...`
+  - `git diff -- flows/power-automate/unpacked/Other/Customizations.xml flows/power-automate/unpacked/Other/Solution.xml`
+  - `ConvertFrom-Json` validation for representative workflow JSON
+- Next actions and blockers:
+  - Next action: none; local repo, GitHub, and PAC-exported source are aligned after committing the sync artifacts.
