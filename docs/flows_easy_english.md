@@ -181,10 +181,11 @@ This document describes the current behavior in your canonical flow files under 
   - Teams escalation message for unresolved cases
   - Teams escalation destination:
     - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
-    - `channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
+  - `channelId = 19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
   - Shared-mailbox sender is `recruitment@dlresources.com.sg`.
   - Reminder conditions now use `empty(...)`-safe checks for SharePoint date fields so null/blank timestamps do not block reminder branches unexpectedly.
 - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
+- Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, so reminders still contain the Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
 
 ### `BGV_7_Generate_Report_Summary`

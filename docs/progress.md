@@ -3090,3 +3090,21 @@ Log each session with:
 - Next actions and blockers:
   - Next action: refresh the BGV_7 flow page and turn the flow on.
   - Note: the import repaired the inaccessible SharePoint binding; the flow still needs to be switched on because it is a scheduled flow and imports land in the off state.
+## 2026-03-19 (BGV_6 employer reminders now regenerate the form link)
+- Current status:
+  - Investigated employer reminder emails that were arriving without a Microsoft Forms URL and confirmed `BGV_6` was still reading the legacy `uniquelinktoemployers` request column, which is now blank in current runtime.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - Added `Get_items_(BGV_FormData)` inside the reminder loop so `BGV_6` can fetch the matching employer form-data row by exact `RequestID`.
+  - Added `FinalVerificationLink` compose action inside `BGV_6` using the same prefilled Microsoft Forms URL logic already used by `BGV_4`.
+  - Changed reminder email bodies to use:
+    - `@{outputs('FinalVerificationLink')}`
+    instead of:
+    - `@{items('Apply_to_each')?['uniquelinktoemployers']}`
+  - Updated docs:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Next action: import the updated solution and verify a fresh reminder email contains the same employer form link pattern as the initial `BGV_4` request email.

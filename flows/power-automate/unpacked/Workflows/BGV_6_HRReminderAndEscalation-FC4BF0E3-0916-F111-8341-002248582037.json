@@ -73,6 +73,31 @@
           "type": "Foreach",
           "foreach": "@outputs('Get_items')?['body/value']",
           "actions": {
+            "Get_items_(BGV_FormData)": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                  "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                  "$filter": "@concat('RequestID eq ''', string(items('Apply_to_each')?['RequestID']), '''')",
+                  "$top": 1
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "GetItems",
+                  "connectionName": "shared_sharepointonline"
+                }
+              }
+            },
+            "FinalVerificationLink": {
+              "type": "Compose",
+              "inputs": "@concat('https://forms.office.com/Pages/ResponsePage.aspx?id=cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUN1c5NE0wWEI2Nk1OMDlJSkI0N0RXUTRHMS4u','&r4930fc603c0f4cada09832be79f2a76f=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value'],'')))),'&r27b6bdb850dd48339dc05df11d485470=',encodeUriComponent(if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']))),'N/A',trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'])))),'&r425242341d6143c7a29307136debe938=',encodeUriComponent(if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']))),if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']))),'N/A',trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']))),'N/A')),'&rd745d133eb7f4611b59ea051f980f97a=',encodeUriComponent(trim(string(items('Apply_to_each')?['RequestID']))),'&rccaf3632669648baaa335c12d4ea40bf=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each')?['EmployerName'],'')))),'&rcf35c7cc008e472f9d0b84bde67cc1ff=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN']))),'&r19aae6e8163d4aaeb8a3f3f2d5329be2=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress']))),'&r0bef44c0d22d493f95a33484875b951e=',encodeUriComponent(if(and(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),'',if(or(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),formatDateTime(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate']),'yyyy-MM-dd'),concat(formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],'yyyy-MM-dd'),' to ',formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'],'yyyy-MM-dd'))))),'&ra6ab2e26d2d84a92b33148fc4694773a=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_LastDrawnSalary']))),'&r49ca8a655f5e4bcba0e8f75d4475ad77=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_JobTitle']))))",
+              "runAfter": {
+                "Get_items_(BGV_FormData)": [
+                  "Succeeded"
+                ]
+              }
+            },
             "Condition": {
               "type": "If",
               "expression": {
@@ -133,7 +158,7 @@
                       "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
                       "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                       "emailMessage/Subject": "Reminder: Employment Verification Request\n",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\"><br>Hello @{items('Apply_to_each')?['EmployerName']},<br><br>This is a reminder that we have sent you an employment verification for our candidate as part of our background verification check for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Id']}.<br><br>We kindly request for you to help us to fill up the information as soon as possible in the following link :</p><p class=\"editor-paragraph\">@{items('Apply_to_each')?['uniquelinktoemployers']}<br><br><br>Thank you.<br><br>Thanks &amp; Regards,<br>D L Reources Pte Ltd</p><br>",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\"><br>Hello @{items('Apply_to_each')?['EmployerName']},<br><br>This is a reminder that we have sent you an employment verification for our candidate as part of our background verification check for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>We kindly request for you to help us to fill up the information as soon as possible in the following link :</p><p class=\"editor-paragraph\">@{outputs('FinalVerificationLink')}<br><br><br>Thank you.<br><br>Thanks &amp; Regards,<br>D L Reources Pte Ltd</p><br>",
                       "emailMessage/Importance": "Normal"
                     },
                     "host": {
@@ -146,6 +171,11 @@
               },
               "else": {
                 "actions": {}
+              },
+              "runAfter": {
+                "FinalVerificationLink": [
+                  "Succeeded"
+                ]
               }
             },
             "Condition_-_Reminder_2_": {
@@ -214,7 +244,7 @@
                       "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
                       "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                       "emailMessage/Subject": "2nd Reminder: Employment Verification Request from D L Resources\n",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">Hello @{items('Apply_to_each')?['EmployerName']},</p><br><p class=\"editor-paragraph\">This is a second reminder to complete the employment verification for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}. @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has provied us your contact to conduct this background check.<br><br>Kindly access the link below and fill in the form as soon as possible:<br>@{items('Apply_to_each')?['uniquelinktoemployers']}<br><br>Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">Hello @{items('Apply_to_each')?['EmployerName']},</p><br><p class=\"editor-paragraph\">This is a second reminder to complete the employment verification for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}. @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has provied us your contact to conduct this background check.<br><br>Kindly access the link below and fill in the form as soon as possible:<br>@{outputs('FinalVerificationLink')}<br><br>Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
                       "emailMessage/Importance": "Normal"
                     },
                     "host": {
@@ -330,7 +360,7 @@
                       "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
                       "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                       "emailMessage/Subject": "Final Reminder: Employment Verification Request ",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">This is a final reminder for the background check regarding:@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.</p><br><p class=\"editor-paragraph\">@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has authorise us to do a background check. He/She has provided us your contact. We kindly ask that you help us to fill in the following form :</p><p class=\"editor-paragraph\">@{items('Apply_to_each')?['uniquelinktoemployers']}</p>",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">This is a final reminder for the background check regarding:@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.</p><br><p class=\"editor-paragraph\">@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has authorise us to do a background check. He/She has provided us your contact. We kindly ask that you help us to fill in the following form :</p><p class=\"editor-paragraph\">@{outputs('FinalVerificationLink')}</p>",
                       "emailMessage/Importance": "Normal"
                     },
                     "host": {
