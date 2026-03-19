@@ -46,6 +46,31 @@ public class ReportSummaryFillerTests
     }
 
     [Fact]
+    public void Mapper_Uses_Form1Fallback_When_Form1RawJson_Is_Missing()
+    {
+        string form2RawJson = JsonSerializer.Serialize(new Dictionary<string, string?>
+        {
+            ["rd745d133eb7f4611b59ea051f980f97a"] = "REQ-BGV-20260319-abcde-EMP1"
+        });
+
+        IReadOnlyDictionary<string, string> mappings = _mapper.BuildMappings(
+            null,
+            form2RawJson,
+            new Dictionary<string, string?>
+            {
+                ["Form1.CandidateFullName"] = "Fallback Candidate",
+                ["Form1.CandidateEmail"] = "fallback@example.com",
+                ["Form1.IdentificationNumberNRIC"] = "S7654321A",
+                ["Form1.IdentificationNumberPassport"] = null
+            });
+
+        Assert.Equal("Fallback Candidate", mappings["Form1.CandidateFullName"]);
+        Assert.Equal("fallback@example.com", mappings["Form1.CandidateEmail"]);
+        Assert.Equal("S7654321A", mappings["Form1.IdentificationNumberNRIC"]);
+        Assert.Equal("N/A", mappings["Form1.IdentificationNumberPassport"]);
+    }
+
+    [Fact]
     public void Filler_Replaces_Content_Control_Text_By_Tag()
     {
         byte[] template = CreateTextControlDocument(new Dictionary<string, string>

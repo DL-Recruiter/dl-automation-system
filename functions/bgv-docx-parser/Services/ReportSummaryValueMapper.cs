@@ -46,7 +46,10 @@ public sealed class ReportSummaryValueMapper : IReportSummaryValueMapper
             ["Form2.Q31"] = "r57e4baaeaafc4ffc8b3977149b18f2f2"
         };
 
-    public IReadOnlyDictionary<string, string> BuildMappings(string? form1RawJson, string? form2RawJson)
+    public IReadOnlyDictionary<string, string> BuildMappings(
+        string? form1RawJson,
+        string? form2RawJson,
+        IReadOnlyDictionary<string, string?>? form1FallbackValues = null)
     {
         IReadOnlyDictionary<string, string> form1Values = ParseFlatStringMap(form1RawJson);
         IReadOnlyDictionary<string, string> form2Values = ParseFlatStringMap(form2RawJson);
@@ -56,6 +59,13 @@ public sealed class ReportSummaryValueMapper : IReportSummaryValueMapper
         foreach ((string tag, string key) in Form1TagToKey)
         {
             string value = GetNormalizedFormValue(form1Values, key);
+            if (string.IsNullOrWhiteSpace(value) &&
+                form1FallbackValues is not null &&
+                form1FallbackValues.TryGetValue(tag, out string? fallbackValue) &&
+                !string.IsNullOrWhiteSpace(fallbackValue))
+            {
+                value = fallbackValue.Trim();
+            }
 
             if (tag.Equals("Form1.IdentificationNumberNRIC", StringComparison.OrdinalIgnoreCase))
             {

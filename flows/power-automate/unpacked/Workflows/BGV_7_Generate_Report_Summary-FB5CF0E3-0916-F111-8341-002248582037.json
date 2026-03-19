@@ -67,7 +67,7 @@
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
               "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-              "$filter": "VerificationStatus eq 'Completed'"
+              "$filter": "Status eq 'Completed' or VerificationStatus eq 'Completed'"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -140,12 +140,6 @@
                       },
                       {
                         "equals": [
-                          "@empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Form1RawJson'])",
-                          false
-                        ]
-                      },
-                      {
-                        "equals": [
                           "@empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson'])",
                           false
                         ]
@@ -178,7 +172,11 @@
                           "fileName": "@outputs('Compose_ReportFileName')",
                           "docxBase64": "@outputs('Compose_Template_Base64')",
                           "form1RawJson": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Form1RawJson']",
-                          "form2RawJson": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson']"
+                          "form2RawJson": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson']",
+                          "form1CandidateFullName": "@first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName']",
+                          "form1CandidateEmail": "@first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateEmail']",
+                          "form1IdentificationNumberNRIC": "@first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']",
+                          "form1IdentificationNumberPassport": "@first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']"
                         }
                       },
                       "runAfter": {

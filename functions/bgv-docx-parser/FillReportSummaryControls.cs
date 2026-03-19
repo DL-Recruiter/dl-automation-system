@@ -12,7 +12,8 @@ public class FillReportSummaryControls
 {
     private const int MaxRequestBodyBytes = 16 * 1024 * 1024;
     private const int MaxDocxBytes = 10 * 1024 * 1024;
-    private const string HealthMessage = "Use POST with JSON { fileName, docxBase64, form1RawJson, form2RawJson }.";
+    private const string HealthMessage =
+        "Use POST with JSON { fileName, docxBase64, form1RawJson, form2RawJson, form1CandidateFullName, form1CandidateEmail, form1IdentificationNumberNRIC, form1IdentificationNumberPassport }.";
     private const string Note =
         "Report summary content controls were populated from Form 1 and Form 2 raw response payloads.";
 
@@ -87,7 +88,18 @@ public class FillReportSummaryControls
             return await WriteErrorAsync(req, HttpStatusCode.BadRequest, "docxBase64 is not valid base64");
         }
 
-        IReadOnlyDictionary<string, string> mappings = _valueMapper.BuildMappings(payload?.Form1RawJson, payload?.Form2RawJson);
+        var form1FallbackValues = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Form1.CandidateFullName"] = payload?.Form1CandidateFullName,
+            ["Form1.CandidateEmail"] = payload?.Form1CandidateEmail,
+            ["Form1.IdentificationNumberNRIC"] = payload?.Form1IdentificationNumberNRIC,
+            ["Form1.IdentificationNumberPassport"] = payload?.Form1IdentificationNumberPassport
+        };
+
+        IReadOnlyDictionary<string, string> mappings = _valueMapper.BuildMappings(
+            payload?.Form1RawJson,
+            payload?.Form2RawJson,
+            form1FallbackValues);
 
         (byte[] filledDocxBytes, int filledControlsCount) fillResult;
         try

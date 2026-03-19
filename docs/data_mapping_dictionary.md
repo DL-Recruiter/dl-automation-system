@@ -226,7 +226,7 @@ Note:
 | `BGV_3_AuthReminder_5Days` | `BGV_Candidates` | Reads rows where `Status='Pending Authorization Form Signature'`; uses `AuthorizationLinkCreatedAt`, `AuthorizationLink`; updates `LastAuthReminderAt`. |
 | `BGV_4_SendToEmployer_Clean` | `BGV_Requests` | Reads pending requests; reads candidate auth status; updates `HRRequestSentAt=utcNow()`, `VerificationStatus='Sent'`. |
 | `BGV_6_HRReminderAndEscalation` | `BGV_Requests` | Reads rows where `Status='Sent'`; uses `ResponseReceivedAt`, `Reminder1At`, `Reminder2At`, `Reminder3At`; updates `Reminder1At`, `Reminder2At`, `Reminder3At`. |
-| `BGV_7_Generate_Report_Summary` | `BGV Records` document library | Reads `ReportSummary_Template.docx` by path, fills it using `BGV_FormData.Form1RawJson` + `Form2RawJson`, and writes `RS_EmpN.docx` into `Candidate Files/{CandidateID}/`. |
+| `BGV_7_Generate_Report_Summary` | `BGV Records` document library | Reads `ReportSummary_Template.docx` by path, fills it using `BGV_FormData.Form2RawJson` plus Form 1 data from `Form1RawJson` when present or normalized `F1_*` fields as fallback, and writes `RS_EmpN.docx` into `Candidate Files/{CandidateID}/`. |
 
 ## 9) BGV Records (Document Library) Data Path
 
@@ -308,7 +308,12 @@ Source template:
 - `DLR Recruitment Ops > BGV Records > Templates > ReportSummary_Template.docx`
 
 Generation behavior:
-- `BGV_7_Generate_Report_Summary` reads `BGV_FormData.Form1RawJson` and `BGV_FormData.Form2RawJson`.
+- `BGV_7_Generate_Report_Summary` requires `BGV_FormData.Form2RawJson`.
+- It prefers `BGV_FormData.Form1RawJson`, and if that is blank it falls back to:
+  - `F1_CandidateFullName`
+  - `F1_CandidateEmail`
+  - `F1_IDNumberNRIC`
+  - `F1_IDNumberPassport`
 - It sends those payloads plus the template DOCX to Azure Function `FillReportSummaryControls`.
 - The function fills live Word content controls and saves:
   - `RS_Emp1.docx`

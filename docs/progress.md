@@ -3108,3 +3108,34 @@ Log each session with:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
 - Next actions and blockers:
   - Next action: import the updated solution and verify a fresh reminder email contains the same employer form link pattern as the initial `BGV_4` request email.
+
+## 2026-03-19 (BGV_7 detection aligned with live employer-completion fields)
+- Current status:
+  - Tightened `BGV_7` so report generation follows the actual completion fields written by `BGV_5` and no longer fails just because `Form1RawJson` is blank on the matched `BGV_FormData` row.
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json`
+  - Changed the completed-request query in `BGV_7` to accept either:
+    - `Status = Completed`
+    - `VerificationStatus = Completed`
+  - Relaxed the `Condition_-_FormData_Found` gate so `BGV_7` now requires:
+    - a matched `BGV_FormData` row
+    - non-empty `Form2RawJson`
+    - but no longer hard-requires `Form1RawJson`
+  - Extended the `BGV_7` HTTP payload to pass Form 1 fallback values from normalized `BGV_FormData` columns:
+    - `F1_CandidateFullName`
+    - `F1_CandidateEmail`
+    - `F1_IDNumberNRIC`
+    - `F1_IDNumberPassport`
+  - Updated Azure Function request payload and mapper so `fillreportsummarycontrols`:
+    - prefers `Form1RawJson` when present
+    - otherwise uses those normalized Form 1 fallback values
+  - Added test coverage for the fallback path in:
+    - `tests/bgv-docx-parser.tests/ReportSummaryFillerTests.cs`
+  - Updated docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+- Validation commands run:
+  - pending in this task
+- Next actions and blockers:
+  - Next action: publish the function, import the updated solution, and verify that one completed employer form submission produces `RS_EmpN.docx`.

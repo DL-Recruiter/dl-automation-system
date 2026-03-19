@@ -191,14 +191,19 @@ This document describes the current behavior in your canonical flow files under 
 ### `BGV_7_Generate_Report_Summary`
 - Trigger: Recurrence every 30 minutes.
 - Selection:
-  - Reads `BGV_Requests` where `VerificationStatus = Completed`.
+  - Reads `BGV_Requests` where either `Status = Completed` or `VerificationStatus = Completed`.
   - Only continues for rows with a non-empty `ResponseReceivedAt` and a `RequestID` ending in an employer slot such as `EMP1`.
 - What it does:
   - Reads the live Word template by path:
     - `DLR Recruitment Ops > BGV Records > Templates > ReportSummary_Template.docx`
   - Loads the matching `BGV_FormData` row by exact `RequestID`.
-  - Uses `Form1RawJson` and `Form2RawJson` from `BGV_FormData` as the source payloads.
-  - Sends the template plus both raw JSON payloads to the Azure Function endpoint `FillReportSummaryControls`.
+  - Requires non-empty `Form2RawJson` from `BGV_FormData`.
+  - Uses `Form1RawJson` when present, and falls back to normalized `BGV_FormData` Form 1 fields when `Form1RawJson` is blank:
+    - `F1_CandidateFullName`
+    - `F1_CandidateEmail`
+    - `F1_IDNumberNRIC`
+    - `F1_IDNumberPassport`
+  - Sends the template plus employer raw JSON and Form 1 data to the Azure Function endpoint `FillReportSummaryControls`.
   - The Azure Function fills Word content controls by live template tag, including:
     - Form 1 candidate basics:
       - `Form1.CandidateFullName`
