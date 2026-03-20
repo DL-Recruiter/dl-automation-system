@@ -14,7 +14,6 @@ It currently uses these headers:
 | --- | --- | --- |
 | `Candidate Name` | Quick candidate identification. | `BGV_Candidates.FullName` |
 | `CandidateID` | Main case identifier for tracking and folder lookup. | `BGV_Candidates.CandidateID` / linked request rows |
-| `RecruiterID` | Placeholder assignment field for recruiter ownership. | Current live SharePoint lists do not store a recruiter ID, so the workbook shows `Not tracked in current lists`. |
 | `RequestID` | Employer-request identifier for one employer slot. | `BGV_Requests.RequestID` |
 | `Company Name` | Employer/company being verified. | `BGV_FormData.F1_EmployerName`, fallback `BGV_Requests.EmployerName` |
 | `HR Name` | Employer HR contact person. | `BGV_FormData.F1_HRContactName` |

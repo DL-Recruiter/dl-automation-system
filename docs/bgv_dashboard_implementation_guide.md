@@ -224,16 +224,6 @@ This comes from:
 - `BGV_Requests.Reminder2At`
 - `BGV_Requests.Reminder3At`
 
-### `RecruiterID`
-
-Current limitation:
-
-- the live SharePoint lists do not currently store a recruiter ownership ID
-
-So the workbook currently shows:
-
-- `Not tracked in current lists`
-
 ## How the SharePoint Push Works
 
 When the workbook is ready, this command is used:

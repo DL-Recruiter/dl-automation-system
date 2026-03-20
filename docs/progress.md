@@ -3412,7 +3412,6 @@ Log each session with:
     - builds one condensed recruiter cases table with:
       - `Candidate Name`
       - `CandidateID`
-      - `RecruiterID`
       - `RequestID`
       - `Company Name`
       - `HR Name`
@@ -3440,9 +3439,6 @@ Log each session with:
       - overdue count summary table
       - completed count summary table
     - keeps the `Cases` sheet filterable for recruiter use
-  - `RecruiterID` is currently surfaced as:
-    - `Not tracked in current lists`
-    because no live SharePoint source field currently stores recruiter ownership.
   - Exported reusable Power Query logic for the same master-table shape:
     - `out/dashboard/BGV Dashboard Master Query.m`
   - Generated workbook artifact:
@@ -3465,7 +3461,6 @@ Log each session with:
     - confirmed condensed headers:
       - `Candidate Name`
       - `CandidateID`
-      - `RecruiterID`
       - `RequestID`
       - `Company Name`
       - `HR Name`
@@ -3522,3 +3517,26 @@ Log each session with:
 - Next actions and blockers:
   - Next action: push the dashboard script/docs updates to GitHub so local and GitHub match the SharePoint-backed dashboard build state.
   - Clarification: GitHub stores the source/docs for the dashboard, while SharePoint stores the recruiter workbook artifact itself.
+
+## 2026-03-20 (RecruiterID removed from dashboard)
+- Current status:
+  - Removed the unused `RecruiterID` column from the recruiter dashboard and aligned the workbook/docs so only real recruiter-facing fields remain.
+- Completed tasks:
+  - Updated dashboard builder:
+    - `scripts/active/build_bgv_dashboard.ps1`
+    - removed `RecruiterID` from the generated `Cases` table
+  - Updated dashboard docs:
+    - `docs/bgv_dashboard.md`
+    - `docs/bgv_dashboard_headers.md`
+    - `docs/bgv_dashboard_implementation_guide.md`
+  - Rebuilt local workbook:
+    - `out/dashboard/BGV Dashboard.xlsx`
+  - Replaced SharePoint workbook:
+    - `BGV Records/Dashboard/BGV Dashboard.xlsx`
+- Validation commands run:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\active\build_bgv_dashboard.ps1`
+  - Excel COM inspection of `out/dashboard/BGV Dashboard.xlsx`
+    - confirmed `RecruiterID` header removed
+  - `m365 spo file add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --folder "BGV Records/Dashboard" --path "<local BGV Dashboard.xlsx>" --overwrite`
+- Next actions and blockers:
+  - Next action: commit and push this cleanup so GitHub matches local and SharePoint again.

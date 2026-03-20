@@ -340,15 +340,8 @@ let
         type text
     ),
 
-    AddRecruiterId = Table.AddColumn(
-        AddEmployerReminder,
-        "RecruiterID",
-        each "Not tracked in current lists",
-        type text
-    ),
-
     AddOverdue = Table.AddColumn(
-        AddRecruiterId,
+        AddEmployerReminder,
         "Overdue",
         each
             let
@@ -415,7 +408,6 @@ let
         {
             "Candidate Name",
             "CandidateID",
-            "RecruiterID",
             "RequestID",
             "Company Name",
             "HR Name",
@@ -641,7 +633,6 @@ function Build-MasterRows {
         [pscustomobject]@{
             "Candidate Name"               = if ($null -ne $candidate) { $candidate.FullName } else { $null }
             CandidateID                     = $request.CandidateID
-            RecruiterID                     = "Not tracked in current lists"
             RequestID                       = $request.RequestID
             "Company Name"                  = if ($null -ne $form -and -not [string]::IsNullOrWhiteSpace($form.F1EmployerName)) { $form.F1EmployerName } else { $request.EmployerName }
             "HR Name"                       = if ($null -ne $form) { $form.F1HRContactName } else { $null }

@@ -30,7 +30,6 @@ The recruiter-facing table is trimmed to the fields recruiters need most:
 
 - `Candidate Name`
 - `CandidateID`
-- `RecruiterID`
 - `RequestID`
 - `Company Name`
 - `HR Name`
