@@ -3395,3 +3395,130 @@ Log each session with:
   - parse updated flow JSON
   - PAC pack/import
   - final git sync check
+
+## 2026-03-20 (BGV Dashboard workbook created and uploaded)
+- Current status:
+  - Reworked the recruiter-facing Excel dashboard workbook into a condensed table view with a pivot-style summary sheet and uploaded the revised copy into the `BGV Records/Dashboard/` folder.
+- Completed tasks:
+  - Added dashboard builder script:
+    - `scripts/active/build_bgv_dashboard.ps1`
+  - Added dashboard usage/design doc:
+    - `docs/bgv_dashboard.md`
+  - Added dedicated dashboard header/logic doc:
+    - `docs/bgv_dashboard_headers.md`
+  - Builder now:
+    - exports live `BGV_Candidates`, `BGV_Requests`, and `BGV_FormData` rows through authenticated `m365`
+    - writes hidden raw sheets into the workbook
+    - builds one condensed recruiter cases table with:
+      - `Candidate Name`
+      - `CandidateID`
+      - `RecruiterID`
+      - `RequestID`
+      - `Company Name`
+      - `HR Name`
+      - `HR Email`
+      - `HR Mobile Number`
+      - `Status`
+      - `Candidate Reminder`
+      - `Employer Reminder`
+      - `Overdue`
+      - `Completed Status`
+      - `Employer Response Received At`
+      - `Last Activity At`
+      - `Severity`
+      - `Outcome`
+    - maps one recruiter-facing `Status` column across the end-to-end journey:
+      - candidate form received
+      - authorisation form sent
+      - authorisation form received
+      - employer email queued/sent
+      - employer reminder 1/2/3
+      - employer form received
+    - creates a pivot-style `Summary` sheet with:
+      - KPI cards
+      - status count summary table
+      - overdue count summary table
+      - completed count summary table
+    - keeps the `Cases` sheet filterable for recruiter use
+  - `RecruiterID` is currently surfaced as:
+    - `Not tracked in current lists`
+    because no live SharePoint source field currently stores recruiter ownership.
+  - Exported reusable Power Query logic for the same master-table shape:
+    - `out/dashboard/BGV Dashboard Master Query.m`
+  - Generated workbook artifact:
+    - `out/dashboard/BGV Dashboard.xlsx`
+  - Uploaded workbook to SharePoint:
+    - `BGV Records/Dashboard/BGV Dashboard.xlsx`
+  - Root-library overwrite was intentionally not used because an existing root-level `BGV Dashboard.xlsx` was locked by `recruitment@dlresources.com.sg`.
+- Validation commands run:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\active\build_bgv_dashboard.ps1`
+  - Excel COM inspection of:
+    - `out/dashboard/BGV Dashboard.xlsx`
+    - confirmed workbook sheets:
+      - `Summary`
+      - `Cases`
+      - `Support`
+      - `RawCandidates`
+      - `RawRequests`
+      - `RawFormData`
+    - confirmed `Cases` used range populated and `tblBGVCases` exists
+    - confirmed condensed headers:
+      - `Candidate Name`
+      - `CandidateID`
+      - `RecruiterID`
+      - `RequestID`
+      - `Company Name`
+      - `HR Name`
+      - `HR Email`
+      - `HR Mobile Number`
+      - `Status`
+      - `Candidate Reminder`
+      - `Employer Reminder`
+      - `Overdue`
+      - `Completed Status`
+      - `Employer Response Received At`
+      - `Last Activity At`
+      - `Severity`
+      - `Outcome`
+  - `m365 spo file add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --folder "BGV Records/Dashboard" --path "<local BGV Dashboard.xlsx>" --overwrite`
+- Next actions and blockers:
+  - Optional next action: if you want the workbook to replace the existing root-level `BGV Dashboard.xlsx`, close/unlock that file first and re-upload to `BGV Records` root.
+  - Note: Excel COM automation on this machine would not reliably create slicers or silently hydrate a live SharePoint-authenticated Power Query load, so the workbook is delivered as a fresh live-list snapshot with standard table filters, a pivot-style summary sheet, and a separate exported Power Query M definition.
+
+## 2026-03-20 (Dashboard sync + implementation guide)
+- Current status:
+  - Aligned the main SharePoint dashboard file with the latest local build and added a plain-English implementation guide so the dashboard setup is easier to understand and maintain.
+- Completed tasks:
+  - Updated the reminder display format in the dashboard build:
+    - `Candidate Reminder` now shows:
+      - `Not sent`
+      - `1: yyyy-mm-dd hh:mm`
+    - `Employer Reminder` now shows:
+      - `Not sent`
+      - `1: yyyy-mm-dd hh:mm`
+      - `2: yyyy-mm-dd hh:mm`
+      - `3: yyyy-mm-dd hh:mm`
+  - Hardened `m365` JSON parsing in:
+    - `scripts/active/build_bgv_dashboard.ps1`
+    - the builder now strips the occasional sign-in prompt text before `ConvertFrom-Json`
+  - Added simplified implementation guide:
+    - `docs/bgv_dashboard_implementation_guide.md`
+  - Updated dashboard docs:
+    - `docs/bgv_dashboard.md`
+    - `docs/bgv_dashboard_headers.md`
+  - Rebuilt the local workbook:
+    - `out/dashboard/BGV Dashboard.xlsx`
+  - Replaced the main SharePoint workbook after user confirmation:
+    - `BGV Records/Dashboard/BGV Dashboard.xlsx`
+    - confirmed SharePoint version advanced to `6.0`
+- Validation commands run:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\active\build_bgv_dashboard.ps1`
+  - Excel COM inspection of `out/dashboard/BGV Dashboard.xlsx`
+    - confirmed reminder examples such as:
+      - `Not sent`
+      - `1: 2026-03-16 17:00`
+      - `2: 2026-03-19 15:00`
+  - `m365 spo file add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --folder "BGV Records/Dashboard" --path "<local BGV Dashboard.xlsx>" --overwrite`
+- Next actions and blockers:
+  - Next action: push the dashboard script/docs updates to GitHub so local and GitHub match the SharePoint-backed dashboard build state.
+  - Clarification: GitHub stores the source/docs for the dashboard, while SharePoint stores the recruiter workbook artifact itself.
