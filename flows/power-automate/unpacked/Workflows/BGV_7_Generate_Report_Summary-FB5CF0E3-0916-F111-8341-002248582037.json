@@ -9,6 +9,15 @@
           "connectionReferenceLogicalName": "cr94d_sharedsharepointonline_96d5d"
         },
         "runtimeSource": "embedded"
+      },
+      "shared_teams": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "cr94d_sharedteams_4466d"
+        },
+        "api": {
+          "name": "shared_teams"
+        }
       }
     },
     "definition": {
@@ -160,6 +169,15 @@
                         ]
                       }
                     },
+                    "Compose_ReportFileWebLink": {
+                      "type": "Compose",
+                      "inputs": "@concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570',replace(outputs('Compose_CandidateFolderPath'),' ','%20'),'/',replace(outputs('Compose_ReportFileName'),' ','%20'))",
+                      "runAfter": {
+                        "Compose_ReportFileName": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
                     "HTTP_-_Fill_Report_Summary_Controls": {
                       "type": "Http",
                       "inputs": {
@@ -266,6 +284,28 @@
                               "contentTransfer": {
                                 "transferMode": "Chunked"
                               }
+                            }
+                          },
+                          "Post_message_in_a_chat_or_channel_-_Report_Summary_Created": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "poster": "Flow bot",
+                                "location": "Channel",
+                                "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
+                                "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
+                                "body/messageBody": "<p class=\"editor-paragraph\">BGV Report Summary Created</p><br><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each_(Completed_Requests)')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value'],'')}</p><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Completed_Requests)')?['RequestID']}</p><p class=\"editor-paragraph\">Report File: @{outputs('Compose_ReportFileName')}</p><p class=\"editor-paragraph\">Report Link: <a href=\"@{outputs('Compose_ReportFileWebLink')}\">@{outputs('Compose_ReportFileWebLink')}</a></p>"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                                "operationId": "PostMessageToConversation",
+                                "connectionName": "shared_teams"
+                              }
+                            },
+                            "runAfter": {
+                              "Create_report_summary_file": [
+                                "Succeeded"
+                              ]
                             }
                           }
                         }

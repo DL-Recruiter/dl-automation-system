@@ -157,7 +157,7 @@ This document describes the current behavior in your canonical flow files under 
   - Looks up `BGV_Requests` by `startswith(RequestID, <submitted RequestID>)`.
   - Looks up `BGV_FormData` by exact `RequestID`.
 - What it does:
-  - Initializes scoring variables (`Severity`, `Outcome`, notify flags).
+  - Initializes scoring variables (`Severity`, `FlaggedIssues`, notify flags).
   - Applies risk logic:
     - MAS misconduct not `No / Not Applicable` -> High.
     - Disciplinary issue `Yes` -> High.
@@ -169,7 +169,14 @@ This document describes the current behavior in your canonical flow files under 
   - Writes final result to `BGV_Requests`:
     - `VerificationStatus = Responded`
     - `ResponseReceivedAt`
-    - `Severity`, `Outcome`, `Notes`
+    - `Severity`, `FlaggedIssues` (stored in the `Outcome` internal field), `Notes`
+  - `FlaggedIssues` now stores the combined flagged items detected from Form 2:
+    - selected company-detail discrepancies from `Q9`
+    - selected employment-detail discrepancies from `Q16`
+    - `MAS` when the MAS answer is not `No / Not Applicable`
+    - `Disciplinary` when disciplinary action is `Yes`
+    - `Re-employ` when re-employ is `No`
+    - `Other Comments` when `Q27` is filled
   - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including `F2_ReasonForLeaving`.
   - `Form2RawJson` stores the full submitted Form 2 payload, not just the normalized subset.
   - For the low-severity inaccurate-information section, the detailed email/details block now only shows the explanation headings for the options that were actually selected.
@@ -182,7 +189,7 @@ This document describes the current behavior in your canonical flow files under 
   - Keeps required SharePoint fields (including `Title`) when updating `BGV_FormData`, preventing save/runtime validation errors.
   - Sends Teams alert when notify flag is true.
   - Sends internal high-severity email when severity is `High`, including employer name and employer HR email in the body.
-  - Recruiter-facing BGV_5 emails now include `EmployerName` in the email body context.
+  - Recruiter-facing BGV_5 emails now include `EmployerName` in the email body context and tell recruiters where to find the later report summary under `BGV_Records > Candidate Files (<CandidateID>)`.
   - All email notifications in this flow are routed via shared mailbox and addressed to `recruitment@dlresources.com.sg`.
   - Teams notification target for this flow is `DLR Recruitment Ops > BGV`:
     - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
@@ -190,7 +197,7 @@ This document describes the current behavior in your canonical flow files under 
 - Main outcome: Employer response is automatically triaged, stored, and escalated when needed.
 
 ### `BGV_6_HRReminderAndEscalation`
-- Trigger: Daily recurrence.
+- Trigger: Every 30 minutes, but reminder processing only runs during Singapore time windows at `9:00 AM` and `5:30 PM`.
 - Selection baseline: requests with `HRRequestSentAt` present and `ResponseReceivedAt` still empty.
 - Reminder/escalation timeline:
   - Reminder 1: when HR request is at least 2 days old.
@@ -199,6 +206,7 @@ This document describes the current behavior in your canonical flow files under 
   - Final reminder: when HR request is 11+ days old and `Reminder3At` is empty.
 - What it updates:
   - Reminder timestamps (`Reminder1At`, `Reminder2At`, `Reminder3At`)
+  - `EscalatedAt` when the recruiter escalation post is sent
   - `VerificationStatus` lifecycle:
     - `Reminder 1 Sent`
     - `Reminder 2 Sent`
@@ -212,6 +220,7 @@ This document describes the current behavior in your canonical flow files under 
   - Reminder conditions now use `empty(...)`-safe checks for SharePoint date fields so null/blank timestamps do not block reminder branches unexpectedly.
 - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, so reminders still contain the Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
+- Escalation now stamps `EscalatedAt`, so the same unresolved request is not escalated again on every later run.
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
 
 ### `BGV_7_Generate_Report_Summary`
@@ -249,7 +258,7 @@ This document describes the current behavior in your canonical flow files under 
   - Candidate folder path used:
     - `BGV Records/Candidate Files/<CandidateID>/`
   - If the report already exists, updates the file content in place.
-  - If the report does not exist yet, creates it.
+  - If the report does not exist yet, creates it and posts a Teams message to `DLR Recruitment Ops > BGV` with the report link.
 - Main outcome: Each completed employer verification now gets a report-summary DOCX generated from the real SharePoint template and stored in the correct candidate folder.
 
 ## How the Flows Connect

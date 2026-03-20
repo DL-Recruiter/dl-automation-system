@@ -105,15 +105,16 @@ Typical user questions this list answers:
 
 | Column | What it is for | Mainly written by | Mainly read by |
 | --- | --- | --- | --- |
-| `VerificationStatus` | Main employer-outreach state, for example `Pending` before send and `Sent` after the employer email is dispatched. | `BGV_0`, `BGV_4` | `BGV_4`, `BGV_6`, users |
-| `Status` | Broader request-lifecycle field used for final request completion states. | `BGV_5` | users, reporting |
+| `VerificationStatus` | Main employer-outreach lifecycle field. Current live values are `Not Sent`, `Email Sent`, `Reminder 1 Sent`, `Reminder 2 Sent`, `Reminder 3 Sent`, and `Responded`. | `BGV_0`, `BGV_4`, `BGV_5`, `BGV_6` | `BGV_4`, `BGV_6`, `BGV_7`, users |
+| `Status` | Legacy request-lifecycle field kept for compatibility/history. Current canonical flows no longer depend on it. | legacy | users, reporting |
 | `HRRequestSentAt` | Timestamp for when the verification email was sent to employer HR. | `BGV_4` | `BGV_4`, `BGV_6`, users |
 | `ResponseReceivedAt` | Timestamp for when the employer HR form response was received and processed. | `BGV_5` | `BGV_6`, users |
 | `Reminder1At` | Timestamp of the first employer reminder. | `BGV_6` | `BGV_6`, users |
 | `Reminder2At` | Timestamp of the second employer reminder. | `BGV_6` | `BGV_6`, users |
 | `Reminder3At` | Timestamp of the later/final employer reminder stage tracked by the automation. | `BGV_6` | `BGV_6`, users |
+| `EscalatedAt` | Timestamp for when the case was escalated to recruiters in Teams after repeated non-response. | `BGV_6` | `BGV_6`, users |
 | `Severity` | Risk level assigned from the employer HR response. In the current flow this can be `High`, `Medium`, `Low`, or blank when no rule is triggered. | `BGV_5` | users, recruiter notifications |
-| `Outcome` | Final verification outcome summary produced by response-scoring logic. | `BGV_5` | users, reporting |
+| `Outcome` | Live display name `FlaggedIssues`. Stores the combined flagged items detected from the employer form response. | `BGV_5` | users, reporting |
 | `Notes` | Plain-text explanation built by the flow from the triggered rule(s), then saved into the request row for users and recruiters to review. | `BGV_5` | users, reporting |
 
 ### 2.3 How `Severity/Value` is calculated
@@ -124,7 +125,7 @@ the HR verification form.
 The flow starts with:
 
 - `Severity` = empty
-- `Outcome` = `Verified`
+- `FlaggedIssues` / `Outcome` = empty
 
 Then it checks the employer response in this priority order:
 
@@ -133,27 +134,33 @@ Then it checks the employer response in this priority order:
    - If MAS misconduct is anything other than `No / Not Applicable`,
      severity becomes `High`.
    - If disciplinary action is `Yes`, severity becomes `High`.
-   - In both cases, outcome becomes `Needs Clarification`.
+   - `FlaggedIssues` adds `MAS` and/or `Disciplinary`.
 
 2. Medium severity check
 
-   - If the employer says they would not re-employ the candidate,
+   - If the employer says the employment details are inaccurate,
      severity becomes `Medium`.
    - This only happens if severity is not already `High`.
-   - Outcome becomes `Needs Clarification`.
+   - `FlaggedIssues` adds the selected employment-detail checkbox values from Form 2 `Q16`.
 
 3. Low severity check for inaccurate information
 
-   - If the employer says the information provided is not accurate,
+   - If the employer says the company details are inaccurate,
      severity becomes `Low`.
    - This only happens if no higher severity has already been set.
-   - This path does not change `Outcome` by itself.
+   - `FlaggedIssues` adds the selected company-detail checkbox values from Form 2 `Q9`.
 
 4. Contact-request check
 
    - If the employer selects `Please contact me for further
      clarification`, the flow turns on notification and adds a note.
    - This does not change severity by itself.
+
+5. Other-comments check
+
+   - If only `Q27` other comments is filled and no higher severity rule has set a value yet,
+     severity becomes `Neutral`.
+   - `FlaggedIssues` adds `Other Comments`.
 
 So the practical priority order is:
 
@@ -279,7 +286,7 @@ These fields come from Form 2, the employer HR verification form.
 | `F2_ReEmployReason` | Employer's reason when they would not re-employ the candidate. | `BGV_5` | users, troubleshooting |
 | `F2_ReasonForLeaving` | Employer-submitted reason for leaving. This can be compared against the candidate declaration. | `BGV_5` | users, troubleshooting |
 | `F2_Severity/Value` | Copy of the final request severity after the same response-scoring logic is applied. | `BGV_5` | users, troubleshooting |
-| `F2_Outcome` | Stored response outcome summary. | `BGV_5` | users, troubleshooting |
+| `F2_Outcome` | Stored copy of the combined flagged-issues summary. | `BGV_5` | users, troubleshooting |
 | `F2_Notes` | Copy of the plain-text notes body stored for the same response when a matching FormData row exists. | `BGV_5` | users, troubleshooting |
 | `Form2RawJson` | Full raw employer HR response payload kept for audit and troubleshooting. | `BGV_5` | users, troubleshooting |
 | `Form2SubmittedAt` | Timestamp of when the Form 2 snapshot was stored. | `BGV_5` | users, troubleshooting |
@@ -347,7 +354,7 @@ Use it when you need the real files rather than the tracking rows.
 | What employer request rows exist | `BGV_Requests` |
 | What exact candidate/employer values were captured for one slot | `BGV_FormData` |
 | What the employer replied in Form 2 | `BGV_FormData` |
-| What final severity/outcome was assigned | `BGV_Requests` |
+| What final severity/flagged issues were assigned | `BGV_Requests` |
 | Where the actual signed document is stored | `BGV Records` |
 
 ## 6) Related Documents

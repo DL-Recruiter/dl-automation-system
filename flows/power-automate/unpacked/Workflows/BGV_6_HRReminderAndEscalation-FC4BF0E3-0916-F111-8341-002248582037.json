@@ -46,347 +46,400 @@
         "Recurrence": {
           "type": "Recurrence",
           "recurrence": {
-            "frequency": "Day",
-            "interval": 1,
-            "startTime": "2026-02-03T01:00:00Z"
+            "frequency": "Minute",
+            "interval": "30",
+            "startTime": "2026-03-20T01:00:00Z"
           }
         }
       },
       "actions": {
-        "Get_items": {
-          "type": "OpenApiConnection",
-          "inputs": {
-            "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-              "$filter": "HRRequestSentAt ne null and ResponseReceivedAt eq null"
-            },
-            "host": {
-              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-              "operationId": "GetItems",
-              "connectionName": "shared_sharepointonline"
-            }
+        "Condition_-_Reminder_Run_Window": {
+          "type": "If",
+          "expression": {
+            "or": [
+              {
+                "equals": [
+                  "@convertTimeZone(utcNow(),'UTC','Singapore Standard Time','HH:mm')",
+                  "09:00"
+                ]
+              },
+              {
+                "equals": [
+                  "@convertTimeZone(utcNow(),'UTC','Singapore Standard Time','HH:mm')",
+                  "17:30"
+                ]
+              }
+            ]
           },
-          "runAfter": {}
-        },
-        "Apply_to_each": {
-          "type": "Foreach",
-          "foreach": "@outputs('Get_items')?['body/value']",
           "actions": {
-            "Get_items_(BGV_FormData)": {
+            "Get_items": {
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
                   "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                  "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
-                  "$filter": "@concat('RequestID eq ''', string(items('Apply_to_each')?['RequestID']), '''')",
-                  "$top": 1
+                  "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+                  "$filter": "HRRequestSentAt ne null and ResponseReceivedAt eq null"
                 },
                 "host": {
                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
                   "operationId": "GetItems",
                   "connectionName": "shared_sharepointonline"
                 }
-              }
-            },
-            "FinalVerificationLink": {
-              "type": "Compose",
-              "inputs": "@concat('https://forms.office.com/Pages/ResponsePage.aspx?id=cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUN1c5NE0wWEI2Nk1OMDlJSkI0N0RXUTRHMS4u','&r4930fc603c0f4cada09832be79f2a76f=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value'],'')))),'&r27b6bdb850dd48339dc05df11d485470=',encodeUriComponent(if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']))),'N/A',trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'])))),'&r425242341d6143c7a29307136debe938=',encodeUriComponent(if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']))),if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']))),'N/A',trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']))),'N/A')),'&rd745d133eb7f4611b59ea051f980f97a=',encodeUriComponent(trim(string(items('Apply_to_each')?['RequestID']))),'&rccaf3632669648baaa335c12d4ea40bf=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each')?['EmployerName'],'')))),'&rcf35c7cc008e472f9d0b84bde67cc1ff=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN']))),'&r19aae6e8163d4aaeb8a3f3f2d5329be2=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress']))),'&r0bef44c0d22d493f95a33484875b951e=',encodeUriComponent(if(and(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),'',if(or(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),formatDateTime(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate']),'yyyy-MM-dd'),concat(formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],'yyyy-MM-dd'),' to ',formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'],'yyyy-MM-dd'))))),'&ra6ab2e26d2d84a92b33148fc4694773a=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_LastDrawnSalary']))),'&r49ca8a655f5e4bcba0e8f75d4475ad77=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_JobTitle']))))",
-              "runAfter": {
-                "Get_items_(BGV_FormData)": [
-                  "Succeeded"
-                ]
-              }
-            },
-            "Condition": {
-              "type": "If",
-              "expression": {
-                "and": [
-                  {
-                    "equals": [
-                      "@empty(items('Apply_to_each')?['Reminder1At'])",
-                      true
-                    ]
-                  },
-                  {
-                    "equals": [
-                      "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
-                      true
-                    ]
-                  },
-                  {
-                    "lessOrEquals": [
-                      "@items('Apply_to_each')?['HRRequestSentAt']",
-                      "@addDays(utcNow(),-2)"
-                    ]
-                  }
-                ]
               },
+              "runAfter": {}
+            },
+            "Apply_to_each": {
+              "type": "Foreach",
+              "foreach": "@outputs('Get_items')?['body/value']",
               "actions": {
-                "Update_item": {
+                "Get_items_(BGV_FormData)": {
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
                       "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-                      "id": "@items('Apply_to_each')?['ID']",
-                      "item/Title": "@items('Apply_to_each')?['Title']",
-                      "item/Reminder1At": "@utcNow()",
-                      "item/VerificationStatus/Value": "Reminder 1 Sent"
+                      "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                      "$filter": "@concat('RequestID eq ''', string(items('Apply_to_each')?['RequestID']), '''')",
+                      "$top": 1
                     },
                     "host": {
                       "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                      "operationId": "PatchItem",
+                      "operationId": "GetItems",
                       "connectionName": "shared_sharepointonline"
                     }
-                  },
+                  }
+                },
+                "FinalVerificationLink": {
+                  "type": "Compose",
+                  "inputs": "@concat('https://forms.office.com/Pages/ResponsePage.aspx?id=cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUN1c5NE0wWEI2Nk1OMDlJSkI0N0RXUTRHMS4u','&r4930fc603c0f4cada09832be79f2a76f=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value'],'')))),'&r27b6bdb850dd48339dc05df11d485470=',encodeUriComponent(if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']))),'N/A',trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'])))),'&r425242341d6143c7a29307136debe938=',encodeUriComponent(if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']))),if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']))),'N/A',trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']))),'N/A')),'&rd745d133eb7f4611b59ea051f980f97a=',encodeUriComponent(trim(string(items('Apply_to_each')?['RequestID']))),'&rccaf3632669648baaa335c12d4ea40bf=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each')?['EmployerName'],'')))),'&rcf35c7cc008e472f9d0b84bde67cc1ff=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN']))),'&r19aae6e8163d4aaeb8a3f3f2d5329be2=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress']))),'&r0bef44c0d22d493f95a33484875b951e=',encodeUriComponent(if(and(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),'',if(or(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),formatDateTime(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate']),'yyyy-MM-dd'),concat(formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],'yyyy-MM-dd'),' to ',formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'],'yyyy-MM-dd'))))),'&ra6ab2e26d2d84a92b33148fc4694773a=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_LastDrawnSalary']))),'&r49ca8a655f5e4bcba0e8f75d4475ad77=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_JobTitle']))))",
                   "runAfter": {
-                    "Send_an_email_from_a_shared_mailbox_(V2)": [
+                    "Get_items_(BGV_FormData)": [
                       "Succeeded"
                     ]
                   }
                 },
-                "Send_an_email_from_a_shared_mailbox_(V2)": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
-                      "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
-                      "emailMessage/Subject": "Reminder: Employment Verification Request\n",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\"><br>Hello @{items('Apply_to_each')?['EmployerName']},<br><br>This is a reminder that we have sent you an employment verification for our candidate as part of our background verification check for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>We kindly request for you to help us to fill up the information as soon as possible in the following link :</p><p class=\"editor-paragraph\">@{outputs('FinalVerificationLink')}<br><br><br>Thank you.<br><br>Thanks &amp; Regards,<br>D L Reources Pte Ltd</p><br>",
-                      "emailMessage/Importance": "Normal"
+                "Condition": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@empty(items('Apply_to_each')?['Reminder1At'])",
+                          true
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
+                          true
+                        ]
+                      },
+                      {
+                        "lessOrEquals": [
+                          "@items('Apply_to_each')?['HRRequestSentAt']",
+                          "@addDays(utcNow(),-2)"
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "Update_item": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+                          "id": "@items('Apply_to_each')?['ID']",
+                          "item/Title": "@items('Apply_to_each')?['Title']",
+                          "item/Reminder1At": "@utcNow()",
+                          "item/VerificationStatus/Value": "Reminder 1 Sent"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "PatchItem",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      },
+                      "runAfter": {
+                        "Send_an_email_from_a_shared_mailbox_(V2)": [
+                          "Succeeded"
+                        ]
+                      }
                     },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
-                      "operationId": "SharedMailboxSendEmailV2",
-                      "connectionName": "shared_office365"
+                    "Send_an_email_from_a_shared_mailbox_(V2)": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
+                          "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
+                          "emailMessage/Subject": "Reminder: Employment Verification Request\n",
+                          "emailMessage/Body": "<p class=\"editor-paragraph\"><br>Hello @{items('Apply_to_each')?['EmployerName']},<br><br>This is a reminder that we have sent you an employment verification for our candidate as part of our background verification check for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>We kindly request for you to help us to fill up the information as soon as possible in the following link :</p><p class=\"editor-paragraph\">@{outputs('FinalVerificationLink')}<br><br><br>Thank you.<br><br>Thanks &amp; Regards,<br>D L Reources Pte Ltd</p><br>",
+                          "emailMessage/Importance": "Normal"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                          "operationId": "SharedMailboxSendEmailV2",
+                          "connectionName": "shared_office365"
+                        }
+                      }
                     }
-                  }
-                }
-              },
-              "else": {
-                "actions": {}
-              },
-              "runAfter": {
-                "FinalVerificationLink": [
-                  "Succeeded"
-                ]
-              }
-            },
-            "Condition_-_Reminder_2_": {
-              "type": "If",
-              "expression": {
-                "and": [
-                  {
-                    "equals": [
-                      "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
-                      true
-                    ]
                   },
-                  {
-                    "equals": [
-                      "@empty(items('Apply_to_each')?['Reminder1At'])",
-                      false
-                    ]
-                  },
-                  {
-                    "equals": [
-                      "@empty(items('Apply_to_each')?['Reminder2At'])",
-                      true
-                    ]
-                  },
-                  {
-                    "lessOrEquals": [
-                      "@items('Apply_to_each')?['Reminder1At']",
-                      "@addDays(utcNow(),-3)"
-                    ]
-                  }
-                ]
-              },
-              "actions": {
-                "Update_item_1": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-                      "id": "@items('Apply_to_each')?['ID']",
-                      "item/Title": "@items('Apply_to_each')?['Title']",
-                      "item/Reminder2At": "@utcNow()",
-                      "item/VerificationStatus/Value": "Reminder 2 Sent"
-                    },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                      "operationId": "PatchItem",
-                      "connectionName": "shared_sharepointonline"
-                    }
+                  "else": {
+                    "actions": {}
                   },
                   "runAfter": {
-                    "Send_an_email_from_a_shared_mailbox_(V2)_1": [
+                    "FinalVerificationLink": [
                       "Succeeded"
                     ]
                   }
                 },
-                "Send_an_email_from_a_shared_mailbox_(V2)_1": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
-                      "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
-                      "emailMessage/Subject": "2nd Reminder: Employment Verification Request from D L Resources\n",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">Hello @{items('Apply_to_each')?['EmployerName']},</p><br><p class=\"editor-paragraph\">This is a second reminder to complete the employment verification for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}. @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has provied us your contact to conduct this background check.<br><br>Kindly access the link below and fill in the form as soon as possible:<br>@{outputs('FinalVerificationLink')}<br><br>Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
-                      "emailMessage/Importance": "Normal"
-                    },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
-                      "operationId": "SharedMailboxSendEmailV2",
-                      "connectionName": "shared_office365"
-                    }
-                  }
-                }
-              },
-              "else": {
-                "actions": {}
-              },
-              "runAfter": {
-                "Condition": [
-                  "Succeeded"
-                ]
-              }
-            },
-            "Condition_-_Escalation_to_Recruiters": {
-              "type": "If",
-              "expression": {
-                "and": [
-                  {
-                    "equals": [
-                      "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
-                      true
+                "Condition_-_Reminder_2_": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
+                          true
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@empty(items('Apply_to_each')?['Reminder1At'])",
+                          false
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@empty(items('Apply_to_each')?['Reminder2At'])",
+                          true
+                        ]
+                      },
+                      {
+                        "lessOrEquals": [
+                          "@items('Apply_to_each')?['Reminder1At']",
+                          "@addDays(utcNow(),-3)"
+                        ]
+                      }
                     ]
                   },
-                  {
-                    "equals": [
-                      "@empty(items('Apply_to_each')?['Reminder2At'])",
-                      false
-                    ]
-                  },
-                  {
-                    "lessOrEquals": [
-                      "@items('Apply_to_each')?['Reminder2At']",
-                      "@addDays(utcNow(),-1)"
-                    ]
-                  }
-                ]
-              },
-              "actions": {
-                "Post_message_in_a_chat_or_channel": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "poster": "Flow bot",
-                      "location": "Channel",
-                      "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
-                      "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
-                      "body/messageBody": "<p class=\"editor-paragraph\">BGV Escalation - Employer Not Responding</p><br><p class=\"editor-paragraph\">Candidate ID : @{items('Apply_to_each')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name : @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}</p><p class=\"editor-paragraph\">Employer : @{items('Apply_to_each')?['EmployerName']}</p><p class=\"editor-paragraph\">Employer HR Email : @{items('Apply_to_each')?['EmployerHR_Email']}</p><br><p class=\"editor-paragraph\">Two reminders have been sent and no response was received. <br>Please follow up manually.</p>"
+                  "actions": {
+                    "Update_item_1": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+                          "id": "@items('Apply_to_each')?['ID']",
+                          "item/Title": "@items('Apply_to_each')?['Title']",
+                          "item/Reminder2At": "@utcNow()",
+                          "item/VerificationStatus/Value": "Reminder 2 Sent"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "PatchItem",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      },
+                      "runAfter": {
+                        "Send_an_email_from_a_shared_mailbox_(V2)_1": [
+                          "Succeeded"
+                        ]
+                      }
                     },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
-                      "operationId": "PostMessageToConversation",
-                      "connectionName": "shared_teams"
+                    "Send_an_email_from_a_shared_mailbox_(V2)_1": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
+                          "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
+                          "emailMessage/Subject": "2nd Reminder: Employment Verification Request from D L Resources\n",
+                          "emailMessage/Body": "<p class=\"editor-paragraph\">Hello @{items('Apply_to_each')?['EmployerName']},</p><br><p class=\"editor-paragraph\">This is a second reminder to complete the employment verification for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}. @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has provied us your contact to conduct this background check.<br><br>Kindly access the link below and fill in the form as soon as possible:<br>@{outputs('FinalVerificationLink')}<br><br>Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
+                          "emailMessage/Importance": "Normal"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                          "operationId": "SharedMailboxSendEmailV2",
+                          "connectionName": "shared_office365"
+                        }
+                      }
                     }
-                  }
-                }
-              },
-              "else": {
-                "actions": {}
-              },
-              "runAfter": {
-                "Condition_-_Reminder_2_": [
-                  "Succeeded"
-                ]
-              }
-            },
-            "Condition_-_Final_Reminder": {
-              "type": "If",
-              "expression": {
-                "and": [
-                  {
-                    "equals": [
-                      "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
-                      true
-                    ]
                   },
-                  {
-                    "equals": [
-                      "@empty(items('Apply_to_each')?['Reminder3At'])",
-                      true
-                    ]
-                  },
-                  {
-                    "lessOrEquals": [
-                      "@items('Apply_to_each')?['HRRequestSentAt']",
-                      "@addDays(utcNow(),-11)"
-                    ]
-                  }
-                ]
-              },
-              "actions": {
-                "Send_an_email_from_a_shared_mailbox_(V2)_2": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
-                      "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
-                      "emailMessage/Subject": "Final Reminder: Employment Verification Request ",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">This is a final reminder for the background check regarding:@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.</p><br><p class=\"editor-paragraph\">@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has authorise us to do a background check. He/She has provided us your contact. We kindly ask that you help us to fill in the following form :</p><p class=\"editor-paragraph\">@{outputs('FinalVerificationLink')}</p>",
-                      "emailMessage/Importance": "Normal"
-                    },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
-                      "operationId": "SharedMailboxSendEmailV2",
-                      "connectionName": "shared_office365"
-                    }
-                  }
-                },
-                "Update_item_2": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-                      "id": "@items('Apply_to_each')?['ID']",
-                      "item/Title": "@items('Apply_to_each')?['Title']",
-                      "item/Reminder3At": "@utcNow()",
-                      "item/VerificationStatus/Value": "Reminder 3 Sent"
-                    },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                      "operationId": "PatchItem",
-                      "connectionName": "shared_sharepointonline"
-                    }
+                  "else": {
+                    "actions": {}
                   },
                   "runAfter": {
-                    "Send_an_email_from_a_shared_mailbox_(V2)_2": [
+                    "Condition": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Condition_-_Escalation_to_Recruiters": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
+                          true
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@empty(items('Apply_to_each')?['Reminder2At'])",
+                          false
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@empty(items('Apply_to_each')?['EscalatedAt'])",
+                          true
+                        ]
+                      },
+                      {
+                        "lessOrEquals": [
+                          "@items('Apply_to_each')?['Reminder2At']",
+                          "@addDays(utcNow(),-1)"
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "Post_message_in_a_chat_or_channel": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "poster": "Flow bot",
+                          "location": "Channel",
+                          "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
+                          "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
+                          "body/messageBody": "<p class=\"editor-paragraph\">BGV Escalation - Employer Not Responding</p><br><p class=\"editor-paragraph\">Candidate ID : @{items('Apply_to_each')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name : @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}</p><p class=\"editor-paragraph\">Employer : @{items('Apply_to_each')?['EmployerName']}</p><p class=\"editor-paragraph\">Employer HR Email : @{items('Apply_to_each')?['EmployerHR_Email']}</p><br><p class=\"editor-paragraph\">Two reminders have been sent and no response was received. <br>Please follow up manually.</p>"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                          "operationId": "PostMessageToConversation",
+                          "connectionName": "shared_teams"
+                        }
+                      }
+                    },
+                    "Update_item_-_EscalatedAt": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+                          "id": "@items('Apply_to_each')?['ID']",
+                          "item/Title": "@items('Apply_to_each')?['Title']",
+                          "item/EscalatedAt": "@utcNow()"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "PatchItem",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      },
+                      "runAfter": {
+                        "Post_message_in_a_chat_or_channel": [
+                          "Succeeded"
+                        ]
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Condition_-_Reminder_2_": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Condition_-_Final_Reminder": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@empty(items('Apply_to_each')?['ResponseReceivedAt'])",
+                          true
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@empty(items('Apply_to_each')?['Reminder3At'])",
+                          true
+                        ]
+                      },
+                      {
+                        "lessOrEquals": [
+                          "@items('Apply_to_each')?['HRRequestSentAt']",
+                          "@addDays(utcNow(),-11)"
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "Send_an_email_from_a_shared_mailbox_(V2)_2": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
+                          "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
+                          "emailMessage/Subject": "Final Reminder: Employment Verification Request ",
+                          "emailMessage/Body": "<p class=\"editor-paragraph\">This is a final reminder for the background check regarding:@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.</p><br><p class=\"editor-paragraph\">@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has authorise us to do a background check. He/She has provided us your contact. We kindly ask that you help us to fill in the following form :</p><p class=\"editor-paragraph\">@{outputs('FinalVerificationLink')}</p>",
+                          "emailMessage/Importance": "Normal"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                          "operationId": "SharedMailboxSendEmailV2",
+                          "connectionName": "shared_office365"
+                        }
+                      }
+                    },
+                    "Update_item_2": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+                          "id": "@items('Apply_to_each')?['ID']",
+                          "item/Title": "@items('Apply_to_each')?['Title']",
+                          "item/Reminder3At": "@utcNow()",
+                          "item/VerificationStatus/Value": "Reminder 3 Sent"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "PatchItem",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      },
+                      "runAfter": {
+                        "Send_an_email_from_a_shared_mailbox_(V2)_2": [
+                          "Succeeded"
+                        ]
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Condition_-_Escalation_to_Recruiters": [
                       "Succeeded"
                     ]
                   }
                 }
               },
-              "else": {
-                "actions": {}
-              },
               "runAfter": {
-                "Condition_-_Escalation_to_Recruiters": [
+                "Get_items": [
                   "Succeeded"
                 ]
               }
             }
           },
-          "runAfter": {
-            "Get_items": [
-              "Succeeded"
-            ]
-          }
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {}
         }
       }
     },

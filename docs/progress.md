@@ -3294,3 +3294,41 @@ Log each session with:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
 - Next actions and blockers:
   - Next action: import the updated solution and re-save `BGV_0` in Power Automate to confirm the obsolete-parameter error is gone.
+
+## 2026-03-20 (FlaggedIssues remap, twice-daily reminder windows, and report-created post)
+- Current status:
+  - Remapped the employer-response summary field from fixed `Outcome` labels to dynamic flagged-issue text while keeping the internal SharePoint field name as `Outcome`.
+  - Updated reminder handling to run on twice-daily Singapore checkpoints and added one-time escalation stamping.
+  - Added a Teams post when a new report summary file is created.
+- Completed tasks:
+  - Updated `BGV_5_Response1` so the request/form-data summary field now stores combined flagged issues from Form 2:
+    - selected company-detail discrepancies from `Q9`
+    - selected employment-detail discrepancies from `Q16`
+    - `MAS`
+    - `Disciplinary`
+    - `Re-employ`
+    - `Other Comments`
+  - Updated recruiter response email wording to mention the later report summary location in `BGV_Records > Candidate Files (<CandidateID>)`.
+  - Updated `BGV_6_HRReminderAndEscalation`:
+    - recurrence now runs every 30 minutes with a processing gate at `9:00 AM` and `5:30 PM` Singapore time
+    - escalation path now stamps `EscalatedAt`
+  - Updated `BGV_7_Generate_Report_Summary`:
+    - adds Teams connection reference
+    - posts to `DLR Recruitment Ops > BGV` when a new `RS_EmpN.docx` is first created
+    - includes the report link in the Teams post
+  - Updated the live SharePoint field:
+    - `BGV_Requests.Outcome` display title -> `FlaggedIssues`
+    - `FillInChoice = true`
+    - simplified column formatter to plain text
+  - Updated supporting docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+    - `docs/sharepoint_list_user_guide.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `m365 spo field set --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --internalName Outcome --Title FlaggedIssues --FillInChoice true --CustomFormatter ...`
+  - `m365 spo field get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --internalName Outcome --output json`
+- Next actions and blockers:
+  - Next action: import the updated flows through PAC, then refresh the external `Flow Details` document copy so repo docs and working copy stay aligned.

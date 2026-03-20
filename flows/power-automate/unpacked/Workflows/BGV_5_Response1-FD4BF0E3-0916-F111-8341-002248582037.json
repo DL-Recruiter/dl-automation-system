@@ -158,10 +158,10 @@
                           "Succeeded"
                         ]
                       },
-                      "type": "SetVariable",
+                      "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varOutcome",
-                        "value": "Needs Clarification"
+                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),'MAS')"
                       }
                     },
                     "Set_variable_-_Notify_Teams_1": {
@@ -233,10 +233,10 @@
                           "Succeeded"
                         ]
                       },
-                      "type": "SetVariable",
+                      "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varOutcome",
-                        "value": "Needs Clarification"
+                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),'Disciplinary')"
                       }
                     },
                     "Set_variable_-_Notify_Teams_2": {
@@ -329,10 +329,10 @@
                           "Succeeded"
                         ]
                       },
-                      "type": "SetVariable",
+                      "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varOutcome",
-                        "value": "Needs Clarification"
+                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),'Re-employ')"
                       }
                     },
                     "Set_variable_-_Notify_Teams_3": {
@@ -419,9 +419,21 @@
                       },
                       "type": "If"
                     },
-                    "Append_to_string_variable_-_Notify_Body_4": {
+                    "Append_to_string_variable_-_Outcome_Employment_Details": {
                       "runAfter": {
                         "Condition_-_Severity_Low": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varOutcome",
+                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),if(empty(trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'[',''),']',''),'\\\"',''))),'Employment Details',trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'[',''),']',''),'\\\"',''))))"
+                      }
+                    },
+                    "Append_to_string_variable_-_Notify_Body_4": {
+                      "runAfter": {
+                        "Append_to_string_variable_-_Outcome_Employment_Details": [
                           "Succeeded"
                         ]
                       },
@@ -545,9 +557,21 @@
                       },
                       "type": "If"
                     },
-                    "Append_to_string_variable_-_Notify_Body_Company_Details": {
+                    "Append_to_string_variable_-_Outcome_Company_Details": {
                       "runAfter": {
                         "Condition_-_Severity_Low_Company_Details": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varOutcome",
+                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),if(empty(trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'')),'[',''),']',''),'\\\"',''))),'Company Details',trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'')),'[',''),']',''),'\\\"',''))))"
+                      }
+                    },
+                    "Append_to_string_variable_-_Notify_Body_Company_Details": {
+                      "runAfter": {
+                        "Append_to_string_variable_-_Outcome_Company_Details": [
                           "Succeeded"
                         ]
                       },
@@ -637,9 +661,21 @@
                       },
                       "type": "If"
                     },
-                    "Append_to_string_variable_-_Notify_Body_Other_Comments": {
+                    "Append_to_string_variable_-_Outcome_Other_Comments": {
                       "runAfter": {
                         "Condition_-_Severity_Neutral": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "varOutcome",
+                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),'Other Comments')"
+                      }
+                    },
+                    "Append_to_string_variable_-_Notify_Body_Other_Comments": {
+                      "runAfter": {
+                        "Append_to_string_variable_-_Outcome_Other_Comments": [
                           "Succeeded"
                         ]
                       },
@@ -778,7 +814,7 @@
                       "id": "@items('Apply_to_each')?['ID']",
                       "item/Title": "@items('Apply_to_each')?['Title']",
                       "item/ResponseReceivedAt": "@utcNow()",
-                      "item/Outcome/Value": "@variables('varOutcome')",
+                      "item/Outcome/Value": "@if(empty(trim(variables('varOutcome'))),'None',variables('varOutcome'))",
                       "item/Notes": "@variables('varRequestNotesBody')",
                       "item/Severity/Value": "@variables('varSeverity')",
                       "item/VerificationStatus/Value": "Responded"
@@ -812,7 +848,7 @@
                           "item/F2_ReEmployReason": "@outputs('Get_response_details')?['body/r5f7ebc3390bc4699b160504c65254c3e']",
                           "item/F2_ReasonForLeaving": "@coalesce(outputs('Get_response_details')?['body/r513ad5ab3a14453286bdb910820985ec'],'')",
                           "item/F2_Severity/Value": "@variables('varSeverity')",
-                          "item/F2_Outcome": "@variables('varOutcome')",
+                          "item/F2_Outcome": "@if(empty(trim(variables('varOutcome'))),'None',variables('varOutcome'))",
                           "item/F2_Notes": "@variables('varRequestNotesBody')"
                         },
                         "host": {
@@ -854,7 +890,7 @@
                           "location": "Channel",
                           "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
                           "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
-                          "body/messageBody": "<p class=\"editor-paragraph\">BGV Response Submitted for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}</p><br><p class=\"editor-paragraph\">Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}, @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerHR_Email']}</p><br><p class=\"editor-paragraph\">Request ID: @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}</p><p class=\"editor-paragraph\">Severity: @{variables('varSeverity')}</p><p class=\"editor-paragraph\">Outcome: @{variables('varOutcome')}</p><br><p class=\"editor-paragraph\">Details: <br>@{variables('varNotifyBody')}</p><br>"
+                          "body/messageBody": "<p class=\"editor-paragraph\">BGV Response Submitted for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}</p><br><p class=\"editor-paragraph\">Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}, @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerHR_Email']}</p><br><p class=\"editor-paragraph\">Request ID: @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}</p><p class=\"editor-paragraph\">Severity: @{variables('varSeverity')}</p><p class=\"editor-paragraph\">Flagged Issues: @{if(empty(trim(variables('varOutcome'))),'None',variables('varOutcome'))}</p><br><p class=\"editor-paragraph\">Details: <br>@{variables('varNotifyBody')}</p><br>"
                         },
                         "host": {
                           "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
@@ -937,8 +973,8 @@
                   "inputs": {
                     "parameters": {
                       "emailMessage/To": "recruitment@dlresources.com.sg",
-                      "emailMessage/Subject": "BGV Reponse Received - @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']},@{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">The employer verification response has been received for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br><br>Verification Status: Responded<br><br>Severity: @{variables('varSeverity')} -- Please check the form for clarifications</p>",
+                      "emailMessage/Subject": "BGV Response Received - @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}, @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">The employer verification response has been received for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br><br>Verification Status: Responded<br><br>Severity: @{variables('varSeverity')}<br><br>Flagged Issues: @{if(empty(trim(variables('varOutcome'))),'None',variables('varOutcome'))}<br><br>For more detailed information, please refer to the summary report later in BGV_Records, Candidate Files (@{outputs('Update_item_-_of_BGV_Request')?['body/CandidateID']}). Please check the teams BGV channel - a post will be sent once the report is done.</p>",
                       "emailMessage/Importance": "Normal",
                       "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg"
                     },
@@ -1018,7 +1054,7 @@
               {
                 "name": "varOutcome",
                 "type": "string",
-                "value": "Verified"
+                "value": ""
               }
             ]
           }
