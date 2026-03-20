@@ -142,7 +142,6 @@
               "item/CandidateID": "@variables('varCandidateID')",
               "item/FullName": "@outputs('Get_response_details')?['body/rfe96c622120343f294de908deb0e849d']",
               "item/CandidateEmail": "@outputs('Get_response_details')?['body/rcd8057cd92b24b5594681a5b39c07e3d']",
-              "item/ConsentCaptured": true,
               "item/Status/Value": "New Candidate Form Filled",
               "item/CreatedDate": "@utcNow()",
               "item/IdentificationNumberPassport": "@outputs('Get_response_details')?['body/rf5b324c022804863a720ef13edeb9d9b']",

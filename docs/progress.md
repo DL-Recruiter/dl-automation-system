@@ -3277,3 +3277,20 @@ Log each session with:
   - `git diff -- flows/power-automate/unpacked/Workflows/...`
 - Next actions and blockers:
   - Next action: commit and push the sync artifacts so local repo and GitHub match the latest exported live state again.
+
+## 2026-03-20 (BGV_0 save fix for removed ConsentCaptured column)
+- Current status:
+  - Fixed a live Flow save failure in `BGV_0` caused by an obsolete SharePoint parameter:
+    - `item/ConsentCaptured`
+- Completed tasks:
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+  - Removed `item/ConsentCaptured = true` from `Create_BGV_Candidates_Row`.
+  - Rechecked the canonical flows for related candidate-field writes and confirmed no other current flow still writes `ConsentCaptured`.
+  - Updated supporting docs:
+    - `docs/flows_easy_english.md`
+- Validation commands run:
+  - `rg -n "ConsentCaptured|ConsentEvidence|item/Consent" flows/power-automate/unpacked/Workflows docs`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Next action: import the updated solution and re-save `BGV_0` in Power Automate to confirm the obsolete-parameter error is gone.

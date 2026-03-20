@@ -98,8 +98,8 @@ This document describes the current behavior in your canonical flow files under 
 - `JobTitle`
   - Not used by the current canonical flows.
 - `ConsentCaptured`
-  - Still written as `true` when `BGV_0` creates the candidate row.
-  - Not used by the current reminder/send/signature gates.
+  - No longer written by the canonical flows.
+  - Treat as a legacy field only if it still exists in older rows/views.
 - `ConsentEvidence`
   - Not used by the current canonical flows.
 - `IDTypeProvided`
