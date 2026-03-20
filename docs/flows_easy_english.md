@@ -157,7 +157,7 @@ This document describes the current behavior in your canonical flow files under 
   - Looks up `BGV_Requests` by `startswith(RequestID, <submitted RequestID>)`.
   - Looks up `BGV_FormData` by exact `RequestID`.
 - What it does:
-  - Initializes scoring variables (`Severity`, `FlaggedIssues`, notify flags).
+  - Initializes scoring variables (`Severity`, `Outcome`, notify flags).
   - Applies risk logic:
     - MAS misconduct not `No / Not Applicable` -> High.
     - Disciplinary issue `Yes` -> High.
@@ -169,8 +169,8 @@ This document describes the current behavior in your canonical flow files under 
   - Writes final result to `BGV_Requests`:
     - `VerificationStatus = Responded`
     - `ResponseReceivedAt`
-    - `Severity`, `FlaggedIssues` (stored in the `Outcome` internal field), `Notes`
-  - `FlaggedIssues` now stores the combined flagged items detected from Form 2:
+    - `Severity`, `Outcome`, `Notes`
+  - `Outcome` now stores the combined flagged items detected from Form 2:
     - selected company-detail discrepancies from `Q9`
     - selected employment-detail discrepancies from `Q16`
     - `MAS` when the MAS answer is not `No / Not Applicable`

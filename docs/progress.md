@@ -3332,3 +3332,16 @@ Log each session with:
   - `m365 spo field get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --internalName Outcome --output json`
 - Next actions and blockers:
   - Next action: import the updated flows through PAC, then refresh the external `Flow Details` document copy so repo docs and working copy stay aligned.
+
+## 2026-03-20 (Outcome display title restored)
+- Current status:
+  - Restored the live SharePoint display title of `BGV_Requests.Outcome` back to `Outcome` to avoid user confusion between the internal field name and the visible label.
+- Completed tasks:
+  - Updated the live SharePoint field:
+    - `BGV_Requests.Outcome` display title -> `Outcome`
+  - Updated supporting docs so they describe the combined-issue behavior using the visible field name `Outcome`.
+- Validation commands run:
+  - `m365 spo field set --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --internalName Outcome --Title Outcome`
+  - `m365 spo field get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --internalName Outcome --output json`
+- Next actions and blockers:
+  - None. This was a label cleanup only; flow logic remains unchanged.

@@ -172,7 +172,7 @@ Note:
 | Form 2 response key | Usage | Target column(s) | Flow action(s) |
 | --- | --- | --- | --- |
 | `rd745d133eb7f4611b59ea051f980f97a` | Request lookup key | Lookup filter on `BGV_Requests.RequestID` (`startswith`) and `BGV_FormData.RequestID` (`eq`) | `Get_items`; `Get_items_(BGV_FormData)` |
-| Derived runtime values | Scoring output | `BGV_Requests.Severity/Value`, `Outcome/Value` (displayed live as `FlaggedIssues`), `Notes`, `VerificationStatus/Value='Responded'`, `ResponseReceivedAt=utcNow()` | `Update_item_-_of_BGV_Request` |
+| Derived runtime values | Scoring output | `BGV_Requests.Severity/Value`, `Outcome/Value`, `Notes`, `VerificationStatus/Value='Responded'`, `ResponseReceivedAt=utcNow()` | `Update_item_-_of_BGV_Request` |
 
 ### 7.2 Form 2 fields persisted into BGV_FormData
 

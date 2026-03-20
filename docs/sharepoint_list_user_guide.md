@@ -114,7 +114,7 @@ Typical user questions this list answers:
 | `Reminder3At` | Timestamp of the later/final employer reminder stage tracked by the automation. | `BGV_6` | `BGV_6`, users |
 | `EscalatedAt` | Timestamp for when the case was escalated to recruiters in Teams after repeated non-response. | `BGV_6` | `BGV_6`, users |
 | `Severity` | Risk level assigned from the employer HR response. In the current flow this can be `High`, `Medium`, `Low`, or blank when no rule is triggered. | `BGV_5` | users, recruiter notifications |
-| `Outcome` | Live display name `FlaggedIssues`. Stores the combined flagged items detected from the employer form response. | `BGV_5` | users, reporting |
+| `Outcome` | Stores the combined flagged items detected from the employer form response. | `BGV_5` | users, reporting |
 | `Notes` | Plain-text explanation built by the flow from the triggered rule(s), then saved into the request row for users and recruiters to review. | `BGV_5` | users, reporting |
 
 ### 2.3 How `Severity/Value` is calculated
@@ -125,7 +125,7 @@ the HR verification form.
 The flow starts with:
 
 - `Severity` = empty
-- `FlaggedIssues` / `Outcome` = empty
+- `Outcome` = empty
 
 Then it checks the employer response in this priority order:
 
@@ -134,21 +134,21 @@ Then it checks the employer response in this priority order:
    - If MAS misconduct is anything other than `No / Not Applicable`,
      severity becomes `High`.
    - If disciplinary action is `Yes`, severity becomes `High`.
-   - `FlaggedIssues` adds `MAS` and/or `Disciplinary`.
+   - `Outcome` adds `MAS` and/or `Disciplinary`.
 
 2. Medium severity check
 
    - If the employer says the employment details are inaccurate,
      severity becomes `Medium`.
    - This only happens if severity is not already `High`.
-   - `FlaggedIssues` adds the selected employment-detail checkbox values from Form 2 `Q16`.
+   - `Outcome` adds the selected employment-detail checkbox values from Form 2 `Q16`.
 
 3. Low severity check for inaccurate information
 
    - If the employer says the company details are inaccurate,
      severity becomes `Low`.
    - This only happens if no higher severity has already been set.
-   - `FlaggedIssues` adds the selected company-detail checkbox values from Form 2 `Q9`.
+   - `Outcome` adds the selected company-detail checkbox values from Form 2 `Q9`.
 
 4. Contact-request check
 
@@ -160,7 +160,7 @@ Then it checks the employer response in this priority order:
 
    - If only `Q27` other comments is filled and no higher severity rule has set a value yet,
      severity becomes `Neutral`.
-   - `FlaggedIssues` adds `Other Comments`.
+   - `Outcome` adds `Other Comments`.
 
 So the practical priority order is:
 
