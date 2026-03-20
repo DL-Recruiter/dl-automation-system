@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ImportExportXml version="9.2.26024.163" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26024.163" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26024.00166">
+<ImportExportXml version="9.2.26031.160" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26031.160" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26031.00160">
   <SolutionManifest>
     <UniqueName>BGV_System</UniqueName>
     <LocalizedNames>
@@ -81,11 +81,11 @@
       <RootComponent type="29" id="{8c1238c7-e4f1-f011-8406-002248582037}" behavior="0" />
       <RootComponent type="29" id="{a35ca9c0-e4f1-f011-8406-002248582037}" behavior="0" />
       <RootComponent type="29" id="{a45ca9c0-e4f1-f011-8406-002248582037}" behavior="0" />
+      <RootComponent type="29" id="{fb5cf0e3-0916-f111-8341-002248582037}" behavior="0" />
       <RootComponent type="29" id="{fc4bf0e3-0916-f111-8341-002248582037}" behavior="0" />
       <RootComponent type="29" id="{fd4bf0e3-0916-f111-8341-002248582037}" behavior="0" />
       <RootComponent type="29" id="{fe4bf0e3-0916-f111-8341-002248582037}" behavior="0" />
       <RootComponent type="29" id="{ff4bf0e3-0916-f111-8341-002248582037}" behavior="0" />
-      <RootComponent type="29" id="{fb5cf0e3-0916-f111-8341-002248582037}" behavior="0" />
     </RootComponents>
     <MissingDependencies />
   </SolutionManifest>
