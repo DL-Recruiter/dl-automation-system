@@ -3345,3 +3345,25 @@ Log each session with:
   - `m365 spo field get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --internalName Outcome --output json`
 - Next actions and blockers:
   - None. This was a label cleanup only; flow logic remains unchanged.
+
+## 2026-03-20 (Added BGV Checks request summary field)
+- Current status:
+  - Added a new request-side text field `BGV Checks` to `BGV_Requests` and wired the canonical flows to maintain it.
+- Completed tasks:
+  - Created live SharePoint field:
+    - display title: `BGV Checks`
+    - internal name: `BGV_x0020_Checks`
+  - Updated `BGV_5_Response1` so request rows are stamped with:
+    - `Form Filled and Cleared` when employer response is received and severity is blank or `Neutral`
+    - `Adverse BGV Checks - see severity` when employer response is received and severity is `Low`, `Medium`, or `High`
+  - Updated `BGV_6_HRReminderAndEscalation` so request rows are stamped with:
+    - `No response at Reminder 2` after the reminder-2 delay matures with no response
+    - `Form Filled and Cleared` again when reminder 3 is sent, per the requested business rule
+  - Updated docs to explain the new field and confirmed `CandidateItemID` can be hidden from the SharePoint view without affecting the flows.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `m365 spo field add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --xml <Field ... />`
+  - `m365 spo field get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --internalName BGVChecks --output json`
+- Next actions and blockers:
+  - Next action: import the updated flows through PAC and push the repo changes so local, GitHub, and Power Automate stay aligned.

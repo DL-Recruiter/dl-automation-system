@@ -172,7 +172,7 @@ Note:
 | Form 2 response key | Usage | Target column(s) | Flow action(s) |
 | --- | --- | --- | --- |
 | `rd745d133eb7f4611b59ea051f980f97a` | Request lookup key | Lookup filter on `BGV_Requests.RequestID` (`startswith`) and `BGV_FormData.RequestID` (`eq`) | `Get_items`; `Get_items_(BGV_FormData)` |
-| Derived runtime values | Scoring output | `BGV_Requests.Severity/Value`, `Outcome/Value`, `Notes`, `VerificationStatus/Value='Responded'`, `ResponseReceivedAt=utcNow()` | `Update_item_-_of_BGV_Request` |
+| Derived runtime values | Scoring output | `BGV_Requests.Severity/Value`, `Outcome/Value`, `BGV Checks`, `Notes`, `VerificationStatus/Value='Responded'`, `ResponseReceivedAt=utcNow()` | `Update_item_-_of_BGV_Request` |
 
 ### 7.2 Form 2 fields persisted into BGV_FormData
 
@@ -228,7 +228,7 @@ Note:
 | `BGV_2_Postsignature` | `BGV Records` library | Reads authorization `.docx` files, locks all content controls via `LockAuthorizationControls` function, overwrites file content with locked DOCX, then performs `Stop sharing` on matched files. |
 | `BGV_3_AuthReminder_5Days` | `BGV_Candidates` | Reads rows where `Status='Pending Authorization Form Signature'`; uses `AuthorizationLinkCreatedAt`, `AuthorizationLink`; updates `LastAuthReminderAt`. |
 | `BGV_4_SendToEmployer_Clean` | `BGV_Requests` | Reads pending requests where `VerificationStatus='Not Sent'`; reads candidate auth status; updates `HRRequestSentAt=utcNow()`, `VerificationStatus='Email Sent'`, `uniquelinktoemployers=FinalVerificationLink`. |
-| `BGV_6_HRReminderAndEscalation` | `BGV_Requests` | Runs every 30 minutes but only processes at 9:00 AM / 5:30 PM Singapore time; reads rows with `HRRequestSentAt` present and no `ResponseReceivedAt`; uses `Reminder1At`, `Reminder2At`, `Reminder3At`, `EscalatedAt`; updates timestamps and sets `VerificationStatus='Reminder 1 Sent'/'Reminder 2 Sent'/'Reminder 3 Sent'`; stamps `EscalatedAt` when recruiter escalation is posted. |
+| `BGV_6_HRReminderAndEscalation` | `BGV_Requests` | Runs every 30 minutes but only processes at 9:00 AM / 5:30 PM Singapore time; reads rows with `HRRequestSentAt` present and no `ResponseReceivedAt`; uses `Reminder1At`, `Reminder2At`, `Reminder3At`, `EscalatedAt`; updates timestamps and sets `VerificationStatus='Reminder 1 Sent'/'Reminder 2 Sent'/'Reminder 3 Sent'`; stamps `EscalatedAt` when recruiter escalation is posted; sets `BGV Checks='No response at Reminder 2'` after the reminder-2 delay and `BGV Checks='Form Filled and Cleared'` when reminder 3 is sent. |
 | `BGV_7_Generate_Report_Summary` | `BGV Records` document library | Reads `ReportSummary_Template.docx` by path, fills it using `BGV_FormData.Form2RawJson` plus Form 1 data from `Form1RawJson` when present or normalized `F1_*` fields as fallback, writes `RS_EmpN.docx` into `Candidate Files/{CandidateID}/`, and posts a Teams message with the report link when a new report is first created. |
 
 ## 9) BGV Records (Document Library) Data Path

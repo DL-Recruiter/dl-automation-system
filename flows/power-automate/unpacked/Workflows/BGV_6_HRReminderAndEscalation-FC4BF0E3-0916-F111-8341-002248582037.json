@@ -330,6 +330,8 @@
                           "id": "@items('Apply_to_each')?['ID']",
                           "item/Title": "@items('Apply_to_each')?['Title']",
                           "item/EscalatedAt": "@utcNow()"
+                          ,
+                          "item/BGV_x0020_Checks": "No response at Reminder 2"
                         },
                         "host": {
                           "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -404,6 +406,7 @@
                           "id": "@items('Apply_to_each')?['ID']",
                           "item/Title": "@items('Apply_to_each')?['Title']",
                           "item/Reminder3At": "@utcNow()",
+                          "item/BGV_x0020_Checks": "Form Filled and Cleared",
                           "item/VerificationStatus/Value": "Reminder 3 Sent"
                         },
                         "host": {

@@ -815,6 +815,7 @@
                       "item/Title": "@items('Apply_to_each')?['Title']",
                       "item/ResponseReceivedAt": "@utcNow()",
                       "item/Outcome/Value": "@if(empty(trim(variables('varOutcome'))),'None',variables('varOutcome'))",
+                      "item/BGV_x0020_Checks": "@if(or(empty(variables('varSeverity')),equals(variables('varSeverity'),'Neutral')),'Form Filled and Cleared','Adverse BGV Checks - see severity')",
                       "item/Notes": "@variables('varRequestNotesBody')",
                       "item/Severity/Value": "@variables('varSeverity')",
                       "item/VerificationStatus/Value": "Responded"

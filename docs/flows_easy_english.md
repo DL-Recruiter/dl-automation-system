@@ -169,7 +169,7 @@ This document describes the current behavior in your canonical flow files under 
   - Writes final result to `BGV_Requests`:
     - `VerificationStatus = Responded`
     - `ResponseReceivedAt`
-    - `Severity`, `Outcome`, `Notes`
+    - `Severity`, `Outcome`, `BGV Checks`, `Notes`
   - `Outcome` now stores the combined flagged items detected from Form 2:
     - selected company-detail discrepancies from `Q9`
     - selected employment-detail discrepancies from `Q16`
@@ -177,6 +177,9 @@ This document describes the current behavior in your canonical flow files under 
     - `Disciplinary` when disciplinary action is `Yes`
     - `Re-employ` when re-employ is `No`
     - `Other Comments` when `Q27` is filled
+  - `BGV Checks` is set to:
+    - `Form Filled and Cleared` when the employer has responded and severity is blank or `Neutral`
+    - `Adverse BGV Checks - see severity` when the employer has responded and severity is `Low`, `Medium`, or `High`
   - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including `F2_ReasonForLeaving`.
   - `Form2RawJson` stores the full submitted Form 2 payload, not just the normalized subset.
   - For the low-severity inaccurate-information section, the detailed email/details block now only shows the explanation headings for the options that were actually selected.
@@ -207,6 +210,9 @@ This document describes the current behavior in your canonical flow files under 
 - What it updates:
   - Reminder timestamps (`Reminder1At`, `Reminder2At`, `Reminder3At`)
   - `EscalatedAt` when the recruiter escalation post is sent
+  - `BGV Checks`:
+    - `No response at Reminder 2` one day after reminder 2 has been sent
+    - `Form Filled and Cleared` once reminder 3 is sent and there is still no response
   - `VerificationStatus` lifecycle:
     - `Reminder 1 Sent`
     - `Reminder 2 Sent`
