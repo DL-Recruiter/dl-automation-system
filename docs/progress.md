@@ -3367,3 +3367,31 @@ Log each session with:
   - `m365 spo field get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --internalName BGVChecks --output json`
 - Next actions and blockers:
   - Next action: import the updated flows through PAC and push the repo changes so local, GitHub, and Power Automate stay aligned.
+## 2026-03-20 (BGV_FormData normalization expansion for Form 1 defer date and Form 2 admin/compliance fields)
+- Current status:
+  - Added new dedicated `BGV_FormData` columns for previously raw/noted fields and wired the canonical flows to persist them.
+- Completed tasks:
+  - Added live `BGV_FormData` columns:
+    - `F1_SendAfterDate`
+    - `F2_MASQuestion`
+    - `F2_DisciplinaryAction`
+    - `F2_ContactForClarification`
+    - `F2_OtherComments`
+    - `F2_FormCompleterName`
+    - `F2_FormCompleterJobTitle`
+    - `F2_FormCompleterContactDetails`
+    - `F2_CompanyStampFileName`
+  - Confirmed `F2_CompanyDetailsAccurate` and `F2_CompanyDetailsSelectedIssues` already existed live and wired them into `BGV_5`.
+  - Updated `BGV_0_CandidateDeclaration`:
+    - `Create_BGV_FormData_Row_E1` now writes `F1_SendAfterDate` when the Form 1 defer answer is `Yes` and the EMP1 end date is present.
+  - Updated `BGV_5_Response1`:
+    - now writes company-details accuracy and selected company-detail issues into dedicated `BGV_FormData` fields
+    - now writes MAS answer, disciplinary yes/no, contact-for-clarification, other comments, form completer name, form completer job title, form completer contact details, and derived company-stamp filename into dedicated `BGV_FormData` fields
+  - Updated docs:
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+    - `docs/sharepoint_list_user_guide.md`
+- Validation planned:
+  - parse updated flow JSON
+  - PAC pack/import
+  - final git sync check

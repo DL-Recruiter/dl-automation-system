@@ -130,8 +130,8 @@ Notes:
 
 | Form 1 response key | Current usage | Target column | Flow action |
 | --- | --- | --- | --- |
-| `r0ed00b9df34d4ab6bb34235a2466ea5e` | EMP1 current-employer defer answer (`Yes`/`No`). If `Yes`, `SendAfterDate` uses the EMP1 end-date field; otherwise it falls back to `utcNow()`. | `BGV_Requests.SendAfterDate` | `Create_BGV_Request_Row` |
-| `rad5353936be1480f9ffe08b3fde00739` | EMP1 employment period end date. Used as `SendAfterDate` only when the EMP1 current-employer defer answer is `Yes`. | `BGV_Requests.SendAfterDate`; `BGV_FormData.F1_EmploymentEndDate` | `Create_BGV_Request_Row`; `Create_BGV_FormData_Row_E1` |
+| `r0ed00b9df34d4ab6bb34235a2466ea5e` | EMP1 current-employer defer answer (`Yes`/`No`). If `Yes`, `SendAfterDate` uses the EMP1 end-date field; otherwise it falls back to `utcNow()`. | `BGV_Requests.SendAfterDate`; `BGV_FormData.F1_SendAfterDate` (when `Yes`) | `Create_BGV_Request_Row`; `Create_BGV_FormData_Row_E1` |
+| `rad5353936be1480f9ffe08b3fde00739` | EMP1 employment period end date. Used as `SendAfterDate` only when the EMP1 current-employer defer answer is `Yes`. | `BGV_Requests.SendAfterDate`; `BGV_FormData.F1_EmploymentEndDate`; `BGV_FormData.F1_SendAfterDate` (when `Yes`) | `Create_BGV_Request_Row`; `Create_BGV_FormData_Row_E1` |
 | Derived from NRIC empty/not empty | Candidate ID type provided | `BGV_Candidates.IDTypeProvided` = `NRIC` when the NRIC field is filled, otherwise `Passport` | `Create_BGV_Candidates_Row` |
 
 ### 5.4 Common payload snapshots in FormData
@@ -181,11 +181,19 @@ Note:
 | `rd745d133eb7f4611b59ea051f980f97a` | Request ID | `BGV_FormData.RequestID` | direct |
 | `r9594fab1bfa04c90883b1dffd7f4549e` | Employment details accurate yes/no | `BGV_FormData.F2_InformationAccurate` | `equals(value,'Yes')` (boolean) |
 | `r72b23e4aa192405091846e1279085029` | Selected issues | `BGV_FormData.F2_SelectedIssues` | direct |
+| `r2d39255c2449439096683ca0e39241b0` | Company-details accuracy yes/no | `BGV_FormData.F2_CompanyDetailsAccurate` | `equals(value,'Yes')` (boolean) |
+| `rd05170e51ac34fef95f5464cf348bedc` | Company-details inaccurate fields | `BGV_FormData.F2_CompanyDetailsSelectedIssues` | direct (coalesce to empty string) |
+| `r7bd26b4a7e94430dbda54f9e8b8212e4` | MAS question / answer | `BGV_FormData.F2_MASQuestion` | direct (coalesce to empty string) |
+| `r96d079f9858e40bab89ab0ea4ad23931` | Disciplinary action yes/no | `BGV_FormData.F2_DisciplinaryAction` | `equals(value,'Yes')` (boolean) |
 | `rafe3ada4157c49fb9e555cd0fb53bd59` | Re-employ yes/no | `BGV_FormData.F2_EmployerWouldReEmploy` | `equals(value,'Yes')` (boolean) |
 | `r5f7ebc3390bc4699b160504c65254c3e` | Re-employ reason | `BGV_FormData.F2_ReEmployReason` | direct |
 | `r513ad5ab3a14453286bdb910820985ec` | Reason for leaving (employer-entered response) | `BGV_FormData.F2_ReasonForLeaving` | direct (coalesce to empty string) |
-| `r2d39255c2449439096683ca0e39241b0` | Company-details accuracy yes/no | `BGV_FormData.F2_Notes` | appended into notes text when company-details discrepancy section is used |
-| `rd05170e51ac34fef95f5464cf348bedc` | Company-details inaccurate fields | `BGV_FormData.F2_Notes` | appended into notes text when present |
+| `r57e4baaeaafc4ffc8b3977149b18f2f2` | Contact for clarification | `BGV_FormData.F2_ContactForClarification` | direct (coalesce to empty string) |
+| `rab9c2a586db943b18ac02367d3b1d3f7` | Other comments | `BGV_FormData.F2_OtherComments` | direct (coalesce to empty string) |
+| `r1f2d7ec255b1430fbb2a6e56ce4042d1` | Full name of form completer | `BGV_FormData.F2_FormCompleterName` | direct (coalesce to empty string) |
+| `r7b65617c391a48239b9f75dd239702c3` | Completer job title | `BGV_FormData.F2_FormCompleterJobTitle` | direct (coalesce to empty string) |
+| `reb80c95cd24242998cbc884c24254bed` | Completer contact details | `BGV_FormData.F2_FormCompleterContactDetails` | direct (coalesce to empty string) |
+| Derived from upload metadata in raw response | Uploaded company stamp filename | `BGV_FormData.F2_CompanyStampFileName` | extracts first upload object `name`; else `No file uploaded` |
 | `ra03058e9bbfd40d28014b0c669e92434` | Company-details explanation | `BGV_FormData.F2_Notes` | appended into notes text when present |
 | Derived runtime values | Scoring output | `BGV_FormData.F2_Severity/Value`, `F2_Outcome` (same combined flagged-issues text), `F2_Notes` | from variables |
 | Full Form 2 response JSON | Snapshot | `BGV_FormData.Form2RawJson` | `string(outputs('Get_response_details')?['body'])` |
@@ -266,8 +274,8 @@ Legend:
 | 4 | RequestID (auto-filled) | `rd745d133eb7f4611b59ea051f980f97a` | Prefill + Read + Stored | Request lookup key; stored in `BGV_FormData.RequestID` |
 | 5 | Company Name (Declared by Candidate) | `rccaf3632669648baaa335c12d4ea40bf` | Prefill | Context for employer; not stored from Form 2 response |
 | 6 | Company UEN (Declared by Candidate) | `rcf35c7cc008e472f9d0b84bde67cc1ff` (from user-provided prefill URL) | Prefill | `BGV_4` uses `BGV_FormData.F1_EmployerUEN` |
-| 7 | Information accurate for declared company details | `r2d39255c2449439096683ca0e39241b0` (from user-provided prefill URL) | Read + persisted in notes | Stored in `BGV_Requests.Notes` and `BGV_FormData.F2_Notes` when company-details discrepancy section is used |
-| 8 | If company details are not accurate, select inaccurate fields | `rd05170e51ac34fef95f5464cf348bedc` (from user-provided prefill URL) | Read + persisted in notes | Stored in `BGV_Requests.Notes` and `BGV_FormData.F2_Notes` when present |
+| 7 | Information accurate for declared company details | `r2d39255c2449439096683ca0e39241b0` (from user-provided prefill URL) | Read + Stored | `BGV_FormData.F2_CompanyDetailsAccurate` (boolean) and notes when company-details discrepancy section is used |
+| 8 | If company details are not accurate, select inaccurate fields | `rd05170e51ac34fef95f5464cf348bedc` (from user-provided prefill URL) | Read + Stored | `BGV_FormData.F2_CompanyDetailsSelectedIssues` plus notes when present |
 | 9 | Explain the company-details discrepancy | `ra03058e9bbfd40d28014b0c669e92434` (from user-provided prefill URL) | Read + persisted in notes | Stored in `BGV_Requests.Notes` and `BGV_FormData.F2_Notes` when present |
 | 10 | Employment Period (Declared By Candidate) | `r0bef44c0d22d493f95a33484875b951e` (from user-provided prefill URL) | Prefill | `BGV_4` writes `start to end` if both dates exist, else uses the single available date |
 | 11 | Reason For Leaving | `r513ad5ab3a14453286bdb910820985ec` | Stored only | Employer HR enters this manually in Form 2; it is not a current `(Declared By Candidate)` prefill field, and the submitted response is stored in `BGV_FormData.F2_ReasonForLeaving` |
@@ -282,17 +290,17 @@ Legend:
 | 20 | Discrepancy in reason for leaving employment declared by candidate (if applicable) | Not present in current canonical flow JSON | Not wired | N/A |
 | 21 | Other abnormalities such as unable to verify all information (if any) | `ra15c799c557d42d1bcee1de947c29466` | Read | Included in `varNotifyBody`; persisted in `BGV_FormData.F2_Notes` via derived notes |
 | 22 | MAS reporting question | Not present in current canonical flow JSON | Not wired | N/A |
-| 23 | Kindly provide details, if candidate has been reported for MAS related incidents | `r7bd26b4a7e94430dbda54f9e8b8212e4` | Read | High-severity rule and notes text |
-| 24 | Was any disciplinary action taken against he/she during your employment | `r96d079f9858e40bab89ab0ea4ad23931` | Read | High-severity rule |
+| 23 | Kindly provide details, if candidate has been reported for MAS related incidents | `r7bd26b4a7e94430dbda54f9e8b8212e4` | Read + Stored | `BGV_FormData.F2_MASQuestion`; also drives high-severity rule and notes text |
+| 24 | Was any disciplinary action taken against he/she during your employment | `r96d079f9858e40bab89ab0ea4ad23931` | Read + Stored | `BGV_FormData.F2_DisciplinaryAction` (boolean); also drives high-severity rule |
 | 25 | Kindly provide details, if there were disciplinary actions taken | `r35197d5910d2489db0d5786157b35295` | Read | High-severity notes text |
 | 26 | Would you re-employ him/her? | `rafe3ada4157c49fb9e555cd0fb53bd59` | Read + Stored | `BGV_FormData.F2_EmployerWouldReEmploy` (boolean) and medium-severity rule |
 | 27 | Reason for not wanting to re-employ him/her | `r5f7ebc3390bc4699b160504c65254c3e` | Read + Stored + Report summary | `BGV_FormData.F2_ReEmployReason`; notes text; `BGV_7` maps this into `Form2.Q26` |
-| 28 | Other comments we should know about | `rab9c2a586db943b18ac02367d3b1d3f7` | Raw JSON + Report summary | `BGV_7` maps this into `Form2.Q27` from `Form2RawJson` |
-| 29 | Full Name of Person Completing This Form | `r1f2d7ec255b1430fbb2a6e56ce4042d1` | Report summary | `BGV_7` maps this into `Form2.Q28` from `Form2RawJson` |
-| 30 | Job Title | `r7b65617c391a48239b9f75dd239702c3` | Report summary | `BGV_7` maps this into `Form2.Q29` from `Form2RawJson` |
-| 31 | Contact details for clarification/follow-up | `reb80c95cd24242998cbc884c24254bed` | Report summary | `BGV_7` maps this into `Form2.Q30` from `Form2RawJson` |
-| 32 | HR declaration confirmation | `r57e4baaeaafc4ffc8b3977149b18f2f2` | Read + Report summary | Triggers follow-up notification when value is "Please contact me for further clarification"; `BGV_7` maps this into `Form2.Q31` |
-| 33 | Upload official company stamp for verification | file upload payload in `Form2RawJson` | Report summary | `BGV_7` extracts uploaded file name(s) into `Form2.Q31FileName` |
+| 28 | Other comments we should know about | `rab9c2a586db943b18ac02367d3b1d3f7` | Read + Stored + Report summary | `BGV_FormData.F2_OtherComments`; `BGV_7` maps this into `Form2.Q27` |
+| 29 | Full Name of Person Completing This Form | `r1f2d7ec255b1430fbb2a6e56ce4042d1` | Read + Stored + Report summary | `BGV_FormData.F2_FormCompleterName`; `BGV_7` maps this into `Form2.Q28` |
+| 30 | Job Title | `r7b65617c391a48239b9f75dd239702c3` | Read + Stored + Report summary | `BGV_FormData.F2_FormCompleterJobTitle`; `BGV_7` maps this into `Form2.Q29` |
+| 31 | Contact details for clarification/follow-up | `reb80c95cd24242998cbc884c24254bed` | Read + Stored + Report summary | `BGV_FormData.F2_FormCompleterContactDetails`; `BGV_7` maps this into `Form2.Q30` |
+| 32 | HR declaration confirmation | `r57e4baaeaafc4ffc8b3977149b18f2f2` | Read + Stored + Report summary | `BGV_FormData.F2_ContactForClarification`; triggers follow-up notification; `BGV_7` maps this into `Form2.Q31` |
+| 33 | Upload official company stamp for verification | file upload payload in `Form2RawJson` | Stored + Report summary | `BGV_FormData.F2_CompanyStampFileName`; `BGV_7` extracts uploaded file name(s) into `Form2.Q31FileName` |
 
 Known current direct Form 2 storage fields in `BGV_FormData`:
 - `F2_InformationAccurate` <- `r9594fab1bfa04c90883b1dffd7f4549e`

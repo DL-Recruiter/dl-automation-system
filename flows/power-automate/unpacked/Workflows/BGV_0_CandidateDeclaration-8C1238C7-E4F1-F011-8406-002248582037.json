@@ -709,6 +709,7 @@
                   "item/F1_ReasonForLeaving": "@coalesce(outputs('Get_response_details')?['body/r73ad46a6f6e34cb5a811f76061af5d59'],'')",
                   "item/F1_EmploymentStartDate": "@if(empty(outputs('Get_response_details')?['body/rf5ce346dbc2e4326b0e23bd037a5a405']), null, outputs('Get_response_details')?['body/rf5ce346dbc2e4326b0e23bd037a5a405'])",
                   "item/F1_EmploymentEndDate": "@if(empty(outputs('Get_response_details')?['body/rad5353936be1480f9ffe08b3fde00739']), null, outputs('Get_response_details')?['body/rad5353936be1480f9ffe08b3fde00739'])",
+                  "item/F1_SendAfterDate": "@if(and(equals(toLower(trim(string(outputs('Get_response_details')?['body/r0ed00b9df34d4ab6bb34235a2466ea5e']))), 'yes'), not(empty(outputs('Get_response_details')?['body/rad5353936be1480f9ffe08b3fde00739']))), outputs('Get_response_details')?['body/rad5353936be1480f9ffe08b3fde00739'], null)",
                   "item/F1_HRContactName": "@outputs('Get_response_details')?['body/r7f64c0a46334405a952868d9921d83bf']",
                   "item/F1_HREmail": "@outputs('Get_response_details')?['body/r99f0629822f44e1990ee2e00b3c2b442']",
                   "item/F1_HRMobile": "@outputs('Get_response_details')?['body/r627e3c5b0a874aaa90166f6babd66bd1']"

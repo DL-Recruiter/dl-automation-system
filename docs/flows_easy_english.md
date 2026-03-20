@@ -31,6 +31,7 @@ This document describes the current behavior in your canonical flow files under 
   - Creates `BGV_Requests` rows for EMP1 always, and EMP2/EMP3 when those employer sections are filled.
   - Before creating each EMP slot row, checks whether that same slot RequestID already exists to avoid duplicate inserts.
   - Creates `BGV_FormData` rows (`EMP1`, optional `EMP2`, optional `EMP3`) with normalized candidate/employer fields and raw Form 1 payload.
+  - For `EMP1`, also writes `F1_SendAfterDate` into `BGV_FormData` when the candidate selected the current-employer defer option and provided an employment end date.
   - Writes Form 1 reason-for-leaving per slot into `BGV_FormData.F1_ReasonForLeaving`:
     - EMP1 <- E1 reason key
     - EMP2 <- E2 reason key
@@ -180,7 +181,18 @@ This document describes the current behavior in your canonical flow files under 
   - `BGV Checks` is set to:
     - `Form Filled and Cleared` when the employer has responded and severity is blank or `Neutral`
     - `Adverse BGV Checks - see severity` when the employer has responded and severity is `Low`, `Medium`, or `High`
-  - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including `F2_ReasonForLeaving`.
+  - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including:
+    - `F2_CompanyDetailsAccurate`
+    - `F2_CompanyDetailsSelectedIssues`
+    - `F2_MASQuestion`
+    - `F2_DisciplinaryAction`
+    - `F2_ContactForClarification`
+    - `F2_OtherComments`
+    - `F2_FormCompleterName`
+    - `F2_FormCompleterJobTitle`
+    - `F2_FormCompleterContactDetails`
+    - `F2_CompanyStampFileName`
+    - `F2_ReasonForLeaving`
   - `Form2RawJson` stores the full submitted Form 2 payload, not just the normalized subset.
   - For the low-severity inaccurate-information section, the detailed email/details block now only shows the explanation headings for the options that were actually selected.
   - Notes now add one shared line, `Please refer to the report summary for additional comments.`, when any mapped long-comment field is filled.

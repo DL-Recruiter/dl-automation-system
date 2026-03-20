@@ -285,6 +285,7 @@ These fields come from Form 1, the candidate declaration form.
 | `F1_LastDrawnSalary` | Last drawn salary declared by the candidate. | `BGV_0` | `BGV_4`, users |
 | `F1_EmploymentStartDate` | Employment start date declared by the candidate. | `BGV_0` | `BGV_4`, users |
 | `F1_EmploymentEndDate` | Employment end date declared by the candidate. | `BGV_0` | `BGV_4`, users |
+| `F1_SendAfterDate` | Deferred send date copied into FormData for EMP1 when the candidate selected the current-employer defer option and supplied the end date. | `BGV_0` | users, troubleshooting |
 | `F1_HRContactName` | HR contact name given by the candidate for that employer slot. | `BGV_0` | users |
 | `F1_HREmail` | HR email given by the candidate for that employer slot. Used as the preferred employer recipient when valid. | `BGV_0` | `BGV_4`, users |
 | `F1_HRMobile` | HR mobile number given by the candidate for that employer slot. | `BGV_0` | users |
@@ -300,9 +301,19 @@ These fields come from Form 2, the employer HR verification form.
 | --- | --- | --- | --- |
 | `F2_InformationAccurate` | Normalized yes/no answer for whether the employer says the information is accurate. | `BGV_5` | users, troubleshooting |
 | `F2_SelectedIssues` | Selected issue list captured from the employer response. | `BGV_5` | users, troubleshooting |
+| `F2_CompanyDetailsAccurate` | Normalized yes/no answer for whether the employer says the declared company details are accurate. | `BGV_5` | users, troubleshooting |
+| `F2_CompanyDetailsSelectedIssues` | Selected inaccurate company-detail fields from the employer response. | `BGV_5` | users, troubleshooting |
+| `F2_MASQuestion` | Stored copy of the MAS-related answer from the employer form. | `BGV_5` | users, troubleshooting |
+| `F2_DisciplinaryAction` | Normalized yes/no answer for whether disciplinary action was taken. | `BGV_5` | users, troubleshooting |
 | `F2_EmployerWouldReEmploy` | Normalized yes/no answer for whether the employer would re-employ the candidate. | `BGV_5` | users, troubleshooting |
 | `F2_ReEmployReason` | Employer's reason when they would not re-employ the candidate. | `BGV_5` | users, troubleshooting |
 | `F2_ReasonForLeaving` | Employer-submitted reason for leaving. This can be compared against the candidate declaration. | `BGV_5` | users, troubleshooting |
+| `F2_ContactForClarification` | Raw contact-for-clarification / declaration response stored as a dedicated field. | `BGV_5` | users, troubleshooting |
+| `F2_OtherComments` | Employer free-text other comments captured as a dedicated field. | `BGV_5` | users, troubleshooting |
+| `F2_FormCompleterName` | Name of the person completing the employer form. | `BGV_5` | users, troubleshooting |
+| `F2_FormCompleterJobTitle` | Job title of the person completing the employer form. | `BGV_5` | users, troubleshooting |
+| `F2_FormCompleterContactDetails` | Contact details of the person completing the employer form. | `BGV_5` | users, troubleshooting |
+| `F2_CompanyStampFileName` | Uploaded company stamp filename(s) derived from the raw Form 2 upload payload. | `BGV_5` | users, troubleshooting |
 | `F2_Severity/Value` | Copy of the final request severity after the same response-scoring logic is applied. | `BGV_5` | users, troubleshooting |
 | `F2_Outcome` | Stored copy of the combined flagged-issues summary. | `BGV_5` | users, troubleshooting |
 | `F2_Notes` | Copy of the plain-text notes body stored for the same response when a matching FormData row exists. | `BGV_5` | users, troubleshooting |
@@ -332,15 +343,21 @@ the raw response snapshot.
 | Discrepancy in job title / position | Notes body | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
 | Discrepancy in remuneration package | Notes body | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
 | Other abnormalities such as unable to verify all information | Notes body | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
-| Discrepancy in company details | Notes body and raw JSON | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes`; `BGV_FormData.Form2RawJson` |
-| Company-details inaccurate checkbox section | Notes body and raw JSON | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes`; `BGV_FormData.Form2RawJson` |
+| Discrepancy in company details | Structured field, notes body, and raw JSON | `BGV_FormData.F2_CompanyDetailsSelectedIssues`; `BGV_Requests.Notes`; `BGV_FormData.F2_Notes`; `BGV_FormData.Form2RawJson` |
+| Company-details inaccurate checkbox section | Structured field, notes body, and raw JSON | `BGV_FormData.F2_CompanyDetailsAccurate`; `BGV_FormData.F2_CompanyDetailsSelectedIssues`; `BGV_Requests.Notes`; `BGV_FormData.F2_Notes`; `BGV_FormData.Form2RawJson` |
 | Company-details explanation box | Notes body and raw JSON | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes`; `BGV_FormData.Form2RawJson` |
 | MAS incident details | Notes body | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
 | Disciplinary-action details | Notes body | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
 | Would re-employ? | Structured field | `BGV_FormData.F2_EmployerWouldReEmploy` |
 | Reason for not re-employing | Structured field and notes body | `BGV_FormData.F2_ReEmployReason`; may also appear in `Notes` / `F2_Notes` |
-| Other comments we should know about | Raw JSON only until live Forms key is identified | `BGV_FormData.Form2RawJson` |
-| Please contact me for further clarification | Notes body and notification trigger | `BGV_Requests.Notes`; `BGV_FormData.F2_Notes`; internal notification content |
+| MAS answer | Structured field plus notes body | `BGV_FormData.F2_MASQuestion`; `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
+| Disciplinary action yes/no | Structured field plus notes body | `BGV_FormData.F2_DisciplinaryAction`; `BGV_Requests.Notes`; `BGV_FormData.F2_Notes` |
+| Other comments we should know about | Structured field plus raw JSON | `BGV_FormData.F2_OtherComments`; `BGV_FormData.Form2RawJson` |
+| Please contact me for further clarification | Structured field, notes body, and notification trigger | `BGV_FormData.F2_ContactForClarification`; `BGV_Requests.Notes`; `BGV_FormData.F2_Notes`; internal notification content |
+| Name of form completer | Structured field plus raw JSON | `BGV_FormData.F2_FormCompleterName`; `BGV_FormData.Form2RawJson` |
+| Completer job title | Structured field plus raw JSON | `BGV_FormData.F2_FormCompleterJobTitle`; `BGV_FormData.Form2RawJson` |
+| Completer contact details | Structured field plus raw JSON | `BGV_FormData.F2_FormCompleterContactDetails`; `BGV_FormData.Form2RawJson` |
+| Uploaded company stamp filename | Structured field plus raw JSON | `BGV_FormData.F2_CompanyStampFileName`; `BGV_FormData.Form2RawJson` |
 
 Important practical points:
 
