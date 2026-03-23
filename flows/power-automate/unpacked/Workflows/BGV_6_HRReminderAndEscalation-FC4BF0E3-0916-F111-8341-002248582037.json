@@ -329,8 +329,7 @@
                           "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
                           "id": "@items('Apply_to_each')?['ID']",
                           "item/Title": "@items('Apply_to_each')?['Title']",
-                          "item/EscalatedAt": "@utcNow()"
-                          ,
+                          "item/EscalatedAt": "@utcNow()",
                           "item/BGV_x0020_Checks": "No response at Reminder 2"
                         },
                         "host": {

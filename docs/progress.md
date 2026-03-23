@@ -3540,3 +3540,31 @@ Log each session with:
   - `m365 spo file add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --folder "BGV Records/Dashboard" --path "<local BGV Dashboard.xlsx>" --overwrite`
 - Next actions and blockers:
   - Next action: commit and push this cleanup so GitHub matches local and SharePoint again.
+## 2026-03-23 (Daily sync refresh + dashboard rebuild)
+- Current status:
+  - Ran the daily PAC export/unpack successfully using `recruitment@dlresources.com.sg`.
+  - Rebuilt the recruiter dashboard workbook from the latest live SharePoint list data.
+- Completed tasks:
+  - Refreshed local canonical flow source from Power Automate via:
+    - `scripts/active/bgv_daily_sync.ps1`
+  - Confirmed the export/unpack again hit the expected transient ZIP-lock once and then succeeded on retry.
+  - Rebuilt dashboard workbook artifact:
+    - `out/dashboard/BGV Dashboard.xlsx`
+    - `out/dashboard/BGV Dashboard Master Query.m`
+  - Checked the live SharePoint dashboard file metadata and confirmed:
+    - `BGV Records/Dashboard/BGV Dashboard.xlsx`
+    - version `10.0`
+    - modified `2026-03-23T01:59:23Z`
+  - Confirmed the post-sync repo diffs were export-normalization only:
+    - trailing newline normalization in `BGV_0`, `BGV_5`, `BGV_7`
+    - minor comma formatting normalization in `BGV_6`
+    - normal environment version drift in `Customizations.xml` and `Solution.xml`
+- Validation commands run:
+  - `powershell -ExecutionPolicy Bypass -File .\\scripts\\active\\bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+  - `powershell -ExecutionPolicy Bypass -File .\\scripts\\active\\build_bgv_dashboard.ps1`
+  - `m365 spo file get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --url "/sites/DLRRecruitmentOps570/BGV Records/Dashboard/BGV Dashboard.xlsx" --output json`
+  - `git diff --stat`
+- Next actions and blockers:
+  - One direct overwrite attempt of the dashboard workbook returned:
+    - `locked for shared use by recruitment@dlresources.com.sg`
+  - The live file already showed a fresh same-day modified timestamp, so no immediate follow-up is required unless you want another forced upload after closing the workbook.
