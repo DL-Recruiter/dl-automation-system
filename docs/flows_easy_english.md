@@ -22,7 +22,7 @@ This document describes the current behavior in your canonical flow files under 
   - Creates candidate folder and authorization subfolder in SharePoint.
   - Creates candidate row in `BGV_Candidates`.
   - Generates and saves authorization `.docx` from the target-site template in `DLR Recruitment Ops > BGV Records > Templates > AuthorizationLetter_Template.docx`, then shares it and emails candidate.
-  - The authorization link is created as an anonymous edit link so the candidate can open and edit the Word document directly.
+  - The authorization document is now shared directly with the candidate's own email address as a specific-person edit permission, and the email/reminder link points to that sign-in-protected document URL.
   - When filling the authorization Word template ID content controls:
     - NRIC control gets candidate NRIC, else `N/A`.
     - Passport control gets `N/A` when NRIC exists; otherwise candidate Passport, else `N/A`.

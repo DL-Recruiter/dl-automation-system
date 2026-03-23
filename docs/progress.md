@@ -3667,3 +3667,14 @@ Log each session with:
   - One direct overwrite attempt of the dashboard workbook returned:
     - `locked for shared use by recruitment@dlresources.com.sg`
   - The live file already showed a fresh same-day modified timestamp, so no immediate follow-up is required unless you want another forced upload after closing the workbook.
+- Date: 2026-03-23
+- Task: Switch candidate authorization sharing from anonymous edit links to candidate-specific edit access.
+- Completed tasks:
+  - Updated `BGV_0_CandidateDeclaration` so the generated authorization document now composes a direct document URL, grants candidate-specific edit access using the candidate email from Form 1, and stores/sends that URL through `BGV_Candidates.AuthorizationLink`.
+  - Replaced the old anonymous `CreateSharingLink` step with a SharePoint REST share request using the existing SharePoint connection.
+  - Kept downstream reminder behavior unchanged by continuing to use the same `AuthorizationLink` field in `BGV_Candidates`.
+  - Updated onboarding docs to reflect the new sign-in-required candidate access model.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+- Notes:
+  - The candidate now needs to sign in with the same email address they submitted in Form 1 to open and edit the document.

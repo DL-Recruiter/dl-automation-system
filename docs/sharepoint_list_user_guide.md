@@ -44,7 +44,7 @@ Typical user questions this list answers:
 
 - Has the candidate signed the authorization form?
 - What is the candidate's current status?
-- What share link was sent to the candidate?
+- What authorization link was sent to the candidate?
 - When was the last reminder sent?
 
 ### 1.1 Core identity columns
@@ -62,7 +62,7 @@ Typical user questions this list answers:
 | Column | What it is for | Mainly written by | Mainly read by |
 | --- | --- | --- | --- |
 | `Status` | Human-readable candidate workflow stage, for example pending signature or signed authorization obtained. | `BGV_0`, `BGV_1` | `BGV_2`, `BGV_3`, users |
-| `AuthorizationLink` | Share link sent to the candidate so they can open and sign the authorization document. | `BGV_0` | `BGV_3`, users |
+| `AuthorizationLink` | Candidate-specific edit link sent to the candidate so they can sign the authorization document after signing in with their own email address. | `BGV_0` | `BGV_3`, users |
 | `AuthorizationLinkCreatedAt` | Timestamp of when the authorization-link process was created. Used to decide reminder and escalation timing. | `BGV_0` | `BGV_3`, users |
 | `AuthorisationSigned` | Main yes/no field showing whether the candidate's authorization has been confirmed as signed. | `BGV_1` | `BGV_3`, `BGV_4`, users |
 | `ConsentTimestamp` | Timestamp of when the signed authorization was detected and recorded. | `BGV_1` | users, audit/review |
