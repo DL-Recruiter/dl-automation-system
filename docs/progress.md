@@ -6,6 +6,25 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-23 (BGV_7 report-summary Teams post save fix)
+- Current status:
+  - Fixed the `BGV_7_Generate_Report_Summary` save error caused by an invalid cross-scope reference from the Teams post action to `Compose_ReportFileWebLink`.
+- Completed tasks:
+  - Updated the Teams message body in:
+    - `flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json`
+  - Replaced the out-of-scope `Compose_ReportFileWebLink` reference with inline expressions for:
+    - report file name
+    - report link
+  - Preserved the business behavior:
+    - Teams post still only happens when a new report summary file is created
+    - Teams post still includes candidate ID, candidate name, request ID, report file, and report link
+- Validation commands run:
+  - `pac auth who`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - The save validation error is fixed in the canonical flow source.
+  - The separate Teams connection binding warning still requires a valid live `shared_teams` connection before the flow can be turned on.
+
 ## 2026-03-23 (BGV_7 Teams connection triage + BGV_8 reply Teams notification)
 - Current status:
   - Confirmed the `BGV_7_Generate_Report_Summary` activation warning is caused by a missing live `shared_teams` connector instance for `recruitment@dlresources.com.sg`, not by broken report-summary logic.
