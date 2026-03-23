@@ -161,7 +161,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varOutcome",
-                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),'MAS')"
+                        "value": ", MAS"
                       }
                     },
                     "Set_variable_-_Notify_Teams_1": {
@@ -236,7 +236,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varOutcome",
-                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),'Disciplinary')"
+                        "value": ", Disciplinary"
                       }
                     },
                     "Set_variable_-_Notify_Teams_2": {
@@ -332,7 +332,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varOutcome",
-                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),'Re-employ')"
+                        "value": ", Re-employ"
                       }
                     },
                     "Set_variable_-_Notify_Teams_3": {
@@ -428,7 +428,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varOutcome",
-                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),if(empty(trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'[',''),']',''),'\\\"',''))),'Employment Details',trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'[',''),']',''),'\\\"',''))))"
+                        "value": "@concat(', ',if(empty(trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'[',''),']',''),'\\\"',''))),'Employment Details',trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/r72b23e4aa192405091846e1279085029'],'')),'[',''),']',''),'\\\"',''))))"
                       }
                     },
                     "Append_to_string_variable_-_Notify_Body_4": {
@@ -566,7 +566,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varOutcome",
-                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),if(empty(trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'')),'[',''),']',''),'\\\"',''))),'Company Details',trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'')),'[',''),']',''),'\\\"',''))))"
+                        "value": "@concat(', ',if(empty(trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'')),'[',''),']',''),'\\\"',''))),'Company Details',trim(replace(replace(replace(string(coalesce(outputs('Get_response_details')?['body/rd05170e51ac34fef95f5464cf348bedc'],'')),'[',''),']',''),'\\\"',''))))"
                       }
                     },
                     "Append_to_string_variable_-_Notify_Body_Company_Details": {
@@ -670,7 +670,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varOutcome",
-                        "value": "@concat(if(empty(variables('varOutcome')),'',', '),'Other Comments')"
+                        "value": ", Other Comments"
                       }
                     },
                     "Append_to_string_variable_-_Notify_Body_Other_Comments": {
@@ -814,7 +814,7 @@
                       "id": "@items('Apply_to_each')?['ID']",
                       "item/Title": "@items('Apply_to_each')?['Title']",
                       "item/ResponseReceivedAt": "@utcNow()",
-                      "item/Outcome/Value": "@if(empty(trim(variables('varOutcome'))),'None',variables('varOutcome'))",
+                      "item/Outcome/Value": "@if(empty(trim(variables('varOutcome'))),'None',if(startsWith(variables('varOutcome'),', '),substring(variables('varOutcome'),2,sub(length(variables('varOutcome')),2)),variables('varOutcome')))",
                       "item/BGV_x0020_Checks": "@if(or(empty(variables('varSeverity')),equals(variables('varSeverity'),'Neutral')),'Form Filled and Cleared','Adverse BGV Checks - see severity')",
                       "item/Notes": "@variables('varRequestNotesBody')",
                       "item/Severity/Value": "@variables('varSeverity')",
@@ -859,7 +859,7 @@
                           "item/F2_FormCompleterContactDetails": "@coalesce(outputs('Get_response_details')?['body/reb80c95cd24242998cbc884c24254bed'],'')",
                           "item/F2_CompanyStampFileName": "@if(contains(string(outputs('Get_response_details')?['body']), '\\\"name\\\":\\\"'), first(split(last(split(string(outputs('Get_response_details')?['body']), '\\\"name\\\":\\\"')), '\\\"')), 'No file uploaded')",
                           "item/F2_Severity/Value": "@variables('varSeverity')",
-                          "item/F2_Outcome": "@if(empty(trim(variables('varOutcome'))),'None',variables('varOutcome'))",
+                          "item/F2_Outcome": "@if(empty(trim(variables('varOutcome'))),'None',if(startsWith(variables('varOutcome'),', '),substring(variables('varOutcome'),2,sub(length(variables('varOutcome')),2)),variables('varOutcome')))",
                           "item/F2_Notes": "@variables('varRequestNotesBody')"
                         },
                         "host": {
@@ -901,7 +901,7 @@
                           "location": "Channel",
                           "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
                           "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
-                          "body/messageBody": "<p class=\"editor-paragraph\">BGV Response Submitted for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}</p><br><p class=\"editor-paragraph\">Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}, @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerHR_Email']}</p><br><p class=\"editor-paragraph\">Request ID: @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}</p><p class=\"editor-paragraph\">Severity: @{variables('varSeverity')}</p><p class=\"editor-paragraph\">Flagged Issues: @{if(empty(trim(variables('varOutcome'))),'None',variables('varOutcome'))}</p><br><p class=\"editor-paragraph\">Details: <br>@{variables('varNotifyBody')}</p><br>"
+                          "body/messageBody": "<p class=\"editor-paragraph\">BGV Response Submitted for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}</p><br><p class=\"editor-paragraph\">Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}, @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerHR_Email']}</p><br><p class=\"editor-paragraph\">Request ID: @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}</p><p class=\"editor-paragraph\">Severity: @{variables('varSeverity')}</p><p class=\"editor-paragraph\">Flagged Issues: @{if(empty(trim(variables('varOutcome'))),'None',if(startsWith(variables('varOutcome'),', '),substring(variables('varOutcome'),2,sub(length(variables('varOutcome')),2)),variables('varOutcome')))}</p><br><p class=\"editor-paragraph\">Details: <br>@{variables('varNotifyBody')}</p><br>"
                         },
                         "host": {
                           "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
@@ -985,7 +985,7 @@
                     "parameters": {
                       "emailMessage/To": "recruitment@dlresources.com.sg",
                       "emailMessage/Subject": "BGV Response Received - @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}, @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">The employer verification response has been received for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br><br>Verification Status: Responded<br><br>Severity: @{variables('varSeverity')}<br><br>Flagged Issues: @{if(empty(trim(variables('varOutcome'))),'None',variables('varOutcome'))}<br><br>For more detailed information, please refer to the summary report later in BGV_Records, Candidate Files (@{outputs('Update_item_-_of_BGV_Request')?['body/CandidateID']}). Please check the teams BGV channel - a post will be sent once the report is done.</p>",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">The employer verification response has been received for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br><br>Verification Status: Responded<br><br>Severity: @{variables('varSeverity')}<br><br>Flagged Issues: @{if(empty(trim(variables('varOutcome'))),'None',if(startsWith(variables('varOutcome'),', '),substring(variables('varOutcome'),2,sub(length(variables('varOutcome')),2)),variables('varOutcome')))}<br><br>For more detailed information, please refer to the summary report later in BGV_Records, Candidate Files (@{outputs('Update_item_-_of_BGV_Request')?['body/CandidateID']}). Please check the teams BGV channel - a post will be sent once the report is done.</p>",
                       "emailMessage/Importance": "Normal",
                       "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg"
                     },

@@ -6,6 +6,32 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-23 (BGV_5 outcome self-reference save fix)
+- Current status:
+  - Fixed the `BGV_5_Response1` save error caused by invalid self-reference while appending to `varOutcome`.
+- Completed tasks:
+  - Updated `BGV_5_Response1` outcome-building steps so they no longer reference `varOutcome` while appending to `varOutcome`.
+  - Switched the flagged-issue appends to safe delimiter-prefixed appends:
+    - `MAS`
+    - `Disciplinary`
+    - `Re-employ`
+    - employment-detail selections
+    - company-detail selections
+    - `Other Comments`
+  - Normalized the final `varOutcome` value at write/display points so downstream behavior stays the same:
+    - `BGV_Requests.Outcome`
+    - `BGV_FormData.F2_Outcome`
+    - Teams notification body
+    - recruiter email body
+  - Ran a repo sweep for the same invalid `varOutcome` self-reference pattern across canonical flow JSON and did not find the same save blocker in the other flows.
+- Validation commands run:
+  - `pac auth who`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "variables\\('varOutcome'\\).*variables\\('varOutcome'\\)|concat\\(if\\(empty\\(variables\\('varOutcome'\\)\\)|SetVariable.*variables\\('varOutcome'\\)" flows/power-automate/unpacked/Workflows`
+- Next actions and blockers:
+  - Import the updated solution so live `BGV_5` matches the canonical fix.
+  - Teams-connection warnings remain a separate live connector-binding issue and are not caused by this `BGV_5` save fix.
+
 ## 2026-03-23 (BGV_7 report-summary Teams post save fix)
 - Current status:
   - Fixed the `BGV_7_Generate_Report_Summary` save error caused by an invalid cross-scope reference from the Teams post action to `Compose_ReportFileWebLink`.
