@@ -95,6 +95,7 @@ function Convert-ToSnapshotRows {
                         SendAfterDate       = Get-PropertyValue $item "SendAfterDate"
                         HRRequestSentAt     = Get-PropertyValue $item "HRRequestSentAt"
                         ResponseReceivedAt  = Get-PropertyValue $item "ResponseReceivedAt"
+                        EmployerEmailReplyAt = Get-PropertyValue $item "EmployerEmailReplyAt"
                         Reminder1At         = Get-PropertyValue $item "Reminder1At"
                         Reminder2At         = Get-PropertyValue $item "Reminder2At"
                         Reminder3At         = Get-PropertyValue $item "Reminder3At"
@@ -199,6 +200,7 @@ let
             {"SendAfterDate", each ToDate(_), type date},
             {"HRRequestSentAt", each ToDateTime(_), type datetime},
             {"ResponseReceivedAt", each ToDateTime(_), type datetime},
+            {"EmployerEmailReplyAt", each ToDateTime(_), type datetime},
             {"Reminder1At", each ToDateTime(_), type datetime},
             {"Reminder2At", each ToDateTime(_), type datetime},
             {"Reminder3At", each ToDateTime(_), type datetime},
@@ -382,7 +384,7 @@ let
         "Last Activity At",
         each
             let
-                values = List.RemoveNulls({[ResponseReceivedAt], [Reminder3At], [Reminder2At], [Reminder1At], [HRRequestSentAt], [#"Authorization Signed At"], [#"Last Candidate Reminder At"], [RequestModified], [#"Candidate Modified At"], [#"FormData Modified At"]})
+                values = List.RemoveNulls({[EmployerEmailReplyAt], [ResponseReceivedAt], [Reminder3At], [Reminder2At], [Reminder1At], [HRRequestSentAt], [#"Authorization Signed At"], [#"Last Candidate Reminder At"], [RequestModified], [#"Candidate Modified At"], [#"FormData Modified At"]})
             in
                 if List.IsEmpty(values) then null else List.Max(values),
         type datetime
@@ -395,6 +397,7 @@ let
             {"SendAfterDate", "Send After Date"},
             {"HRRequestSentAt", "Employer Request Sent At"},
             {"ResponseReceivedAt", "Employer Response Received At"},
+            {"EmployerEmailReplyAt", "Employer Email Reply At"},
             {"Reminder1At", "Reminder 1 At"},
             {"Reminder2At", "Reminder 2 At"},
             {"Reminder3At", "Reminder 3 At"},
@@ -419,6 +422,7 @@ let
             "Overdue",
             "Completed Status",
             "Employer Response Received At",
+            "Employer Email Reply At",
             "Last Activity At",
             "Severity",
             "Outcome"
@@ -534,6 +538,7 @@ function Build-MasterRows {
         $lastCandidateReminderAt = if ($null -ne $candidate) { Convert-ToNullableDateTime -Value $candidate.LastAuthReminderAt } else { $null }
         $requestSentAt = Convert-ToNullableDateTime -Value $request.HRRequestSentAt
         $responseReceivedAt = Convert-ToNullableDateTime -Value $request.ResponseReceivedAt
+        $employerEmailReplyAt = Convert-ToNullableDateTime -Value $request.EmployerEmailReplyAt
         $reminder1At = Convert-ToNullableDateTime -Value $request.Reminder1At
         $reminder2At = Convert-ToNullableDateTime -Value $request.Reminder2At
         $reminder3At = Convert-ToNullableDateTime -Value $request.Reminder3At
@@ -618,6 +623,7 @@ function Build-MasterRows {
         }
 
         $lastActivityAt = Get-LatestDate @(
+            $employerEmailReplyAt,
             $responseReceivedAt,
             $reminder3At,
             $reminder2At,
@@ -644,6 +650,7 @@ function Build-MasterRows {
             Overdue                         = $overdueCase
             "Completed Status"              = $completedStatus
             "Employer Response Received At" = $responseReceivedAt
+            "Employer Email Reply At"       = $employerEmailReplyAt
             "Last Activity At"              = $lastActivityAt
             Severity                        = $severity
             Outcome                         = $request.Outcome

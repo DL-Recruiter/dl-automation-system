@@ -25,6 +25,7 @@ It currently uses these headers:
 | `Overdue` | Quick overdue flag for chasing. | `Yes` when auth is unsigned after 5 days, send date has passed with no employer email, reminder 2/3 has been reached, or the case is escalated |
 | `Completed Status` | Whether the employer-side cycle is completed. | `Yes` when `BGV_Requests.VerificationStatus = Responded`; otherwise `No` |
 | `Employer Response Received At` | Timestamp of completed employer response. | `BGV_Requests.ResponseReceivedAt` |
+| `Employer Email Reply At` | Timestamp of the latest inbound employer reply email detected in the recruitment mailbox for that request. | `BGV_Requests.EmployerEmailReplyAt` |
 | `Last Activity At` | Latest known case activity for sorting and recency checks. | Max of key candidate/request/reminder/response timestamps |
 | `Severity` | Reported risk level from employer response. | `BGV_Requests.Severity` |
 | `Outcome` | Short result/flag summary from employer response. | `BGV_Requests.Outcome` |

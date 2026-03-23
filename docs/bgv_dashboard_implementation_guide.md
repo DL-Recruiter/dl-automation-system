@@ -164,7 +164,12 @@ This is where the important logic lives for:
 - `Employer Reminder`
 - `Overdue`
 - `Completed Status`
+- `Employer Email Reply At`
 - company/HR detail selection
+
+`Last Activity At` also now considers:
+
+- `BGV_Requests.EmployerEmailReplyAt`
 
 ### `Write-SnapshotTable`
 
@@ -223,6 +228,14 @@ This comes from:
 - `BGV_Requests.Reminder1At`
 - `BGV_Requests.Reminder2At`
 - `BGV_Requests.Reminder3At`
+
+### `Employer Email Reply At`
+
+This is the latest inbound employer reply email time detected in the recruitment mailbox.
+
+It comes from:
+
+- `BGV_Requests.EmployerEmailReplyAt`
 
 ## How the SharePoint Push Works
 

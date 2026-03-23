@@ -1,0 +1,274 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "api": {
+          "name": "shared_sharepointonline"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "cr94d_sharedsharepointonline_96d5d"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_office365": {
+        "api": {
+          "name": "shared_office365"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "cr94d_sharedoffice365_bdd97"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "undefined",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "When_a_new_email_arrives_(V3)": {
+          "type": "OpenApiConnectionNotification",
+          "inputs": {
+            "parameters": {
+              "folderPath": "Inbox",
+              "includeAttachments": false
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+              "connectionName": "shared_office365",
+              "operationId": "OnNewEmailV3"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "splitOn": "@triggerOutputs()?['body/value']"
+        }
+      },
+      "actions": {
+        "Initialize_variable_-_SelectedRequest": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varSelectedRequest",
+                "type": "object",
+                "value": {}
+              }
+            ]
+          },
+          "runAfter": {}
+        },
+        "Get_items_(BGV_Requests)": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+              "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+              "$top": 5000
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetItems",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {
+            "Initialize_variable_-_SelectedRequest": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Compose_-_CurrentSubject": {
+          "type": "Compose",
+          "inputs": "@toLower(trim(string(coalesce(triggerBody()?['subject'], ''))))",
+          "runAfter": {
+            "Get_items_(BGV_Requests)": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Compose_-_CurrentSenderEmail": {
+          "type": "Compose",
+          "inputs": "@toLower(trim(string(coalesce(triggerBody()?['from']?['emailAddress']?['address'], triggerBody()?['from']?['address'], ''))))",
+          "runAfter": {
+            "Compose_-_CurrentSubject": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Condition_-_Ignore_Internal_or_Blank_Senders": {
+          "type": "If",
+          "expression": "@and(not(empty(outputs('Compose_-_CurrentSenderEmail'))), not(equals(outputs('Compose_-_CurrentSenderEmail'), 'recruitment@dlresources.com.sg')), not(equals(outputs('Compose_-_CurrentSenderEmail'), 'dlresplmain@dlresources.com.sg')), not(equals(outputs('Compose_-_CurrentSenderEmail'), 'recruitmentops@dlresources.com.sg')))",
+          "actions": {
+            "Filter_array_-_Subject_Matches": {
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Get_items_(BGV_Requests)')?['value']",
+                "where": "@and(not(empty(item()?['RequestID'])), contains(outputs('Compose_-_CurrentSubject'), toLower(string(item()?['RequestID']))))"
+              }
+            },
+            "Condition_-_Subject_Match_Unique": {
+              "type": "If",
+              "expression": "@equals(length(body('Filter_array_-_Subject_Matches')), 1)",
+              "actions": {
+                "Set_variable_-_SelectedRequest_from_Subject": {
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "varSelectedRequest",
+                    "value": "@first(body('Filter_array_-_Subject_Matches'))"
+                  }
+                }
+              },
+              "else": {
+                "actions": {
+                  "Filter_array_-_Sender_Matches": {
+                    "type": "Query",
+                    "inputs": {
+                      "from": "@body('Get_items_(BGV_Requests)')?['value']",
+                      "where": "@and(not(empty(item()?['EmployerHR_Email'])), equals(toLower(trim(string(item()?['EmployerHR_Email']))), outputs('Compose_-_CurrentSenderEmail')))"
+                    }
+                  },
+                  "Condition_-_Sender_Match_Unique": {
+                    "type": "If",
+                    "expression": "@equals(length(body('Filter_array_-_Sender_Matches')), 1)",
+                    "actions": {
+                      "Set_variable_-_SelectedRequest_from_Sender": {
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "varSelectedRequest",
+                          "value": "@first(body('Filter_array_-_Sender_Matches'))"
+                        }
+                      }
+                    },
+                    "else": {
+                      "actions": {}
+                    },
+                    "runAfter": {
+                      "Filter_array_-_Sender_Matches": [
+                        "Succeeded"
+                      ]
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "Filter_array_-_Subject_Matches": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Condition_-_Request_Selected": {
+              "type": "If",
+              "expression": "@not(empty(variables('varSelectedRequest')?['RequestID']))",
+              "actions": {
+                "Get_items_(BGV_FormData)": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                      "$filter": "@concat('RequestID eq ''', string(variables('varSelectedRequest')?['RequestID']), '''')",
+                      "$top": 2
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "GetItems",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  }
+                },
+                "Condition_-_FormData_Found": {
+                  "type": "If",
+                  "expression": "@equals(length(body('Get_items_(BGV_FormData)')?['value']), 1)",
+                  "actions": {
+                    "Condition_-_Reply_Is_Newer": {
+                      "type": "If",
+                      "expression": "@or(empty(variables('varSelectedRequest')?['EmployerEmailReplyAt']), greater(ticks(triggerBody()?['receivedDateTime']), ticks(variables('varSelectedRequest')?['EmployerEmailReplyAt'])))",
+                      "actions": {
+                        "Update_item_-_BGV_Requests": {
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                              "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+                              "id": "@variables('varSelectedRequest')?['ID']",
+                              "item/Title": "@variables('varSelectedRequest')?['Title']",
+                              "item/EmployerEmailReplyAt": "@triggerBody()?['receivedDateTime']"
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                              "operationId": "PatchItem",
+                              "connectionName": "shared_sharepointonline"
+                            }
+                          }
+                        },
+                        "Update_item_-_BGV_FormData": {
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                              "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                              "id": "@first(body('Get_items_(BGV_FormData)')?['value'])?['ID']",
+                              "item/Title": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Title']",
+                              "item/EmployerEmailReplyAt": "@triggerBody()?['receivedDateTime']"
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                              "operationId": "PatchItem",
+                              "connectionName": "shared_sharepointonline"
+                            }
+                          },
+                          "runAfter": {
+                            "Update_item_-_BGV_Requests": [
+                              "Succeeded"
+                            ]
+                          }
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Get_items_(BGV_FormData)": [
+                      "Succeeded"
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "runAfter": {
+                "Condition_-_Subject_Match_Unique": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {
+            "Compose_-_CurrentSenderEmail": [
+              "Succeeded"
+            ]
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

@@ -11,6 +11,7 @@ Last verified from canonical flow files:
 - `flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
 - `flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
 - `flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json`
+- `flows/power-automate/unpacked/Workflows/BGV_8_Track_Employer_Email_Replies-FA5CF0E3-0916-F111-8341-002248582037.json`
 
 ## 1) Canonical Document To Maintain
 Use this file as the canonical field mapping document for this repo.
@@ -52,6 +53,7 @@ When mappings change:
 | `BGV_Requests` | `EmployerHR_Email` | N/A | `BGV_4` email recipient (`Send an email (V2)`) |
 | `BGV_Requests` | `HRRequestSentAt` | N/A | Updated by `BGV_4` to `utcNow()` after email send |
 | `BGV_Requests` | `VerificationStatus` | N/A | Updated by `BGV_0` to `Not Sent`, by `BGV_4` to `Email Sent`, by `BGV_6` to `Reminder 1 Sent` / `Reminder 2 Sent` / `Reminder 3 Sent`, and by `BGV_5` to `Responded` |
+| `BGV_Requests` | `EmployerEmailReplyAt` | N/A | Updated by `BGV_8` when a matching inbound employer reply email is detected |
 
 Notes:
 - In `BGV_4`, prefill source order is `BGV_FormData` first, then fallback to `BGV_Candidates`/`BGV_Requests`.
@@ -196,6 +198,7 @@ Note:
 | Derived from upload metadata in raw response | Uploaded company stamp filename | `BGV_FormData.F2_CompanyStampFileName` | extracts first upload object `name`; else `No file uploaded` |
 | `ra03058e9bbfd40d28014b0c669e92434` | Company-details explanation | `BGV_FormData.F2_Notes` | appended into notes text when present |
 | Derived runtime values | Scoring output | `BGV_FormData.F2_Severity/Value`, `F2_Outcome` (same combined flagged-issues text), `F2_Notes` | from variables |
+| Mailbox reply detection | Latest inbound employer reply timestamp | `BGV_FormData.EmployerEmailReplyAt` | `BGV_8` updates when a safe unique mailbox match is found |
 | Full Form 2 response JSON | Snapshot | `BGV_FormData.Form2RawJson` | `string(outputs('Get_response_details')?['body'])` |
 | Timestamp | Submission timestamp | `BGV_FormData.Form2SubmittedAt` | `utcNow()` |
 | Linked record keys | Relational fields | `BGV_FormData.CandidateID`, `RecordItemID` | from matched `BGV_Requests` item |
@@ -238,6 +241,7 @@ Note:
 | `BGV_4_SendToEmployer_Clean` | `BGV_Requests` | Reads pending requests where `VerificationStatus='Not Sent'`; reads candidate auth status; updates `HRRequestSentAt=utcNow()`, `VerificationStatus='Email Sent'`, `uniquelinktoemployers=FinalVerificationLink`. |
 | `BGV_6_HRReminderAndEscalation` | `BGV_Requests` | Runs every 30 minutes but only processes at 9:00 AM / 5:30 PM Singapore time; reads rows with `HRRequestSentAt` present and no `ResponseReceivedAt`; uses `Reminder1At`, `Reminder2At`, `Reminder3At`, `EscalatedAt`; updates timestamps and sets `VerificationStatus='Reminder 1 Sent'/'Reminder 2 Sent'/'Reminder 3 Sent'`; stamps `EscalatedAt` when recruiter escalation is posted; sets `BGV Checks='No response at Reminder 2'` after the reminder-2 delay and `BGV Checks='Form Filled and Cleared'` when reminder 3 is sent. |
 | `BGV_7_Generate_Report_Summary` | `BGV Records` document library | Reads `ReportSummary_Template.docx` by path, fills it using `BGV_FormData.Form2RawJson` plus Form 1 data from `Form1RawJson` when present or normalized `F1_*` fields as fallback, writes `RS_EmpN.docx` into `Candidate Files/{CandidateID}/`, and posts a Teams message with the report link when a new report is first created. |
+| `BGV_8_Track_Employer_Email_Replies` | `BGV_Requests` and `BGV_FormData` | Watches the recruitment mailbox inbox, matches inbound replies by `RequestID` in the subject first or sender email second, and updates `EmployerEmailReplyAt` in both lists only when one safe unique request match and one matching FormData row are found. |
 
 ## 9) BGV Records (Document Library) Data Path
 

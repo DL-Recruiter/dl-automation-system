@@ -41,6 +41,7 @@ The recruiter-facing table is trimmed to the fields recruiters need most:
 - `Overdue`
 - `Completed Status`
 - `Employer Response Received At`
+- `Employer Email Reply At`
 - `Last Activity At`
 - `Severity`
 - `Outcome`

@@ -109,6 +109,7 @@ Typical user questions this list answers:
 | `Status` | Legacy request-lifecycle field kept for compatibility/history. Current canonical flows no longer depend on it. | legacy | users, reporting |
 | `HRRequestSentAt` | Timestamp for when the verification email was sent to employer HR. | `BGV_4` | `BGV_4`, `BGV_6`, users |
 | `ResponseReceivedAt` | Timestamp for when the employer HR form response was received and processed. | `BGV_5` | `BGV_6`, users |
+| `EmployerEmailReplyAt` | Timestamp of the latest inbound employer reply email detected in the recruitment mailbox for that request. | `BGV_8` | dashboard, users, troubleshooting |
 | `Reminder1At` | Timestamp of the first employer reminder. | `BGV_6` | `BGV_6`, users |
 | `Reminder2At` | Timestamp of the second employer reminder. | `BGV_6` | `BGV_6`, users |
 | `Reminder3At` | Timestamp of the later/final employer reminder stage tracked by the automation. | `BGV_6` | `BGV_6`, users |
@@ -317,6 +318,7 @@ These fields come from Form 2, the employer HR verification form.
 | `F2_Severity/Value` | Copy of the final request severity after the same response-scoring logic is applied. | `BGV_5` | users, troubleshooting |
 | `F2_Outcome` | Stored copy of the combined flagged-issues summary. | `BGV_5` | users, troubleshooting |
 | `F2_Notes` | Copy of the plain-text notes body stored for the same response when a matching FormData row exists. | `BGV_5` | users, troubleshooting |
+| `EmployerEmailReplyAt` | Timestamp of the latest employer reply email detected from the recruitment mailbox for this FormData row. | `BGV_8` | dashboard cross-checking, troubleshooting |
 | `Form2RawJson` | Full raw employer HR response payload kept for audit and troubleshooting. | `BGV_5` | users, troubleshooting |
 | `Form2SubmittedAt` | Timestamp of when the Form 2 snapshot was stored. | `BGV_5` | users, troubleshooting |
 

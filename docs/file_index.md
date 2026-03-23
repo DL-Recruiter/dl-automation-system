@@ -26,9 +26,9 @@
 - `BGV_Report_Summary_Template.docx` - Word template for additive Azure Function-generated BGV report summaries using verified Form 1/Form 2 question keys.
 - `docs/architecture_flows.md` - Flow/connector integration and PAC CLI guidance.
 - `docs/collaboration_setup_guide.md` - Step-by-step collaboration guide for Edwin and Recruitment accounts.
-- `docs/data_mapping_dictionary.md` - Canonical field-level mapping and data dictionary for Forms, SharePoint lists, document library, and flows BGV_0 to BGV_7.
+- `docs/data_mapping_dictionary.md` - Canonical field-level mapping and data dictionary for Forms, SharePoint lists, document library, and flows BGV_0 to BGV_8.
 - `docs/first_time_and_daily_sop_guide.md` - Reading-order guide that tells collaborators which repo documents to use for first-time setup, daily SOP, migration, troubleshooting, and deployment.
-- `docs/flows_easy_english.md` - Plain-language explanation of BGV_0 to BGV_6 process flow.
+- `docs/flows_easy_english.md` - Plain-language explanation of the current BGV_0 to BGV_8 process flow.
 - `docs/ms365_authentication_runbook.md` - Authentication reference for PAC, Azure, PnP PowerShell, CLI for Microsoft 365, and Microsoft Graph.
 - `docs/progress.md` - Ongoing status log for completed tasks and next actions.
 - `docs/repo_inventory.md` - Full tracked-file inventory with file-by-file purpose descriptions.

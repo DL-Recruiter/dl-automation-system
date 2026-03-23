@@ -133,6 +133,7 @@ This document describes the current behavior in your canonical flow files under 
     - Job title
   - Uses the matching `BGV_FormData` row as the first source for company name/address/UEN in the employer email body, so EMP1/EMP2/EMP3 show the correct declared company details.
   - Employer email subject/body wording is synced to the latest cloud-edited template (including the newest HR instruction text), while preserving the existing dynamic mappings for declared-details and verification-link sections.
+  - Employer email wording now also tells the employer to reply to the email or include the `RequestID` in the subject line when they need more information, so mailbox replies can be matched safely.
   - Finds authorization file, attaches it, and emails employer HR.
   - Sends the same signed authorization attachment to the candidate email (`BGV_Candidates.CandidateEmail`) for reference, with a note to open it in Word to view the signed copy.
   - Email sends are routed via shared mailbox `recruitment@dlresources.com.sg`.
@@ -279,6 +280,19 @@ This document describes the current behavior in your canonical flow files under 
   - If the report does not exist yet, creates it and posts a Teams message to `DLR Recruitment Ops > BGV` with the report link.
 - Main outcome: Each completed employer verification now gets a report-summary DOCX generated from the real SharePoint template and stored in the correct candidate folder.
 
+### `BGV_8_Track_Employer_Email_Replies`
+- Trigger: `When a new email arrives (V3)` on the recruitment mailbox inbox.
+- Purpose:
+  - Detects employer reply emails and stores the latest reply timestamp in both `BGV_Requests` and `BGV_FormData`.
+- Matching logic:
+  - Primary match: `RequestID` found anywhere in the email subject.
+  - Fallback match: exact sender-email match against `BGV_Requests.EmployerHR_Email`.
+  - Only proceeds when there is exactly one safe matching request and exactly one matching `BGV_FormData` row.
+  - If the match is missing or ambiguous, the flow skips without changing records.
+- Update logic:
+  - Writes `EmployerEmailReplyAt` into both lists.
+  - If multiple replies are received later, the flow keeps only the most recent detected reply timestamp.
+
 ## How the Flows Connect
 - Candidate signature track:
   - `BGV_0` -> `BGV_1` -> `BGV_2`
@@ -286,6 +300,7 @@ This document describes the current behavior in your canonical flow files under 
   - `BGV_0` creates `BGV_Requests` + `BGV_FormData`
   - `BGV_4` sends prefilled HR request + attachment
   - `BGV_5` processes HR response and updates both lists
+  - `BGV_8` tracks later employer reply emails and stamps the latest reply time into both lists
   - `BGV_7` generates the per-employer report summary DOCX from the completed Form 2 response
 - Reminder/escalation track:
   - `BGV_3` for candidate signature delays

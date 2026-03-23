@@ -6,6 +6,28 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-23 (Employer email reply tracking + dashboard source update)
+- Current status:
+  - Implemented employer mailbox reply tracking across `BGV_Requests`, `BGV_FormData`, the outbound employer email wording, and the recruiter dashboard source.
+- Completed tasks:
+  - Added live SharePoint DateTime columns:
+    - `BGV_Requests.EmployerEmailReplyAt`
+    - `BGV_FormData.EmployerEmailReplyAt`
+  - Updated `BGV_4_SendToEmployer_Clean` employer email wording so employers are instructed to reply to the email or include the `RequestID` in the subject line for mailbox matching.
+  - Added new canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_8_Track_Employer_Email_Replies-FA5CF0E3-0916-F111-8341-002248582037.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_8_Track_Employer_Email_Replies-FA5CF0E3-0916-F111-8341-002248582037.json.data.xml`
+  - `BGV_8` now:
+    - watches the recruitment mailbox inbox
+    - matches incoming emails by `RequestID` contained anywhere in the subject first
+    - falls back to exact sender-email match against `BGV_Requests.EmployerHR_Email`
+    - skips safely when no unique match or multiple possible matches are found
+    - updates `EmployerEmailReplyAt` in both `BGV_Requests` and `BGV_FormData` when the newly detected reply is more recent than the stored value
+  - Updated the dashboard build so the recruiter table now includes:
+    - `Employer Email Reply At`
+    - `Last Activity At` now also considers employer reply timestamps
+  - Updated dashboard, flow, mapping, and SharePoint field docs to reflect the new reply-tracking path.
+
 ## 2026-03-16 (Whole-solution Power Automate validation pass)
 - Current status:
   - Ran a full repo-side validation pass after the latest `BGV_0` and `BGV_1` fixes to confirm GitHub, local files, and the live Power Automate solution remain aligned.
