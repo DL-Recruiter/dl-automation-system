@@ -6,6 +6,38 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-23 (BGV_7 Teams connection triage + BGV_8 reply Teams notification)
+- Current status:
+  - Confirmed the `BGV_7_Generate_Report_Summary` activation warning is caused by a missing live `shared_teams` connector instance for `recruitment@dlresources.com.sg`, not by broken report-summary logic.
+  - Extended `BGV_8` so employer email replies now notify the `DLR Recruitment Ops > BGV` channel after the matching records are updated successfully.
+- Completed tasks:
+  - Verified active PAC identity:
+    - `recruitment@dlresources.com.sg`
+  - Verified current connector inventory with `pac connection list` and confirmed:
+    - no connected `shared_teams` connection instance currently exists for the `recruitment@dlresources.com.sg` account
+  - Confirmed `BGV_7` still points to the correct BGV channel destination:
+    - Team `DLR Recruitment Ops`: `4475a565-7f2b-4df1-91cd-c8e3df8f805a`
+    - Channel `BGV`: `19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2`
+  - Updated `BGV_8_Track_Employer_Email_Replies`:
+    - added embedded `shared_teams` connection reference using `cr94d_sharedteams_4466d`
+    - added Teams post action after the successful `BGV_FormData` update
+    - Teams post now includes:
+      - `Request ID`
+      - `Candidate ID`
+      - employer name
+      - sender email
+      - received timestamp
+      - subject
+  - Updated flow docs to reflect the new `BGV_8` Teams-notification behavior.
+- Validation commands run:
+  - `pac auth who`
+  - `pac connection list`
+  - `pac connection create --help`
+  - `rg -n "shared_teams|PostMessageToConversation|4475a565-7f2b-4df1-91cd-c8e3df8f805a|19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2" flows/power-automate/unpacked/Workflows docs`
+- Next actions and blockers:
+  - `BGV_7` cannot be turned on until a real Microsoft Teams connector instance is created/shared for `recruitment@dlresources.com.sg` and bound to connection reference `cr94d_sharedteams_4466d`.
+  - `BGV_8` now contains the Teams post step and will need the same Teams connector binding before it can be activated cleanly.
+
 ## 2026-03-23 (Employer email reply tracking + dashboard source update)
 - Current status:
   - Implemented employer mailbox reply tracking across `BGV_Requests`, `BGV_FormData`, the outbound employer email wording, and the recruiter dashboard source.

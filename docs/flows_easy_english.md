@@ -284,6 +284,7 @@ This document describes the current behavior in your canonical flow files under 
 - Trigger: `When a new email arrives (V3)` on the recruitment mailbox inbox.
 - Purpose:
   - Detects employer reply emails and stores the latest reply timestamp in both `BGV_Requests` and `BGV_FormData`.
+  - Posts a Teams notification to `DLR Recruitment Ops > BGV` when a unique employer reply is detected and written back successfully.
 - Matching logic:
   - Primary match: `RequestID` found anywhere in the email subject.
   - Fallback match: exact sender-email match against `BGV_Requests.EmployerHR_Email`.
@@ -292,6 +293,13 @@ This document describes the current behavior in your canonical flow files under 
 - Update logic:
   - Writes `EmployerEmailReplyAt` into both lists.
   - If multiple replies are received later, the flow keeps only the most recent detected reply timestamp.
+  - After both list updates succeed, posts the reply details:
+    - `Request ID`
+    - `Candidate ID`
+    - `Employer`
+    - sender email
+    - received timestamp
+    - subject
 
 ## How the Flows Connect
 - Candidate signature track:

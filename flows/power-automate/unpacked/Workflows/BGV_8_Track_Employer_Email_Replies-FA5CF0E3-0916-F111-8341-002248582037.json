@@ -18,6 +18,15 @@
           "connectionReferenceLogicalName": "cr94d_sharedoffice365_bdd97"
         },
         "runtimeSource": "embedded"
+      },
+      "shared_teams": {
+        "api": {
+          "name": "shared_teams"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "cr94d_sharedteams_4466d"
+        },
+        "runtimeSource": "embedded"
       }
     },
     "definition": {
@@ -227,6 +236,28 @@
                           },
                           "runAfter": {
                             "Update_item_-_BGV_Requests": [
+                              "Succeeded"
+                            ]
+                          }
+                        },
+                        "Post_message_in_a_chat_or_channel_-_Employer_Email_Reply_Detected": {
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "poster": "Flow bot",
+                              "location": "Channel",
+                              "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
+                              "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
+                              "body/messageBody": "<p class=\"editor-paragraph\">Employer Email Reply Detected</p><br><p class=\"editor-paragraph\">Request ID: @{variables('varSelectedRequest')?['RequestID']}</p><p class=\"editor-paragraph\">Candidate ID: @{variables('varSelectedRequest')?['CandidateID']}</p><p class=\"editor-paragraph\">Employer: @{variables('varSelectedRequest')?['EmployerName']}</p><p class=\"editor-paragraph\">Sender: @{outputs('Compose_-_CurrentSenderEmail')}</p><p class=\"editor-paragraph\">Received At: @{triggerBody()?['receivedDateTime']}</p><p class=\"editor-paragraph\">Subject: @{coalesce(triggerBody()?['subject'], '')}</p>"
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                              "operationId": "PostMessageToConversation",
+                              "connectionName": "shared_teams"
+                            }
+                          },
+                          "runAfter": {
+                            "Update_item_-_BGV_FormData": [
                               "Succeeded"
                             ]
                           }
