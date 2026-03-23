@@ -1,0 +1,36 @@
+CHATGPT UPLOAD PACK USER GUIDE
+
+
+The repo’s “ChatGPT Upload Pack” is a curated context bundle for this BGV project. It is meant to be uploaded into ChatGPT so ChatGPT can answer with the right repo context without needing the whole repository. The main files are README.md, UPLOAD_MANIFEST.txt, and the migration brief chatgpt_upload_pack_20260312.md.
+
+Use
+
+Give ChatGPT the system spec, key docs, canonical flow JSON, scripts, and parser code in one upload.
+Ask ChatGPT for runbooks, troubleshooting, deployment steps, migration reviews, or rollback plans.
+Keep the uploaded scope controlled; the manifest shows exactly what was included.
+Instructions
+
+Upload the pack zip or the extracted folder.
+If the task is migration-related, also upload chatgpt_upload_pack_20260312.md.
+In your prompt, state:
+your objective
+the environment URL
+the exact flow/script/file involved
+whether you want analysis only or a fix/deploy runbook
+Ask for a concrete output, for example:
+“Give me a strict runbook”
+“Find the likely root cause”
+“List rollback steps”
+“Review this flow JSON”
+Repo rules inside the pack
+
+Sync first: powershell -File scripts/active/bgv_daily_sync.ps1
+Verify PAC identity first: pac auth who
+Edit only canonical flows in flows/power-automate/unpacked/Workflows/
+Do not commit secrets or .env
+When flow JSON changes, update linked docs in the same change
+Deploy with pac solution pack then pac solution import
+Important
+This pack is not current. The extracted pack is from March 5, 2026, and the brief is from March 12, 2026. Your repo is now synced to master at commit 1dc2cae on March 23, 2026, so the old pack does not include the latest changes such as newer docs and BGV_7/BGV_8.
+
+If you want, I can build you a fresh ChatGPT upload pack from the current repo state.
