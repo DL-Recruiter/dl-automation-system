@@ -3706,6 +3706,9 @@ Log each session with:
 - Completed tasks:
   - Added `scripts/active/run_bgv_dashboard_refresh.ps1` as the manual one-command dashboard rebuild/upload entrypoint.
   - Added `scripts/active/register_bgv_dashboard_refresh_task.ps1` to register a local Windows scheduled task for automatic refreshes.
+  - Corrected the dashboard builder default upload target so scheduled/manual refreshes now overwrite:
+    - `BGV Records/Dashboard/BGV Dashboard.xlsx`
+    instead of the document-library root.
   - Documented the manual and scheduled dashboard refresh paths in the dashboard docs.
 - Scheduled refresh design:
   - runs daily at `09:00`, `12:00`, `15:00`, `18:00`, and `21:00`

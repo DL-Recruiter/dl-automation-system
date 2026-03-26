@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$SiteUrl = "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-    [string]$LibraryFolder = "BGV Records",
+    [string]$LibraryFolder = "BGV Records/Dashboard",
     [string]$OutputPath = ".\out\dashboard\BGV Dashboard.xlsx",
     [switch]$UploadToSharePoint
 )
