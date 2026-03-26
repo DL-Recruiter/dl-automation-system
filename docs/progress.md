@@ -3746,3 +3746,20 @@ Log each session with:
   - Run the prototype builder script
   - Confirm workbook sheets and named tables exist
   - Review the comparison workbook before changing the live SharePoint dashboard
+- Date: 2026-03-26
+- Task: Publish dashboard prototype beside the live dashboard for user comparison.
+- Completed tasks:
+  - Created a renamed comparison copy of the prototype workbook:
+    - `out/dashboard/BGVDashboard_FLow.xlsx`
+  - Uploaded the comparison workbook to the same SharePoint dashboard folder as the live workbook:
+    - `BGV Records/Dashboard/BGVDashboard_FLow.xlsx`
+  - Confirmed the uploaded file metadata:
+    - version `1.0`
+    - created `2026-03-26T03:50:29Z`
+  - This lets users compare:
+    - `BGV Dashboard.xlsx`
+    - `BGVDashboard_FLow.xlsx`
+    side by side in the same SharePoint folder before any dashboard cutover.
+- Validation commands run:
+  - `Copy-Item -LiteralPath "out\dashboard\BGV Dashboard - Power Automate Prototype.xlsx" -Destination "out\dashboard\BGVDashboard_FLow.xlsx" -Force`
+  - `m365 spo file add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --folder "BGV Records/Dashboard" --path "out/dashboard/BGVDashboard_FLow.xlsx" --overwrite`
