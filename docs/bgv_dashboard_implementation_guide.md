@@ -37,7 +37,7 @@ These are the three lists that hold:
 
 ## Connectors / Tools Used
 
-No Power Automate flow was added for this dashboard.
+No Power Automate cloud flow was added for this dashboard.
 
 The dashboard build uses:
 
@@ -79,6 +79,24 @@ The main builder is a PowerShell script:
 - `scripts/active/build_bgv_dashboard.ps1`
 
 This is the real source of truth for the dashboard build process.
+
+### 4. Windows Task Scheduler
+
+Used to automate the local dashboard refresh during working hours.
+
+Helper scripts:
+
+- `scripts/active/run_bgv_dashboard_refresh.ps1`
+- `scripts/active/register_bgv_dashboard_refresh_task.ps1`
+
+What they do:
+
+- `run_bgv_dashboard_refresh.ps1`
+  - runs the dashboard build with `-UploadToSharePoint`
+  - writes refresh output into `out/logs/bgv_dashboard_refresh.log`
+- `register_bgv_dashboard_refresh_task.ps1`
+  - creates a local scheduled task named `DLR BGV Dashboard Refresh`
+  - schedules refreshes at `09:00`, `12:00`, `15:00`, `18:00`, and `21:00`
 
 ## Was Power Query Used?
 
@@ -326,3 +344,8 @@ m365 spo file add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecru
 - The recruiter workbook is intentionally a snapshot-style build, not a live self-refreshing reporting app.
 - Standard Excel filters are used on the `Cases` sheet instead of slicers.
 - The implementation guide is meant to be readable without needing to know every Excel COM detail.
+- If you want an immediate refresh outside the schedule, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\active\run_bgv_dashboard_refresh.ps1
+```

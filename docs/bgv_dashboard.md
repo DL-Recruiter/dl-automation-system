@@ -102,3 +102,39 @@ The builder also exports the reusable Power Query M logic beside the workbook fo
 - `out/dashboard/BGV Dashboard Master Query.m`
 
 This avoids needing Power Automate for the dashboard itself.
+
+## Manual Refresh
+
+If you want to refresh the dashboard yourself at any time, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\active\run_bgv_dashboard_refresh.ps1
+```
+
+This rebuilds the workbook from live SharePoint list data and uploads it back to:
+
+- `BGV Records/Dashboard/BGV Dashboard.xlsx`
+
+## Automatic Refresh Schedule
+
+This repo now includes a helper script to register a local Windows scheduled task for the dashboard refresh.
+
+To register it:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\active\register_bgv_dashboard_refresh_task.ps1
+```
+
+The task runs daily at:
+
+- `9:00 AM`
+- `12:00 PM`
+- `3:00 PM`
+- `6:00 PM`
+- `9:00 PM`
+
+Important:
+
+- this is a local Windows scheduled task, not a Power Automate cloud flow
+- it does not consume Power Automate flow space or runs
+- the machine must be on and the interactive user session must be available

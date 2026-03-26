@@ -3701,3 +3701,13 @@ Log each session with:
     - latest `EmployerEmailReplyAt` wins
 - Validation commands run:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_8_Track_Employer_Email_Replies-FA5CF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+- Date: 2026-03-26
+- Task: Add scheduled local dashboard refresh helpers and manual refresh command.
+- Completed tasks:
+  - Added `scripts/active/run_bgv_dashboard_refresh.ps1` as the manual one-command dashboard rebuild/upload entrypoint.
+  - Added `scripts/active/register_bgv_dashboard_refresh_task.ps1` to register a local Windows scheduled task for automatic refreshes.
+  - Documented the manual and scheduled dashboard refresh paths in the dashboard docs.
+- Scheduled refresh design:
+  - runs daily at `09:00`, `12:00`, `15:00`, `18:00`, and `21:00`
+  - uses the existing local dashboard build script with SharePoint upload
+  - does not consume Power Automate cloud flow capacity
