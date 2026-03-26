@@ -109,8 +109,30 @@ There is now a separate redesign document and comparison workbook for a cloud-re
 
 - `docs/bgv_dashboard_power_automate_redesign.md`
 - `out/dashboard/BGV Dashboard - Power Automate Prototype.xlsx`
+- SharePoint comparison workbook:
+  - `BGV Records/Dashboard/BGVDashboard_FLow.xlsx`
 
 This prototype keeps the Summary/Cases feel close to the current workbook, removes `Overdue`, and is centered around stable Excel tables so a future Power Automate flow can refresh rows without rebuilding workbook structure.
+
+## Live cloud-refresh target
+
+The Power Automate-managed dashboard workbook is now:
+
+- `BGV Records/Dashboard/BGVDashboard_FLow.xlsx`
+
+It is refreshed by:
+
+- `BGV_9_Refresh_Dashboard_Excel`
+
+Schedule:
+
+- `9:00 AM`
+- `12:00 PM`
+- `3:00 PM`
+- `6:00 PM`
+- `9:00 PM`
+
+Singapore time.
 
 ## Manual Refresh
 

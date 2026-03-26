@@ -68,6 +68,14 @@
       <statecode>0</statecode>
       <statuscode>1</statuscode>
     </connectionreference>
+    <connectionreference connectionreferencelogicalname="new_sharedexcelonlinebusiness_7f4a1">
+      <connectionreferencedisplayname>Excel Online (Business) BGVChecks-7f4a1</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
     <connectionreference connectionreferencelogicalname="new_sharedwordonlinebusiness_2ff9a">
       <connectionreferencedisplayname>Word Online (Business) BGVChecks-2ff9a</connectionreferencedisplayname>
       <connectorid>/providers/Microsoft.PowerApps/apis/shared_wordonlinebusiness</connectorid>

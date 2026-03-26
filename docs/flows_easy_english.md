@@ -301,6 +301,63 @@ This document describes the current behavior in your canonical flow files under 
     - received timestamp
     - subject
 
+### `BGV_9_Refresh_Dashboard_Excel`
+- Trigger: Recurrence five times a day in Singapore time:
+  - `9:00 AM`
+  - `12:00 PM`
+  - `3:00 PM`
+  - `6:00 PM`
+  - `9:00 PM`
+- Purpose:
+  - Keeps the Power Automate-friendly dashboard workbook refreshed in SharePoint without depending on the local PC.
+  - Writes into:
+    - `BGV Records/Dashboard/BGVDashboard_FLow.xlsx`
+- What it does:
+  - Reads all rows from:
+    - `BGV_Candidates`
+    - `BGV_Requests`
+    - `BGV_FormData`
+  - Clears the existing Excel table:
+    - `tblDashboardCasesPA`
+  - Rebuilds one dashboard row per `RequestID`
+  - Writes recruiter-facing dashboard columns:
+    - `Candidate Name`
+    - `CandidateID`
+    - `RequestID`
+    - `Company Name`
+    - `HR Name`
+    - `HR Email`
+    - `HR Mobile Number`
+    - `Status`
+    - `Candidate Reminder`
+    - `Employer Reminder`
+    - `Completed Status`
+    - `Employer Response Received At`
+    - `Employer Email Reply At`
+    - `Last Activity At`
+    - `Severity`
+    - `Outcome`
+  - Appends a run entry into:
+    - `tblDashboardRefreshLog`
+- Status logic:
+  - Preserves the same recruiter-stage logic as the current local dashboard builder:
+    - `Candidate Form Received`
+    - `Authorisation Form Sent`
+    - `Authorisation Form Received`
+    - `Authorisation Received - Employer Email Queued`
+    - `Email Sent to Employer`
+    - `Employer Reminder 1 Sent`
+    - `Employer Reminder 2 Sent`
+    - `Employer Reminder 3 Sent`
+    - `Employer Form Received`
+    - `In Progress`
+- Important note:
+  - This refresh target is the comparison/live-flow workbook:
+    - `BGVDashboard_FLow.xlsx`
+  - The older local COM-based snapshot workbook:
+    - `BGV Dashboard.xlsx`
+    remains unchanged unless you choose to cut over later.
+
 ## How the Flows Connect
 - Candidate signature track:
   - `BGV_0` -> `BGV_1` -> `BGV_2`
@@ -313,6 +370,8 @@ This document describes the current behavior in your canonical flow files under 
 - Reminder/escalation track:
   - `BGV_3` for candidate signature delays
   - `BGV_6` for employer response delays
+- Dashboard refresh track:
+  - `BGV_9` refreshes `BGVDashboard_FLow.xlsx` from live SharePoint list data
 
 ## Notes
 - This summary is based on the current unpacked canonical flow JSON in the repo.

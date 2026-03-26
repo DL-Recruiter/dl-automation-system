@@ -3763,3 +3763,32 @@ Log each session with:
 - Validation commands run:
   - `Copy-Item -LiteralPath "out\dashboard\BGV Dashboard - Power Automate Prototype.xlsx" -Destination "out\dashboard\BGVDashboard_FLow.xlsx" -Force`
   - `m365 spo file add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --folder "BGV Records/Dashboard" --path "out/dashboard/BGVDashboard_FLow.xlsx" --overwrite`
+- Date: 2026-03-26
+- Task: Build and deploy live cloud dashboard refresh flow.
+- Completed tasks:
+  - Added new canonical flow:
+    - `BGV_9_Refresh_Dashboard_Excel`
+  - Added new solution workflow metadata:
+    - `flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json`
+    - `flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json.data.xml`
+  - Registered a new Excel Online (Business) connection reference in:
+    - `flows/power-automate/unpacked/Other/Customizations.xml`
+  - Updated solution manifest root components in:
+    - `flows/power-automate/unpacked/Other/Solution.xml`
+  - Built the new cloud refresh target workbook around stable tables:
+    - `BGV Records/Dashboard/BGVDashboard_FLow.xlsx`
+  - Wired the flow to:
+    - read `BGV_Candidates`, `BGV_Requests`, and `BGV_FormData`
+    - clear `tblDashboardCasesPA`
+    - repopulate recruiter-facing dashboard rows
+    - append refresh log rows into `tblDashboardRefreshLog`
+  - Preserved recruiter-facing status/reminder/completed logic as closely as possible while removing `Overdue`.
+  - Imported and published the updated solution successfully using `recruitment@dlresources.com.sg`.
+- Validation commands run:
+  - `pac auth who`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+  - `pac solution create-settings --solution-folder .\flows\power-automate\unpacked --settings-file .\out\deployment-settings\bgv9_live.settings.json`
+  - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_live.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
+- Notes:
+  - The cloud refresh target is intentionally separate from the original snapshot workbook so both dashboards can be compared side by side.

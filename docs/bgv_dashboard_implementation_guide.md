@@ -91,6 +91,20 @@ The repo now also contains a separate redesign package for a cloud-refreshable v
 
 That prototype is intentionally separate from the live workbook so we can review the new table-driven structure before changing the SharePoint dashboard file.
 
+## New cloud refresh flow
+
+The repo now also includes a cloud refresh flow for the Power Automate-friendly dashboard workbook:
+
+- `BGV_9_Refresh_Dashboard_Excel`
+
+Current target workbook:
+
+- `BGV Records/Dashboard/BGVDashboard_FLow.xlsx`
+
+The older local builder and scheduled task remain available as backup for the original snapshot workbook:
+
+- `BGV Records/Dashboard/BGV Dashboard.xlsx`
+
 ### 4. Windows Task Scheduler
 
 Used to automate the local dashboard refresh during working hours.
