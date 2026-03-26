@@ -80,6 +80,17 @@ The main builder is a PowerShell script:
 
 This is the real source of truth for the dashboard build process.
 
+## Power Automate-first redesign reference
+
+The repo now also contains a separate redesign package for a cloud-refreshable version of the dashboard:
+
+- design document:
+  - `docs/bgv_dashboard_power_automate_redesign.md`
+- comparison workbook:
+  - `out/dashboard/BGV Dashboard - Power Automate Prototype.xlsx`
+
+That prototype is intentionally separate from the live workbook so we can review the new table-driven structure before changing the SharePoint dashboard file.
+
 ### 4. Windows Task Scheduler
 
 Used to automate the local dashboard refresh during working hours.

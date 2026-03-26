@@ -3714,3 +3714,35 @@ Log each session with:
   - runs daily at `09:00`, `12:00`, `15:00`, `18:00`, and `21:00`
   - uses the existing local dashboard build script with SharePoint upload
   - does not consume Power Automate cloud flow capacity
+- Date: 2026-03-26
+- Task: Prepare Power Automate-first dashboard redesign and comparison workbook.
+- Completed tasks:
+  - Reviewed the current dashboard builder, local refresh helpers, and dashboard docs to capture the current logic for:
+    - `Status`
+    - `Candidate Reminder`
+    - `Employer Reminder`
+    - `Completed Status`
+    - `Last Activity At`
+  - Documented the cloud-refreshable target design in:
+    - `docs/bgv_dashboard_power_automate_redesign.md`
+  - Defined the recommended stable workbook structure:
+    - `Summary`
+    - `Cases`
+    - `Helper`
+    - `RefreshLog`
+    - `Comparison`
+  - Defined the target main Excel table for a future cloud refresh flow:
+    - `tblDashboardCasesPA`
+  - Defined the recommended future Power Automate flow:
+    - `BGV_9_Refresh_Dashboard_Excel`
+  - Confirmed the redesign removes:
+    - `Overdue`
+  - Preserved current dashboard `Status` logic in the redesign mapping plan.
+  - Added a local comparison workbook builder:
+    - `scripts/active/build_bgv_dashboard_pa_prototype.ps1`
+  - Added a separate prototype workbook artifact for side-by-side review:
+    - `out/dashboard/BGV Dashboard - Power Automate Prototype.xlsx`
+- Validation planned:
+  - Run the prototype builder script
+  - Confirm workbook sheets and named tables exist
+  - Review the comparison workbook before changing the live SharePoint dashboard

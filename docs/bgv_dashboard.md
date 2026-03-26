@@ -103,6 +103,15 @@ The builder also exports the reusable Power Query M logic beside the workbook fo
 
 This avoids needing Power Automate for the dashboard itself.
 
+## Power Automate-first redesign preview
+
+There is now a separate redesign document and comparison workbook for a cloud-refreshable dashboard:
+
+- `docs/bgv_dashboard_power_automate_redesign.md`
+- `out/dashboard/BGV Dashboard - Power Automate Prototype.xlsx`
+
+This prototype keeps the Summary/Cases feel close to the current workbook, removes `Overdue`, and is centered around stable Excel tables so a future Power Automate flow can refresh rows without rebuilding workbook structure.
+
 ## Manual Refresh
 
 If you want to refresh the dashboard yourself at any time, run:
