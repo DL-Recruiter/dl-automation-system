@@ -105,7 +105,7 @@
         },
         "Compose_-_CurrentSenderEmail": {
           "type": "Compose",
-          "inputs": "@toLower(trim(string(coalesce(triggerBody()?['from']?['emailAddress']?['address'], triggerBody()?['from']?['address'], ''))))",
+          "inputs": "@toLower(trim(if(contains(string(triggerBody()?['from']), '\"emailAddress\"'), string(json(string(triggerBody()?['from']))?['emailAddress']?['address']), if(contains(string(triggerBody()?['from']), '\"address\"'), string(json(string(triggerBody()?['from']))?['address']), string(coalesce(triggerBody()?['from'], ''))))))",
           "runAfter": {
             "Compose_-_CurrentSubject": [
               "Succeeded"

@@ -3688,3 +3688,16 @@ Log each session with:
 - Validation commands run:
   - `m365 spo site get --url "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570" --output json`
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+- Date: 2026-03-26
+- Task: Fix `BGV_8_Track_Employer_Email_Replies` sender parsing for incoming mailbox trigger variations.
+- Completed tasks:
+  - Updated `Compose_-_CurrentSenderEmail` so it safely handles both trigger shapes returned by `When a new email arrives (V3)`:
+    - sender as an object containing `emailAddress.address`
+    - sender as a plain string email address
+  - Removed the runtime dependency on direct property selection from a value that may already be a string.
+  - Kept the rest of the reply-tracking logic unchanged:
+    - primary subject match by `RequestID`
+    - fallback sender-email match
+    - latest `EmployerEmailReplyAt` wins
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_8_Track_Employer_Email_Replies-FA5CF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`

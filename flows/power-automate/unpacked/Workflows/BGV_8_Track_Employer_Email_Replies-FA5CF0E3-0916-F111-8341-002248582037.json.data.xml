@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Workflow WorkflowId="{fa5cf0e3-0916-f111-8341-002248582037}" Name="BGV_8_Track_Employer_Email_Replies" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <JsonFileName>/Workflows/BGV_8_Track_Employer_Email_Replies-FA5CF0E3-0916-F111-8341-002248582037.json</JsonFileName>
   <Type>1</Type>
@@ -11,8 +11,8 @@
   <TriggerOnDelete>0</TriggerOnDelete>
   <AsyncAutodelete>0</AsyncAutodelete>
   <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
-  <StateCode>0</StateCode>
-  <StatusCode>1</StatusCode>
+  <StateCode>1</StateCode>
+  <StatusCode>2</StatusCode>
   <RunAs>1</RunAs>
   <IsTransacted>1</IsTransacted>
   <IntroducedVersion>1.0.0.0</IntroducedVersion>
