@@ -320,6 +320,10 @@ This document describes the current behavior in your canonical flow files under 
   - Clears the existing Excel table:
     - `tblDashboardCasesPA`
   - Rebuilds one dashboard row per `RequestID`
+  - Uses Singapore time (`SGT`) formatting for dashboard date/time display fields.
+  - Applies dashboard row-retention cleanup by skipping rows when:
+    - `Reminder 3 Sent` and no response for `>= 3 days` after `Reminder3At`
+    - `Responded` and `>= 3 days` after `ResponseReceivedAt`
   - Writes recruiter-facing dashboard columns:
     - `Candidate Name`
     - `CandidateID`
@@ -339,6 +343,7 @@ This document describes the current behavior in your canonical flow files under 
     - `Outcome`
   - Appends a run entry into:
     - `tblDashboardRefreshLog`
+    - timestamp value is written in SGT format (legacy column name remains `Run At (UTC)`).
 - Status logic:
   - Preserves the same recruiter-stage logic as the current local dashboard builder:
     - `Candidate Form Received`

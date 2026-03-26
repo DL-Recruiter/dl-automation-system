@@ -3843,3 +3843,23 @@ Log each session with:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
   - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_live.zip --packagetype Unmanaged`
   - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
+- Date: 2026-03-26
+- Task: Align `BGV_9` dashboard timestamps to SGT and apply 3-day case-retention removal rules.
+- Completed tasks:
+  - Updated `BGV_9_Refresh_Dashboard_Excel` time mappings to Singapore time for dashboard output fields:
+    - `Candidate Reminder`
+    - `Employer Reminder`
+    - `Employer Response Received At`
+    - `Employer Email Reply At`
+    - `Last Activity At`
+  - Updated refresh-log timestamp output to write SGT-formatted time values.
+  - Added row-retention filter logic inside the flow so dashboard rows are skipped when either condition is met:
+    - `VerificationStatus = Reminder 3 Sent` and no employer response for at least 3 days since `Reminder3At`
+    - `VerificationStatus = Responded` and at least 3 days have passed since `ResponseReceivedAt`
+  - Kept all other rows included so active cases remain visible in `tblDashboardCasesPA`.
+  - Repacked and reimported the solution; customizations were published successfully.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+  - `pac auth who`
+  - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_live.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
