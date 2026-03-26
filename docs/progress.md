@@ -3831,3 +3831,15 @@ Log each session with:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
   - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_live.zip --packagetype Unmanaged`
   - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
+- Date: 2026-03-26
+- Task: Fix `BGV_9` dashboard choice-field text mapping for Severity/Outcome.
+- Completed tasks:
+  - Investigated dashboard output where `Severity` (and similar choice fields) were showing raw SharePoint expanded-reference JSON in Excel.
+  - Updated `BGV_9_Refresh_Dashboard_Excel` Excel row mapping:
+    - `Severity` now writes `Severity.Value` when present, with safe fallback to plain value
+    - `Outcome` now writes `Outcome.Value` when present, with safe fallback to plain value
+  - Repacked and reimported the solution to publish the fix in live flow definition.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_live.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`

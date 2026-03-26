@@ -364,8 +364,8 @@
                         "Employer Response Received At": "@coalesce(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],'')",
                         "Employer Email Reply At": "@coalesce(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt'],'')",
                         "Last Activity At": "@coalesce(outputs('Compose_LastActivityAt'),'')",
-                        "Severity": "@coalesce(items('Apply_to_each_(Requests)')?['Severity'],'')",
-                        "Outcome": "@coalesce(items('Apply_to_each_(Requests)')?['Outcome'],'')"
+                        "Severity": "@coalesce(items('Apply_to_each_(Requests)')?['Severity']?['Value'],items('Apply_to_each_(Requests)')?['Severity'],'')",
+                        "Outcome": "@coalesce(items('Apply_to_each_(Requests)')?['Outcome']?['Value'],items('Apply_to_each_(Requests)')?['Outcome'],'')"
                       }
                     },
                     "host": {
