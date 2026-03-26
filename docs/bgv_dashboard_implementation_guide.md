@@ -86,10 +86,10 @@ The repo now also contains a separate redesign package for a cloud-refreshable v
 
 - design document:
   - `docs/bgv_dashboard_power_automate_redesign.md`
-- comparison workbook:
-  - `out/dashboard/BGV Dashboard - Power Automate Prototype.xlsx`
+- workbook builder output:
+  - `out/dashboard/BGVDashboard_FLow.xlsx`
 
-That prototype is intentionally separate from the live workbook so we can review the new table-driven structure before changing the SharePoint dashboard file.
+That workbook is intentionally separate from the original snapshot dashboard so both approaches can be compared side by side in SharePoint.
 
 ## New cloud refresh flow
 

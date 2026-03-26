@@ -105,14 +105,14 @@ This avoids needing Power Automate for the dashboard itself.
 
 ## Power Automate-first redesign preview
 
-There is now a separate redesign document and comparison workbook for a cloud-refreshable dashboard:
+There is now a separate redesign document and a cloud-refreshable dashboard workbook for the Power Automate-managed version:
 
 - `docs/bgv_dashboard_power_automate_redesign.md`
-- `out/dashboard/BGV Dashboard - Power Automate Prototype.xlsx`
+- `out/dashboard/BGVDashboard_FLow.xlsx`
 - SharePoint comparison workbook:
   - `BGV Records/Dashboard/BGVDashboard_FLow.xlsx`
 
-This prototype keeps the Summary/Cases feel close to the current workbook, removes `Overdue`, and is centered around stable Excel tables so a future Power Automate flow can refresh rows without rebuilding workbook structure.
+This workbook keeps the Summary/Cases feel close to the current dashboard, removes `Overdue`, and is centered around stable Excel tables so Power Automate can refresh rows without rebuilding workbook structure.
 
 ## Live cloud-refresh target
 

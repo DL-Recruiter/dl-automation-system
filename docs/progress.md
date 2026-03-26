@@ -3792,3 +3792,26 @@ Log each session with:
   - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
 - Notes:
   - The cloud refresh target is intentionally separate from the original snapshot workbook so both dashboards can be compared side by side.
+- Date: 2026-03-26
+- Task: Refine `BGVDashboard_FLow` workbook layout for live use.
+- Completed tasks:
+  - Updated `scripts/active/build_bgv_dashboard_pa_prototype.ps1` so the flow-managed workbook now builds as:
+    - `out/dashboard/BGVDashboard_FLow.xlsx`
+  - Removed the `Comparison` sheet from the workbook structure.
+  - Removed `Prototype` wording from the Summary sheet and refresh log wording.
+  - Added a `Completed Cases` KPI card to the first page.
+  - Shifted the status/severity summary tables upward on the Summary sheet for a tighter first-page layout.
+  - Rebuilt the local workbook and verified sheets/tables:
+    - `Summary`
+    - `Cases`
+    - `Helper`
+    - `RefreshLog`
+    - `tblDashboardCasesPA`
+    - `tblDashboardStatusLegend`
+    - `tblDashboardSeverityLegend`
+    - `tblDashboardRefreshLog`
+- Validation commands run:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\active\build_bgv_dashboard_pa_prototype.ps1`
+  - Excel COM inspection of `out/dashboard/BGVDashboard_FLow.xlsx`
+- Blockers:
+  - SharePoint overwrite attempt for `BGV Records/Dashboard/BGVDashboard_FLow.xlsx` was blocked because the file is locked for shared use by `recruitment@dlresources.com.sg`.

@@ -1,5 +1,5 @@
 param(
-    [string]$OutputPath = (Join-Path $PSScriptRoot "..\\..\\out\\dashboard\\BGV Dashboard - Power Automate Prototype.xlsx")
+    [string]$OutputPath = (Join-Path $PSScriptRoot "..\\..\\out\\dashboard\\BGVDashboard_FLow.xlsx")
 )
 
 Set-StrictMode -Version Latest
@@ -56,7 +56,7 @@ try {
 
     $workbook = $excel.Workbooks.Add()
 
-    while ($workbook.Worksheets.Count -lt 5) {
+    while ($workbook.Worksheets.Count -lt 4) {
         $null = $workbook.Worksheets.Add()
     }
 
@@ -64,15 +64,13 @@ try {
     $casesSheet = $workbook.Worksheets.Item(2)
     $helperSheet = $workbook.Worksheets.Item(3)
     $refreshSheet = $workbook.Worksheets.Item(4)
-    $comparisonSheet = $workbook.Worksheets.Item(5)
 
     $summarySheet.Name = "Summary"
     $casesSheet.Name = "Cases"
     $helperSheet.Name = "Helper"
     $refreshSheet.Name = "RefreshLog"
-    $comparisonSheet.Name = "Comparison"
 
-    foreach ($sheet in @($summarySheet, $casesSheet, $helperSheet, $refreshSheet, $comparisonSheet)) {
+    foreach ($sheet in @($summarySheet, $casesSheet, $helperSheet, $refreshSheet)) {
         $sheet.Cells.Font.Name = "Calibri"
         $sheet.Cells.Font.Size = 11
     }
@@ -102,32 +100,34 @@ try {
     $casesSheet.Columns.Item(1).Hidden = $true
     $casesSheet.Range("A1:Q2").EntireColumn.AutoFit() | Out-Null
 
-    $summarySheet.Range("A1").Value2 = "BGV Dashboard - Power Automate Prototype"
+    $summarySheet.Range("A1").Value2 = "BGV Dashboard Flow"
     $summarySheet.Range("A1").Font.Size = 18
     $summarySheet.Range("A1").Font.Bold = $true
-    $summarySheet.Range("A3").Value2 = "This workbook is a prototype for a cloud-refreshable dashboard. Power Automate should update only Excel tables; it should not rebuild workbook structure."
-    $summarySheet.Range("A4").Value2 = "Compared with the current dashboard, Overdue is removed and the layout is centered around tblDashboardCasesPA."
+    $summarySheet.Range("A3").Value2 = "This workbook is maintained by the cloud refresh flow and is designed around stable Excel tables."
+    $summarySheet.Range("A4").Value2 = "It keeps the recruiter dashboard focused on live request status, reminders, completion, severity, and latest activity."
     $summarySheet.Range("A3:K4").WrapText = $true
 
     $summarySheet.Range("A6").Value2 = "Total Requests"
     $summarySheet.Range("B6").Formula = "=COUNTA(tblDashboardCasesPA[RequestID])"
     $summarySheet.Range("D6").Value2 = "Open Cases"
     $summarySheet.Range("E6").Formula = "=COUNTIF(tblDashboardCasesPA[Completed Status],""No"")"
-    $summarySheet.Range("G6").Value2 = "Employer Forms Received"
-    $summarySheet.Range("H6").Formula = "=COUNTIF(tblDashboardCasesPA[Status],""Employer Form Received"")"
-    $summarySheet.Range("J6").Value2 = "Authorisation Forms Sent"
-    $summarySheet.Range("K6").Formula = "=COUNTIF(tblDashboardCasesPA[Status],""Authorisation Form Sent"")"
+    $summarySheet.Range("G6").Value2 = "Completed Cases"
+    $summarySheet.Range("H6").Formula = "=COUNTIF(tblDashboardCasesPA[Completed Status],""Yes"")"
+    $summarySheet.Range("J6").Value2 = "Employer Forms Received"
+    $summarySheet.Range("K6").Formula = "=COUNTIF(tblDashboardCasesPA[Status],""Employer Form Received"")"
+    $summarySheet.Range("M6").Value2 = "Authorisation Forms Sent"
+    $summarySheet.Range("N6").Formula = "=COUNTIF(tblDashboardCasesPA[Status],""Authorisation Form Sent"")"
 
-    foreach ($addr in @("A6:B7", "D6:E7", "G6:H7", "J6:K7")) {
+    foreach ($addr in @("A6:B7", "D6:E7", "G6:H7", "J6:K7", "M6:N7")) {
         $range = $summarySheet.Range($addr)
         $range.Borders.LineStyle = 1
         $range.Interior.Color = 0xD9EAF7
     }
 
-    $summarySheet.Range("A10").Value2 = "Status"
-    $summarySheet.Range("B10").Value2 = "Count"
-    $summarySheet.Range("D10").Value2 = "Severity"
-    $summarySheet.Range("E10").Value2 = "Count"
+    $summarySheet.Range("A9").Value2 = "Status"
+    $summarySheet.Range("B9").Value2 = "Count"
+    $summarySheet.Range("D9").Value2 = "Severity"
+    $summarySheet.Range("E9").Value2 = "Count"
 
     $statusLabels = @(
         "Candidate Form Received",
@@ -143,14 +143,14 @@ try {
     )
 
     for ($i = 0; $i -lt $statusLabels.Count; $i++) {
-        $row = 11 + $i
+        $row = 10 + $i
         $summarySheet.Cells.Item($row, 1).Value2 = $statusLabels[$i]
         $summarySheet.Cells.Item($row, 2).Formula = "=COUNTIF(tblDashboardCasesPA[Status],A$row)"
     }
 
     $severityLabels = @("", "Neutral", "Low", "Medium", "High")
     for ($i = 0; $i -lt $severityLabels.Count; $i++) {
-        $row = 11 + $i
+        $row = 10 + $i
         $summarySheet.Cells.Item($row, 4).Value2 = $(if ([string]::IsNullOrEmpty($severityLabels[$i])) { "(blank)" } else { $severityLabels[$i] })
         if ([string]::IsNullOrEmpty($severityLabels[$i])) {
             $summarySheet.Cells.Item($row, 5).Formula = "=COUNTBLANK(tblDashboardCasesPA[Severity])"
@@ -160,9 +160,9 @@ try {
         }
     }
 
-    $summarySheet.Range("A10:B20").Borders.LineStyle = 1
-    $summarySheet.Range("D10:E15").Borders.LineStyle = 1
-    $summarySheet.Columns("A:K").AutoFit() | Out-Null
+    $summarySheet.Range("A9:B19").Borders.LineStyle = 1
+    $summarySheet.Range("D9:E14").Borders.LineStyle = 1
+    $summarySheet.Columns("A:N").AutoFit() | Out-Null
 
     $helperSheet.Range("A1").Value2 = "Status"
     $helperSheet.Range("A1").Font.Bold = $true
@@ -185,41 +185,18 @@ try {
     $refreshHeaders = @("Run At (UTC)", "Trigger", "Refresh Mode", "Rows Written", "Notes")
     Set-HeaderRow -Worksheet $refreshSheet -Headers $refreshHeaders
     $refreshSheet.Cells.Item(2, 1).Value2 = [DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
-    $refreshSheet.Cells.Item(2, 2).Value2 = "Prototype build"
+    $refreshSheet.Cells.Item(2, 2).Value2 = "Flow-managed dashboard build"
     $refreshSheet.Cells.Item(2, 3).Value2 = "Structure only"
     $refreshSheet.Cells.Item(2, 4).Value2 = 0
-    $refreshSheet.Cells.Item(2, 5).Value2 = "Power Automate should overwrite this table on each refresh."
+    $refreshSheet.Cells.Item(2, 5).Value2 = "Power Automate refreshes this workbook through tblDashboardCasesPA and tblDashboardRefreshLog."
     Add-Table -Worksheet $refreshSheet -TableName "tblDashboardRefreshLog" -RowCount 2 -ColumnCount $refreshHeaders.Count | Out-Null
     $refreshSheet.Columns("A:E").AutoFit() | Out-Null
-
-    $comparisonRows = @(
-        @("Refresh engine", "Local PowerShell + Excel COM rebuild", "Power Automate recurrence + Excel Online table refresh"),
-        @("Workbook write pattern", "Rebuild workbook structure from scratch", "Keep structure stable and update tables only"),
-        @("Operational dependency", "Depends on local PC and scheduled task", "Cloud refresh; not machine-specific"),
-        @("Main data sheet", "Cases", "Cases"),
-        @("Summary source", "tblBGVCases", "tblDashboardCasesPA"),
-        @("Overdue column", "Present", "Removed"),
-        @("Unique row key", "Implicit request row", "Explicit hidden DashboardKey"),
-        @("Runtime lock risk", "High during overwrite", "Lower; row refresh instead of file rebuild"),
-        @("Recommended future flow", "None", "BGV_9_Refresh_Dashboard_Excel")
-    )
-
-    $comparisonHeaders = @("Area", "Current Dashboard", "Power Automate Prototype")
-    Set-HeaderRow -Worksheet $comparisonSheet -Headers $comparisonHeaders
-    for ($r = 0; $r -lt $comparisonRows.Count; $r++) {
-        for ($c = 0; $c -lt 3; $c++) {
-            $comparisonSheet.Cells.Item($r + 2, $c + 1).Value2 = $comparisonRows[$r][$c]
-        }
-    }
-    Add-Table -Worksheet $comparisonSheet -TableName "tblDashboardComparison" -RowCount ($comparisonRows.Count + 1) -ColumnCount 3 | Out-Null
-    $comparisonSheet.Columns("A:C").ColumnWidth = 35
-    $comparisonSheet.Range("A1:C10").EntireRow.AutoFit() | Out-Null
 
     $summarySheet.Activate() | Out-Null
 
     $xlOpenXmlWorkbook = 51
     $workbook.SaveAs($resolvedOutputPath, $xlOpenXmlWorkbook)
-    Write-Output "Created prototype workbook: $resolvedOutputPath"
+    Write-Output "Created dashboard-flow workbook: $resolvedOutputPath"
 }
 finally {
     if ($workbook -ne $null) {
