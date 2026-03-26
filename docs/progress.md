@@ -3678,3 +3678,13 @@ Log each session with:
   - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
 - Notes:
   - The candidate now needs to sign in with the same email address they submitted in Form 1 to open and edit the document.
+- Date: 2026-03-26
+- Task: Restore anonymous editable authorization links after SharePoint site sharing was reopened.
+- Completed tasks:
+  - Verified the live SharePoint site still has `ShareByLinkEnabled = true` and `ShareByEmailEnabled = true`.
+  - Reverted `BGV_0_CandidateDeclaration` from candidate-specific sign-in access back to the anonymous editable `CreateSharingLink` action.
+  - Restored `BGV_Candidates.AuthorizationLink` and the onboarding email body to use the anonymous edit link again.
+  - Updated the documentation so it again reflects the external-access anonymous sharing model for authorization documents.
+- Validation commands run:
+  - `m365 spo site get --url "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570" --output json`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`

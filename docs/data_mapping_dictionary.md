@@ -237,7 +237,7 @@ Note:
 | --- | --- | --- |
 | `BGV_1_Detect_Authorization_Signature` | `BGV_Candidates` | Reads by `CandidateID`; sets `ConsentTimestamp=utcNow()`, `Status='Obtained Authorization Form Signature'`, `AuthorisationSigned=true`. |
 | `BGV_2_Postsignature` | `BGV Records` library | Reads authorization `.docx` files, locks all content controls via `LockAuthorizationControls` function, overwrites file content with locked DOCX, then performs `Stop sharing` on matched files. |
-| `BGV_3_AuthReminder_5Days` | `BGV_Candidates` | Reads rows where `Status='Pending Authorization Form Signature'`; uses `AuthorizationLinkCreatedAt`, `AuthorizationLink`; updates `LastAuthReminderAt`. The stored link is the candidate-specific authorization document URL created by `BGV_0`. |
+| `BGV_3_AuthReminder_5Days` | `BGV_Candidates` | Reads rows where `Status='Pending Authorization Form Signature'`; uses `AuthorizationLinkCreatedAt`, `AuthorizationLink`; updates `LastAuthReminderAt`. The stored link is the anonymous edit authorization link created by `BGV_0`. |
 | `BGV_4_SendToEmployer_Clean` | `BGV_Requests` | Reads pending requests where `VerificationStatus='Not Sent'`; reads candidate auth status; updates `HRRequestSentAt=utcNow()`, `VerificationStatus='Email Sent'`, `uniquelinktoemployers=FinalVerificationLink`. |
 | `BGV_6_HRReminderAndEscalation` | `BGV_Requests` | Runs every 30 minutes but only processes at 9:00 AM / 5:30 PM Singapore time; reads rows with `HRRequestSentAt` present and no `ResponseReceivedAt`; uses `Reminder1At`, `Reminder2At`, `Reminder3At`, `EscalatedAt`; updates timestamps and sets `VerificationStatus='Reminder 1 Sent'/'Reminder 2 Sent'/'Reminder 3 Sent'`; stamps `EscalatedAt` when recruiter escalation is posted; sets `BGV Checks='No response at Reminder 2'` after the reminder-2 delay and `BGV Checks='Form Filled and Cleared'` when reminder 3 is sent. |
 | `BGV_7_Generate_Report_Summary` | `BGV Records` document library | Reads `ReportSummary_Template.docx` by path, fills it using `BGV_FormData.Form2RawJson` plus Form 1 data from `Form1RawJson` when present or normalized `F1_*` fields as fallback, writes `RS_EmpN.docx` into `Candidate Files/{CandidateID}/`, and posts a Teams message with the report link when a new report is first created. |
@@ -252,7 +252,7 @@ Note:
 | Authorization document file | `Authorization Form - {CandidateID}.docx` created from Word template |
 | Authorization template ID controls | `IdentificationNumberNRIC` content control: candidate NRIC else `N/A`; `IdentificationNumberPassport` content control: `N/A` when NRIC exists, else candidate Passport, else `N/A` |
 | Authorization consent checkbox | Template includes bottom text `Yes, I authorized` with checkbox content-control tag `SignedYes` for parser-compatible signed/unchecked detection in `BGV_1` |
-| Authorization link | Candidate-specific edit document URL written to `BGV_Candidates.AuthorizationLink` after `BGV_0` grants access to the candidate email |
+| Share link | Anonymous edit document link written to `BGV_Candidates.AuthorizationLink` |
 | Signature lifecycle | `BGV_1` parses signed document; `BGV_2` stops sharing after signature status is set |
 
 ## 10) Coverage Note (Current-State Accuracy)
