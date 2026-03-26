@@ -277,7 +277,9 @@ This document describes the current behavior in your canonical flow files under 
   - Candidate folder path used:
     - `BGV Records/Candidate Files/<CandidateID>/`
   - If the report already exists, updates the file content in place.
-  - If the report does not exist yet, creates it and posts a Teams message to `DLR Recruitment Ops > BGV` with the report link.
+  - If the report does not exist yet, creates it and checks one-time post flags before posting to Teams.
+  - Teams post (`Report Summary Created`) only sends when both `BGV_Requests.Report Summary Teams Posted At` and `BGV_FormData.Report Summary Teams Posted At` are blank.
+  - After a successful Teams post, flow stamps both fields with current UTC time so it will not post that same report summary again.
 - Main outcome: Each completed employer verification now gets a report-summary DOCX generated from the real SharePoint template and stored in the correct candidate folder.
 
 ### `BGV_8_Track_Employer_Email_Replies`

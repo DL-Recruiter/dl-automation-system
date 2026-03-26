@@ -6,6 +6,47 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-26 (BGV_7 one-time report-summary Teams post guard)
+- Current status:
+  - Added idempotency guard so `BGV_7` report-summary Teams post sends only once per request/report.
+- Completed tasks:
+  - Added a new DateTime tracking column to live SharePoint lists:
+    - `BGV_Requests`: `Report Summary Teams Posted At` (internal name `Report_x0020_Summary_x0020_Teams`)
+    - `BGV_FormData`: `Report Summary Teams Posted At` (internal name `Report_x0020_Summary_x0020_Teams`)
+  - Updated `BGV_7_Generate_Report_Summary` flow JSON so in the create-report path it:
+    - checks both tracking fields are blank before posting Teams message
+    - posts `Report Summary Created` only when both are blank
+    - updates both list items with `utcNow()` after successful post
+  - Updated easy-English flow doc to reflect this one-time posting behavior.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "Report_x0020_Summary_x0020_Teams|Condition_-_Report_Summary_Post_Not_Already_Sent" flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json`
+  - `m365 spo field list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests`
+  - `m365 spo field list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_FormData`
+- Next actions and blockers:
+  - Import/apply updated canonical flow JSON so runtime flow includes this guard.
+  - Existing runs that already posted before this change are not retroactively altered.
+
+## 2026-03-26 (BGV_4 requests-loop failure hardening)
+- Current status:
+  - Diagnosed latest live `BGV_4_SendToEmployer_Clean` failure (`2026-03-26`) as a failure cascade from the inner authorization-files loop (`For_each`) inside the requests loop.
+- Completed tasks:
+  - Pulled live failed run details for flow `BGV_4_SendToEmployer_Clean` in environment `Default-38597470-4753-461a-837f-ad8c14860b22`.
+  - Updated canonical `BGV_4` flow JSON to harden two fragile expressions:
+    - candidate lookup id now uses safe fallback:
+      - `CandidateItemID/Id`
+      - `CandidateItemID#Id`
+      - `CandidateItemID.Id`
+    - authorization files foreach now tolerates null:
+      - `@coalesce(outputs('Get_files_(properties_only)')?['body/value'],createArray())`
+  - This prevents loop-level failure when file list payload is null and avoids candidate-id shape drift issues.
+- Validation commands run:
+  - `m365 flow run get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 8eeeed39-e02f-4b7a-82c8-fc51f245d863 --name 08584270882440027587298161840CU29 --withActions`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "CandidateItemID/Id|CandidateItemID#Id|coalesce\\(outputs\\('Get_files_\\(properties_only\\)'\\)\\?\\['body/value'\\],createArray\\(\\)\\)" flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+- Next actions and blockers:
+  - Import/apply updated canonical `BGV_4` JSON to live flow, then resubmit failed run to verify no loop crash.
+
 ## 2026-03-23 (BGV_5 outcome self-reference save fix)
 - Current status:
   - Fixed the `BGV_5_Response1` save error caused by invalid self-reference while appending to `varOutcome`.

@@ -102,7 +102,7 @@
                 "parameters": {
                   "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
                   "table": "65747b59-c6b0-4671-ae37-79e35ad84c48",
-                  "id": "@items('Apply_to_each_(Requests_Loop)')?['CandidateItemID/Id']"
+                  "id": "@coalesce(items('Apply_to_each_(Requests_Loop)')?['CandidateItemID/Id'],items('Apply_to_each_(Requests_Loop)')?['CandidateItemID#Id'],items('Apply_to_each_(Requests_Loop)')?['CandidateItemID']?['Id'])"
                 },
                 "host": {
                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -186,7 +186,7 @@
                 },
                 "For_each": {
                   "type": "Foreach",
-                  "foreach": "@outputs('Get_files_(properties_only)')?['body/value']",
+                  "foreach": "@coalesce(outputs('Get_files_(properties_only)')?['body/value'],createArray())",
                   "actions": {
                     "Get_file_content": {
                       "type": "OpenApiConnection",
