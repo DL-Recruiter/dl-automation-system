@@ -3815,3 +3815,19 @@ Log each session with:
   - Excel COM inspection of `out/dashboard/BGVDashboard_FLow.xlsx`
 - Blockers:
   - SharePoint overwrite attempt for `BGV Records/Dashboard/BGVDashboard_FLow.xlsx` was blocked because the file is locked for shared use by `recruitment@dlresources.com.sg`.
+- Date: 2026-03-26
+- Task: Fix `BGV_9_Refresh_Dashboard_Excel` Excel connector drive-id validation error.
+- Completed tasks:
+  - Investigated the live save error:
+    - `excelonlinebusiness` `GetTable`
+    - `The provided drive id appears to be malformed, or does not represent a valid drive.`
+  - Retrieved the real SharePoint Graph identifiers for the flow workbook:
+    - drive id: `b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp`
+    - file id: `017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD`
+  - Updated all Excel Online actions in `BGV_9` to use valid drive/file identifiers rather than the malformed drive value.
+  - Packed and re-imported the solution, then published customizations.
+- Validation commands run:
+  - `m365 request --url "https://graph.microsoft.com/v1.0/drives/b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp/root:/Dashboard/BGVDashboard_FLow.xlsx" --output json`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_live.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`

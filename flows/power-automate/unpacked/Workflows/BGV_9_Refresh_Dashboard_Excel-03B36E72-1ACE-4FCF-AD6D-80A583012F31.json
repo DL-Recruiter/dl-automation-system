@@ -121,8 +121,8 @@
           "inputs": {
             "parameters": {
               "source": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "drive": "BGV Records",
-              "file": "Dashboard/BGVDashboard_FLow.xlsx",
+              "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
+              "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
               "table": "tblDashboardCasesPA"
             },
             "host": {
@@ -156,8 +156,8 @@
                   "inputs": {
                     "parameters": {
                       "source": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "drive": "BGV Records",
-                      "file": "Dashboard/BGVDashboard_FLow.xlsx",
+                      "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
+                      "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
                       "table": "tblDashboardCasesPA",
                       "idColumn": "DashboardKey",
                       "id": "@items('Apply_to_each_(Existing_Dashboard_Rows)')?['DashboardKey']"
@@ -345,8 +345,8 @@
                   "inputs": {
                     "parameters": {
                       "source": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "drive": "BGV Records",
-                      "file": "Dashboard/BGVDashboard_FLow.xlsx",
+                      "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
+                      "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
                       "table": "tblDashboardCasesPA",
                       "item": {
                         "DashboardKey": "@outputs('Compose_DashboardKey')",
@@ -398,8 +398,8 @@
           "inputs": {
             "parameters": {
               "source": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "drive": "BGV Records",
-              "file": "Dashboard/BGVDashboard_FLow.xlsx",
+              "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
+              "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
               "table": "tblDashboardRefreshLog",
               "item": {
                 "Run At (UTC)": "@utcNow()",
