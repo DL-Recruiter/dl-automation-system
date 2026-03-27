@@ -131,6 +131,9 @@ This document describes the current behavior in your canonical flow files under 
     - Employment period
     - Last drawn salary
     - Job title
+    - Company-stamp upload link (`rd5d9cb98b1aa47dd8bcd7914cd4bdc87`) pointing to an employer-specific SharePoint request folder.
+  - Creates an employer-specific request folder in `BGV Records/Candidate Files/<CandidateID>/<RequestID>`.
+  - Creates an anonymous edit sharing link for that request folder and injects it into the prefilled Form 2 key for company-stamp upload.
   - Uses the matching `BGV_FormData` row as the first source for company name/address/UEN in the employer email body, so EMP1/EMP2/EMP3 show the correct declared company details.
   - Employer email subject/body wording is synced to the latest cloud-edited template (including the newest HR instruction text), while preserving the existing dynamic mappings for declared-details and verification-link sections.
   - Employer email wording now also tells the employer to reply to the email or include the `RequestID` in the subject line when they need more information, so mailbox replies can be matched safely.
@@ -172,6 +175,9 @@ This document describes the current behavior in your canonical flow files under 
     - `VerificationStatus = Responded`
     - `ResponseReceivedAt`
     - `Severity`, `Outcome`, `BGV Checks`, `Notes`
+  - Expires employer upload access when HR has responded:
+    - locates `BGV Records/Candidate Files/<CandidateID>/<RequestID>`
+    - runs `Stop sharing` (`UnshareItem`) on that request folder.
   - `Outcome` now stores the combined flagged items detected from Form 2:
     - selected company-detail discrepancies from `Q9`
     - selected employment-detail discrepancies from `Q16`
@@ -240,6 +246,10 @@ This document describes the current behavior in your canonical flow files under 
 - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, so reminders still contain the Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
 - Escalation now stamps `EscalatedAt`, so the same unresolved request is not escalated again on every later run.
+- Adds close-window upload-link expiry for no-response cases:
+  - when `Reminder3At` is 5+ days old and `ResponseReceivedAt` is still empty
+  - finds request folder `BGV Records/Candidate Files/<CandidateID>/<RequestID>`
+  - stops sharing that folder (`UnshareItem`).
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
 
 ### `BGV_7_Generate_Report_Summary`

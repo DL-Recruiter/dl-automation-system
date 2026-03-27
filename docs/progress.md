@@ -6,6 +6,39 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-27 (BGV_4 employer upload-link key + BGV_5/BGV_6 expiry flow updates)
+- Current status:
+  - Implemented employer-specific company-stamp upload-link handling using your new Form 2 prefill key (`rd5d9cb98b1aa47dd8bcd7914cd4bdc87`) and added link-expiry automation in response/closure paths.
+- Completed tasks:
+  - Updated canonical `BGV_4_SendToEmployer_Clean`:
+    - creates request folder at `BGV Records/Candidate Files/<CandidateID>/<RequestID>`
+    - creates anonymous edit sharing link for that folder
+    - injects the folder share URL into prefilled Form 2 key `rd5d9cb98b1aa47dd8bcd7914cd4bdc87`
+    - keeps per-employer specificity via `RequestID` (EMP1/EMP2/EMP3).
+  - Updated canonical `BGV_5_Response1`:
+    - after successful employer response processing, locates request folder and runs `UnshareItem` to expire the upload link.
+  - Updated canonical `BGV_6_HRReminderAndEscalation`:
+    - added close-window branch for no-response cases (`Reminder3At` >= 5 days, `ResponseReceivedAt` empty)
+    - locates request folder and runs `UnshareItem` to expire upload access when the unresolved case reaches closure window.
+  - Updated flow documentation:
+    - `docs/flows_easy_english.md` now reflects the new upload-link key mapping and expiry behavior in flows 4/5/6.
+  - Deployed live and synced:
+    - packed and imported solution to default environment
+    - ran `scripts/active/bgv_daily_sync.ps1` after import so local canonical files match live state.
+- Validation commands run:
+  - `pac auth who`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --folder .\\flows\\power-automate\\unpacked --zipfile .\\artifacts\\exports\\BGV_System_dashboard_live.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\\artifacts\\exports\\BGV_System_dashboard_live.zip --settings-file .\\out\\deployment-settings\\bgv9_live.settings.json --publish-changes --force-overwrite`
+  - `powershell -ExecutionPolicy Bypass -File .\\scripts\\active\\bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+- Next actions and blockers:
+  - If employers mainly use reminder emails instead of the first email, consider adding the same anonymous folder-share generation chain into `BGV_6` reminder prefill link (currently reminder link rebuild is unchanged except for existing form prefill fields).
+  - Run one live end-to-end test with a real EMP slot to verify:
+    - prefilled upload URL opens correctly for external HR
+    - link is unshared immediately after response in `BGV_5`.
+
 ## 2026-03-26 (BGV_7 one-time report-summary Teams post guard)
 - Current status:
   - Added idempotency guard so `BGV_7` report-summary Teams post sends only once per request/report.

@@ -872,8 +872,9 @@
                     }
                   },
                   "runAfter": {
-                    "Update_item_-_of_BGV_Request": [
-                      "Succeeded"
+                    "Condition_-_Expire_Employer_Upload_Link": [
+                      "Succeeded",
+                      "Skipped"
                     ]
                   },
                   "else": {
@@ -995,6 +996,78 @@
                       "operationId": "SharedMailboxSendEmailV2"
                     },
                     "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Get_files_(Candidate_root_for_request_folder)": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                      "folderPath": "@concat('/BGV Records/Candidate Files/', items('Apply_to_each')?['CandidateID'])"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "connectionName": "shared_sharepointonline",
+                      "operationId": "GetFileItems"
+                    },
+                    "authentication": "@parameters('')"
+                  },
+                  "runAfter": {
+                    "Update_item_-_of_BGV_Request": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Filter_array_-_Request_folder_for_unshare": {
+                  "runAfter": {
+                    "Get_files_(Candidate_root_for_request_folder)": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@body('Get_files_(Candidate_root_for_request_folder)')?['value']",
+                    "where": "@equals(item()?['{Name}'], items('Apply_to_each')?['RequestID'])"
+                  }
+                },
+                "Condition_-_Expire_Employer_Upload_Link": {
+                  "runAfter": {
+                    "Filter_array_-_Request_folder_for_unshare": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "greater": [
+                          "@length(body('Filter_array_-_Request_folder_for_unshare'))",
+                          0
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "Stop_sharing_request_upload_folder": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                          "id": "@first(body('Filter_array_-_Request_folder_for_unshare'))?['ID']"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "connectionName": "shared_sharepointonline",
+                          "operationId": "UnshareItem"
+                        },
+                        "authentication": "@parameters('')"
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {}
                   }
                 }
               },
