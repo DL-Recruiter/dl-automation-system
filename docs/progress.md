@@ -4084,3 +4084,29 @@ Log each session with:
   - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
   - `m365 flow enable --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 7f4dbc87-1117-af35-a703-126c8a6485c0`
   - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 7f4dbc87-1117-af35-a703-126c8a6485c0 --query "{state:properties.state,lastModified:properties.lastModifiedTime}"`
+- Date: 2026-03-27
+- Task: Fix live BGV flow activation/connection blockers for employer-send and confirm related flows are started.
+- Completed tasks:
+  - Investigated the live `BGV_4_SendToEmployer_Clean` activation failure instead of relying on the UI warning banner alone.
+  - Identified two concrete canonical-flow issues in `BGV_4`:
+    - invalid empty-array fallback in the authorization attachment loop:
+      - changed `createArray()` to `json('[]')`
+    - invalid cross-scope dependency inside `Condition_-_AuthorisationSigned`:
+      - `Create_Request_Stamp_Folder` was using `runAfter` on `Get_items_(BGV_FormData)` even though that action lives outside the condition branch
+      - reset that action to branch-local `runAfter: {}`
+  - Repaired a malformed JSON structure in the canonical `BGV_4` file introduced while cleaning the action block:
+    - removed the stray extra closing brace after `Create_Request_Stamp_Folder.inputs`
+    - restored the top-level workflow `outputs` block so the flow JSON imports cleanly
+  - Repacked and reimported the full unmanaged solution successfully.
+  - Enabled `BGV_4_SendToEmployer_Clean` successfully in the default environment.
+  - Verified the other connection-banner flows are also in a healthy started state:
+    - `BGV_7_Generate_Report_Summary`
+    - `BGV_8_Track_Employer_Email_Replies`
+- Validation commands run:
+  - `pac auth who`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_live.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
+  - `m365 flow enable --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 8eeeed39-e02f-4b7a-82c8-fc51f245d863`
+  - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 8eeeed39-e02f-4b7a-82c8-fc51f245d863 --output json`
+  - `m365 flow list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --output json`

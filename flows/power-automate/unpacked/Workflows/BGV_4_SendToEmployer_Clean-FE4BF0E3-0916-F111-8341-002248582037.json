@@ -191,7 +191,7 @@
                 },
                 "For_each": {
                   "type": "Foreach",
-                  "foreach": "@coalesce(outputs('Get_files_(properties_only)')?['body/value'],createArray())",
+                  "foreach": "@coalesce(outputs('Get_files_(properties_only)')?['body/value'],json('[]'))",
                   "actions": {
                     "Get_file_content": {
                       "type": "OpenApiConnection",
@@ -357,11 +357,7 @@
                       "connectionName": "shared_sharepointonline"
                     }
                   },
-                  "runAfter": {
-                    "Get_items_(BGV_FormData)": [
-                      "Succeeded"
-                    ]
-                  }
+                  "runAfter": {}
                 },
                 "Create_sharing_link_for_request_stamp_folder": {
                   "type": "OpenApiConnection",
@@ -402,7 +398,8 @@
             ]
           }
         }
-      }
+      },
+      "outputs": {}
     },
     "templateName": null
   },
