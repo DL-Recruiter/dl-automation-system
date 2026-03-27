@@ -3959,3 +3959,18 @@ Log each session with:
   - `powershell -ExecutionPolicy Bypass -File .\scripts\active\bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
   - `m365 spo file add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --folder "BGV Records/Dashboard" --path "out/dashboard/BGVDashboard_FLow.xlsx" --overwrite`
   - `git diff -- flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json.data.xml`
+- Date: 2026-03-27
+- Task: Fix Flow 9 activation failure and restore started state.
+- Completed tasks:
+  - Diagnosed `BGV_9_Refresh_Dashboard_Excel` activation failure in Power Automate:
+    - template parse error was thrown while turning the flow on
+  - Simplified `Compose_Status` expression to a parser-safe version while preserving recruiter-facing reminder/responded/flagged statuses.
+  - Repacked and reimported solution.
+  - Confirmed live flow definition contains corrected `Compose_Status`.
+  - Enabled the flow successfully in the default environment.
+- Validation commands run:
+  - `m365 flow list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --output json`
+  - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 7f4dbc87-1117-af35-a703-126c8a6485c0 --output json`
+  - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_live.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
+  - `m365 flow enable --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 7f4dbc87-1117-af35-a703-126c8a6485c0`
