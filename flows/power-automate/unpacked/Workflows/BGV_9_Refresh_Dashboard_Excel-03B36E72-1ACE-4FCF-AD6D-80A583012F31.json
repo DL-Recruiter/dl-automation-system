@@ -268,11 +268,20 @@
                     ]
                   }
                 },
-                "Compose_Status": {
+                "Compose_VerificationStatusText": {
                   "type": "Compose",
-                  "inputs": "@if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Responded'),if(outputs('Compose_IsFlagged'),'Employer Form Received But Flagged','Employer Form Received'),if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Reminder 3 Sent'),'Employer Reminder 3 Sent',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Reminder 2 Sent'),'Employer Reminder 2 Sent',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Reminder 1 Sent'),'Employer Reminder 1 Sent',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Email Sent'),'Email Sent to Employer','Authorisation Form Received')))))",
+                  "inputs": "@trim(string(coalesce(items('Apply_to_each_(Requests)')?['VerificationStatus']?['Value'],items('Apply_to_each_(Requests)')?['VerificationStatus'],'')))",
                   "runAfter": {
                     "Compose_IsFlagged": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_Status": {
+                  "type": "Compose",
+                  "inputs": "@if(equals(outputs('Compose_VerificationStatusText'),'Responded'),if(outputs('Compose_IsFlagged'),'Employer Form Received But Flagged','Employer Form Received'),if(equals(outputs('Compose_VerificationStatusText'),'Reminder 3 Sent'),'Employer Reminder 3 Sent',if(equals(outputs('Compose_VerificationStatusText'),'Reminder 2 Sent'),'Employer Reminder 2 Sent',if(equals(outputs('Compose_VerificationStatusText'),'Reminder 1 Sent'),'Employer Reminder 1 Sent',if(equals(outputs('Compose_VerificationStatusText'),'Email Sent'),'Email Sent to Employer','Authorisation Form Received')))))",
+                  "runAfter": {
+                    "Compose_VerificationStatusText": [
                       "Succeeded"
                     ]
                   }
@@ -378,7 +387,7 @@
                               "and": [
                                 {
                                   "equals": [
-                                    "@items('Apply_to_each_(Requests)')?['VerificationStatus']",
+                                    "@outputs('Compose_VerificationStatusText')",
                                     "Reminder 3 Sent"
                                   ]
                                 },
@@ -493,7 +502,7 @@
           "type": "Query",
           "inputs": {
             "from": "@outputs('Get_items_(BGV_Requests)')?['body/value']",
-            "where": "@and(equals(item()?['VerificationStatus'],'Reminder 3 Sent'),empty(item()?['ResponseReceivedAt']),equals(empty(item()?['Reminder3At']),false),lessOrEquals(ticks(item()?['Reminder3At']),ticks(addDays(utcNow(),-5))))"
+            "where": "@and(equals(trim(string(coalesce(item()?['VerificationStatus']?['Value'],item()?['VerificationStatus'],''))),'Reminder 3 Sent'),empty(item()?['ResponseReceivedAt']),equals(empty(item()?['Reminder3At']),false),lessOrEquals(ticks(item()?['Reminder3At']),ticks(addDays(utcNow(),-5))))"
           },
           "runAfter": {
             "Apply_to_each_(Requests)": [
@@ -505,7 +514,7 @@
           "type": "Query",
           "inputs": {
             "from": "@outputs('Get_items_(BGV_Requests)')?['body/value']",
-            "where": "@and(equals(item()?['VerificationStatus'],'Responded'),equals(empty(item()?['ResponseReceivedAt']),false),lessOrEquals(ticks(item()?['ResponseReceivedAt']),ticks(addDays(utcNow(),-5))))"
+            "where": "@and(equals(trim(string(coalesce(item()?['VerificationStatus']?['Value'],item()?['VerificationStatus'],''))),'Responded'),equals(empty(item()?['ResponseReceivedAt']),false),lessOrEquals(ticks(item()?['ResponseReceivedAt']),ticks(addDays(utcNow(),-5))))"
           },
           "runAfter": {
             "Filter_array_-_Closed_Reminder3_5Days": [

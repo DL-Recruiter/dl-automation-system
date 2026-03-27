@@ -3974,3 +3974,22 @@ Log each session with:
   - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_live.zip --packagetype Unmanaged`
   - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
   - `m365 flow enable --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 7f4dbc87-1117-af35-a703-126c8a6485c0`
+- Date: 2026-03-27
+- Task: Fix Flow 9 status mis-mapping caused by SharePoint Choice object comparisons.
+- Completed tasks:
+  - Identified root cause for dashboard status mismatch:
+    - `VerificationStatus` in SharePoint is a Choice object, but Flow 9 compared it as plain text.
+    - This caused status checks to fail and cases to fall back to `Authorisation Form Received`.
+  - Updated `BGV_9` to normalize request status text with:
+    - `Compose_VerificationStatusText = coalesce(VerificationStatus.Value, VerificationStatus)`
+  - Remapped status comparisons to use normalized status text in:
+    - `Compose_Status`
+    - row-retention condition checks
+    - closed-case count filters
+  - Repacked/imported/published updated solution and re-enabled `BGV_9`.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_live.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
+  - `m365 flow enable --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 7f4dbc87-1117-af35-a703-126c8a6485c0`
+  - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 7f4dbc87-1117-af35-a703-126c8a6485c0 --query "{state:properties.state,lastModified:properties.lastModifiedTime}"`
