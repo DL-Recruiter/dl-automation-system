@@ -66,7 +66,9 @@ This is a redesign, not a patch. The current builder rebuilds workbook structure
 - `HR Email`
 - `HR Mobile Number`
 - `Status`
+- `Candidate Email Sent At`
 - `Candidate Reminder`
+- `Employer Email Sent At`
 - `Employer Reminder`
 - `Completed Status`
 - `Employer Response Received At`
@@ -111,7 +113,9 @@ This is a redesign, not a patch. The current builder rebuilds workbook structure
 | `HR Email` | `BGV_Requests` / fallback `BGV_FormData` | employer email |
 | `HR Mobile Number` | `BGV_FormData` | Form 1 HR mobile |
 | `Status` | Derived | current dashboard status logic preserved |
+| `Candidate Email Sent At` | `BGV_Candidates` | `AuthorizationLinkCreatedAt` (SGT) |
 | `Candidate Reminder` | Derived | from `LastAuthReminderAt` |
+| `Employer Email Sent At` | `BGV_Requests` | `HRRequestSentAt` (SGT) |
 | `Employer Reminder` | Derived | from `Reminder1At`, `Reminder2At`, `Reminder3At` |
 | `Completed Status` | Derived | `Yes` when `VerificationStatus = Responded`, else `No` |
 | `Employer Response Received At` | `BGV_Requests` | `ResponseReceivedAt` |

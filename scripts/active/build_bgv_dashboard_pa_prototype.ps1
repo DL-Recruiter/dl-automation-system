@@ -85,7 +85,9 @@ try {
         "HR Email",
         "HR Mobile Number",
         "Status",
+        "Candidate Email Sent At",
         "Candidate Reminder",
+        "Employer Email Sent At",
         "Employer Reminder",
         "Completed Status",
         "Completed Date",
@@ -99,7 +101,7 @@ try {
     Set-HeaderRow -Worksheet $casesSheet -Headers $caseHeaders
     Add-Table -Worksheet $casesSheet -TableName "tblDashboardCasesPA" -RowCount 2 -ColumnCount $caseHeaders.Count | Out-Null
     $casesSheet.Columns.Item(1).Hidden = $true
-    $casesSheet.Range("A1:R2").EntireColumn.AutoFit() | Out-Null
+    $casesSheet.Range("A1:T2").EntireColumn.AutoFit() | Out-Null
 
     $summarySheet.Range("A1").Value2 = "BGV Dashboard Flow"
     $summarySheet.Range("A1").Font.Size = 18

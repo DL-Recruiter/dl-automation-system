@@ -19,7 +19,9 @@ The current operational dashboard is `BGVDashboard_FLow.xlsx`.
 | `HR Email` | Employer HR email for follow-up. | `BGV_FormData.F1_HREmail`, fallback `BGV_Requests.EmployerHR_Email` |
 | `HR Mobile Number` | Employer HR mobile/contact number. | `BGV_FormData.F1_HRMobile` |
 | `Status` | Single recruiter-facing case stage across authorization and employer verification. | Derived from candidate authorization state + request verification + severity |
+| `Candidate Email Sent At` | Timestamp when authorization-form email was sent to candidate. | `BGV_Candidates.AuthorizationLinkCreatedAt` shown in SGT |
 | `Candidate Reminder` | Whether a candidate reminder has been sent and when. | `BGV_Candidates.LastAuthReminderAt` shown in SGT |
+| `Employer Email Sent At` | Timestamp when employer verification email was first sent. | `BGV_Requests.HRRequestSentAt` shown in SGT |
 | `Employer Reminder` | Latest employer reminder stage and timestamp. | latest of `Reminder1At/2At/3At` shown in SGT |
 | `Completed Status` | Whether the employer-side cycle is completed. | `Yes` when status is `Employer Form Received` or `Employer Form Received But Flagged` |
 | `Completed Date` | Completion timestamp for employer-side cycle. | `ResponseReceivedAt` shown in SGT when completed, else blank |
@@ -65,4 +67,3 @@ Key cards and counts:
   - `Cleared Rows (Total)`
 
 This keeps the recruiter view focused on active work while still tracking closed volume.
-

@@ -318,8 +318,7 @@ This document describes the current behavior in your canonical flow files under 
   - `9:00 AM`
   - `12:00 PM`
   - `3:00 PM`
-  - `6:00 PM`
-  - `9:00 PM`
+  - every 90 minutes from `8:00 AM` onward (SGT anchor)
 - Purpose:
   - Keeps the Power Automate-friendly dashboard workbook refreshed in SharePoint without depending on the local PC.
   - Writes into:
@@ -345,7 +344,9 @@ This document describes the current behavior in your canonical flow files under 
     - `HR Email`
     - `HR Mobile Number`
     - `Status`
+    - `Candidate Email Sent At`
     - `Candidate Reminder`
+    - `Employer Email Sent At`
     - `Employer Reminder`
     - `Completed Status`
     - `Completed Date`

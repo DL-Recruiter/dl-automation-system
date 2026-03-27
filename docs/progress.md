@@ -6,6 +6,41 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-27 (Dashboard email-sent timestamps + 90-minute refresh cadence + key-map doc sync)
+- Current status:
+  - Updated dashboard flow/schema so case rows now include explicit email-sent timestamps for candidate authorization and employer outreach, and aligned key-mapping docs with the latest prefill behavior.
+- Completed tasks:
+  - Updated canonical `BGV_9_Refresh_Dashboard_Excel`:
+    - recurrence changed to 90-minute cadence anchored at `08:00` SGT
+    - added `Compose_CandidateEmailSentAt` from `BGV_Candidates.AuthorizationLinkCreatedAt` (SGT formatted)
+    - added `Compose_EmployerEmailSentAt` from `BGV_Requests.HRRequestSentAt` (SGT formatted)
+    - wrote new dashboard columns in this order:
+      - `Candidate Email Sent At` before `Candidate Reminder`
+      - `Employer Email Sent At` before `Employer Reminder`
+  - Updated dashboard workbook builder:
+    - `scripts/active/build_bgv_dashboard_pa_prototype.ps1`
+    - added columns:
+      - `Candidate Email Sent At`
+      - `Employer Email Sent At`
+  - Updated dashboard/key docs:
+    - `docs/bgv_dashboard_headers.md`
+    - `docs/bgv_dashboard_power_automate_redesign.md`
+    - `docs/flows_easy_english.md`
+    - `docs/data_mapping_dictionary.md`
+  - Synced and deployed:
+    - packed/imported/published updated solution
+    - ran daily sync to re-align canonical local files with live.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+  - `pac auth who`
+  - `pac solution pack --folder .\\flows\\power-automate\\unpacked --zipfile .\\artifacts\\exports\\BGV_System_dashboard_live.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\\artifacts\\exports\\BGV_System_dashboard_live.zip --settings-file .\\out\\deployment-settings\\bgv9_live.settings.json --publish-changes --force-overwrite`
+  - `powershell -ExecutionPolicy Bypass -File .\\scripts\\active\\bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+- Next actions and blockers:
+  - Re-upload of `BGVDashboard_FLow.xlsx` to SharePoint is blocked while file is locked by `recruitment@dlresources.com.sg`.
+  - After file is closed, rerun:
+    - `m365 spo file add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --folder "BGV Records/Dashboard" --path "out/dashboard/BGVDashboard_FLow.xlsx" --overwrite`
+
 ## 2026-03-27 (BGV_4 employer upload-link key + BGV_5/BGV_6 expiry flow updates)
 - Current status:
   - Implemented employer-specific company-stamp upload-link handling using your new Form 2 prefill key (`rd5d9cb98b1aa47dd8bcd7914cd4bdc87`) and added link-expiry automation in response/closure paths.
