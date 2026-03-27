@@ -193,7 +193,7 @@
             "parameters": {
               "source": "sites/dlresourcespl88.sharepoint.com,4a00b2e1-49ac-40de-bb98-ba8ea1643a42,38c5c241-3542-4629-9b7e-f155ebc4ac49",
               "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
-              "file": "017QXH3HY4VD3KC5XPBVHKXU2XVJJNBW5I",
+              "file": "017QXH3H2C7KNCCUL4KRDIDZKFV4VC5U6H",
               "dynamicFileSchema/974713748": "@if(not(empty(outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49'])),outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49'],'N/A')",
               "dynamicFileSchema/-1424797845": "@outputs('Get_response_details')?['body/rfe96c622120343f294de908deb0e849d']",
               "dynamicFileSchema/-206184337": "@if(not(empty(outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49'])),'N/A',if(not(empty(outputs('Get_response_details')?['body/rf5b324c022804863a720ef13edeb9d9b'])),outputs('Get_response_details')?['body/rf5b324c022804863a720ef13edeb9d9b'],'N/A'))",
@@ -211,7 +211,7 @@
             ]
           },
           "metadata": {
-            "016SGZG5NYDHTWYGVEHBAJJ55N7V55HNXG": "/Templates/AuthorizationLetter_Template.docx",
+            "017QXH3H2C7KNCCUL4KRDIDZKFV4VC5U6H": "/Templates/DLRAuthorizationLetter_Template.docx",
             "operationMetadataId": "eea86399-9b39-4f42-904d-a81b4256ca44",
             "017QXH3HY4VD3KC5XPBVHKXU2XVJJNBW5I": "/Templates/AuthorizationLetter_Template.docx"
           }

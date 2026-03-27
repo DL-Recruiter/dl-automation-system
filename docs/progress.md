@@ -6,6 +6,27 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-27 (BGV_0 authorization template remap to DLRAuthorizationLetter_Template)
+- Current status:
+  - Remapped `BGV_0` Word template binding to the newly uploaded authorization template filename while preserving existing signature/checkbox/expiry behavior.
+- Completed tasks:
+  - Resolved new live template in SharePoint:
+    - `BGV Records/Templates/DLRAuthorizationLetter_Template.docx`
+    - drive id: `b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp`
+    - file id: `017QXH3H2C7KNCCUL4KRDIDZKFV4VC5U6H`
+  - Updated canonical flow:
+    - `flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json`
+    - `Populate_a_Microsoft_Word_template.inputs.parameters.file` now points to the new file id.
+    - metadata path updated to `DLRAuthorizationLetter_Template.docx`.
+  - Updated documentation reference:
+    - `docs/flows_easy_english.md` template filename/path reference.
+  - No changes made to signature detection (`BGV_1`), post-sign expiry/locking (`BGV_2`), or reminder logic (`BGV_3`).
+- Validation commands run:
+  - `m365 request --url "https://graph.microsoft.com/v1.0/drives/b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp/root:/Templates/DLRAuthorizationLetter_Template.docx" --output json`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Pack/import/publish the updated solution and run daily sync so PAC/local/live remain aligned.
+
 ## 2026-03-27 (Dashboard email-sent timestamps + daytime refresh-window cadence + key-map doc sync)
 - Current status:
   - Updated dashboard flow/schema so case rows now include explicit email-sent timestamps for candidate authorization and employer outreach, and aligned key-mapping docs with the latest prefill behavior.
