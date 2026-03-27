@@ -250,11 +250,29 @@
                     ]
                   }
                 },
-                "Compose_Status": {
+                "Compose_SeverityText": {
                   "type": "Compose",
-                  "inputs": "@if(or(equals(outputs('Compose_HasCandidate'),false),empty(first(body('Filter_array_-_Candidate_Match'))?['AuthorizationLinkCreatedAt'])),'Candidate Form Received',if(equals(outputs('Compose_AuthorisationSigned'),false),'Authorisation Form Sent',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Responded'),'Employer Form Received',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Reminder 3 Sent'),'Employer Reminder 3 Sent',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Reminder 2 Sent'),'Employer Reminder 2 Sent',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Reminder 1 Sent'),'Employer Reminder 1 Sent',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Email Sent'),'Email Sent to Employer',if(or(empty(items('Apply_to_each_(Requests)')?['VerificationStatus']),equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Not Sent')),if(and(equals(empty(items('Apply_to_each_(Requests)')?['SendAfterDate']),false),greater(formatDateTime(items('Apply_to_each_(Requests)')?['SendAfterDate'],'yyyy-MM-dd'),formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'yyyy-MM-dd'))),'Authorisation Received - Employer Email Queued','Authorisation Form Received'),'In Progress'))))))))",
+                  "inputs": "@toLower(trim(string(coalesce(items('Apply_to_each_(Requests)')?['Severity']?['Value'],items('Apply_to_each_(Requests)')?['Severity'],''))))",
                   "runAfter": {
                     "Compose_DashboardKey": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_IsFlagged": {
+                  "type": "Compose",
+                  "inputs": "@or(equals(outputs('Compose_SeverityText'),'low'),equals(outputs('Compose_SeverityText'),'medium'),equals(outputs('Compose_SeverityText'),'high'))",
+                  "runAfter": {
+                    "Compose_SeverityText": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_Status": {
+                  "type": "Compose",
+                  "inputs": "@if(or(equals(outputs('Compose_HasCandidate'),false),empty(first(body('Filter_array_-_Candidate_Match'))?['AuthorizationLinkCreatedAt'])),'Candidate Form Received',if(equals(outputs('Compose_AuthorisationSigned'),false),'Authorisation Form Sent',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Responded'),if(outputs('Compose_IsFlagged'),'Employer Form Received But Flagged','Employer Form Received'),if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Reminder 3 Sent'),'Employer Reminder 3 Sent',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Reminder 2 Sent'),'Employer Reminder 2 Sent',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Reminder 1 Sent'),'Employer Reminder 1 Sent',if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Email Sent'),'Email Sent to Employer',if(or(empty(items('Apply_to_each_(Requests)')?['VerificationStatus']),equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Not Sent')),if(and(equals(empty(items('Apply_to_each_(Requests)')?['SendAfterDate']),false),greater(formatDateTime(items('Apply_to_each_(Requests)')?['SendAfterDate'],'yyyy-MM-dd'),formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'yyyy-MM-dd'))),'Authorisation Received - Employer Email Queued','Authorisation Form Received'),'Authorisation Form Received')))))))))",
+                  "runAfter": {
+                    "Compose_IsFlagged": [
                       "Succeeded"
                     ]
                   }
@@ -324,9 +342,18 @@
                 },
                 "Compose_CompletedStatus": {
                   "type": "Compose",
-                  "inputs": "@if(equals(items('Apply_to_each_(Requests)')?['VerificationStatus'],'Responded'),'Yes','No')",
+                  "inputs": "@if(or(equals(outputs('Compose_Status'),'Employer Form Received'),equals(outputs('Compose_Status'),'Employer Form Received But Flagged')),'Yes','No')",
                   "runAfter": {
                     "Compose_EmployerReminder": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_CompletedDate": {
+                  "type": "Compose",
+                  "inputs": "@if(equals(outputs('Compose_CompletedStatus'),'Yes'),if(equals(empty(items('Apply_to_each_(Requests)')?['ResponseReceivedAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),'')",
+                  "runAfter": {
+                    "Compose_CompletedStatus": [
                       "Succeeded"
                     ]
                   }
@@ -335,7 +362,7 @@
                   "type": "Compose",
                   "inputs": "@if(equals(empty(coalesce(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt'],items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],items('Apply_to_each_(Requests)')?['Reminder3At'],items('Apply_to_each_(Requests)')?['Reminder2At'],items('Apply_to_each_(Requests)')?['Reminder1At'],items('Apply_to_each_(Requests)')?['HRRequestSentAt'],if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp']),false)),first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp'],null),if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt']),false)),first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt'],null),items('Apply_to_each_(Requests)')?['Modified'],if(outputs('Compose_HasCandidate'),first(body('Filter_array_-_Candidate_Match'))?['Modified'],null),if(outputs('Compose_HasFormData'),first(body('Filter_array_-_FormData_Match'))?['Modified'],null))),true),'',formatDateTime(convertTimeZone(coalesce(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt'],items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],items('Apply_to_each_(Requests)')?['Reminder3At'],items('Apply_to_each_(Requests)')?['Reminder2At'],items('Apply_to_each_(Requests)')?['Reminder1At'],items('Apply_to_each_(Requests)')?['HRRequestSentAt'],if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp']),false)),first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp'],null),if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt']),false)),first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt'],null),items('Apply_to_each_(Requests)')?['Modified'],if(outputs('Compose_HasCandidate'),first(body('Filter_array_-_Candidate_Match'))?['Modified'],null),if(outputs('Compose_HasFormData'),first(body('Filter_array_-_FormData_Match'))?['Modified'],null)),'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'))",
                   "runAfter": {
-                    "Compose_CompletedStatus": [
+                    "Compose_CompletedDate": [
                       "Succeeded"
                     ]
                   }
@@ -370,7 +397,7 @@
                                 {
                                   "lessOrEquals": [
                                     "@ticks(items('Apply_to_each_(Requests)')?['Reminder3At'])",
-                                    "@ticks(addDays(utcNow(),-3))"
+                                    "@ticks(addDays(utcNow(),-5))"
                                   ]
                                 }
                               ]
@@ -379,8 +406,8 @@
                               "and": [
                                 {
                                   "equals": [
-                                    "@items('Apply_to_each_(Requests)')?['VerificationStatus']",
-                                    "Responded"
+                                    "@outputs('Compose_CompletedStatus')",
+                                    "Yes"
                                   ]
                                 },
                                 {
@@ -392,7 +419,7 @@
                                 {
                                   "lessOrEquals": [
                                     "@ticks(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'])",
-                                    "@ticks(addDays(utcNow(),-3))"
+                                    "@ticks(addDays(utcNow(),-5))"
                                   ]
                                 }
                               ]
@@ -424,6 +451,7 @@
                             "Candidate Reminder": "@outputs('Compose_CandidateReminder')",
                             "Employer Reminder": "@outputs('Compose_EmployerReminder')",
                             "Completed Status": "@outputs('Compose_CompletedStatus')",
+                            "Completed Date": "@outputs('Compose_CompletedDate')",
                             "Employer Response Received At": "@if(equals(empty(items('Apply_to_each_(Requests)')?['ResponseReceivedAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'))",
                             "Employer Email Reply At": "@if(equals(empty(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'))",
                             "Last Activity At": "@coalesce(outputs('Compose_LastActivityAt'),'')",
@@ -461,6 +489,105 @@
             ]
           }
         },
+        "Filter_array_-_Closed_Reminder3_5Days": {
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('Get_items_(BGV_Requests)')?['body/value']",
+            "where": "@and(equals(item()?['VerificationStatus'],'Reminder 3 Sent'),empty(item()?['ResponseReceivedAt']),equals(empty(item()?['Reminder3At']),false),lessOrEquals(ticks(item()?['Reminder3At']),ticks(addDays(utcNow(),-5))))"
+          },
+          "runAfter": {
+            "Apply_to_each_(Requests)": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Filter_array_-_Closed_Responded_5Days": {
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('Get_items_(BGV_Requests)')?['body/value']",
+            "where": "@and(equals(item()?['VerificationStatus'],'Responded'),equals(empty(item()?['ResponseReceivedAt']),false),lessOrEquals(ticks(item()?['ResponseReceivedAt']),ticks(addDays(utcNow(),-5))))"
+          },
+          "runAfter": {
+            "Filter_array_-_Closed_Reminder3_5Days": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Filter_array_-_Closed_Responded_Flagged_5Days": {
+          "type": "Query",
+          "inputs": {
+            "from": "@body('Filter_array_-_Closed_Responded_5Days')",
+            "where": "@or(equals(toLower(trim(string(coalesce(item()?['Severity']?['Value'],item()?['Severity'],'')))),'low'),equals(toLower(trim(string(coalesce(item()?['Severity']?['Value'],item()?['Severity'],'')))),'medium'),equals(toLower(trim(string(coalesce(item()?['Severity']?['Value'],item()?['Severity'],'')))),'high'))"
+          },
+          "runAfter": {
+            "Filter_array_-_Closed_Responded_5Days": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Compose_ClosedReminder3Count": {
+          "type": "Compose",
+          "inputs": "@length(body('Filter_array_-_Closed_Reminder3_5Days'))",
+          "runAfter": {
+            "Filter_array_-_Closed_Responded_Flagged_5Days": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Compose_ClosedRespondedCount": {
+          "type": "Compose",
+          "inputs": "@length(body('Filter_array_-_Closed_Responded_5Days'))",
+          "runAfter": {
+            "Compose_ClosedReminder3Count": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Compose_ClosedRespondedFlaggedCount": {
+          "type": "Compose",
+          "inputs": "@length(body('Filter_array_-_Closed_Responded_Flagged_5Days'))",
+          "runAfter": {
+            "Compose_ClosedRespondedCount": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Compose_ClosedRespondedClearCount": {
+          "type": "Compose",
+          "inputs": "@sub(outputs('Compose_ClosedRespondedCount'),outputs('Compose_ClosedRespondedFlaggedCount'))",
+          "runAfter": {
+            "Compose_ClosedRespondedFlaggedCount": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Compose_TotalRequests": {
+          "type": "Compose",
+          "inputs": "@length(outputs('Get_items_(BGV_Requests)')?['body/value'])",
+          "runAfter": {
+            "Compose_ClosedRespondedClearCount": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Compose_ClearedCases": {
+          "type": "Compose",
+          "inputs": "@add(outputs('Compose_ClosedReminder3Count'),outputs('Compose_ClosedRespondedCount'))",
+          "runAfter": {
+            "Compose_TotalRequests": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Compose_ActiveCases": {
+          "type": "Compose",
+          "inputs": "@sub(outputs('Compose_TotalRequests'),outputs('Compose_ClearedCases'))",
+          "runAfter": {
+            "Compose_ClearedCases": [
+              "Succeeded"
+            ]
+          }
+        },
         "Add_a_row_into_tblDashboardRefreshLog": {
           "type": "OpenApiConnection",
           "inputs": {
@@ -470,10 +597,16 @@
               "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
               "table": "tblDashboardRefreshLog",
               "item": {
-                "Run At (UTC)": "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')",
+                "Run At (SGT)": "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')",
                 "Trigger": "Scheduled cloud flow",
                 "Refresh Mode": "Full table refresh",
-                "Rows Written": "@length(outputs('Get_items_(BGV_Requests)')?['body/value'])",
+                "Rows Written": "@outputs('Compose_ActiveCases')",
+                "Total Requests": "@outputs('Compose_TotalRequests')",
+                "Active Cases": "@outputs('Compose_ActiveCases')",
+                "Cleared Cases": "@outputs('Compose_ClearedCases')",
+                "Closed Employer Form Received": "@outputs('Compose_ClosedRespondedClearCount')",
+                "Closed Employer Form Received But Flagged": "@outputs('Compose_ClosedRespondedFlaggedCount')",
+                "Closed Reminder 3 Sent": "@outputs('Compose_ClosedReminder3Count')",
                 "Notes": "BGV_9 refreshed tblDashboardCasesPA from SharePoint source lists."
               }
             },
@@ -485,7 +618,7 @@
             "authentication": "@parameters('$authentication')"
           },
           "runAfter": {
-            "Apply_to_each_(Requests)": [
+            "Compose_ActiveCases": [
               "Succeeded"
             ]
           }

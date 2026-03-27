@@ -1,75 +1,68 @@
 # BGV Dashboard Headers
 
-This document explains the condensed recruiter table in `BGV Dashboard.xlsx`.
+This document explains the recruiter table and summary logic for:
 
-The workbook is intentionally lean so recruiters can scan cases quickly.
+- `BGV Dashboard.xlsx` (legacy local snapshot workbook)
+- `BGVDashboard_FLow.xlsx` (cloud-refreshed flow workbook)
 
-## Recruiter Table Headers
+The current operational dashboard is `BGVDashboard_FLow.xlsx`.
 
-The main recruiter table is on the `Cases` sheet.
-
-It currently uses these headers:
+## Recruiter Table Headers (`Cases` sheet)
 
 | Header | What recruiters should use it for | Logic / source |
 | --- | --- | --- |
-| `Candidate Name` | Quick candidate identification. | `BGV_Candidates.FullName` |
-| `CandidateID` | Main case identifier for tracking and folder lookup. | `BGV_Candidates.CandidateID` / linked request rows |
+| `Candidate Name` | Quick candidate identification. | `BGV_Candidates.FullName` (fallback FormData candidate name) |
+| `CandidateID` | Main case identifier for tracking and folder lookup. | `BGV_Requests.CandidateID` |
 | `RequestID` | Employer-request identifier for one employer slot. | `BGV_Requests.RequestID` |
 | `Company Name` | Employer/company being verified. | `BGV_FormData.F1_EmployerName`, fallback `BGV_Requests.EmployerName` |
 | `HR Name` | Employer HR contact person. | `BGV_FormData.F1_HRContactName` |
 | `HR Email` | Employer HR email for follow-up. | `BGV_FormData.F1_HREmail`, fallback `BGV_Requests.EmployerHR_Email` |
 | `HR Mobile Number` | Employer HR mobile/contact number. | `BGV_FormData.F1_HRMobile` |
-| `Status` | Single recruiter-facing case stage across authorization and employer verification. | Derived from candidate authorization state plus `BGV_Requests.VerificationStatus` |
-| `Candidate Reminder` | Whether a candidate reminder has been sent and when. | `BGV_Candidates.LastAuthReminderAt` |
-| `Employer Reminder` | Latest employer reminder stage and timestamp. | Latest of `Reminder1At`, `Reminder2At`, `Reminder3At`, with fallback wording from request status |
-| `Overdue` | Quick overdue flag for chasing. | `Yes` when auth is unsigned after 5 days, send date has passed with no employer email, reminder 2/3 has been reached, or the case is escalated |
-| `Completed Status` | Whether the employer-side cycle is completed. | `Yes` when `BGV_Requests.VerificationStatus = Responded`; otherwise `No` |
-| `Employer Response Received At` | Timestamp of completed employer response. | `BGV_Requests.ResponseReceivedAt` |
-| `Employer Email Reply At` | Timestamp of the latest inbound employer reply email detected in the recruitment mailbox for that request. | `BGV_Requests.EmployerEmailReplyAt` |
-| `Last Activity At` | Latest known case activity for sorting and recency checks. | Max of key candidate/request/reminder/response timestamps |
+| `Status` | Single recruiter-facing case stage across authorization and employer verification. | Derived from candidate authorization state + request verification + severity |
+| `Candidate Reminder` | Whether a candidate reminder has been sent and when. | `BGV_Candidates.LastAuthReminderAt` shown in SGT |
+| `Employer Reminder` | Latest employer reminder stage and timestamp. | latest of `Reminder1At/2At/3At` shown in SGT |
+| `Completed Status` | Whether the employer-side cycle is completed. | `Yes` when status is `Employer Form Received` or `Employer Form Received But Flagged` |
+| `Completed Date` | Completion timestamp for employer-side cycle. | `ResponseReceivedAt` shown in SGT when completed, else blank |
+| `Employer Response Received At` | Timestamp of completed employer response. | `BGV_Requests.ResponseReceivedAt` shown in SGT |
+| `Employer Email Reply At` | Timestamp of latest inbound employer mailbox reply. | `BGV_Requests.EmployerEmailReplyAt` shown in SGT |
+| `Last Activity At` | Latest known case activity for sorting and recency checks. | Max of key candidate/request/reminder/response timestamps shown in SGT |
 | `Severity` | Reported risk level from employer response. | `BGV_Requests.Severity` |
 | `Outcome` | Short result/flag summary from employer response. | `BGV_Requests.Outcome` |
 
 ## `Status` Logic
 
-`Status` is the main condensed recruiter stage column.
+`Status` is the main recruiter stage:
 
-It maps the case journey like this:
+- `Candidate Form Received`
+- `Authorisation Form Sent`
+- `Authorisation Form Received`
+- `Authorisation Received - Employer Email Queued`
+- `Email Sent to Employer`
+- `Employer Reminder 1 Sent`
+- `Employer Reminder 2 Sent`
+- `Employer Reminder 3 Sent`
+- `Employer Form Received`
+- `Employer Form Received But Flagged` (when severity is `Low`, `Medium`, or `High`)
 
-| Status value | When it appears |
-| --- | --- |
-| `Candidate Form Received` | Candidate declaration exists but the authorization form has not been generated/sent yet |
-| `Authorisation Form Sent` | Authorization link exists but candidate signature is not yet confirmed |
-| `Authorisation Form Received` | Candidate signature is confirmed and employer email is ready to go now |
-| `Authorisation Received - Employer Email Queued` | Candidate signature is confirmed, but the employer email is being held until `SendAfterDate` |
-| `Email Sent to Employer` | Employer verification email has been sent and no reminder has gone yet |
-| `Employer Reminder 1 Sent` | First employer reminder has been sent |
-| `Employer Reminder 2 Sent` | Second employer reminder has been sent |
-| `Employer Reminder 3 Sent` | Third employer reminder has been sent |
-| `Employer Form Received` | Employer form response has been received and processed |
+## Row Clearing Logic (`BGVDashboard_FLow`)
 
-## Reminder Columns
+Rows are removed from the `Cases` table after 5 days when either condition is met:
 
-The workbook keeps reminders simple for recruiters:
+- `Employer Reminder 3 Sent` and still no employer response
+- completed case (`Employer Form Received` / `Employer Form Received But Flagged`) 5 days after `Completed Date`
 
-- `Candidate Reminder`
-  - `Not sent`
-  - or `1: yyyy-mm-dd hh:mm`
-- `Employer Reminder`
-  - `Not sent`
-  - `1: yyyy-mm-dd hh:mm`
-  - `2: yyyy-mm-dd hh:mm`
-  - `3: yyyy-mm-dd hh:mm`
+## Summary Sheet (How To Read)
 
-## Summary Sheet
+Key cards and counts:
 
-The `Summary` sheet is a pivot-style recruiter overview of the same table.
+- `Total Requests`: total rows in live `BGV_Requests` (includes active + cleared/closed)
+- `Open Cases`: currently visible active rows in dashboard logic
+- `Completed Cases`: active rows with completed status `Yes`
+- `Closed Cases Report`:
+  - `Closed Employer Form Received`
+  - `Closed Employer Form Received But Flagged`
+  - `Closed Reminder 3 Sent`
+  - `Cleared Rows (Total)`
 
-It includes:
+This keeps the recruiter view focused on active work while still tracking closed volume.
 
-- small KPI cards
-- a status count table
-- an overdue count table
-- a completed count table
-
-This keeps the first sheet easy to read without forcing recruiters into a full Excel PivotTable workflow.

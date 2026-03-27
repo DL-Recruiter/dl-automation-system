@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ImportExportXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26031.161" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26031.00161">
+<ImportExportXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26032.159" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26032.00159">
   <Entities />
   <Roles />
   <Workflows />
@@ -44,6 +44,14 @@
       <statecode>0</statecode>
       <statuscode>1</statuscode>
     </connectionreference>
+    <connectionreference connectionreferencelogicalname="new_sharedexcelonlinebusiness_7f4a1">
+      <connectionreferencedisplayname>Excel Online (Business) BGVChecks-7f4a1</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
     <connectionreference connectionreferencelogicalname="new_sharedmicrosoftforms_c86c2">
       <connectionreferencedisplayname>Microsoft Forms BGVChecks-c86c2</connectionreferencedisplayname>
       <connectorid>/providers/Microsoft.PowerApps/apis/shared_microsoftforms</connectorid>
@@ -63,14 +71,6 @@
     <connectionreference connectionreferencelogicalname="new_sharedsharepointonline_11e61">
       <connectionreferencedisplayname>SharePoint BGVChecks-11e61</connectionreferencedisplayname>
       <connectorid>/providers/Microsoft.PowerApps/apis/shared_sharepointonline</connectorid>
-      <iscustomizable>1</iscustomizable>
-      <promptingbehavior>0</promptingbehavior>
-      <statecode>0</statecode>
-      <statuscode>1</statuscode>
-    </connectionreference>
-    <connectionreference connectionreferencelogicalname="new_sharedexcelonlinebusiness_7f4a1">
-      <connectionreferencedisplayname>Excel Online (Business) BGVChecks-7f4a1</connectionreferencedisplayname>
-      <connectorid>/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness</connectorid>
       <iscustomizable>1</iscustomizable>
       <promptingbehavior>0</promptingbehavior>
       <statecode>0</statecode>

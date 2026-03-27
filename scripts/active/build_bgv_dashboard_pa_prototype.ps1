@@ -88,6 +88,7 @@ try {
         "Candidate Reminder",
         "Employer Reminder",
         "Completed Status",
+        "Completed Date",
         "Employer Response Received At",
         "Employer Email Reply At",
         "Last Activity At",
@@ -98,7 +99,7 @@ try {
     Set-HeaderRow -Worksheet $casesSheet -Headers $caseHeaders
     Add-Table -Worksheet $casesSheet -TableName "tblDashboardCasesPA" -RowCount 2 -ColumnCount $caseHeaders.Count | Out-Null
     $casesSheet.Columns.Item(1).Hidden = $true
-    $casesSheet.Range("A1:Q2").EntireColumn.AutoFit() | Out-Null
+    $casesSheet.Range("A1:R2").EntireColumn.AutoFit() | Out-Null
 
     $summarySheet.Range("A1").Value2 = "BGV Dashboard Flow"
     $summarySheet.Range("A1").Font.Size = 18
@@ -108,9 +109,9 @@ try {
     $summarySheet.Range("A3:K4").WrapText = $true
 
     $summarySheet.Range("A6").Value2 = "Total Requests"
-    $summarySheet.Range("B6").Formula = "=COUNTA(tblDashboardCasesPA[RequestID])"
+    $summarySheet.Range("B6").Value2 = 0
     $summarySheet.Range("D6").Value2 = "Open Cases"
-    $summarySheet.Range("E6").Formula = "=COUNTIF(tblDashboardCasesPA[Completed Status],""No"")"
+    $summarySheet.Range("E6").Value2 = 0
     $summarySheet.Range("G6").Value2 = "Completed Cases"
     $summarySheet.Range("H6").Formula = "=COUNTIF(tblDashboardCasesPA[Completed Status],""Yes"")"
     $summarySheet.Range("J6").Value2 = "Employer Forms Received"
@@ -139,7 +140,7 @@ try {
         "Employer Reminder 2 Sent",
         "Employer Reminder 3 Sent",
         "Employer Form Received",
-        "In Progress"
+        "Employer Form Received But Flagged"
     )
 
     for ($i = 0; $i -lt $statusLabels.Count; $i++) {
@@ -162,6 +163,18 @@ try {
 
     $summarySheet.Range("A9:B19").Borders.LineStyle = 1
     $summarySheet.Range("D9:E14").Borders.LineStyle = 1
+
+    $summarySheet.Range("G9").Value2 = "Closed Cases Report"
+    $summarySheet.Range("G10").Value2 = "Employer Form Received"
+    $summarySheet.Range("H10").Value2 = 0
+    $summarySheet.Range("G11").Value2 = "Employer Form Received But Flagged"
+    $summarySheet.Range("H11").Value2 = 0
+    $summarySheet.Range("G12").Value2 = "Employer Reminder 3 Sent"
+    $summarySheet.Range("H12").Value2 = 0
+    $summarySheet.Range("G13").Value2 = "Cleared Rows (Total)"
+    $summarySheet.Range("H13").Value2 = 0
+    $summarySheet.Range("G9:H13").Borders.LineStyle = 1
+
     $summarySheet.Columns("A:N").AutoFit() | Out-Null
 
     $helperSheet.Range("A1").Value2 = "Status"
@@ -182,15 +195,40 @@ try {
     $severityTable.Name = "tblDashboardSeverityLegend"
     $severityTable.TableStyle = "TableStyleMedium3"
 
-    $refreshHeaders = @("Run At (UTC)", "Trigger", "Refresh Mode", "Rows Written", "Notes")
+    $refreshHeaders = @(
+        "Run At (SGT)",
+        "Trigger",
+        "Refresh Mode",
+        "Rows Written",
+        "Total Requests",
+        "Active Cases",
+        "Cleared Cases",
+        "Closed Employer Form Received",
+        "Closed Employer Form Received But Flagged",
+        "Closed Reminder 3 Sent",
+        "Notes"
+    )
     Set-HeaderRow -Worksheet $refreshSheet -Headers $refreshHeaders
-    $refreshSheet.Cells.Item(2, 1).Value2 = [DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+    $refreshSheet.Cells.Item(2, 1).Value2 = [DateTime]::UtcNow.AddHours(8).ToString("yyyy-MM-dd HH:mm:ss")
     $refreshSheet.Cells.Item(2, 2).Value2 = "Flow-managed dashboard build"
     $refreshSheet.Cells.Item(2, 3).Value2 = "Structure only"
     $refreshSheet.Cells.Item(2, 4).Value2 = 0
-    $refreshSheet.Cells.Item(2, 5).Value2 = "Power Automate refreshes this workbook through tblDashboardCasesPA and tblDashboardRefreshLog."
+    $refreshSheet.Cells.Item(2, 5).Value2 = 0
+    $refreshSheet.Cells.Item(2, 6).Value2 = 0
+    $refreshSheet.Cells.Item(2, 7).Value2 = 0
+    $refreshSheet.Cells.Item(2, 8).Value2 = 0
+    $refreshSheet.Cells.Item(2, 9).Value2 = 0
+    $refreshSheet.Cells.Item(2, 10).Value2 = 0
+    $refreshSheet.Cells.Item(2, 11).Value2 = "Power Automate refreshes this workbook through tblDashboardCasesPA and tblDashboardRefreshLog."
     Add-Table -Worksheet $refreshSheet -TableName "tblDashboardRefreshLog" -RowCount 2 -ColumnCount $refreshHeaders.Count | Out-Null
-    $refreshSheet.Columns("A:E").AutoFit() | Out-Null
+    $refreshSheet.Columns("A:K").AutoFit() | Out-Null
+
+    $summarySheet.Range("B6").Formula = "=IFERROR(INDEX(tblDashboardRefreshLog[Total Requests],ROWS(tblDashboardRefreshLog[Total Requests])),0)"
+    $summarySheet.Range("E6").Formula = "=IFERROR(INDEX(tblDashboardRefreshLog[Active Cases],ROWS(tblDashboardRefreshLog[Active Cases])),0)"
+    $summarySheet.Range("H10").Formula = "=IFERROR(INDEX(tblDashboardRefreshLog[Closed Employer Form Received],ROWS(tblDashboardRefreshLog[Closed Employer Form Received])),0)"
+    $summarySheet.Range("H11").Formula = "=IFERROR(INDEX(tblDashboardRefreshLog[Closed Employer Form Received But Flagged],ROWS(tblDashboardRefreshLog[Closed Employer Form Received But Flagged])),0)"
+    $summarySheet.Range("H12").Formula = "=IFERROR(INDEX(tblDashboardRefreshLog[Closed Reminder 3 Sent],ROWS(tblDashboardRefreshLog[Closed Reminder 3 Sent])),0)"
+    $summarySheet.Range("H13").Formula = "=IFERROR(INDEX(tblDashboardRefreshLog[Cleared Cases],ROWS(tblDashboardRefreshLog[Cleared Cases])),0)"
 
     $summarySheet.Activate() | Out-Null
 

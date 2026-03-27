@@ -38,8 +38,8 @@ The recruiter-facing table is trimmed to the fields recruiters need most:
 - `Status`
 - `Candidate Reminder`
 - `Employer Reminder`
-- `Overdue`
 - `Completed Status`
+- `Completed Date`
 - `Employer Response Received At`
 - `Employer Email Reply At`
 - `Last Activity At`
@@ -59,6 +59,7 @@ The main recruiter stage is now one single column called `Status`:
 - `Employer Reminder 2 Sent`
 - `Employer Reminder 3 Sent`
 - `Employer Form Received`
+- `Employer Form Received But Flagged`
 
 This condenses the candidate and employer journey into one recruiter-friendly stage field.
 
@@ -73,7 +74,7 @@ The workbook shows reminders in two simple columns:
 
 ## Header Logic Doc
 
-Column-by-column header meaning and mapping logic are documented in:
+Column-by-column header meaning, summary interpretation, and row-clearing logic are documented in:
 
 - `docs/bgv_dashboard_headers.md`
 

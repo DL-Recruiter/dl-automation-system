@@ -324,8 +324,8 @@ This document describes the current behavior in your canonical flow files under 
   - Rebuilds one dashboard row per `RequestID`
   - Uses Singapore time (`SGT`) formatting for dashboard date/time display fields.
   - Applies dashboard row-retention cleanup by skipping rows when:
-    - `Reminder 3 Sent` and no response for `>= 3 days` after `Reminder3At`
-    - `Responded` and `>= 3 days` after `ResponseReceivedAt`
+    - `Reminder 3 Sent` and no response for `>= 5 days` after `Reminder3At`
+    - `Completed` cases (`Employer Form Received` / `Employer Form Received But Flagged`) for `>= 5 days` after `ResponseReceivedAt`
   - Writes recruiter-facing dashboard columns:
     - `Candidate Name`
     - `CandidateID`
@@ -338,6 +338,7 @@ This document describes the current behavior in your canonical flow files under 
     - `Candidate Reminder`
     - `Employer Reminder`
     - `Completed Status`
+    - `Completed Date`
     - `Employer Response Received At`
     - `Employer Email Reply At`
     - `Last Activity At`
@@ -345,7 +346,14 @@ This document describes the current behavior in your canonical flow files under 
     - `Outcome`
   - Appends a run entry into:
     - `tblDashboardRefreshLog`
-    - timestamp value is written in SGT format (legacy column name remains `Run At (UTC)`).
+    - timestamp value is written as `Run At (SGT)`
+    - includes summary metrics:
+      - `Total Requests`
+      - `Active Cases`
+      - `Cleared Cases`
+      - `Closed Employer Form Received`
+      - `Closed Employer Form Received But Flagged`
+      - `Closed Reminder 3 Sent`
 - Status logic:
   - Preserves the same recruiter-stage logic as the current local dashboard builder:
     - `Candidate Form Received`
@@ -357,7 +365,7 @@ This document describes the current behavior in your canonical flow files under 
     - `Employer Reminder 2 Sent`
     - `Employer Reminder 3 Sent`
     - `Employer Form Received`
-    - `In Progress`
+    - `Employer Form Received But Flagged`
 - Important note:
   - This refresh target is the comparison/live-flow workbook:
     - `BGVDashboard_FLow.xlsx`
