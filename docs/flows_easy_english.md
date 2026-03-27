@@ -318,7 +318,8 @@ This document describes the current behavior in your canonical flow files under 
   - `9:00 AM`
   - `12:00 PM`
   - `3:00 PM`
-  - every 90 minutes from `8:00 AM` onward (SGT anchor)
+  - internal cadence trigger: every 30 minutes
+  - execution window gate (SGT): `8:00 AM`, `9:30 AM`, `11:00 AM`, `12:30 PM`, `2:00 PM`, `3:30 PM`, `5:00 PM`, `6:30 PM`, `8:00 PM`, `9:00 PM`
 - Purpose:
   - Keeps the Power Automate-friendly dashboard workbook refreshed in SharePoint without depending on the local PC.
   - Writes into:

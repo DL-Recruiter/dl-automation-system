@@ -38,396 +38,175 @@
           "type": "Recurrence",
           "recurrence": {
             "frequency": "Minute",
-            "interval": 90,
+            "interval": 30,
             "timeZone": "Singapore Standard Time",
             "startTime": "2026-03-27T08:00:00"
           }
         }
       },
       "actions": {
-        "Get_items_(BGV_Candidates)": {
-          "type": "OpenApiConnection",
-          "inputs": {
-            "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "table": "65747b59-c6b0-4671-ae37-79e35ad84c48",
-              "$top": 5000
-            },
-            "host": {
-              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-              "operationId": "GetItems",
-              "connectionName": "shared_sharepointonline"
-            },
-            "authentication": "@parameters('$authentication')"
-          },
-          "runAfter": {}
-        },
-        "Get_items_(BGV_Requests)": {
-          "type": "OpenApiConnection",
-          "inputs": {
-            "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-              "$top": 5000
-            },
-            "host": {
-              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-              "operationId": "GetItems",
-              "connectionName": "shared_sharepointonline"
-            },
-            "authentication": "@parameters('$authentication')"
-          },
-          "runAfter": {
-            "Get_items_(BGV_Candidates)": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Get_items_(BGV_FormData)": {
-          "type": "OpenApiConnection",
-          "inputs": {
-            "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
-              "$top": 5000
-            },
-            "host": {
-              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-              "operationId": "GetItems",
-              "connectionName": "shared_sharepointonline"
-            },
-            "authentication": "@parameters('$authentication')"
-          },
-          "runAfter": {
-            "Get_items_(BGV_Requests)": [
-              "Succeeded"
-            ]
-          }
-        },
-        "List_rows_present_in_tblDashboardCasesPA": {
-          "type": "OpenApiConnection",
-          "inputs": {
-            "parameters": {
-              "source": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
-              "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
-              "table": "tblDashboardCasesPA"
-            },
-            "host": {
-              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
-              "operationId": "GetItems",
-              "connectionName": "shared_excelonlinebusiness"
-            },
-            "authentication": "@parameters('$authentication')"
-          },
-          "runAfter": {
-            "Get_items_(BGV_FormData)": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Apply_to_each_(Existing_Dashboard_Rows)": {
-          "type": "Foreach",
-          "foreach": "@outputs('List_rows_present_in_tblDashboardCasesPA')?['body/value']",
-          "actions": {
-            "Condition_-_Has_DashboardKey": {
-              "type": "If",
-              "expression": {
+        "Condition_-_Refresh_Window_SGT": {
+          "type": "If",
+          "expression": {
+            "or": [
+              {
                 "equals": [
-                  "@empty(items('Apply_to_each_(Existing_Dashboard_Rows)')?['DashboardKey'])",
-                  false
+                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
+                  "08:00"
                 ]
               },
-              "actions": {
-                "Delete_row_from_tblDashboardCasesPA": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "source": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
-                      "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
-                      "table": "tblDashboardCasesPA",
-                      "idColumn": "DashboardKey",
-                      "id": "@items('Apply_to_each_(Existing_Dashboard_Rows)')?['DashboardKey']"
-                    },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
-                      "operationId": "DeleteItem",
-                      "connectionName": "shared_excelonlinebusiness"
-                    },
-                    "authentication": "@parameters('$authentication')"
-                  }
-                }
+              {
+                "equals": [
+                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
+                  "09:30"
+                ]
               },
-              "else": {
-                "actions": {}
+              {
+                "equals": [
+                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
+                  "11:00"
+                ]
+              },
+              {
+                "equals": [
+                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
+                  "12:30"
+                ]
+              },
+              {
+                "equals": [
+                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
+                  "14:00"
+                ]
+              },
+              {
+                "equals": [
+                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
+                  "15:30"
+                ]
+              },
+              {
+                "equals": [
+                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
+                  "17:00"
+                ]
+              },
+              {
+                "equals": [
+                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
+                  "18:30"
+                ]
+              },
+              {
+                "equals": [
+                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
+                  "20:00"
+                ]
+              },
+              {
+                "equals": [
+                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
+                  "21:00"
+                ]
               }
-            }
-          },
-          "runAfter": {
-            "List_rows_present_in_tblDashboardCasesPA": [
-              "Succeeded"
             ]
-          }
-        },
-        "Apply_to_each_(Requests)": {
-          "type": "Foreach",
-          "foreach": "@outputs('Get_items_(BGV_Requests)')?['body/value']",
+          },
           "actions": {
-            "Condition_-_Has_RequestID": {
-              "type": "If",
-              "expression": {
-                "equals": [
-                  "@empty(items('Apply_to_each_(Requests)')?['RequestID'])",
-                  false
-                ]
+            "Get_items_(BGV_Candidates)": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                  "table": "65747b59-c6b0-4671-ae37-79e35ad84c48",
+                  "$top": 5000
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "GetItems",
+                  "connectionName": "shared_sharepointonline"
+                },
+                "authentication": "@parameters('$authentication')"
               },
+              "runAfter": {}
+            },
+            "Get_items_(BGV_Requests)": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                  "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+                  "$top": 5000
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "GetItems",
+                  "connectionName": "shared_sharepointonline"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Get_items_(BGV_Candidates)": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Get_items_(BGV_FormData)": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                  "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                  "$top": 5000
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "GetItems",
+                  "connectionName": "shared_sharepointonline"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Get_items_(BGV_Requests)": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "List_rows_present_in_tblDashboardCasesPA": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "source": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                  "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
+                  "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
+                  "table": "tblDashboardCasesPA"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                  "operationId": "GetItems",
+                  "connectionName": "shared_excelonlinebusiness"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Get_items_(BGV_FormData)": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Apply_to_each_(Existing_Dashboard_Rows)": {
+              "type": "Foreach",
+              "foreach": "@outputs('List_rows_present_in_tblDashboardCasesPA')?['body/value']",
               "actions": {
-                "Filter_array_-_Candidate_Match": {
-                  "type": "Query",
-                  "inputs": {
-                    "from": "@outputs('Get_items_(BGV_Candidates)')?['body/value']",
-                    "where": "@equals(item()?['CandidateID'], items('Apply_to_each_(Requests)')?['CandidateID'])"
-                  }
-                },
-                "Filter_array_-_FormData_Match": {
-                  "type": "Query",
-                  "inputs": {
-                    "from": "@outputs('Get_items_(BGV_FormData)')?['body/value']",
-                    "where": "@equals(item()?['RequestID'], items('Apply_to_each_(Requests)')?['RequestID'])"
-                  },
-                  "runAfter": {
-                    "Filter_array_-_Candidate_Match": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_HasCandidate": {
-                  "type": "Compose",
-                  "inputs": "@greater(length(body('Filter_array_-_Candidate_Match')),0)",
-                  "runAfter": {
-                    "Filter_array_-_FormData_Match": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_HasFormData": {
-                  "type": "Compose",
-                  "inputs": "@greater(length(body('Filter_array_-_FormData_Match')),0)",
-                  "runAfter": {
-                    "Compose_HasCandidate": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_AuthorisationSigned": {
-                  "type": "Compose",
-                  "inputs": "@if(outputs('Compose_HasCandidate'),or(equals(first(body('Filter_array_-_Candidate_Match'))?['AuthorisationSigned'],true),equals(toLower(string(first(body('Filter_array_-_Candidate_Match'))?['AuthorisationSigned'])),'true')),false)",
-                  "runAfter": {
-                    "Compose_HasFormData": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_DashboardKey": {
-                  "type": "Compose",
-                  "inputs": "@concat(coalesce(items('Apply_to_each_(Requests)')?['CandidateID'],''),'|',coalesce(items('Apply_to_each_(Requests)')?['RequestID'],''))",
-                  "runAfter": {
-                    "Compose_AuthorisationSigned": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_SeverityText": {
-                  "type": "Compose",
-                  "inputs": "@toLower(trim(string(coalesce(items('Apply_to_each_(Requests)')?['Severity']?['Value'],items('Apply_to_each_(Requests)')?['Severity'],''))))",
-                  "runAfter": {
-                    "Compose_DashboardKey": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_IsFlagged": {
-                  "type": "Compose",
-                  "inputs": "@or(equals(outputs('Compose_SeverityText'),'low'),equals(outputs('Compose_SeverityText'),'medium'),equals(outputs('Compose_SeverityText'),'high'))",
-                  "runAfter": {
-                    "Compose_SeverityText": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_VerificationStatusText": {
-                  "type": "Compose",
-                  "inputs": "@trim(string(coalesce(items('Apply_to_each_(Requests)')?['VerificationStatus']?['Value'],items('Apply_to_each_(Requests)')?['VerificationStatus'],'')))",
-                  "runAfter": {
-                    "Compose_IsFlagged": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_Status": {
-                  "type": "Compose",
-                  "inputs": "@if(equals(outputs('Compose_VerificationStatusText'),'Responded'),if(outputs('Compose_IsFlagged'),'Employer Form Received But Flagged','Employer Form Received'),if(equals(outputs('Compose_VerificationStatusText'),'Reminder 3 Sent'),'Employer Reminder 3 Sent',if(equals(outputs('Compose_VerificationStatusText'),'Reminder 2 Sent'),'Employer Reminder 2 Sent',if(equals(outputs('Compose_VerificationStatusText'),'Reminder 1 Sent'),'Employer Reminder 1 Sent',if(equals(outputs('Compose_VerificationStatusText'),'Email Sent'),'Email Sent to Employer','Authorisation Form Received')))))",
-                  "runAfter": {
-                    "Compose_VerificationStatusText": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_CandidateName": {
-                  "type": "Compose",
-                  "inputs": "@if(outputs('Compose_HasCandidate'),coalesce(first(body('Filter_array_-_Candidate_Match'))?['FullName'],if(outputs('Compose_HasFormData'),first(body('Filter_array_-_FormData_Match'))?['F1_CandidateFullName'],'')),if(outputs('Compose_HasFormData'),coalesce(first(body('Filter_array_-_FormData_Match'))?['F1_CandidateFullName'],''),''))",
-                  "runAfter": {
-                    "Compose_Status": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_CompanyName": {
-                  "type": "Compose",
-                  "inputs": "@if(and(outputs('Compose_HasFormData'),equals(empty(first(body('Filter_array_-_FormData_Match'))?['F1_EmployerName']),false)),first(body('Filter_array_-_FormData_Match'))?['F1_EmployerName'],coalesce(items('Apply_to_each_(Requests)')?['EmployerName'],''))",
-                  "runAfter": {
-                    "Compose_CandidateName": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_HRName": {
-                  "type": "Compose",
-                  "inputs": "@if(outputs('Compose_HasFormData'),coalesce(first(body('Filter_array_-_FormData_Match'))?['F1_HRContactName'],''),'')",
-                  "runAfter": {
-                    "Compose_CompanyName": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_HREmail": {
-                  "type": "Compose",
-                  "inputs": "@if(and(outputs('Compose_HasFormData'),equals(empty(first(body('Filter_array_-_FormData_Match'))?['F1_HREmail']),false)),first(body('Filter_array_-_FormData_Match'))?['F1_HREmail'],coalesce(items('Apply_to_each_(Requests)')?['EmployerHR_Email'],''))",
-                  "runAfter": {
-                    "Compose_HRName": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_HRMobile": {
-                  "type": "Compose",
-                  "inputs": "@if(outputs('Compose_HasFormData'),coalesce(first(body('Filter_array_-_FormData_Match'))?['F1_HRMobile'],''),'')",
-                  "runAfter": {
-                    "Compose_HREmail": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_CandidateReminder": {
-                  "type": "Compose",
-                  "inputs": "@if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt']),false)),concat('1: ',formatDateTime(convertTimeZone(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),'Not sent')",
-                  "runAfter": {
-                    "Compose_CandidateEmailSentAt": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_EmployerReminder": {
-                  "type": "Compose",
-                  "inputs": "@if(equals(empty(items('Apply_to_each_(Requests)')?['Reminder3At']),false),concat('3: ',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['Reminder3At'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),if(equals(empty(items('Apply_to_each_(Requests)')?['Reminder2At']),false),concat('2: ',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['Reminder2At'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),if(equals(empty(items('Apply_to_each_(Requests)')?['Reminder1At']),false),concat('1: ',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['Reminder1At'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),'Not sent')))",
-                  "runAfter": {
-                    "Compose_EmployerEmailSentAt": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_CompletedStatus": {
-                  "type": "Compose",
-                  "inputs": "@if(or(equals(outputs('Compose_Status'),'Employer Form Received'),equals(outputs('Compose_Status'),'Employer Form Received But Flagged')),'Yes','No')",
-                  "runAfter": {
-                    "Compose_EmployerReminder": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_CompletedDate": {
-                  "type": "Compose",
-                  "inputs": "@if(equals(outputs('Compose_CompletedStatus'),'Yes'),if(equals(empty(items('Apply_to_each_(Requests)')?['ResponseReceivedAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),'')",
-                  "runAfter": {
-                    "Compose_CompletedStatus": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_LastActivityAt": {
-                  "type": "Compose",
-                  "inputs": "@if(equals(empty(coalesce(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt'],items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],items('Apply_to_each_(Requests)')?['Reminder3At'],items('Apply_to_each_(Requests)')?['Reminder2At'],items('Apply_to_each_(Requests)')?['Reminder1At'],items('Apply_to_each_(Requests)')?['HRRequestSentAt'],if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp']),false)),first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp'],null),if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt']),false)),first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt'],null),items('Apply_to_each_(Requests)')?['Modified'],if(outputs('Compose_HasCandidate'),first(body('Filter_array_-_Candidate_Match'))?['Modified'],null),if(outputs('Compose_HasFormData'),first(body('Filter_array_-_FormData_Match'))?['Modified'],null))),true),'',formatDateTime(convertTimeZone(coalesce(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt'],items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],items('Apply_to_each_(Requests)')?['Reminder3At'],items('Apply_to_each_(Requests)')?['Reminder2At'],items('Apply_to_each_(Requests)')?['Reminder1At'],items('Apply_to_each_(Requests)')?['HRRequestSentAt'],if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp']),false)),first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp'],null),if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt']),false)),first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt'],null),items('Apply_to_each_(Requests)')?['Modified'],if(outputs('Compose_HasCandidate'),first(body('Filter_array_-_Candidate_Match'))?['Modified'],null),if(outputs('Compose_HasFormData'),first(body('Filter_array_-_FormData_Match'))?['Modified'],null)),'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'))",
-                  "runAfter": {
-                    "Compose_CompletedDate": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Condition_-_Keep_Dashboard_Row": {
+                "Condition_-_Has_DashboardKey": {
                   "type": "If",
                   "expression": {
-                    "and": [
-                      {
-                        "not": {
-                          "or": [
-                            {
-                              "and": [
-                                {
-                                  "equals": [
-                                    "@outputs('Compose_VerificationStatusText')",
-                                    "Reminder 3 Sent"
-                                  ]
-                                },
-                                {
-                                  "equals": [
-                                    "@empty(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'])",
-                                    true
-                                  ]
-                                },
-                                {
-                                  "equals": [
-                                    "@empty(items('Apply_to_each_(Requests)')?['Reminder3At'])",
-                                    false
-                                  ]
-                                },
-                                {
-                                  "lessOrEquals": [
-                                    "@ticks(items('Apply_to_each_(Requests)')?['Reminder3At'])",
-                                    "@ticks(addDays(utcNow(),-5))"
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "and": [
-                                {
-                                  "equals": [
-                                    "@outputs('Compose_CompletedStatus')",
-                                    "Yes"
-                                  ]
-                                },
-                                {
-                                  "equals": [
-                                    "@empty(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'])",
-                                    false
-                                  ]
-                                },
-                                {
-                                  "lessOrEquals": [
-                                    "@ticks(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'])",
-                                    "@ticks(addDays(utcNow(),-5))"
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      }
+                    "equals": [
+                      "@empty(items('Apply_to_each_(Existing_Dashboard_Rows)')?['DashboardKey'])",
+                      false
                     ]
                   },
                   "actions": {
-                    "Add_a_row_into_tblDashboardCasesPA": {
+                    "Delete_row_from_tblDashboardCasesPA": {
                       "type": "OpenApiConnection",
                       "inputs": {
                         "parameters": {
@@ -435,32 +214,12 @@
                           "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
                           "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
                           "table": "tblDashboardCasesPA",
-                          "item": {
-                            "DashboardKey": "@outputs('Compose_DashboardKey')",
-                            "Candidate Name": "@outputs('Compose_CandidateName')",
-                            "CandidateID": "@coalesce(items('Apply_to_each_(Requests)')?['CandidateID'],'')",
-                            "RequestID": "@coalesce(items('Apply_to_each_(Requests)')?['RequestID'],'')",
-                            "Company Name": "@outputs('Compose_CompanyName')",
-                            "HR Name": "@outputs('Compose_HRName')",
-                            "HR Email": "@outputs('Compose_HREmail')",
-                            "HR Mobile Number": "@outputs('Compose_HRMobile')",
-                            "Status": "@outputs('Compose_Status')",
-                            "Candidate Email Sent At": "@outputs('Compose_CandidateEmailSentAt')",
-                            "Candidate Reminder": "@outputs('Compose_CandidateReminder')",
-                            "Employer Email Sent At": "@outputs('Compose_EmployerEmailSentAt')",
-                            "Employer Reminder": "@outputs('Compose_EmployerReminder')",
-                            "Completed Status": "@outputs('Compose_CompletedStatus')",
-                            "Completed Date": "@outputs('Compose_CompletedDate')",
-                            "Employer Response Received At": "@if(equals(empty(items('Apply_to_each_(Requests)')?['ResponseReceivedAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'))",
-                            "Employer Email Reply At": "@if(equals(empty(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'))",
-                            "Last Activity At": "@coalesce(outputs('Compose_LastActivityAt'),'')",
-                            "Severity": "@coalesce(items('Apply_to_each_(Requests)')?['Severity']?['Value'],items('Apply_to_each_(Requests)')?['Severity'],'')",
-                            "Outcome": "@coalesce(items('Apply_to_each_(Requests)')?['Outcome']?['Value'],items('Apply_to_each_(Requests)')?['Outcome'],'')"
-                          }
+                          "idColumn": "DashboardKey",
+                          "id": "@items('Apply_to_each_(Existing_Dashboard_Rows)')?['DashboardKey']"
                         },
                         "host": {
                           "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
-                          "operationId": "AddRowV2",
+                          "operationId": "DeleteItem",
                           "connectionName": "shared_excelonlinebusiness"
                         },
                         "authentication": "@parameters('$authentication')"
@@ -469,176 +228,490 @@
                   },
                   "else": {
                     "actions": {}
-                  },
-                  "runAfter": {
-                    "Compose_LastActivityAt": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_CandidateEmailSentAt": {
-                  "type": "Compose",
-                  "inputs": "@if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['AuthorizationLinkCreatedAt']),false)),formatDateTime(convertTimeZone(first(body('Filter_array_-_Candidate_Match'))?['AuthorizationLinkCreatedAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'),'')",
-                  "runAfter": {
-                    "Compose_HRMobile": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Compose_EmployerEmailSentAt": {
-                  "type": "Compose",
-                  "inputs": "@if(equals(empty(items('Apply_to_each_(Requests)')?['HRRequestSentAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['HRRequestSentAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'))",
-                  "runAfter": {
-                    "Compose_CandidateReminder": [
-                      "Succeeded"
-                    ]
                   }
                 }
               },
-              "else": {
-                "actions": {}
+              "runAfter": {
+                "List_rows_present_in_tblDashboardCasesPA": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Apply_to_each_(Requests)": {
+              "type": "Foreach",
+              "foreach": "@outputs('Get_items_(BGV_Requests)')?['body/value']",
+              "actions": {
+                "Condition_-_Has_RequestID": {
+                  "type": "If",
+                  "expression": {
+                    "equals": [
+                      "@empty(items('Apply_to_each_(Requests)')?['RequestID'])",
+                      false
+                    ]
+                  },
+                  "actions": {
+                    "Filter_array_-_Candidate_Match": {
+                      "type": "Query",
+                      "inputs": {
+                        "from": "@outputs('Get_items_(BGV_Candidates)')?['body/value']",
+                        "where": "@equals(item()?['CandidateID'], items('Apply_to_each_(Requests)')?['CandidateID'])"
+                      }
+                    },
+                    "Filter_array_-_FormData_Match": {
+                      "type": "Query",
+                      "inputs": {
+                        "from": "@outputs('Get_items_(BGV_FormData)')?['body/value']",
+                        "where": "@equals(item()?['RequestID'], items('Apply_to_each_(Requests)')?['RequestID'])"
+                      },
+                      "runAfter": {
+                        "Filter_array_-_Candidate_Match": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_HasCandidate": {
+                      "type": "Compose",
+                      "inputs": "@greater(length(body('Filter_array_-_Candidate_Match')),0)",
+                      "runAfter": {
+                        "Filter_array_-_FormData_Match": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_HasFormData": {
+                      "type": "Compose",
+                      "inputs": "@greater(length(body('Filter_array_-_FormData_Match')),0)",
+                      "runAfter": {
+                        "Compose_HasCandidate": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_AuthorisationSigned": {
+                      "type": "Compose",
+                      "inputs": "@if(outputs('Compose_HasCandidate'),or(equals(first(body('Filter_array_-_Candidate_Match'))?['AuthorisationSigned'],true),equals(toLower(string(first(body('Filter_array_-_Candidate_Match'))?['AuthorisationSigned'])),'true')),false)",
+                      "runAfter": {
+                        "Compose_HasFormData": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_DashboardKey": {
+                      "type": "Compose",
+                      "inputs": "@concat(coalesce(items('Apply_to_each_(Requests)')?['CandidateID'],''),'|',coalesce(items('Apply_to_each_(Requests)')?['RequestID'],''))",
+                      "runAfter": {
+                        "Compose_AuthorisationSigned": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_SeverityText": {
+                      "type": "Compose",
+                      "inputs": "@toLower(trim(string(coalesce(items('Apply_to_each_(Requests)')?['Severity']?['Value'],items('Apply_to_each_(Requests)')?['Severity'],''))))",
+                      "runAfter": {
+                        "Compose_DashboardKey": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_IsFlagged": {
+                      "type": "Compose",
+                      "inputs": "@or(equals(outputs('Compose_SeverityText'),'low'),equals(outputs('Compose_SeverityText'),'medium'),equals(outputs('Compose_SeverityText'),'high'))",
+                      "runAfter": {
+                        "Compose_SeverityText": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_VerificationStatusText": {
+                      "type": "Compose",
+                      "inputs": "@trim(string(coalesce(items('Apply_to_each_(Requests)')?['VerificationStatus']?['Value'],items('Apply_to_each_(Requests)')?['VerificationStatus'],'')))",
+                      "runAfter": {
+                        "Compose_IsFlagged": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_Status": {
+                      "type": "Compose",
+                      "inputs": "@if(equals(outputs('Compose_VerificationStatusText'),'Responded'),if(outputs('Compose_IsFlagged'),'Employer Form Received But Flagged','Employer Form Received'),if(equals(outputs('Compose_VerificationStatusText'),'Reminder 3 Sent'),'Employer Reminder 3 Sent',if(equals(outputs('Compose_VerificationStatusText'),'Reminder 2 Sent'),'Employer Reminder 2 Sent',if(equals(outputs('Compose_VerificationStatusText'),'Reminder 1 Sent'),'Employer Reminder 1 Sent',if(equals(outputs('Compose_VerificationStatusText'),'Email Sent'),'Email Sent to Employer','Authorisation Form Received')))))",
+                      "runAfter": {
+                        "Compose_VerificationStatusText": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_CandidateName": {
+                      "type": "Compose",
+                      "inputs": "@if(outputs('Compose_HasCandidate'),coalesce(first(body('Filter_array_-_Candidate_Match'))?['FullName'],if(outputs('Compose_HasFormData'),first(body('Filter_array_-_FormData_Match'))?['F1_CandidateFullName'],'')),if(outputs('Compose_HasFormData'),coalesce(first(body('Filter_array_-_FormData_Match'))?['F1_CandidateFullName'],''),''))",
+                      "runAfter": {
+                        "Compose_Status": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_CompanyName": {
+                      "type": "Compose",
+                      "inputs": "@if(and(outputs('Compose_HasFormData'),equals(empty(first(body('Filter_array_-_FormData_Match'))?['F1_EmployerName']),false)),first(body('Filter_array_-_FormData_Match'))?['F1_EmployerName'],coalesce(items('Apply_to_each_(Requests)')?['EmployerName'],''))",
+                      "runAfter": {
+                        "Compose_CandidateName": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_HRName": {
+                      "type": "Compose",
+                      "inputs": "@if(outputs('Compose_HasFormData'),coalesce(first(body('Filter_array_-_FormData_Match'))?['F1_HRContactName'],''),'')",
+                      "runAfter": {
+                        "Compose_CompanyName": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_HREmail": {
+                      "type": "Compose",
+                      "inputs": "@if(and(outputs('Compose_HasFormData'),equals(empty(first(body('Filter_array_-_FormData_Match'))?['F1_HREmail']),false)),first(body('Filter_array_-_FormData_Match'))?['F1_HREmail'],coalesce(items('Apply_to_each_(Requests)')?['EmployerHR_Email'],''))",
+                      "runAfter": {
+                        "Compose_HRName": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_HRMobile": {
+                      "type": "Compose",
+                      "inputs": "@if(outputs('Compose_HasFormData'),coalesce(first(body('Filter_array_-_FormData_Match'))?['F1_HRMobile'],''),'')",
+                      "runAfter": {
+                        "Compose_HREmail": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_CandidateReminder": {
+                      "type": "Compose",
+                      "inputs": "@if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt']),false)),concat('1: ',formatDateTime(convertTimeZone(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),'Not sent')",
+                      "runAfter": {
+                        "Compose_CandidateEmailSentAt": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_EmployerReminder": {
+                      "type": "Compose",
+                      "inputs": "@if(equals(empty(items('Apply_to_each_(Requests)')?['Reminder3At']),false),concat('3: ',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['Reminder3At'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),if(equals(empty(items('Apply_to_each_(Requests)')?['Reminder2At']),false),concat('2: ',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['Reminder2At'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),if(equals(empty(items('Apply_to_each_(Requests)')?['Reminder1At']),false),concat('1: ',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['Reminder1At'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),'Not sent')))",
+                      "runAfter": {
+                        "Compose_EmployerEmailSentAt": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_CompletedStatus": {
+                      "type": "Compose",
+                      "inputs": "@if(or(equals(outputs('Compose_Status'),'Employer Form Received'),equals(outputs('Compose_Status'),'Employer Form Received But Flagged')),'Yes','No')",
+                      "runAfter": {
+                        "Compose_EmployerReminder": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_CompletedDate": {
+                      "type": "Compose",
+                      "inputs": "@if(equals(outputs('Compose_CompletedStatus'),'Yes'),if(equals(empty(items('Apply_to_each_(Requests)')?['ResponseReceivedAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),'')",
+                      "runAfter": {
+                        "Compose_CompletedStatus": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_LastActivityAt": {
+                      "type": "Compose",
+                      "inputs": "@if(equals(empty(coalesce(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt'],items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],items('Apply_to_each_(Requests)')?['Reminder3At'],items('Apply_to_each_(Requests)')?['Reminder2At'],items('Apply_to_each_(Requests)')?['Reminder1At'],items('Apply_to_each_(Requests)')?['HRRequestSentAt'],if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp']),false)),first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp'],null),if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt']),false)),first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt'],null),items('Apply_to_each_(Requests)')?['Modified'],if(outputs('Compose_HasCandidate'),first(body('Filter_array_-_Candidate_Match'))?['Modified'],null),if(outputs('Compose_HasFormData'),first(body('Filter_array_-_FormData_Match'))?['Modified'],null))),true),'',formatDateTime(convertTimeZone(coalesce(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt'],items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],items('Apply_to_each_(Requests)')?['Reminder3At'],items('Apply_to_each_(Requests)')?['Reminder2At'],items('Apply_to_each_(Requests)')?['Reminder1At'],items('Apply_to_each_(Requests)')?['HRRequestSentAt'],if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp']),false)),first(body('Filter_array_-_Candidate_Match'))?['ConsentTimestamp'],null),if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt']),false)),first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt'],null),items('Apply_to_each_(Requests)')?['Modified'],if(outputs('Compose_HasCandidate'),first(body('Filter_array_-_Candidate_Match'))?['Modified'],null),if(outputs('Compose_HasFormData'),first(body('Filter_array_-_FormData_Match'))?['Modified'],null)),'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'))",
+                      "runAfter": {
+                        "Compose_CompletedDate": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Condition_-_Keep_Dashboard_Row": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "or": [
+                                {
+                                  "and": [
+                                    {
+                                      "equals": [
+                                        "@outputs('Compose_VerificationStatusText')",
+                                        "Reminder 3 Sent"
+                                      ]
+                                    },
+                                    {
+                                      "equals": [
+                                        "@empty(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'])",
+                                        true
+                                      ]
+                                    },
+                                    {
+                                      "equals": [
+                                        "@empty(items('Apply_to_each_(Requests)')?['Reminder3At'])",
+                                        false
+                                      ]
+                                    },
+                                    {
+                                      "lessOrEquals": [
+                                        "@ticks(items('Apply_to_each_(Requests)')?['Reminder3At'])",
+                                        "@ticks(addDays(utcNow(),-5))"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "and": [
+                                    {
+                                      "equals": [
+                                        "@outputs('Compose_CompletedStatus')",
+                                        "Yes"
+                                      ]
+                                    },
+                                    {
+                                      "equals": [
+                                        "@empty(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'])",
+                                        false
+                                      ]
+                                    },
+                                    {
+                                      "lessOrEquals": [
+                                        "@ticks(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'])",
+                                        "@ticks(addDays(utcNow(),-5))"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "Add_a_row_into_tblDashboardCasesPA": {
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "source": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                              "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
+                              "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
+                              "table": "tblDashboardCasesPA",
+                              "item": {
+                                "DashboardKey": "@outputs('Compose_DashboardKey')",
+                                "Candidate Name": "@outputs('Compose_CandidateName')",
+                                "CandidateID": "@coalesce(items('Apply_to_each_(Requests)')?['CandidateID'],'')",
+                                "RequestID": "@coalesce(items('Apply_to_each_(Requests)')?['RequestID'],'')",
+                                "Company Name": "@outputs('Compose_CompanyName')",
+                                "HR Name": "@outputs('Compose_HRName')",
+                                "HR Email": "@outputs('Compose_HREmail')",
+                                "HR Mobile Number": "@outputs('Compose_HRMobile')",
+                                "Status": "@outputs('Compose_Status')",
+                                "Candidate Email Sent At": "@outputs('Compose_CandidateEmailSentAt')",
+                                "Candidate Reminder": "@outputs('Compose_CandidateReminder')",
+                                "Employer Email Sent At": "@outputs('Compose_EmployerEmailSentAt')",
+                                "Employer Reminder": "@outputs('Compose_EmployerReminder')",
+                                "Completed Status": "@outputs('Compose_CompletedStatus')",
+                                "Completed Date": "@outputs('Compose_CompletedDate')",
+                                "Employer Response Received At": "@if(equals(empty(items('Apply_to_each_(Requests)')?['ResponseReceivedAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'))",
+                                "Employer Email Reply At": "@if(equals(empty(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['EmployerEmailReplyAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'))",
+                                "Last Activity At": "@coalesce(outputs('Compose_LastActivityAt'),'')",
+                                "Severity": "@coalesce(items('Apply_to_each_(Requests)')?['Severity']?['Value'],items('Apply_to_each_(Requests)')?['Severity'],'')",
+                                "Outcome": "@coalesce(items('Apply_to_each_(Requests)')?['Outcome']?['Value'],items('Apply_to_each_(Requests)')?['Outcome'],'')"
+                              }
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                              "operationId": "AddRowV2",
+                              "connectionName": "shared_excelonlinebusiness"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Compose_LastActivityAt": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_CandidateEmailSentAt": {
+                      "type": "Compose",
+                      "inputs": "@if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['AuthorizationLinkCreatedAt']),false)),formatDateTime(convertTimeZone(first(body('Filter_array_-_Candidate_Match'))?['AuthorizationLinkCreatedAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'),'')",
+                      "runAfter": {
+                        "Compose_HRMobile": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_EmployerEmailSentAt": {
+                      "type": "Compose",
+                      "inputs": "@if(equals(empty(items('Apply_to_each_(Requests)')?['HRRequestSentAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['HRRequestSentAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm'))",
+                      "runAfter": {
+                        "Compose_CandidateReminder": [
+                          "Succeeded"
+                        ]
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  }
+                }
+              },
+              "runAfter": {
+                "Apply_to_each_(Existing_Dashboard_Rows)": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filter_array_-_Closed_Reminder3_5Days": {
+              "type": "Query",
+              "inputs": {
+                "from": "@outputs('Get_items_(BGV_Requests)')?['body/value']",
+                "where": "@and(equals(trim(string(coalesce(item()?['VerificationStatus']?['Value'],item()?['VerificationStatus'],''))),'Reminder 3 Sent'),empty(item()?['ResponseReceivedAt']),equals(empty(item()?['Reminder3At']),false),lessOrEquals(ticks(item()?['Reminder3At']),ticks(addDays(utcNow(),-5))))"
+              },
+              "runAfter": {
+                "Apply_to_each_(Requests)": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filter_array_-_Closed_Responded_5Days": {
+              "type": "Query",
+              "inputs": {
+                "from": "@outputs('Get_items_(BGV_Requests)')?['body/value']",
+                "where": "@and(equals(trim(string(coalesce(item()?['VerificationStatus']?['Value'],item()?['VerificationStatus'],''))),'Responded'),equals(empty(item()?['ResponseReceivedAt']),false),lessOrEquals(ticks(item()?['ResponseReceivedAt']),ticks(addDays(utcNow(),-5))))"
+              },
+              "runAfter": {
+                "Filter_array_-_Closed_Reminder3_5Days": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Filter_array_-_Closed_Responded_Flagged_5Days": {
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Filter_array_-_Closed_Responded_5Days')",
+                "where": "@or(equals(toLower(trim(string(coalesce(item()?['Severity']?['Value'],item()?['Severity'],'')))),'low'),equals(toLower(trim(string(coalesce(item()?['Severity']?['Value'],item()?['Severity'],'')))),'medium'),equals(toLower(trim(string(coalesce(item()?['Severity']?['Value'],item()?['Severity'],'')))),'high'))"
+              },
+              "runAfter": {
+                "Filter_array_-_Closed_Responded_5Days": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_ClosedReminder3Count": {
+              "type": "Compose",
+              "inputs": "@length(body('Filter_array_-_Closed_Reminder3_5Days'))",
+              "runAfter": {
+                "Filter_array_-_Closed_Responded_Flagged_5Days": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_ClosedRespondedCount": {
+              "type": "Compose",
+              "inputs": "@length(body('Filter_array_-_Closed_Responded_5Days'))",
+              "runAfter": {
+                "Compose_ClosedReminder3Count": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_ClosedRespondedFlaggedCount": {
+              "type": "Compose",
+              "inputs": "@length(body('Filter_array_-_Closed_Responded_Flagged_5Days'))",
+              "runAfter": {
+                "Compose_ClosedRespondedCount": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_ClosedRespondedClearCount": {
+              "type": "Compose",
+              "inputs": "@sub(outputs('Compose_ClosedRespondedCount'),outputs('Compose_ClosedRespondedFlaggedCount'))",
+              "runAfter": {
+                "Compose_ClosedRespondedFlaggedCount": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_TotalRequests": {
+              "type": "Compose",
+              "inputs": "@length(outputs('Get_items_(BGV_Requests)')?['body/value'])",
+              "runAfter": {
+                "Compose_ClosedRespondedClearCount": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_ClearedCases": {
+              "type": "Compose",
+              "inputs": "@add(outputs('Compose_ClosedReminder3Count'),outputs('Compose_ClosedRespondedCount'))",
+              "runAfter": {
+                "Compose_TotalRequests": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_ActiveCases": {
+              "type": "Compose",
+              "inputs": "@sub(outputs('Compose_TotalRequests'),outputs('Compose_ClearedCases'))",
+              "runAfter": {
+                "Compose_ClearedCases": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Add_a_row_into_tblDashboardRefreshLog": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "source": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                  "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
+                  "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
+                  "table": "tblDashboardRefreshLog",
+                  "item": {
+                    "Run At (SGT)": "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')",
+                    "Trigger": "Scheduled cloud flow",
+                    "Refresh Mode": "Full table refresh",
+                    "Rows Written": "@outputs('Compose_ActiveCases')",
+                    "Total Requests": "@outputs('Compose_TotalRequests')",
+                    "Active Cases": "@outputs('Compose_ActiveCases')",
+                    "Cleared Cases": "@outputs('Compose_ClearedCases')",
+                    "Closed Employer Form Received": "@outputs('Compose_ClosedRespondedClearCount')",
+                    "Closed Employer Form Received But Flagged": "@outputs('Compose_ClosedRespondedFlaggedCount')",
+                    "Closed Reminder 3 Sent": "@outputs('Compose_ClosedReminder3Count')",
+                    "Notes": "BGV_9 refreshed tblDashboardCasesPA from SharePoint source lists."
+                  }
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                  "operationId": "AddRowV2",
+                  "connectionName": "shared_excelonlinebusiness"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {
+                "Compose_ActiveCases": [
+                  "Succeeded"
+                ]
               }
             }
           },
-          "runAfter": {
-            "Apply_to_each_(Existing_Dashboard_Rows)": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Filter_array_-_Closed_Reminder3_5Days": {
-          "type": "Query",
-          "inputs": {
-            "from": "@outputs('Get_items_(BGV_Requests)')?['body/value']",
-            "where": "@and(equals(trim(string(coalesce(item()?['VerificationStatus']?['Value'],item()?['VerificationStatus'],''))),'Reminder 3 Sent'),empty(item()?['ResponseReceivedAt']),equals(empty(item()?['Reminder3At']),false),lessOrEquals(ticks(item()?['Reminder3At']),ticks(addDays(utcNow(),-5))))"
+          "else": {
+            "actions": {}
           },
-          "runAfter": {
-            "Apply_to_each_(Requests)": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Filter_array_-_Closed_Responded_5Days": {
-          "type": "Query",
-          "inputs": {
-            "from": "@outputs('Get_items_(BGV_Requests)')?['body/value']",
-            "where": "@and(equals(trim(string(coalesce(item()?['VerificationStatus']?['Value'],item()?['VerificationStatus'],''))),'Responded'),equals(empty(item()?['ResponseReceivedAt']),false),lessOrEquals(ticks(item()?['ResponseReceivedAt']),ticks(addDays(utcNow(),-5))))"
-          },
-          "runAfter": {
-            "Filter_array_-_Closed_Reminder3_5Days": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Filter_array_-_Closed_Responded_Flagged_5Days": {
-          "type": "Query",
-          "inputs": {
-            "from": "@body('Filter_array_-_Closed_Responded_5Days')",
-            "where": "@or(equals(toLower(trim(string(coalesce(item()?['Severity']?['Value'],item()?['Severity'],'')))),'low'),equals(toLower(trim(string(coalesce(item()?['Severity']?['Value'],item()?['Severity'],'')))),'medium'),equals(toLower(trim(string(coalesce(item()?['Severity']?['Value'],item()?['Severity'],'')))),'high'))"
-          },
-          "runAfter": {
-            "Filter_array_-_Closed_Responded_5Days": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Compose_ClosedReminder3Count": {
-          "type": "Compose",
-          "inputs": "@length(body('Filter_array_-_Closed_Reminder3_5Days'))",
-          "runAfter": {
-            "Filter_array_-_Closed_Responded_Flagged_5Days": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Compose_ClosedRespondedCount": {
-          "type": "Compose",
-          "inputs": "@length(body('Filter_array_-_Closed_Responded_5Days'))",
-          "runAfter": {
-            "Compose_ClosedReminder3Count": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Compose_ClosedRespondedFlaggedCount": {
-          "type": "Compose",
-          "inputs": "@length(body('Filter_array_-_Closed_Responded_Flagged_5Days'))",
-          "runAfter": {
-            "Compose_ClosedRespondedCount": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Compose_ClosedRespondedClearCount": {
-          "type": "Compose",
-          "inputs": "@sub(outputs('Compose_ClosedRespondedCount'),outputs('Compose_ClosedRespondedFlaggedCount'))",
-          "runAfter": {
-            "Compose_ClosedRespondedFlaggedCount": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Compose_TotalRequests": {
-          "type": "Compose",
-          "inputs": "@length(outputs('Get_items_(BGV_Requests)')?['body/value'])",
-          "runAfter": {
-            "Compose_ClosedRespondedClearCount": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Compose_ClearedCases": {
-          "type": "Compose",
-          "inputs": "@add(outputs('Compose_ClosedReminder3Count'),outputs('Compose_ClosedRespondedCount'))",
-          "runAfter": {
-            "Compose_TotalRequests": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Compose_ActiveCases": {
-          "type": "Compose",
-          "inputs": "@sub(outputs('Compose_TotalRequests'),outputs('Compose_ClearedCases'))",
-          "runAfter": {
-            "Compose_ClearedCases": [
-              "Succeeded"
-            ]
-          }
-        },
-        "Add_a_row_into_tblDashboardRefreshLog": {
-          "type": "OpenApiConnection",
-          "inputs": {
-            "parameters": {
-              "source": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
-              "file": "017QXH3H5QGNFXQP6RPBB36R4T2A5SFHPD",
-              "table": "tblDashboardRefreshLog",
-              "item": {
-                "Run At (SGT)": "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')",
-                "Trigger": "Scheduled cloud flow",
-                "Refresh Mode": "Full table refresh",
-                "Rows Written": "@outputs('Compose_ActiveCases')",
-                "Total Requests": "@outputs('Compose_TotalRequests')",
-                "Active Cases": "@outputs('Compose_ActiveCases')",
-                "Cleared Cases": "@outputs('Compose_ClearedCases')",
-                "Closed Employer Form Received": "@outputs('Compose_ClosedRespondedClearCount')",
-                "Closed Employer Form Received But Flagged": "@outputs('Compose_ClosedRespondedFlaggedCount')",
-                "Closed Reminder 3 Sent": "@outputs('Compose_ClosedReminder3Count')",
-                "Notes": "BGV_9 refreshed tblDashboardCasesPA from SharePoint source lists."
-              }
-            },
-            "host": {
-              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
-              "operationId": "AddRowV2",
-              "connectionName": "shared_excelonlinebusiness"
-            },
-            "authentication": "@parameters('$authentication')"
-          },
-          "runAfter": {
-            "Compose_ActiveCases": [
-              "Succeeded"
-            ]
-          }
+          "runAfter": {}
         }
       },
       "outputs": {}

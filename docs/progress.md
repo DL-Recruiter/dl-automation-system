@@ -6,12 +6,14 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
-## 2026-03-27 (Dashboard email-sent timestamps + 90-minute refresh cadence + key-map doc sync)
+## 2026-03-27 (Dashboard email-sent timestamps + daytime refresh-window cadence + key-map doc sync)
 - Current status:
   - Updated dashboard flow/schema so case rows now include explicit email-sent timestamps for candidate authorization and employer outreach, and aligned key-mapping docs with the latest prefill behavior.
 - Completed tasks:
   - Updated canonical `BGV_9_Refresh_Dashboard_Excel`:
-    - recurrence changed to 90-minute cadence anchored at `08:00` SGT
+    - recurrence trigger set to every 30 minutes
+    - added SGT execution-window gate so refresh runs only at:
+      - `08:00`, `09:30`, `11:00`, `12:30`, `14:00`, `15:30`, `17:00`, `18:30`, `20:00`, `21:00`
     - added `Compose_CandidateEmailSentAt` from `BGV_Candidates.AuthorizationLinkCreatedAt` (SGT formatted)
     - added `Compose_EmployerEmailSentAt` from `BGV_Requests.HRRequestSentAt` (SGT formatted)
     - wrote new dashboard columns in this order:
