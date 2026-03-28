@@ -22,7 +22,7 @@
     },
     "definition": {
       "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-      "contentVersion": "1.0.0.0",
+      "contentVersion": "undefined",
       "parameters": {
         "$authentication": {
           "defaultValue": {},
@@ -44,6 +44,26 @@
         }
       },
       "actions": {
+        "Get_items_(BGV_Requests)": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+              "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+              "$filter": "VerificationStatus eq 'Not Sent' and HRRequestSentAt eq null"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetItems",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {
+            "Initialize_variable_-_AuthFileContent": [
+              "Succeeded"
+            ]
+          }
+        },
         "Initialize_variable_-_AuthFileName": {
           "type": "InitializeVariable",
           "inputs": {
@@ -72,27 +92,6 @@
             ]
           }
         },
-        "Get_items_(BGV_Requests)": {
-          "type": "OpenApiConnection",
-          "inputs": {
-            "parameters": {
-              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-              "$filter": "VerificationStatus eq 'Not Sent' and HRRequestSentAt eq null"
-            },
-            "host": {
-              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-              "operationId": "GetItems",
-              "connectionName": "shared_sharepointonline"
-            },
-            "authentication": "@parameters('$authentication')"
-          },
-          "runAfter": {
-            "Initialize_variable_-_AuthFileContent": [
-              "Succeeded"
-            ]
-          }
-        },
         "Apply_to_each_(Requests_Loop)": {
           "type": "Foreach",
           "foreach": "@outputs('Get_items_(BGV_Requests)')?['body/value']",
@@ -110,8 +109,7 @@
                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
                   "operationId": "GetItems",
                   "connectionName": "shared_sharepointonline"
-                },
-                "authentication": "@parameters('$authentication')"
+                }
               }
             },
             "Get_items_(BGV_FormData)": {
@@ -127,8 +125,7 @@
                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
                   "operationId": "GetItems",
                   "connectionName": "shared_sharepointonline"
-                },
-                "authentication": "@parameters('$authentication')"
+                }
               },
               "runAfter": {
                 "Get_item": [
@@ -145,18 +142,14 @@
                 ]
               }
             },
-            "SignedGateItems": {
-              "type": "Compose",
-              "inputs": "@if(equals(outputs('AuthorisationSignedFlag'),'true'), createArray('go'), createArray())",
-              "runAfter": {
-                "AuthorisationSignedFlag": [
-                  "Succeeded"
+            "Condition_-_AuthorisationSigned": {
+              "type": "If",
+              "expression": {
+                "equals": [
+                  "@outputs('AuthorisationSignedFlag')",
+                  "true"
                 ]
-              }
-            },
-            "For_each_-_SignedGate": {
-              "type": "Foreach",
-              "foreach": "@outputs('SignedGateItems')",
+              },
               "actions": {
                 "FinalVerificationLink": {
                   "type": "Compose",
@@ -165,54 +158,19 @@
                 },
                 "AuthFolderPath": {
                   "type": "Compose",
-                  "inputs": "@concat('/BGV Records/Candidate Files/',coalesce(first(body('Get_item')?['value'])?['CandidateID'], items('Apply_to_each_(Requests_Loop)')?['CandidateID']),'/Authorization/')",
+                  "inputs": "@concat( \r\n\r\n  '/BGV Records/Candidate Files/', \r\n\r\n  coalesce(first(body('Get_item')?['value'])?['CandidateID'], items('Apply_to_each_(Requests_Loop)')?['CandidateID']), \r\n\r\n  '/Authorization/' \r\n\r\n) ",
                   "runAfter": {
                     "FinalVerificationLink": [
                       "Succeeded"
                     ]
                   }
                 },
-                "Create_Request_Stamp_Folder": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
-                      "parameters/path": "Candidate Files/@{coalesce(first(body('Get_item')?['value'])?['CandidateID'], items('Apply_to_each_(Requests_Loop)')?['CandidateID'])}/@{items('Apply_to_each_(Requests_Loop)')?['RequestID']}"
-                    },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                      "operationId": "CreateNewFolder",
-                      "connectionName": "shared_sharepointonline"
-                    },
-                    "authentication": "@parameters('$authentication')"
-                  },
-                  "runAfter": {}
-                },
-                "Create_sharing_link_for_request_stamp_folder": {
-                  "type": "Compose",
-                  "inputs": "@concat('Skipped share link creation. Using direct request folder URL instead: ',concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/',encodeUriComponent(coalesce(first(body('Get_item')?['value'])?['CandidateID'],items('Apply_to_each_(Requests_Loop)')?['CandidateID'])),'/',encodeUriComponent(items('Apply_to_each_(Requests_Loop)')?['RequestID'])))",
-                  "runAfter": {
-                    "Create_Request_Stamp_Folder": [
-                      "Succeeded",
-                      "Failed"
-                    ]
-                  }
-                },
                 "Get_files_(properties_only)": {
-                  "type": "OpenApiConnection",
+                  "type": "Compose",
                   "inputs": {
-                    "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
-                      "folderPath": "@outputs('AuthFolderPath')"
-                    },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                      "operationId": "GetFileItems",
-                      "connectionName": "shared_sharepointonline"
-                    },
-                    "authentication": "@parameters('$authentication')"
+                    "body": {
+                      "value": []
+                    }
                   },
                   "runAfter": {
                     "AuthFolderPath": [
@@ -256,34 +214,18 @@
                     ]
                   }
                 },
-                "CanSendGateItems": {
-                  "type": "Compose",
-                  "inputs": "@if(equals(outputs('Can_Send_Request_With_Authorisation'), true), createArray('go'), createArray())",
-                  "runAfter": {
-                    "Can_Send_Request_With_Authorisation": [
-                      "Succeeded"
+                "Condition_-_if_file_exist_": {
+                  "type": "If",
+                  "expression": {
+                    "equals": [
+                      "@outputs('Can_Send_Request_With_Authorisation')",
+                      true
                     ]
-                  }
-                },
-                "For_each_-_CanSendGate": {
-                  "type": "Foreach",
-                  "foreach": "@outputs('CanSendGateItems')",
+                  },
                   "actions": {
                     "Get_file_content": {
-                      "type": "OpenApiConnection",
-                      "inputs": {
-                        "parameters": {
-                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                          "id": "@outputs('FirstAuthFileIdentifier')",
-                          "inferContentType": true
-                        },
-                        "host": {
-                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                          "operationId": "GetFileContent",
-                          "connectionName": "shared_sharepointonline"
-                        },
-                        "authentication": "@parameters('$authentication')"
-                      }
+                      "type": "Compose",
+                      "inputs": "@base64('isolation')"
                     },
                     "Set_variable": {
                       "type": "SetVariable",
@@ -301,7 +243,7 @@
                       "type": "SetVariable",
                       "inputs": {
                         "name": "AuthFileContent",
-                        "value": "@body('Get_file_content')"
+                        "value": "@outputs('Get_file_content')"
                       },
                       "runAfter": {
                         "Set_variable": [
@@ -310,21 +252,8 @@
                       }
                     },
                     "Send_an_email_(V2)": {
-                      "type": "OpenApiConnection",
-                      "inputs": {
-                        "parameters": {
-                          "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
-                          "emailMessage/To": "@if(contains(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),'@'),trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),if(contains(trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'@'),trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'dlresplmain@dlresources.com.sg'))",
-                          "emailMessage/Subject": "Request for Employment Verification - @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}",
-                          "emailMessage/Body": "Dear HR Department,<br><br>Please complete the employment verification form for @{first(body('Get_item')?['value'])?['FullName']}.<br><br>Request ID: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}<br>Verification form: @{outputs('FinalVerificationLink')}<br><br>A signed authorization file was located in the candidate authorization folder for this request.<br><br>Thanks & Regards,<br>D L Resources Pte Ltd",
-                          "emailMessage/Importance": "Normal"
-                        },
-                        "host": {
-                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
-                          "operationId": "SharedMailboxSendEmailV2",
-                          "connectionName": "shared_office365"
-                        }
-                      },
+                      "type": "Compose",
+                      "inputs": "@concat('EMAIL_SEND_DISABLED_FOR_ISOLATION|', string(items('Apply_to_each_(Requests_Loop)')?['RequestID']), '|', outputs('FinalVerificationLink'))",
                       "runAfter": {
                         "Set_variable_1": [
                           "Succeeded"
@@ -332,21 +261,8 @@
                       }
                     },
                     "Send_signed_form_copy_to_candidate_(V2)": {
-                      "type": "OpenApiConnection",
-                      "inputs": {
-                        "parameters": {
-                          "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
-                          "emailMessage/To": "@if(contains(trim(string(first(body('Get_item')?['value'])?['CandidateEmail'])),'@'),trim(string(first(body('Get_item')?['value'])?['CandidateEmail'])),'recruitment@dlresources.com.sg')",
-                          "emailMessage/Subject": "Authorization Form Sent - @{first(body('Get_item')?['value'])?['FullName']}",
-                          "emailMessage/Body": "Dear @{first(body('Get_item')?['value'])?['FullName']},<br><br>Your employment verification request has been sent to the employer for Request ID @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.<br><br>Thanks,<br>DL Resources Recruitment Team",
-                          "emailMessage/Importance": "Normal"
-                        },
-                        "host": {
-                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
-                          "operationId": "SharedMailboxSendEmailV2",
-                          "connectionName": "shared_office365"
-                        }
-                      },
+                      "type": "Compose",
+                      "inputs": "@concat('CANDIDATE_COPY_DISABLED_FOR_ISOLATION|', string(first(body('Get_item')?['value'])?['FullName']))",
                       "runAfter": {
                         "Send_an_email_(V2)": [
                           "Succeeded"
@@ -354,23 +270,8 @@
                       }
                     },
                     "Update_item_-_BGV_Requests": {
-                      "type": "OpenApiConnection",
-                      "inputs": {
-                        "parameters": {
-                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                          "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-                          "id": "@items('Apply_to_each_(Requests_Loop)')?['ID']",
-                          "item/Title": "@items('Apply_to_each_(Requests_Loop)')?['Title']",
-                          "item/HRRequestSentAt": "@utcNow()",
-                          "item/VerificationStatus/Value": "Email Sent",
-                          "item/uniquelinktoemployers": "@outputs('FinalVerificationLink')"
-                        },
-                        "host": {
-                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                          "operationId": "PatchItem",
-                          "connectionName": "shared_sharepointonline"
-                        }
-                      },
+                      "type": "Compose",
+                      "inputs": "@concat('REQUEST_UPDATE_DISABLED_FOR_ISOLATION|', string(items('Apply_to_each_(Requests_Loop)')?['ID']))",
                       "runAfter": {
                         "Send_signed_form_copy_to_candidate_(V2)": [
                           "Succeeded"
@@ -378,15 +279,36 @@
                       }
                     }
                   },
+                  "else": {
+                    "actions": {}
+                  },
                   "runAfter": {
-                    "CanSendGateItems": [
+                    "Can_Send_Request_With_Authorisation": [
                       "Succeeded"
+                    ]
+                  }
+                },
+                "Create_Request_Stamp_Folder": {
+                  "type": "Compose",
+                  "inputs": "@concat('STAMP_FOLDER_DISABLED_FOR_ISOLATION|', string(items('Apply_to_each_(Requests_Loop)')?['RequestID']))",
+                  "runAfter": {}
+                },
+                "Create_sharing_link_for_request_stamp_folder": {
+                  "type": "Compose",
+                  "inputs": "@concat('Skipped share link creation. Using direct request folder URL instead: ',concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/',encodeUriComponent(coalesce(first(body('Get_item')?['value'])?['CandidateID'],items('Apply_to_each_(Requests_Loop)')?['CandidateID'])),'/',encodeUriComponent(items('Apply_to_each_(Requests_Loop)')?['RequestID'])))",
+                  "runAfter": {
+                    "Create_Request_Stamp_Folder": [
+                      "Succeeded",
+                      "Failed"
                     ]
                   }
                 }
               },
+              "else": {
+                "actions": {}
+              },
               "runAfter": {
-                "SignedGateItems": [
+                "Get_items_(BGV_FormData)": [
                   "Succeeded"
                 ]
               }

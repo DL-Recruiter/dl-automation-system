@@ -79,6 +79,7 @@
     </Publisher>
     <RootComponents>
       <RootComponent type="29" id="{03b36e72-1ace-4fcf-ad6d-80a583012f31}" behavior="0" />
+      <RootComponent type="29" id="{1e53bf6c-2702-4453-8e6b-8654a265c93c}" behavior="0" />
       <RootComponent type="29" id="{8c1238c7-e4f1-f011-8406-002248582037}" behavior="0" />
       <RootComponent type="29" id="{a35ca9c0-e4f1-f011-8406-002248582037}" behavior="0" />
       <RootComponent type="29" id="{a45ca9c0-e4f1-f011-8406-002248582037}" behavior="0" />
