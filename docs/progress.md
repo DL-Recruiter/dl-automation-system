@@ -4110,3 +4110,13 @@ Log each session with:
   - `m365 flow enable --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 8eeeed39-e02f-4b7a-82c8-fc51f245d863`
   - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 8eeeed39-e02f-4b7a-82c8-fc51f245d863 --output json`
   - `m365 flow list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --output json`
+## 2026-03-27 (BGV_4 candidate lookup hardened for run-time AuthorisationSigned failure)
+  - Investigated the failing live `BGV_4_SendToEmployer_Clean` run where the UI surfaced the error on `Condition - AuthorisationSigned`.
+  - Hardened the canonical flow so the candidate read no longer depends on `BGV_Requests.CandidateItemID` staying valid:
+    - changed `Get_item` from SharePoint `GetItem` by lookup item ID to SharePoint `GetItems` filtered by stable `CandidateID` with `$top: 1`
+    - updated downstream candidate references (`AuthorisationSigned`, candidate name/email, candidate folder path, prefill fallbacks) to read from `first(body('Get_item')?['value'])`
+    - added `CandidateID` fallback from the request row for authorization/request-stamp folder paths so an empty candidate result does not crash path construction
+  - Updated docs to reflect that `BGV_4` now resolves the candidate by `CandidateID` rather than relying solely on the request lookup ID.
+  - Validation to run next after import:
+    - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+    - import the updated solution and resubmit the failed `BGV_4` run

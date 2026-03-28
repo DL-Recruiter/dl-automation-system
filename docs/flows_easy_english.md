@@ -115,7 +115,7 @@ This document describes the current behavior in your canonical flow files under 
 - Selection:
   - Reads `BGV_Requests` where `VerificationStatus = Not Sent` and `HRRequestSentAt` is null.
 - What it does (per request):
-  - Loads candidate row and treats `AuthorisationSigned` as signed when value is boolean/string true.
+  - Loads candidate row by `CandidateID` and treats `AuthorisationSigned` as signed when value is boolean/string true.
   - Loads matching `BGV_FormData` row by `RequestID`.
   - Applies the `SendAfterDate` gate only to EMP1:
     - EMP1 sends only when `SendAfterDate` is today or earlier

@@ -35,7 +35,7 @@ When mappings change:
 ### 2.1.1 Current data flow path (BGV_4 then BGV_5)
 
 1. `BGV_4_SendToEmployer_Clean` reads pending request rows from `BGV_Requests` (`VerificationStatus='Not Sent'` and `HRRequestSentAt` is null).
-2. For each request row, flow reads the linked candidate from `BGV_Candidates` using `CandidateItemID/Id`.
+2. For each request row, flow reads the candidate from `BGV_Candidates` using the stable `CandidateID` value from the request row (`Get items`, top 1), so a stale SharePoint lookup ID does not break the run.
 3. Flow builds `FinalVerificationLink` (HR Verification Form prefilled URL) using request/candidate values with `BGV_FormData` as preferred source where available.
 4. Flow emails `BGV_Requests.EmployerHR_Email` with the prefilled HR verification link and signed authorization file.
 5. Flow updates request row in SharePoint: `HRRequestSentAt=utcNow()`, `VerificationStatus='Email Sent'`, `uniquelinktoemployers=FinalVerificationLink`.
