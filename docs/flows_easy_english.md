@@ -224,12 +224,14 @@ This document describes the current behavior in your canonical flow files under 
     - selected inaccurate company-detail fields
     - company-details explanation
   - Keeps required SharePoint fields (including `Title`) when updating `BGV_FormData`, preventing save/runtime validation errors.
-  - The immediate recruiter Teams post from this flow is now disabled so the BGV channel only gets:
+  - This flow now posts to the BGV channel only for cleared employer responses where severity is blank.
+  - The BGV channel therefore gets three main post types:
     - day-5 unsigned authorization alerts from `BGV_3`
-    - report-summary posts from `BGV_7`
+    - cleared-case posts from `BGV_5`
+    - adverse report-summary posts from `BGV_7`
   - Recruiter-facing email details are cleaned before send so escaped newline markers such as `\n` or `\n\n` render as normal line breaks instead of raw text.
   - Recruiter-facing notifications include a direct candidate-folder link for faster follow-up.
-  - If severity is blank after employer response, the recruiter email is treated as a cleared-case notification and says the PEV checks are cleared and TAC form is to be sent.
+  - If severity is blank after employer response, both the recruiter email and the Teams post are treated as cleared-case notifications and say the PEV checks are cleared and TAC form is to be sent.
   - Sends internal high-severity email when severity is `High`, including employer name and employer HR email in the body.
   - Recruiter-facing BGV_5 emails now include `EmployerName` in the email body context and tell recruiters where to find the later report summary under `BGV_Records > Candidate Files (<CandidateID>)`.
   - All email notifications in this flow are routed via shared mailbox and addressed to `recruitment@dlresources.com.sg`.

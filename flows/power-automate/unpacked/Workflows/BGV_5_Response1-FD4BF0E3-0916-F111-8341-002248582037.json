@@ -933,7 +933,7 @@
                           "location": "Channel",
                           "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
                           "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
-                          "body/messageBody": "<p class=\"editor-paragraph\">BGV Response Submitted for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}</p><br><p class=\"editor-paragraph\">Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}, @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerHR_Email']}</p><br><p class=\"editor-paragraph\">Request ID: @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}</p><p class=\"editor-paragraph\">Severity: @{variables('varSeverity')}</p><p class=\"editor-paragraph\">Flagged Issues: @{if(empty(trim(variables('varOutcome'))),'None',if(startsWith(variables('varOutcome'),', '),substring(variables('varOutcome'),2,sub(length(variables('varOutcome')),2)),variables('varOutcome')))}</p><br><p class=\"editor-paragraph\">Candidate Folder: <a href=\"@{outputs('Compose_CandidateFolderLink')}\">@{outputs('Compose_CandidateFolderLink')}</a></p><br><p class=\"editor-paragraph\">Details:<br>@{outputs('Compose_NotifyBodyHtml')}</p><br>"
+                          "body/messageBody": "<p class=\"editor-paragraph\">PEV Checks Cleared</p><br><p class=\"editor-paragraph\">Candidate: @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}</p><p class=\"editor-paragraph\">Candidate ID: @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateID']}</p><p class=\"editor-paragraph\">Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}</p><p class=\"editor-paragraph\">Employer HR Email: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerHR_Email']}</p><p class=\"editor-paragraph\">Request ID: @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}</p><br><p class=\"editor-paragraph\">Candidate Folder: <a href=\"@{outputs('Compose_CandidateFolderLink')}\">@{outputs('Compose_CandidateFolderLink')}</a></p><br><p class=\"editor-paragraph\">PEV checks are cleared. TAC form to be sent.</p>"
                         },
                         "host": {
                           "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
@@ -954,8 +954,8 @@
                   },
                   "expression": {
                     "equals": [
-                      "disabled",
-                      "enabled"
+                      "@empty(variables('varSeverity'))",
+                      true
                     ]
                   },
                   "type": "If"

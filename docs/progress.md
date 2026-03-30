@@ -39,6 +39,23 @@ Log each session with:
   - Import the updated solution to live, run daily sync, and push the synced state to GitHub.
   - After deployment, verify one employer-response case that previously missed `BGV_7` now produces the report summary and adverse Teams post as expected.
 
+## 2026-03-30 (BGV_5 cleared-case Teams post restored)
+- Current status:
+  - Restored the third BGV channel post type so cleared employer responses now post to Teams again, while adverse cases still wait for the report-summary post from `BGV_7`.
+- Completed tasks:
+  - Updated `BGV_5_Response1`:
+    - changed `Condition_-_Notifying_Teams` from fully disabled to cleared-only
+    - Teams post now fires only when `varSeverity` is blank
+    - Teams body now says `PEV Checks Cleared`, includes candidate name/id, employer, request id, candidate folder link, and notes TAC form is to be sent
+  - Updated docs so the BGV channel behavior is explicit again:
+    - unsigned authorization day-5 alert from `BGV_3`
+    - cleared-case post from `BGV_5`
+    - adverse report-summary post from `BGV_7`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Import the updated solution to live, run daily sync, and push the synced state to GitHub.
+
 ## 2026-03-30 (Dashboard candidate-folder link + candidate auth email PDF guide)
 - Current status:
   - Wired the new dashboard `Candidate Folder Link` column into `BGV_9_Refresh_Dashboard_Excel`, attached the new `Instructions For Authorisation Form.pdf` guide in the candidate authorization email sent by `BGV_0_CandidateDeclaration`, and documented the final root cause/fix summary for the Saturday `BGV_4` outage.
