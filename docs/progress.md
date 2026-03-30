@@ -6,6 +6,21 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-30 (BGV_4 candidate-copy attachment + single-send guard + employer stamp wording)
+- Current status:
+  - Updated the live `BGV_4_SendToEmployer_Clean` mail actions so candidate copies carry the authorization attachment again, candidates only receive that copy once on the `EMP1` send, and employer wording now politely asks HR to place the company stamp into the shared Word document.
+- Completed tasks:
+  - Updated `BGV_4_SendToEmployer_Clean`:
+    - restored the signed authorization attachment on the candidate reference email using the same SharePoint file-content payload as the employer email
+    - removed the per-request Request ID sentence from the candidate email body and simplified the wording to a single “your verification has been sent” reference email
+    - wrapped the candidate-copy email in an `EMP1` gate so candidates with EMP2/EMP3 requests still receive only one copy
+    - refreshed the employer email wording so it politely requests the company stamp and tells HR to open the shared company-stamp Word document, place the stamp there, and save it back
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "Condition_-_Send_candidate_copy_once|Copy of Signed Authorization Form|company stamp|attached to this email|base64ToBinary" flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+- Next actions and blockers:
+  - Import the updated solution to live, run daily sync, and verify the active flow remains `BGV_4_SendToEmployer_Clean`.
+
 ## 2026-03-30 (BGV_0/BGV_4/BGV_6 company-stamp document flow + auth ID masking + Reminder 3 archive)
 - Current status:
   - Deployed the new employer company-stamp document flow, masked authorization-form IDs down to the last 5 characters without changing list storage, and added Reminder 3 email archiving into the request folder.

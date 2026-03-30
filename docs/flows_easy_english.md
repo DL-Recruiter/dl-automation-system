@@ -140,11 +140,11 @@ This document describes the current behavior in your canonical flow files under 
   - Creates or reuses `Company Stamp - <RequestID>.docx` inside that request folder from `BGV Records/Templates/Company Stamp.docx`.
   - Creates an anonymous edit sharing link for that employer-specific company-stamp document and injects it into the prefilled Form 2 key for stamp collection.
   - Uses the matching `BGV_FormData` row as the first source for company name/address/UEN in the employer email body, so EMP1/EMP2/EMP3 show the correct declared company details.
-  - Employer email now includes the Request ID and the direct shared company-stamp Word-document link, so HR can place the stamp into the correct employer-specific file instead of uploading a loose image.
-  - Employer email subject/body wording is synced to the latest cloud-edited template (including the newest HR instruction text), while preserving the existing dynamic mappings for declared-details and verification-link sections.
+  - Employer email now includes the Request ID and the direct shared company-stamp Word-document link, and politely asks HR to place the company stamp into that Word document and save it back using the shared link.
+  - Employer email subject/body wording is synced to the latest cloud-edited template while preserving the existing dynamic mappings for declared-details, verification-link, and authorization-attachment sections.
   - Employer email wording now also tells the employer to reply to the email or include the `RequestID` in the subject line when they need more information, so mailbox replies can be matched safely.
   - Finds authorization file, attaches it, and emails employer HR.
-  - Sends the same signed authorization attachment to the candidate email (`BGV_Candidates.CandidateEmail`) for reference, with a note to open it in Word to view the signed copy.
+  - Sends the signed authorization attachment to the candidate email (`BGV_Candidates.CandidateEmail`) for reference only once per candidate, on the `EMP1` request, so candidates with multiple employers do not receive duplicate copies.
   - Email sends are routed via shared mailbox `recruitment@dlresources.com.sg`.
   - Employer email subject now uses the mapped dynamic company field.
   - Employer email wording uses dynamic candidate/company values while preserving the existing declared-details and verification-link sections.
