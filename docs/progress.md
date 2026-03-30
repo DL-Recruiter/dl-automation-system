@@ -6,6 +6,23 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-30 (BGV_4 live-state verification: production flow healthy, v2 parked off)
+- Current status:
+  - Verified that the production employer-send flow is healthy in live, and the flow shown as off in the UI screenshot was the parked `v2` copy rather than the active production flow.
+- Completed tasks:
+  - Confirmed live flow states in the default environment:
+    - `BGV_4_SendToEmployer_Clean` is the active production flow.
+    - `BGV_4_SendToEmployer_Clean_v2` remains intentionally `Stopped`.
+  - Confirmed the latest live runs for the active production flow were successful on `2026-03-30`.
+  - Updated `docs/flows_easy_english.md` so the active-vs-v2 status is explicit and future troubleshooting does not target the wrong flow.
+- Validation commands run:
+  - `git -C "BGV_Checks" status --short --branch`
+  - `m365 flow list --environmentName "Default-38597470-4753-461a-837f-ad8c14860b22" --output json`
+  - `m365 flow run list --environmentName "Default-38597470-4753-461a-837f-ad8c14860b22" --flowName "8eeeed39-e02f-4b7a-82c8-fc51f245d863" --output json`
+- Next actions and blockers:
+  - No live repair was required for the production Flow 4 at this point because the current scheduled runs are succeeding.
+  - If `v2` is ever revived, treat it as a separate flow activation task rather than assuming it replaces the active production flow.
+
 ## 2026-03-27 (BGV_0 authorization template remap to DLRAuthorizationLetter_Template)
 - Current status:
   - Remapped `BGV_0` Word template binding to the newly uploaded authorization template filename while preserving existing signature/checkbox/expiry behavior.

@@ -111,6 +111,9 @@ This document describes the current behavior in your canonical flow files under 
   - Not used by the current canonical flows.
 
 ### `BGV_4_SendToEmployer_Clean`
+- Active production flow note:
+  - Use `BGV_4_SendToEmployer_Clean`.
+  - `BGV_4_SendToEmployer_Clean_v2` is a parked replacement draft and remains off; it is not the live production sender.
 - Trigger: Recurrence every 30 minutes.
 - Selection:
   - Reads `BGV_Requests` where `VerificationStatus = Not Sent` and `HRRequestSentAt` is null.
