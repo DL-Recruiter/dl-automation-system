@@ -260,6 +260,98 @@
                             },
                             "authentication": "@parameters('$authentication')"
                           }
+                        },
+                        "Condition_-_Report_Summary_Post_Not_Already_Sent_After_Update": {
+                          "type": "If",
+                          "expression": {
+                            "and": [
+                              {
+                                "equals": [
+                                  "@empty(items('Apply_to_each_(Completed_Requests)')?['Report_x0020_Summary_x0020_Teams'])",
+                                  true
+                                ]
+                              },
+                              {
+                                "equals": [
+                                  "@empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Report_x0020_Summary_x0020_Teams'])",
+                                  true
+                                ]
+                              }
+                            ]
+                          },
+                          "actions": {
+                            "Post_message_in_a_chat_or_channel_-_Report_Summary_Ready": {
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "parameters": {
+                                  "poster": "Flow bot",
+                                  "location": "Channel",
+                                  "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
+                                  "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
+                                  "body/messageBody": "<p class=\"editor-paragraph\">BGV Report Summary Ready</p><br><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each_(Completed_Requests)')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value'],'')}</p><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Completed_Requests)')?['RequestID']}</p><p class=\"editor-paragraph\">Report File: @{concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')}</p><p class=\"editor-paragraph\">Report Link: <a href=\"@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/', encodeUriComponent(concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')))}\">@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/', encodeUriComponent(concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')))}</a></p>"
+                                },
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                                  "operationId": "PostMessageToConversation",
+                                  "connectionName": "shared_teams"
+                                }
+                              }
+                            },
+                            "Update_item_-_BGV_Requests_-_Report_Summary_PostedAt_After_Update": {
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "parameters": {
+                                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                                  "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+                                  "id": "@items('Apply_to_each_(Completed_Requests)')?['ID']",
+                                  "item/Title": "@items('Apply_to_each_(Completed_Requests)')?['Title']",
+                                  "item/Report_x0020_Summary_x0020_Teams": "@utcNow()"
+                                },
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                                  "operationId": "PatchItem",
+                                  "connectionName": "shared_sharepointonline"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              },
+                              "runAfter": {
+                                "Post_message_in_a_chat_or_channel_-_Report_Summary_Ready": [
+                                  "Succeeded"
+                                ]
+                              }
+                            },
+                            "Update_item_-_BGV_FormData_-_Report_Summary_PostedAt_After_Update": {
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "parameters": {
+                                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                                  "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                                  "id": "@first(body('Get_items_(BGV_FormData)')?['value'])?['ID']",
+                                  "item/Title": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Title']",
+                                  "item/Report_x0020_Summary_x0020_Teams": "@utcNow()"
+                                },
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                                  "operationId": "PatchItem",
+                                  "connectionName": "shared_sharepointonline"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              },
+                              "runAfter": {
+                                "Update_item_-_BGV_Requests_-_Report_Summary_PostedAt_After_Update": [
+                                  "Succeeded"
+                                ]
+                              }
+                            }
+                          },
+                          "else": {
+                            "actions": {}
+                          },
+                          "runAfter": {
+                            "Update_report_summary_file": [
+                              "Succeeded"
+                            ]
+                          }
                         }
                       },
                       "else": {

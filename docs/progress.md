@@ -6,6 +6,27 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-30 (BGV_4 recruiter email polish + BGV_5 Teams formatting + BGV_7 report-post catch-up)
+- Current status:
+  - Polished the active employer/candidate email wording in `BGV_4_SendToEmployer_Clean`, fixed medium-severity Teams notification coverage and message formatting in `BGV_5_Response1`, and patched `BGV_7_Generate_Report_Summary` so the Teams report-link post can still happen when the report file already exists and is only being updated.
+- Completed tasks:
+  - Updated `BGV_4_SendToEmployer_Clean`:
+    - employer email now politely asks HR to open the shared company-stamp Word document, place the company stamp inside it, and save it back using the same link
+    - candidate copy email now says employer emails will be sent based on the candidate-provided details and tells the candidate to open the attached signed authorization form in Microsoft Word
+  - Updated `BGV_5_Response1`:
+    - medium employment-detail discrepancies now also set the Teams notify flag
+    - recruiter-facing Teams/email detail blocks now render readable line breaks instead of raw `\\n` text
+    - recruiter-facing Teams/email notifications now include a direct candidate-folder link
+  - Updated `BGV_7_Generate_Report_Summary`:
+    - added the same one-time report-summary Teams post guard to the update-report path, not just the create-report path
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Import the updated solution to live and verify the active cloud flows.
+  - Dashboard candidate-folder link in Excel still depends on adding a real matching column to `tblDashboardCasesPA`; wiring it before that would risk breaking the add-row action.
+
 ## 2026-03-30 (BGV_4 candidate email wording generalized)
 - Current status:
   - Updated the candidate reference email in `BGV_4_SendToEmployer_Clean` so it no longer exposes employer-slot details to the candidate while still attaching the signed authorization form.

@@ -187,6 +187,7 @@ This document describes the current behavior in your canonical flow files under 
     - `VerificationStatus = Responded`
     - `ResponseReceivedAt`
     - `Severity`, `Outcome`, `BGV Checks`, `Notes`
+  - Medium-severity employment-detail discrepancies now also set the Teams notify flag, not just the high-severity branches.
   - Expires employer upload access when HR has responded:
     - locates `BGV Records/Candidate Files/<CandidateID>/<RequestID>`
     - runs `Stop sharing` (`UnshareItem`) on that request folder.
@@ -222,6 +223,8 @@ This document describes the current behavior in your canonical flow files under 
     - company-details explanation
   - Keeps required SharePoint fields (including `Title`) when updating `BGV_FormData`, preventing save/runtime validation errors.
   - Sends Teams alert when notify flag is true.
+  - Recruiter-facing Teams and email details are cleaned before send so escaped newline markers such as `\n` or `\n\n` render as normal line breaks instead of raw text.
+  - Recruiter-facing Teams and email notifications include a direct candidate-folder link for faster follow-up.
   - Sends internal high-severity email when severity is `High`, including employer name and employer HR email in the body.
   - Recruiter-facing BGV_5 emails now include `EmployerName` in the email body context and tell recruiters where to find the later report summary under `BGV_Records > Candidate Files (<CandidateID>)`.
   - All email notifications in this flow are routed via shared mailbox and addressed to `recruitment@dlresources.com.sg`.
@@ -301,7 +304,8 @@ This document describes the current behavior in your canonical flow files under 
     - `BGV Records/Candidate Files/<CandidateID>/`
   - If the report already exists, updates the file content in place.
   - If the report does not exist yet, creates it and checks one-time post flags before posting to Teams.
-  - Teams post (`Report Summary Created`) only sends when both `BGV_Requests.Report Summary Teams Posted At` and `BGV_FormData.Report Summary Teams Posted At` are blank.
+  - If the report already exists but has never been posted to Teams before, the flow now posts the report link after the update path as well.
+  - Teams report-summary post only sends when both `BGV_Requests.Report Summary Teams Posted At` and `BGV_FormData.Report Summary Teams Posted At` are blank.
   - After a successful Teams post, flow stamps both fields with current UTC time so it will not post that same report summary again.
 - Main outcome: Each completed employer verification now gets a report-summary DOCX generated from the real SharePoint template and stored in the correct candidate folder.
 
@@ -369,6 +373,7 @@ This document describes the current behavior in your canonical flow files under 
     - `Last Activity At`
     - `Severity`
     - `Outcome`
+  - Candidate-folder link is not written into the Excel table yet because the live workbook table `tblDashboardCasesPA` does not currently expose a matching column header for the flow to populate safely.
   - Appends a run entry into:
     - `tblDashboardRefreshLog`
     - timestamp value is written as `Run At (SGT)`
