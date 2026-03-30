@@ -291,7 +291,7 @@
                       "emailMessage/Attachments": [
                         {
                           "Name": "@variables('AuthFileName')",
-                          "ContentBytes": "@outputs('Get_file_content')?['body/$content']"
+                          "ContentBytes": "@base64ToBinary(outputs('Get_file_content')?['body/$content'])"
                         }
                       ],
                       "emailMessage/Importance": "Normal"
