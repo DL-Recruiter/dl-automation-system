@@ -24,8 +24,9 @@ This document describes the current behavior in your canonical flow files under 
   - Generates and saves authorization `.docx` from the target-site template in `DLR Recruitment Ops > BGV Records > Templates > DLRAuthorizationLetter_Template.docx`, then shares it and emails candidate.
   - The authorization link is created as an anonymous edit link so the candidate can open and edit the Word document directly, even outside the organisation.
   - When filling the authorization Word template ID content controls:
-    - NRIC control gets candidate NRIC, else `N/A`.
-    - Passport control gets `N/A` when NRIC exists; otherwise candidate Passport, else `N/A`.
+    - NRIC control gets the last 5 cleaned alphanumeric characters from the candidate's full NRIC, else `N/A`.
+    - Passport control gets `N/A` when NRIC exists; otherwise the last 5 cleaned alphanumeric characters from the candidate's full Passport, else `N/A`.
+  - The full submitted NRIC/passport values are still stored in SharePoint lists and `BGV_FormData`; only the authorization document is masked down to the last 5 characters.
   - Authorization template includes a bottom checkbox line `Yes, I authorized` using content-control tag `SignedYes`.
   - Updates candidate status to pending signature.
   - Creates `BGV_Requests` rows for EMP1 always, and EMP2/EMP3 when those employer sections are filled.
@@ -134,10 +135,12 @@ This document describes the current behavior in your canonical flow files under 
     - Employment period
     - Last drawn salary
     - Job title
-    - Company-stamp upload link (`rd5d9cb98b1aa47dd8bcd7914cd4bdc87`) pointing to an employer-specific SharePoint request folder.
+    - Company-stamp document link (`rd5d9cb98b1aa47dd8bcd7914cd4bdc87`) pointing to an employer-specific shared Word document.
   - Creates an employer-specific request folder in `BGV Records/Candidate Files/<CandidateID>/<RequestID>`.
-  - Creates an anonymous edit sharing link for that request folder and injects it into the prefilled Form 2 key for company-stamp upload.
+  - Creates or reuses `Company Stamp - <RequestID>.docx` inside that request folder from `BGV Records/Templates/Company Stamp.docx`.
+  - Creates an anonymous edit sharing link for that employer-specific company-stamp document and injects it into the prefilled Form 2 key for stamp collection.
   - Uses the matching `BGV_FormData` row as the first source for company name/address/UEN in the employer email body, so EMP1/EMP2/EMP3 show the correct declared company details.
+  - Employer email now includes the Request ID and the direct shared company-stamp Word-document link, so HR can place the stamp into the correct employer-specific file instead of uploading a loose image.
   - Employer email subject/body wording is synced to the latest cloud-edited template (including the newest HR instruction text), while preserving the existing dynamic mappings for declared-details and verification-link sections.
   - Employer email wording now also tells the employer to reply to the email or include the `RequestID` in the subject line when they need more information, so mailbox replies can be matched safely.
   - Finds authorization file, attaches it, and emails employer HR.
@@ -247,8 +250,9 @@ This document describes the current behavior in your canonical flow files under 
   - Shared-mailbox sender is `recruitment@dlresources.com.sg`.
   - Reminder conditions now use `empty(...)`-safe checks for SharePoint date fields so null/blank timestamps do not block reminder branches unexpectedly.
 - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
-- Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, so reminders still contain the Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
+- Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, including the employer-specific shared company-stamp document link, so reminders still contain the current Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
 - Escalation now stamps `EscalatedAt`, so the same unresolved request is not escalated again on every later run.
+- When Reminder 3 is sent, the flow also saves an HTML copy of that final reminder email into the same request folder under the candidate folder for audit/reference.
 - Adds close-window upload-link expiry for no-response cases:
   - when `Reminder3At` is 5+ days old and `ResponseReceivedAt` is still empty
   - finds request folder `BGV Records/Candidate Files/<CandidateID>/<RequestID>`

@@ -187,6 +187,54 @@
             "operationMetadataId": "9d6183ea-2eb8-4833-a970-7c004ab023ee"
           }
         },
+        "Compose_CleanNRICForAuth": {
+          "type": "Compose",
+          "inputs": "@replace(replace(replace(trim(string(outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49'])),'-',''),' ',''),'/','')",
+          "runAfter": {
+            "Create_Authorization_Sub_Folder": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d0c89e3a-0bb8-4e0e-93dc-6c2ad4e56501"
+          }
+        },
+        "Compose_Last5NRICForAuth": {
+          "type": "Compose",
+          "inputs": "@if(empty(outputs('Compose_CleanNRICForAuth')),'N/A',substring(outputs('Compose_CleanNRICForAuth'),sub(length(outputs('Compose_CleanNRICForAuth')),if(greaterOrEquals(length(outputs('Compose_CleanNRICForAuth')),5),5,length(outputs('Compose_CleanNRICForAuth')))),if(greaterOrEquals(length(outputs('Compose_CleanNRICForAuth')),5),5,length(outputs('Compose_CleanNRICForAuth')))))",
+          "runAfter": {
+            "Compose_CleanNRICForAuth": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4b15c767-3409-4e10-b0df-c808c7a1684a"
+          }
+        },
+        "Compose_CleanPassportForAuth": {
+          "type": "Compose",
+          "inputs": "@replace(replace(replace(trim(string(outputs('Get_response_details')?['body/rf5b324c022804863a720ef13edeb9d9b'])),'-',''),' ',''),'/','')",
+          "runAfter": {
+            "Compose_Last5NRICForAuth": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3d1f2eb8-35d5-4d06-9810-d96e8f0ec2b1"
+          }
+        },
+        "Compose_Last5PassportForAuth": {
+          "type": "Compose",
+          "inputs": "@if(empty(outputs('Compose_CleanPassportForAuth')),'N/A',substring(outputs('Compose_CleanPassportForAuth'),sub(length(outputs('Compose_CleanPassportForAuth')),if(greaterOrEquals(length(outputs('Compose_CleanPassportForAuth')),5),5,length(outputs('Compose_CleanPassportForAuth')))),if(greaterOrEquals(length(outputs('Compose_CleanPassportForAuth')),5),5,length(outputs('Compose_CleanPassportForAuth')))))",
+          "runAfter": {
+            "Compose_CleanPassportForAuth": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "bb9ca124-b0c7-46f4-a5c4-dbbc6f284ad8"
+          }
+        },
         "Populate_a_Microsoft_Word_template": {
           "type": "OpenApiConnection",
           "inputs": {
@@ -194,9 +242,9 @@
               "source": "sites/dlresourcespl88.sharepoint.com,4a00b2e1-49ac-40de-bb98-ba8ea1643a42,38c5c241-3542-4629-9b7e-f155ebc4ac49",
               "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp",
               "file": "017QXH3H2C7KNCCUL4KRDIDZKFV4VC5U6H",
-              "dynamicFileSchema/974713748": "@if(not(empty(outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49'])),outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49'],'N/A')",
+              "dynamicFileSchema/974713748": "@outputs('Compose_Last5NRICForAuth')",
               "dynamicFileSchema/-1424797845": "@outputs('Get_response_details')?['body/rfe96c622120343f294de908deb0e849d']",
-              "dynamicFileSchema/-206184337": "@if(not(empty(outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49'])),'N/A',if(not(empty(outputs('Get_response_details')?['body/rf5b324c022804863a720ef13edeb9d9b'])),outputs('Get_response_details')?['body/rf5b324c022804863a720ef13edeb9d9b'],'N/A'))",
+              "dynamicFileSchema/-206184337": "@if(not(empty(outputs('Get_response_details')?['body/rd2fba2b09afd478ba21df420406c9b49'])),'N/A',outputs('Compose_Last5PassportForAuth'))",
               "dynamicFileSchema/-352883803": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'Singapore Standard Time'), 'dd MMM yyyy')"
             },
             "host": {
@@ -206,7 +254,7 @@
             }
           },
           "runAfter": {
-            "Create_Authorization_Sub_Folder": [
+            "Compose_Last5PassportForAuth": [
               "Succeeded"
             ]
           },

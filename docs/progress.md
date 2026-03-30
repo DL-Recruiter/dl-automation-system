@@ -6,6 +6,36 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-30 (BGV_0/BGV_4/BGV_6 company-stamp document flow + auth ID masking + Reminder 3 archive)
+- Current status:
+  - Deployed the new employer company-stamp document flow, masked authorization-form IDs down to the last 5 characters without changing list storage, and added Reminder 3 email archiving into the request folder.
+- Completed tasks:
+  - Updated `BGV_0_CandidateDeclaration`:
+    - authorization Word-template NRIC field now receives the last 5 cleaned alphanumeric characters from the full submitted NRIC
+    - authorization Word-template Passport field now receives the last 5 cleaned alphanumeric characters from the full submitted Passport when NRIC is absent
+    - list storage remains unchanged, so `BGV_Candidates` and `BGV_FormData` still keep the full submitted NRIC/passport values
+  - Updated `BGV_4_SendToEmployer_Clean`:
+    - creates or reuses `Company Stamp - <RequestID>.docx` in `BGV Records/Candidate Files/<CandidateID>/<RequestID>`
+    - sources that file from `BGV Records/Templates/Company Stamp.docx`
+    - creates an anonymous edit sharing link for the employer-specific document
+    - injects that shared document link into Form 2 prefill key `rd5d9cb98b1aa47dd8bcd7914cd4bdc87`
+    - updates employer email wording so the Request ID and the direct company-stamp document link are both included
+  - Updated `BGV_6_HRReminderAndEscalation`:
+    - rebuilds reminder links using the same employer-specific shared company-stamp document link
+    - saves a Reminder 3 email copy as HTML into the request folder when the final reminder is sent and no employer response has been received
+  - Imported the updated solution into the default environment and ran daily sync so local canonical files match live.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `m365 spo file list --webUrl "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570" --folderUrl "BGV Records/Templates" --output json`
+  - `pac solution pack --zipfile .\\artifacts\\exports\\BGV_System_20260330_company_stamp_and_idmask.zip --folder .\\flows\\power-automate\\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\\artifacts\\exports\\BGV_System_20260330_company_stamp_and_idmask.zip --publish-changes --force-overwrite`
+  - `powershell -ExecutionPolicy Bypass -File .\\scripts\\active\\bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+- Next actions and blockers:
+  - Run one fresh end-to-end employer send case to confirm the generated `Company Stamp - <RequestID>.docx` link opens externally and the shared document is populated in the correct request folder.
+  - Run one Reminder 3 case to confirm the archived HTML reminder copy is written to the request folder in live runtime.
+
 ## 2026-03-30 (BGV_4 live-state verification: production flow healthy, v2 parked off)
 - Current status:
   - Verified that the production employer-send flow is healthy in live, and the flow shown as off in the UI screenshot was the parked `v2` copy rather than the active production flow.

@@ -108,11 +108,178 @@
                     }
                   }
                 },
-                "FinalVerificationLink": {
+                "RequestFolderPath": {
                   "type": "Compose",
-                  "inputs": "@concat('https://forms.office.com/Pages/ResponsePage.aspx?id=cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUN1c5NE0wWEI2Nk1OMDlJSkI0N0RXUTRHMS4u','&r4930fc603c0f4cada09832be79f2a76f=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value'],'')))),'&r27b6bdb850dd48339dc05df11d485470=',encodeUriComponent(if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']))),'N/A',trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'])))),'&r425242341d6143c7a29307136debe938=',encodeUriComponent(if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']))),if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']))),'N/A',trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']))),'N/A')),'&rd745d133eb7f4611b59ea051f980f97a=',encodeUriComponent(trim(string(items('Apply_to_each')?['RequestID']))),'&rccaf3632669648baaa335c12d4ea40bf=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each')?['EmployerName'],'')))),'&rcf35c7cc008e472f9d0b84bde67cc1ff=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN']))),'&r19aae6e8163d4aaeb8a3f3f2d5329be2=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress']))),'&r0bef44c0d22d493f95a33484875b951e=',encodeUriComponent(if(and(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),'',if(or(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),formatDateTime(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate']),'yyyy-MM-dd'),concat(formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],'yyyy-MM-dd'),' to ',formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'],'yyyy-MM-dd'))))),'&ra6ab2e26d2d84a92b33148fc4694773a=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_LastDrawnSalary']))),'&r49ca8a655f5e4bcba0e8f75d4475ad77=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_JobTitle']))))",
+                  "inputs": "@concat('/BGV Records/Candidate Files/',items('Apply_to_each')?['CandidateID'],'/',items('Apply_to_each')?['RequestID'])",
                   "runAfter": {
                     "Get_items_(BGV_FormData)": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "CompanyStampDocumentName": {
+                  "type": "Compose",
+                  "inputs": "@concat('Company Stamp - ',items('Apply_to_each')?['RequestID'],'.docx')",
+                  "runAfter": {
+                    "RequestFolderPath": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Create_Request_Stamp_Folder": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                      "parameters/path": "Candidate Files/@{items('Apply_to_each')?['CandidateID']}/@{items('Apply_to_each')?['RequestID']}"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "CreateNewFolder",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  },
+                  "runAfter": {
+                    "CompanyStampDocumentName": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Get_files_(Request_Folder)": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                      "folderPath": "@outputs('RequestFolderPath')"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "GetFileItems",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  },
+                  "runAfter": {
+                    "Create_Request_Stamp_Folder": [
+                      "Succeeded",
+                      "Failed"
+                    ]
+                  }
+                },
+                "Filter_array_-_Company_Stamp_Document": {
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@body('Get_files_(Request_Folder)')?['value']",
+                    "where": "@equals(item()?['{Name}'],outputs('CompanyStampDocumentName'))"
+                  },
+                  "runAfter": {
+                    "Get_files_(Request_Folder)": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Condition_-_Create_Company_Stamp_Document": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@length(body('Filter_array_-_Company_Stamp_Document'))",
+                          0
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "Get_company_stamp_template_content": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "path": "/BGV Records/Templates/Company Stamp.docx",
+                          "inferContentType": true
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "GetFileContentByPath",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      },
+                      "runAfter": {}
+                    },
+                    "Create_company_stamp_document": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "folderPath": "@outputs('RequestFolderPath')",
+                          "name": "@outputs('CompanyStampDocumentName')",
+                          "body": "@body('Get_company_stamp_template_content')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "CreateFile",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      },
+                      "runAfter": {
+                        "Get_company_stamp_template_content": [
+                          "Succeeded"
+                        ]
+                      },
+                      "runtimeConfiguration": {
+                        "contentTransfer": {
+                          "transferMode": "Chunked"
+                        }
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Filter_array_-_Company_Stamp_Document": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "CompanyStampDocumentItemId": {
+                  "type": "Compose",
+                  "inputs": "@coalesce(outputs('Create_company_stamp_document')?['body/ItemId'],first(body('Filter_array_-_Company_Stamp_Document'))?['ID'])",
+                  "runAfter": {
+                    "Condition_-_Create_Company_Stamp_Document": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Create_sharing_link_for_company_stamp_document": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                      "id": "@outputs('CompanyStampDocumentItemId')",
+                      "permission/type": "edit",
+                      "permission/scope": "anonymous"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "CreateSharingLink",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  },
+                  "runAfter": {
+                    "CompanyStampDocumentItemId": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "FinalVerificationLink": {
+                  "type": "Compose",
+                  "inputs": "@concat('https://forms.office.com/Pages/ResponsePage.aspx?id=cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUN1c5NE0wWEI2Nk1OMDlJSkI0N0RXUTRHMS4u','&r4930fc603c0f4cada09832be79f2a76f=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value'],'')))),'&r27b6bdb850dd48339dc05df11d485470=',encodeUriComponent(if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']))),'N/A',trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'])))),'&r425242341d6143c7a29307136debe938=',encodeUriComponent(if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']))),if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']))),'N/A',trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']))),'N/A')),'&rd745d133eb7f4611b59ea051f980f97a=',encodeUriComponent(trim(string(items('Apply_to_each')?['RequestID']))),'&rccaf3632669648baaa335c12d4ea40bf=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each')?['EmployerName'],'')))),'&rcf35c7cc008e472f9d0b84bde67cc1ff=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN']))),'&r19aae6e8163d4aaeb8a3f3f2d5329be2=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress']))),'&r0bef44c0d22d493f95a33484875b951e=',encodeUriComponent(if(and(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),'',if(or(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),formatDateTime(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate']),'yyyy-MM-dd'),concat(formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],'yyyy-MM-dd'),' to ',formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'],'yyyy-MM-dd'))))),'&ra6ab2e26d2d84a92b33148fc4694773a=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_LastDrawnSalary']))),'&r49ca8a655f5e4bcba0e8f75d4475ad77=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_JobTitle']))),'&rd5d9cb98b1aa47dd8bcd7914cd4bdc87=',encodeUriComponent(outputs('Create_sharing_link_for_company_stamp_document')?['body/link/webUrl']))",
+                  "runAfter": {
+                    "Create_sharing_link_for_company_stamp_document": [
                       "Succeeded"
                     ]
                   }
@@ -172,7 +339,7 @@
                           "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
                           "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                           "emailMessage/Subject": "Reminder: Employment Verification Request\n",
-                          "emailMessage/Body": "<p class=\"editor-paragraph\"><br>Hello @{items('Apply_to_each')?['EmployerName']},<br><br>This is a reminder that we have sent you an employment verification for our candidate as part of our background verification check for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>We kindly request for you to help us to fill up the information as soon as possible in the following link :</p><p class=\"editor-paragraph\">@{outputs('FinalVerificationLink')}<br><br><br>Thank you.<br><br>Thanks &amp; Regards,<br>D L Reources Pte Ltd</p><br>",
+                          "emailMessage/Body": "<p class=\"editor-paragraph\"><br>Hello @{items('Apply_to_each')?['EmployerName']},<br><br>This is a reminder that we have sent you an employment verification for our candidate as part of our background verification check for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>We kindly request for you to help us to fill up the information as soon as possible in the following link :</p><p class=\"editor-paragraph\">@{outputs('FinalVerificationLink')}<br><br>Company stamp document for Request ID @{items('Apply_to_each')?['RequestID']}:<br><a href=\"@{outputs('Create_sharing_link_for_company_stamp_document')?['body/link/webUrl']}\">Open Company Stamp - @{items('Apply_to_each')?['RequestID']}.docx</a><br><br>Thank you.<br><br>Thanks &amp; Regards,<br>D L Reources Pte Ltd</p><br>",
                           "emailMessage/Importance": "Normal"
                         },
                         "host": {
@@ -253,7 +420,7 @@
                           "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
                           "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                           "emailMessage/Subject": "2nd Reminder: Employment Verification Request from D L Resources\n",
-                          "emailMessage/Body": "<p class=\"editor-paragraph\">Hello @{items('Apply_to_each')?['EmployerName']},</p><br><p class=\"editor-paragraph\">This is a second reminder to complete the employment verification for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}. @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has provied us your contact to conduct this background check.<br><br>Kindly access the link below and fill in the form as soon as possible:<br>@{outputs('FinalVerificationLink')}<br><br>Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
+                          "emailMessage/Body": "<p class=\"editor-paragraph\">Hello @{items('Apply_to_each')?['EmployerName']},</p><br><p class=\"editor-paragraph\">This is a second reminder to complete the employment verification for @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}. @{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has provied us your contact to conduct this background check.<br><br>Kindly access the link below and fill in the form as soon as possible:<br>@{outputs('FinalVerificationLink')}<br><br>Company stamp document for Request ID @{items('Apply_to_each')?['RequestID']}:<br><a href=\"@{outputs('Create_sharing_link_for_company_stamp_document')?['body/link/webUrl']}\">Open Company Stamp - @{items('Apply_to_each')?['RequestID']}.docx</a><br><br>Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
                           "emailMessage/Importance": "Normal"
                         },
                         "host": {
@@ -379,6 +546,11 @@
                     ]
                   },
                   "actions": {
+                    "Compose_Final_Reminder_Email_Html": {
+                      "type": "Compose",
+                      "inputs": "<p class=\"editor-paragraph\">This is a final reminder for the background check regarding:@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.</p><br><p class=\"editor-paragraph\">@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has authorise us to do a background check. He/She has provided us your contact. We kindly ask that you help us to fill in the following form :</p><p class=\"editor-paragraph\">@{outputs('FinalVerificationLink')}</p><br><p class=\"editor-paragraph\">Company stamp document for Request ID @{items('Apply_to_each')?['RequestID']}:<br><a href=\"@{outputs('Create_sharing_link_for_company_stamp_document')?['body/link/webUrl']}\">Open Company Stamp - @{items('Apply_to_each')?['RequestID']}.docx</a></p>",
+                      "runAfter": {}
+                    },
                     "Send_an_email_from_a_shared_mailbox_(V2)_2": {
                       "type": "OpenApiConnection",
                       "inputs": {
@@ -386,13 +558,44 @@
                           "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
                           "emailMessage/To": "@items('Apply_to_each')?['EmployerHR_Email']",
                           "emailMessage/Subject": "Final Reminder: Employment Verification Request ",
-                          "emailMessage/Body": "<p class=\"editor-paragraph\">This is a final reminder for the background check regarding:@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']}.</p><br><p class=\"editor-paragraph\">@{items('Apply_to_each')?['CandidateItemID_x003a__x0020_Ful/Value']} has authorise us to do a background check. He/She has provided us your contact. We kindly ask that you help us to fill in the following form :</p><p class=\"editor-paragraph\">@{outputs('FinalVerificationLink')}</p>",
+                          "emailMessage/Body": "@outputs('Compose_Final_Reminder_Email_Html')",
                           "emailMessage/Importance": "Normal"
                         },
                         "host": {
                           "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
                           "operationId": "SharedMailboxSendEmailV2",
                           "connectionName": "shared_office365"
+                        }
+                      },
+                      "runAfter": {
+                        "Compose_Final_Reminder_Email_Html": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Create_file_-_Reminder3_Email_Copy": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "folderPath": "@outputs('RequestFolderPath')",
+                          "name": "@concat('Reminder 3 Email - ',items('Apply_to_each')?['RequestID'],'.html')",
+                          "body": "@outputs('Compose_Final_Reminder_Email_Html')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "CreateFile",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      },
+                      "runAfter": {
+                        "Send_an_email_from_a_shared_mailbox_(V2)_2": [
+                          "Succeeded"
+                        ]
+                      },
+                      "runtimeConfiguration": {
+                        "contentTransfer": {
+                          "transferMode": "Chunked"
                         }
                       }
                     },
@@ -415,7 +618,7 @@
                         }
                       },
                       "runAfter": {
-                        "Send_an_email_from_a_shared_mailbox_(V2)_2": [
+                        "Create_file_-_Reminder3_Email_Copy": [
                           "Succeeded"
                         ]
                       }

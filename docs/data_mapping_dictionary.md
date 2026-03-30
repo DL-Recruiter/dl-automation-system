@@ -163,14 +163,14 @@ Flow action: `BGV_4 / FinalVerificationLink`.
 | `r513ad5ab3a14453286bdb910820985ec` | Reason for leaving (declared) | `BGV_FormData.F2_ReasonForLeaving` (when available) |
 | `ra6ab2e26d2d84a92b33148fc4694773a` | Declared last drawn remuneration package | `BGV_FormData.F1_LastDrawnSalary` |
 | `r49ca8a655f5e4bcba0e8f75d4475ad77` | Declared last position held | `BGV_FormData.F1_JobTitle` |
-| `rd5d9cb98b1aa47dd8bcd7914cd4bdc87` | Company-stamp upload link | request-folder sharing link from `BGV Records/Candidate Files/<CandidateID>/<RequestID>` |
+| `rd5d9cb98b1aa47dd8bcd7914cd4bdc87` | Company-stamp document link | anonymous edit sharing link for `BGV Records/Candidate Files/<CandidateID>/<RequestID>/Company Stamp - <RequestID>.docx` |
 
 Note:
 - In the current HR Form 2 layout, questions explicitly labeled `(Declared By Candidate)` are the intended prefill targets in `BGV_4`.
 - Form 2 prefill now also includes:
   - company-details accurate key (`r2d39255c2449439096683ca0e39241b0`) as `Yes`
   - reason-for-leaving key (`r513ad5ab3a14453286bdb910820985ec`) when source value exists
-  - request-folder upload key (`rd5d9cb98b1aa47dd8bcd7914cd4bdc87`) for company stamp upload.
+  - employer-specific company-stamp document key (`rd5d9cb98b1aa47dd8bcd7914cd4bdc87`) for the shared `Company Stamp - <RequestID>.docx` file.
 - All values are URL-encoded with `encodeUriComponent(...)`.
 
 ## 7) Field Mapping: Form 2 -> SharePoint (BGV_5)
@@ -256,7 +256,7 @@ Note:
 | Candidate folder creation | `Candidate Files/{CandidateID}` created by `BGV_0 / Create_Candidate_Folder` |
 | Authorization subfolder | `Candidate Files/{CandidateID}/Authorization` created by `BGV_0 / Create_Authorization_Sub_Folder` |
 | Authorization document file | `Authorization Form - {CandidateID}.docx` created from Word template |
-| Authorization template ID controls | `IdentificationNumberNRIC` content control: candidate NRIC else `N/A`; `IdentificationNumberPassport` content control: `N/A` when NRIC exists, else candidate Passport, else `N/A` |
+| Authorization template ID controls | `IdentificationNumberNRIC` content control: last 5 cleaned alphanumeric characters from full candidate NRIC else `N/A`; `IdentificationNumberPassport` content control: `N/A` when NRIC exists, else last 5 cleaned alphanumeric characters from full candidate Passport, else `N/A` |
 | Authorization consent checkbox | Template includes bottom text `Yes, I authorized` with checkbox content-control tag `SignedYes` for parser-compatible signed/unchecked detection in `BGV_1` |
 | Share link | Anonymous edit document link written to `BGV_Candidates.AuthorizationLink` |
 | Signature lifecycle | `BGV_1` parses signed document; `BGV_2` stops sharing after signature status is set |
