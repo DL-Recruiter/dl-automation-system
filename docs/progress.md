@@ -6,6 +6,39 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-30 (BGV_5/BGV_6/BGV_7/BGV_9 notification and dashboard-clearing logic refresh)
+- Current status:
+  - Tightened the adverse-case/report-summary pipeline so report creation/posting keys off actual employer response timestamps, removed the immediate BGV-response Teams post from `BGV_5`, aligned the severity ladder so old neutral cases are treated as low, and updated dashboard completion logic for reminder/escalation-cleared cases.
+- Completed tasks:
+  - Updated `BGV_5_Response1`:
+    - remapped the old `Neutral` branch to `Low`
+    - kept wrong company-info issues as low severity
+    - changed `BGV Checks` so only truly blank severity is treated as `Form Filled and Cleared`
+    - disabled the immediate BGV channel post from `BGV_5` so the channel only gets day-5 auth alerts and report-summary posts
+    - upgraded the recruiter cleared-case email so when severity is blank it says PEV checks are cleared, includes the candidate-folder link, and notes TAC form is to be sent
+    - kept recruiter email formatting readable by cleaning escaped newline markers
+  - Updated `BGV_6_HRReminderAndEscalation`:
+    - preserved twice-daily reminder evaluation windows
+    - kept `No response at Reminder 2` stamping one day after Reminder 2 when no employer form has been received
+    - changed the recruiter Teams message for that path to a cleared-style `PEV Checks Cleared` notification with candidate-folder link and TAC follow-up wording
+  - Updated `BGV_7_Generate_Report_Summary`:
+    - changed request selection to key off `ResponseReceivedAt` instead of relying only on `VerificationStatus = Responded`
+    - added helper formatting/actions so report-summary Teams posts include highest severity, flagged issues, candidate-folder link, report link, and readable details
+    - limited report-summary Teams posts to adverse cases only (`Low` / `Medium` / `High`)
+    - kept the one-time Teams-post guard on both create and update paths
+  - Updated `BGV_9_Refresh_Dashboard_Excel`:
+    - `Completed Status` now shows `Yes` for cases cleared via `No response at Reminder 2` and for `Employer Reminder 3 Sent`
+    - `Completed Date` now falls back through `ResponseReceivedAt`, then `EscalatedAt`, then `Reminder3At`
+  - Updated flow docs so the BGV channel, severity ladder, report-summary rules, and dashboard completed-case behavior match the canonical JSON again.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Import the updated solution to live, run daily sync, and push the synced state to GitHub.
+  - After deployment, verify one employer-response case that previously missed `BGV_7` now produces the report summary and adverse Teams post as expected.
+
 ## 2026-03-30 (Dashboard candidate-folder link + candidate auth email PDF guide)
 - Current status:
   - Wired the new dashboard `Candidate Folder Link` column into `BGV_9_Refresh_Dashboard_Excel`, attached the new `Instructions For Authorisation Form.pdf` guide in the candidate authorization email sent by `BGV_0_CandidateDeclaration`, and documented the final root cause/fix summary for the Saturday `BGV_4` outage.

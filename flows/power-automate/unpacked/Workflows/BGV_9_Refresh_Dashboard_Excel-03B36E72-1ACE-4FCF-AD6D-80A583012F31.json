@@ -406,7 +406,7 @@
                     },
                     "Compose_CompletedStatus": {
                       "type": "Compose",
-                      "inputs": "@if(or(equals(outputs('Compose_Status'),'Employer Form Received'),equals(outputs('Compose_Status'),'Employer Form Received But Flagged')),'Yes','No')",
+                      "inputs": "@if(or(equals(outputs('Compose_Status'),'Employer Form Received'),equals(outputs('Compose_Status'),'Employer Form Received But Flagged'),equals(outputs('Compose_Status'),'Employer Reminder 3 Sent'),equals(trim(string(coalesce(items('Apply_to_each_(Requests)')?['BGV_x0020_Checks'],''))),'No response at Reminder 2')),'Yes','No')",
                       "runAfter": {
                         "Compose_EmployerReminder": [
                           "Succeeded"
@@ -415,7 +415,7 @@
                     },
                     "Compose_CompletedDate": {
                       "type": "Compose",
-                      "inputs": "@if(equals(outputs('Compose_CompletedStatus'),'Yes'),if(equals(empty(items('Apply_to_each_(Requests)')?['ResponseReceivedAt']),true),'',formatDateTime(convertTimeZone(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),'')",
+                      "inputs": "@if(equals(outputs('Compose_CompletedStatus'),'Yes'),if(equals(empty(coalesce(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],items('Apply_to_each_(Requests)')?['EscalatedAt'],items('Apply_to_each_(Requests)')?['Reminder3At'])),true),'',formatDateTime(convertTimeZone(coalesce(items('Apply_to_each_(Requests)')?['ResponseReceivedAt'],items('Apply_to_each_(Requests)')?['EscalatedAt'],items('Apply_to_each_(Requests)')?['Reminder3At']),'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),'')",
                       "runAfter": {
                         "Compose_CompletedStatus": [
                           "Succeeded"

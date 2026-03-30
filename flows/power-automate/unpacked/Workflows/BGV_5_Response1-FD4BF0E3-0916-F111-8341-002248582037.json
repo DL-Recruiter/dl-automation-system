@@ -654,7 +654,7 @@
                           "type": "SetVariable",
                           "inputs": {
                             "name": "varSeverity",
-                            "value": "Neutral"
+                            "value": "Low"
                           }
                         }
                       },
@@ -694,7 +694,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varNotifyBody",
-                        "value": "[Neutral] Other comments were provided.\n\nComment: @{outputs('Get_response_details')?['body/rab9c2a586db943b18ac02367d3b1d3f7']}"
+                        "value": "[Low] Other comments were provided.\n\nComment: @{outputs('Get_response_details')?['body/rab9c2a586db943b18ac02367d3b1d3f7']}"
                       }
                     },
                     "Append_to_string_variable_-_Request_Notes_Other_Comments": {
@@ -706,7 +706,7 @@
                       "type": "AppendToStringVariable",
                       "inputs": {
                         "name": "varRequestNotesBody",
-                        "value": "[Neutral] Other comments were provided."
+                        "value": "@concat('[Low] Other comments were provided.\\nComment: ',coalesce(outputs('Get_response_details')?['body/rab9c2a586db943b18ac02367d3b1d3f7'],''))"
                       }
                     }
                   },
@@ -827,7 +827,7 @@
                       "item/Title": "@items('Apply_to_each')?['Title']",
                       "item/ResponseReceivedAt": "@utcNow()",
                       "item/Outcome/Value": "@if(empty(trim(variables('varOutcome'))),'None',if(startsWith(variables('varOutcome'),', '),substring(variables('varOutcome'),2,sub(length(variables('varOutcome')),2)),variables('varOutcome')))",
-                      "item/BGV_x0020_Checks": "@if(or(empty(variables('varSeverity')),equals(variables('varSeverity'),'Neutral')),'Form Filled and Cleared','Adverse BGV Checks - see severity')",
+                      "item/BGV_x0020_Checks": "@if(empty(variables('varSeverity')),'Form Filled and Cleared','Adverse BGV Checks - see severity')",
                       "item/Notes": "@variables('varRequestNotesBody')",
                       "item/Severity/Value": "@variables('varSeverity')",
                       "item/VerificationStatus/Value": "Responded"
@@ -953,13 +953,9 @@
                     "actions": {}
                   },
                   "expression": {
-                    "and": [
-                      {
-                        "equals": [
-                          "@variables('varNotifyTeams')",
-                          true
-                        ]
-                      }
+                    "equals": [
+                      "disabled",
+                      "enabled"
                     ]
                   },
                   "type": "If"
@@ -1015,8 +1011,8 @@
                   "inputs": {
                     "parameters": {
                       "emailMessage/To": "recruitment@dlresources.com.sg",
-                      "emailMessage/Subject": "BGV Response Received - @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}, @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">The employer verification response has been received for @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']}.<br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br><br>Verification Status: Responded<br><br>Severity: @{variables('varSeverity')}<br><br>Flagged Issues: @{if(empty(trim(variables('varOutcome'))),'None',if(startsWith(variables('varOutcome'),', '),substring(variables('varOutcome'),2,sub(length(variables('varOutcome')),2)),variables('varOutcome')))}<br><br>Candidate Folder: <a href=\"@{outputs('Compose_CandidateFolderLink')}\">@{outputs('Compose_CandidateFolderLink')}</a><br><br>For more detailed information, please refer to the report summary in the candidate folder. A Teams post with the report link will be sent when the report summary file is created.</p>",
+                      "emailMessage/Subject": "@if(empty(variables('varSeverity')),concat('PEV Checks Cleared - ',outputs('Update_item_-_of_BGV_Request')?['body/RequestID'],', ',outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']),concat('BGV Response Received - ',outputs('Update_item_-_of_BGV_Request')?['body/RequestID'],', ',outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']))",
+                      "emailMessage/Body": "@if(empty(variables('varSeverity')),concat('<p class=\"editor-paragraph\">PEV checks are cleared for ',outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value'],'.</p><br><p class=\"editor-paragraph\">Employer: ',outputs('Update_item_-_of_BGV_Request')?['body/EmployerName'],'</p><p class=\"editor-paragraph\">Candidate Folder: <a href=\"',outputs('Compose_CandidateFolderLink'),'\">',outputs('Compose_CandidateFolderLink'),'</a></p><br><p class=\"editor-paragraph\">TAC form to be sent.</p>'),concat('<p class=\"editor-paragraph\">The employer verification response has been received for ',outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value'],'.<br><br>Employer: ',outputs('Update_item_-_of_BGV_Request')?['body/EmployerName'],'<br><br>Verification Status: Responded<br><br>Severity: ',variables('varSeverity'),'<br><br>Flagged Issues: ',if(empty(trim(variables('varOutcome'))),'None',if(startsWith(variables('varOutcome'),', '),substring(variables('varOutcome'),2,sub(length(variables('varOutcome')),2)),variables('varOutcome'))),'<br><br>Candidate Folder: <a href=\"',outputs('Compose_CandidateFolderLink'),'\">',outputs('Compose_CandidateFolderLink'),'</a><br><br>For more detailed information, please refer to the report summary in the candidate folder. A Teams post with the report link will be sent when the report summary file is ready.</p>'))",
                       "emailMessage/Importance": "Normal",
                       "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg"
                     },

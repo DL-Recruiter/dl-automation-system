@@ -76,7 +76,7 @@
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
               "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-              "$filter": "VerificationStatus eq 'Responded'"
+              "$filter": "ResponseReceivedAt ne null"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -178,6 +178,42 @@
                         ]
                       }
                     },
+                    "Compose_ReportSeverityText": {
+                      "type": "Compose",
+                      "inputs": "@trim(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Severity']?['Value'],items('Apply_to_each_(Completed_Requests)')?['Severity'],'')))",
+                      "runAfter": {
+                        "Compose_ReportFileWebLink": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_ReportFlaggedIssues": {
+                      "type": "Compose",
+                      "inputs": "@if(empty(trim(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Outcome']?['Value'],items('Apply_to_each_(Completed_Requests)')?['Outcome'],'')))),'None',trim(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Outcome']?['Value'],items('Apply_to_each_(Completed_Requests)')?['Outcome'],''))))",
+                      "runAfter": {
+                        "Compose_ReportSeverityText": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_ReportDetailsHtml": {
+                      "type": "Compose",
+                      "inputs": "@trim(replace(replace(replace(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Notes'],'')),'\\r',''),'\\n','<br>'),decodeUriComponent('%0A'),'<br>'))",
+                      "runAfter": {
+                        "Compose_ReportFlaggedIssues": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_IsAdverseSeverity": {
+                      "type": "Compose",
+                      "inputs": "@or(equals(toLower(outputs('Compose_ReportSeverityText')),'low'),equals(toLower(outputs('Compose_ReportSeverityText')),'medium'),equals(toLower(outputs('Compose_ReportSeverityText')),'high'))",
+                      "runAfter": {
+                        "Compose_ReportDetailsHtml": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
                     "HTTP_-_Fill_Report_Summary_Controls": {
                       "type": "Http",
                       "inputs": {
@@ -198,7 +234,7 @@
                         }
                       },
                       "runAfter": {
-                        "Compose_ReportFileName": [
+                        "Compose_IsAdverseSeverity": [
                           "Succeeded"
                         ]
                       }
@@ -276,6 +312,12 @@
                                   "@empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Report_x0020_Summary_x0020_Teams'])",
                                   true
                                 ]
+                              },
+                              {
+                                "equals": [
+                                  "@outputs('Compose_IsAdverseSeverity')",
+                                  true
+                                ]
                               }
                             ]
                           },
@@ -288,7 +330,7 @@
                                   "location": "Channel",
                                   "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
                                   "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
-                                  "body/messageBody": "<p class=\"editor-paragraph\">BGV Report Summary Ready</p><br><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each_(Completed_Requests)')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value'],'')}</p><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Completed_Requests)')?['RequestID']}</p><p class=\"editor-paragraph\">Report File: @{concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')}</p><p class=\"editor-paragraph\">Report Link: <a href=\"@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/', encodeUriComponent(concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')))}\">@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/', encodeUriComponent(concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')))}</a></p>"
+                                  "body/messageBody": "<p class=\"editor-paragraph\">BGV Report Summary Ready</p><br><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each_(Completed_Requests)')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value'],'')}</p><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Completed_Requests)')?['RequestID']}</p><p class=\"editor-paragraph\">Severity: @{outputs('Compose_ReportSeverityText')}</p><p class=\"editor-paragraph\">Flagged Issues: @{outputs('Compose_ReportFlaggedIssues')}</p><p class=\"editor-paragraph\">Candidate Folder: <a href=\"@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}\">@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}</a></p><p class=\"editor-paragraph\">Report Link: <a href=\"@{outputs('Compose_ReportFileWebLink')}\">@{outputs('Compose_ReportFileWebLink')}</a></p><br><p class=\"editor-paragraph\">Details:<br>@{outputs('Compose_ReportDetailsHtml')}</p>"
                                 },
                                 "host": {
                                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
@@ -393,6 +435,12 @@
                                     "@empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Report_x0020_Summary_x0020_Teams'])",
                                     true
                                   ]
+                                },
+                                {
+                                  "equals": [
+                                    "@outputs('Compose_IsAdverseSeverity')",
+                                    true
+                                  ]
                                 }
                               ]
                             },
@@ -405,7 +453,7 @@
                                     "location": "Channel",
                                     "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
                                     "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
-                                    "body/messageBody": "<p class=\"editor-paragraph\">BGV Report Summary Created</p><br><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each_(Completed_Requests)')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value'],'')}</p><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Completed_Requests)')?['RequestID']}</p><p class=\"editor-paragraph\">Report File: @{concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')}</p><p class=\"editor-paragraph\">Report Link: <a href=\"@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/', encodeUriComponent(concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')))}\">@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/', encodeUriComponent(concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')))}</a></p>"
+                                    "body/messageBody": "<p class=\"editor-paragraph\">BGV Report Summary Created</p><br><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each_(Completed_Requests)')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value'],'')}</p><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Completed_Requests)')?['RequestID']}</p><p class=\"editor-paragraph\">Severity: @{outputs('Compose_ReportSeverityText')}</p><p class=\"editor-paragraph\">Flagged Issues: @{outputs('Compose_ReportFlaggedIssues')}</p><p class=\"editor-paragraph\">Candidate Folder: <a href=\"@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}\">@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}</a></p><p class=\"editor-paragraph\">Report Link: <a href=\"@{outputs('Compose_ReportFileWebLink')}\">@{outputs('Compose_ReportFileWebLink')}</a></p><br><p class=\"editor-paragraph\">Details:<br>@{outputs('Compose_ReportDetailsHtml')}</p>"
                                   },
                                   "host": {
                                     "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",

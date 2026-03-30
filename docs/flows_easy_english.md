@@ -182,13 +182,14 @@ This document describes the current behavior in your canonical flow files under 
     - Employer would not re-employ (`Q26 = No`) -> High.
     - Employment details inaccurate (`Q15 = No`) -> Medium if no higher severity already set.
     - Company details inaccurate (`Q8 = No`) -> Low if no higher severity already set.
-    - Other comments (`Q27`) -> Neutral if no higher severity already set.
+    - Other comments (`Q27`) -> Low if no higher severity already set.
     - Contact requested -> action-required notify flag.
   - Writes final result to `BGV_Requests`:
     - `VerificationStatus = Responded`
     - `ResponseReceivedAt`
     - `Severity`, `Outcome`, `BGV Checks`, `Notes`
   - Medium-severity employment-detail discrepancies now also set the Teams notify flag, not just the high-severity branches.
+  - Neutral severity is no longer used; low-severity/cleared logic now treats the old neutral path as `Low`.
   - Expires employer upload access when HR has responded:
     - locates `BGV Records/Candidate Files/<CandidateID>/<RequestID>`
     - runs `Stop sharing` (`UnshareItem`) on that request folder.
@@ -200,7 +201,7 @@ This document describes the current behavior in your canonical flow files under 
     - `Re-employ` when re-employ is `No`
     - `Other Comments` when `Q27` is filled
   - `BGV Checks` is set to:
-    - `Form Filled and Cleared` when the employer has responded and severity is blank or `Neutral`
+    - `Form Filled and Cleared` when the employer has responded and severity is blank
     - `Adverse BGV Checks - see severity` when the employer has responded and severity is `Low`, `Medium`, or `High`
   - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including:
     - `F2_CompanyDetailsAccurate`
@@ -223,9 +224,12 @@ This document describes the current behavior in your canonical flow files under 
     - selected inaccurate company-detail fields
     - company-details explanation
   - Keeps required SharePoint fields (including `Title`) when updating `BGV_FormData`, preventing save/runtime validation errors.
-  - Sends Teams alert when notify flag is true.
-  - Recruiter-facing Teams and email details are cleaned before send so escaped newline markers such as `\n` or `\n\n` render as normal line breaks instead of raw text.
-  - Recruiter-facing Teams and email notifications include a direct candidate-folder link for faster follow-up.
+  - The immediate recruiter Teams post from this flow is now disabled so the BGV channel only gets:
+    - day-5 unsigned authorization alerts from `BGV_3`
+    - report-summary posts from `BGV_7`
+  - Recruiter-facing email details are cleaned before send so escaped newline markers such as `\n` or `\n\n` render as normal line breaks instead of raw text.
+  - Recruiter-facing notifications include a direct candidate-folder link for faster follow-up.
+  - If severity is blank after employer response, the recruiter email is treated as a cleared-case notification and says the PEV checks are cleared and TAC form is to be sent.
   - Sends internal high-severity email when severity is `High`, including employer name and employer HR email in the body.
   - Recruiter-facing BGV_5 emails now include `EmployerName` in the email body context and tell recruiters where to find the later report summary under `BGV_Records > Candidate Files (<CandidateID>)`.
   - All email notifications in this flow are routed via shared mailbox and addressed to `recruitment@dlresources.com.sg`.
@@ -262,6 +266,7 @@ This document describes the current behavior in your canonical flow files under 
 - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, including the employer-specific shared company-stamp document link, so reminders still contain the current Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
 - Escalation now stamps `EscalatedAt`, so the same unresolved request is not escalated again on every later run.
+- One day after Reminder 2 with no employer response, the recruiter notification now says `PEV Checks Cleared`, includes the candidate-folder link, and tells recruiters TAC form is to be sent.
 - When Reminder 3 is sent, the flow also saves an HTML copy of that final reminder email into the same request folder under the candidate folder for audit/reference.
 - Adds close-window upload-link expiry for no-response cases:
   - when `Reminder3At` is 5+ days old and `ResponseReceivedAt` is still empty
@@ -272,7 +277,7 @@ This document describes the current behavior in your canonical flow files under 
 ### `BGV_7_Generate_Report_Summary`
 - Trigger: Recurrence every 30 minutes.
 - Selection:
-  - Reads `BGV_Requests` where `VerificationStatus = Responded`.
+  - Reads `BGV_Requests` where `ResponseReceivedAt` is not empty.
   - Only continues for rows with a non-empty `ResponseReceivedAt` and a `RequestID` ending in an employer slot such as `EMP1`.
 - What it does:
   - Reads the live Word template by path:
@@ -307,6 +312,14 @@ This document describes the current behavior in your canonical flow files under 
   - If the report does not exist yet, creates it and checks one-time post flags before posting to Teams.
   - If the report already exists but has never been posted to Teams before, the flow now posts the report link after the update path as well.
   - Teams report-summary post only sends when both `BGV_Requests.Report Summary Teams Posted At` and `BGV_FormData.Report Summary Teams Posted At` are blank.
+  - Teams report-summary post only sends for adverse cases where the highest mapped severity is `Low`, `Medium`, or `High`.
+  - Old `Neutral` severity is treated as `Low`, so low/medium/high is now the full adverse ladder.
+  - The Teams post includes:
+    - highest severity for the request
+    - flagged issue summary
+    - candidate folder link
+    - report summary link
+    - details block built from request notes, including MAS-style reasons where present
   - After a successful Teams post, flow stamps both fields with current UTC time so it will not post that same report summary again.
 - Main outcome: Each completed employer verification now gets a report-summary DOCX generated from the real SharePoint template and stored in the correct candidate folder.
 
@@ -376,6 +389,13 @@ This document describes the current behavior in your canonical flow files under 
     - `Severity`
     - `Outcome`
   - `Candidate Folder Link` now points to `BGV Records/Candidate Files/<CandidateID>/` for each dashboard row.
+  - `Completed Status` now also shows `Yes` for reminder/escalation-cleared cases:
+    - request `BGV Checks = No response at Reminder 2`
+    - `Employer Reminder 3 Sent`
+  - `Completed Date` uses the first available completion-style timestamp in this order:
+    - `ResponseReceivedAt`
+    - `EscalatedAt`
+    - `Reminder3At`
   - Appends a run entry into:
     - `tblDashboardRefreshLog`
     - timestamp value is written as `Run At (SGT)`
