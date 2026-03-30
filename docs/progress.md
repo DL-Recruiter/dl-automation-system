@@ -6,6 +6,20 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-30 (BGV_4 candidate email wording generalized)
+- Current status:
+  - Updated the candidate reference email in `BGV_4_SendToEmployer_Clean` so it no longer exposes employer-slot details to the candidate while still attaching the signed authorization form.
+- Completed tasks:
+  - Updated `BGV_4_SendToEmployer_Clean`:
+    - removed the employer/request-specific phrasing from the candidate email body
+    - replaced it with a generic note that employer emails will be sent based on the details the candidate provided
+    - kept the signed authorization form attached and explicitly told the candidate to keep that copy for their records
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "signed authorization form is attached|An email will be sent to your employers|Send_signed_form_copy_to_candidate_\(V2\)" flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+- Next actions and blockers:
+  - Import the updated solution, run daily sync, and keep GitHub aligned with the live mail wording.
+
 ## 2026-03-30 (BGV_3 authorization reminder cadence increased with signed-status buffer)
 - Current status:
   - Updated `BGV_3_AuthReminder_5Days` so authorization reminders now run on Singapore-time reminder slots with a small post-hour buffer, while still checking the latest candidate signed state before sending.

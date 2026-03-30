@@ -150,6 +150,7 @@ This document describes the current behavior in your canonical flow files under 
   - Employer email wording now also tells the employer to reply to the email or include the `RequestID` in the subject line when they need more information, so mailbox replies can be matched safely.
   - Finds authorization file, attaches it, and emails employer HR.
   - Sends the signed authorization attachment to the candidate email (`BGV_Candidates.CandidateEmail`) for reference only once per candidate, on the `EMP1` request, so candidates with multiple employers do not receive duplicate copies.
+  - Candidate reference email wording is intentionally generic: it says employer emails will be sent based on the details the candidate provided, and it does not expose specific employer names or `RequestID` values to the candidate.
   - Email sends are routed via shared mailbox `recruitment@dlresources.com.sg`.
   - Employer email subject now uses the mapped dynamic company field.
   - Employer email wording uses dynamic candidate/company values while preserving the existing declared-details and verification-link sections.

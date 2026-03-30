@@ -432,7 +432,7 @@
                       "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
                       "emailMessage/To": "@outputs('EmployerRecipientEmail')",
                       "emailMessage/Subject": "Request for Employment Verification - @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">Dear HR Department,</p><br><p class=\"editor-paragraph\">We are reaching out to the Human Resource Department of your company to conduct a Previous Employment Verification Check for @{first(body('Get_item')?['value'])?['FullName']}, who has listed your organisation (@{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}) as the relevant previous employer.</p><br><p class=\"editor-paragraph\">Declared company details from candidate:</p><p class=\"editor-paragraph\">- Company Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}<br>- Company Address: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['Employer_Address'],'(Not captured)')}<br>- Company UEN: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['Employer_UEN'],'(Not captured)')}</p><br><p class=\"editor-paragraph\">We would greatly appreciate your assistance in completing the \"Previous Employment Verification Form\" via the link provided below as soon as possible to support a smooth and timely onboarding process.</p><br><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}</p><p class=\"editor-paragraph\">We would also kindly ask for your company stamp for verification. Please open the Word document below, place your company stamp in the document, and save it back using the same shared link:</p><p class=\"editor-paragraph\"><a href=\"@{outputs('Create_sharing_link_for_request_stamp_folder')?['body/link/webUrl']}\" class=\"editor-link\">Open Company Stamp - @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.docx</a></p><br><p class=\"editor-paragraph\">The following is the link to the form:<br><a href=\"@{outputs('FinalVerificationLink')}\" class=\"editor-link\"><br><br>Click here to complete verification</a></p><br><p class=\"editor-paragraph\">For your reference, the candidate's signed authorisation form is attached to this email.</p><br><p class=\"editor-paragraph\">Please be assured that all information provided will be treated with the strictest confidence and used solely for internal HR and employment verification purposes. If you have any questions or require further information, please reply to this email or include this Request ID in the subject line: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.</p><br><p class=\"editor-paragraph\">Thank you for your time and we appreciate your verification.</p><br><p class=\"editor-paragraph\">Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">Dear HR Department,<br><br>We are reaching out to the Human Resource Department of your company to conduct a Previous Employment Verification Check for</p><p class=\"editor-paragraph\">@{first(body('Get_item')?['value'])?['FullName']}, who has listed your organisation (@{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}) as the relevant previous employer.</p><br><p class=\"editor-paragraph\">Declared company details from candidate:</p><p class=\"editor-paragraph\">- Company Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}<br>- Company Address: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['Employer_Address'],'(Not captured)')}<br>- Company UEN: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['Employer_UEN'],'(Not captured)')}</p><br><p class=\"editor-paragraph\">We would greatly appreciate your assistance in completing the \"Previous Employment Verification Form\" via the link provided below as soon as possible to support a smooth and timely onboarding process.</p><br><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}<br>Company stamp document:<br><a href=\"@{outputs('Create_sharing_link_for_request_stamp_folder')?['body/link/webUrl']}\" class=\"editor-link\">Open Company Stamp - @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.docx</a><br><br>Please place your company stamp in that document and save it using the shared link above.</p><br><p class=\"editor-paragraph\">The following is the link to the form:<br><a href=\"@{outputs('FinalVerificationLink')}\" class=\"editor-link\"><br><br>Click here to complete verification</a><br><br>For your reference, the candidate's signed authorisation has been recorded for this request.</p><br><p class=\"editor-paragraph\">Please be assured that all information provided will be treated with the strictest confidence and used solely for internal HR and employment verification purposes. Please note: if you have any questions or require further information, please reply to this email or include this Request ID in the subject line: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.</p><br><p class=\"editor-paragraph\">Thank you for your time and we appreciate your verification.</p><br><p class=\"editor-paragraph\">Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
                       "emailMessage/Attachments": [
                         {
                           "Name": "@variables('AuthFileName')",
@@ -453,46 +453,21 @@
                     ]
                   }
                 },
-                "Condition_-_Send_candidate_copy_once": {
-                  "type": "If",
-                  "expression": {
-                    "and": [
-                      {
-                        "equals": [
-                          "@endsWith(string(items('Apply_to_each_(Requests_Loop)')?['RequestID']), '-EMP1')",
-                          true
-                        ]
-                      }
-                    ]
-                  },
-                  "actions": {
-                    "Send_signed_form_copy_to_candidate_(V2)": {
-                      "type": "OpenApiConnection",
-                      "inputs": {
-                        "parameters": {
-                          "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
-                          "emailMessage/To": "@if(contains(trim(string(first(body('Get_item')?['value'])?['CandidateEmail'])),'@'),trim(string(first(body('Get_item')?['value'])?['CandidateEmail'])),'recruitment@dlresources.com.sg')",
-                          "emailMessage/Subject": "Copy of Signed Authorization Form - @{first(body('Get_item')?['value'])?['FullName']}",
-                          "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{first(body('Get_item')?['value'])?['FullName']},</p><br><p class=\"editor-paragraph\">Your previous employer verification has been sent.</p><br><p class=\"editor-paragraph\">For your reference, we have attached a copy of your signed authorization form to this email.</p><br><p class=\"editor-paragraph\">Thank you.<br>DL Resources Recruitment Team</p>",
-                          "emailMessage/Attachments": [
-                            {
-                              "Name": "@variables('AuthFileName')",
-                              "ContentBytes": "@base64ToBinary(outputs('Get_file_content')?['body/$content'])"
-                            }
-                          ],
-                          "emailMessage/Importance": "Normal"
-                        },
-                        "host": {
-                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
-                          "operationId": "SharedMailboxSendEmailV2",
-                          "connectionName": "shared_office365"
-                        }
-                      },
-                      "runAfter": {}
+                "Send_signed_form_copy_to_candidate_(V2)": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
+                      "emailMessage/To": "@if(contains(trim(string(first(body('Get_item')?['value'])?['CandidateEmail'])),'@'),trim(string(first(body('Get_item')?['value'])?['CandidateEmail'])),'recruitment@dlresources.com.sg')",
+                      "emailMessage/Subject": "Employment Verification Sent - @{first(body('Get_item')?['value'])?['FullName']}",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{first(body('Get_item')?['value'])?['FullName']},</p><br><p class=\"editor-paragraph\">Your previous employer verification request has been sent for Request ID @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.</p><br><p class=\"editor-paragraph\">Please keep this email for your reference while we wait for the employer's response.</p><br><p class=\"editor-paragraph\">Thank you.<br>DL Resources Recruitment Team</p>",
+                      "emailMessage/Importance": "Normal"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                      "operationId": "SharedMailboxSendEmailV2",
+                      "connectionName": "shared_office365"
                     }
-                  },
-                  "else": {
-                    "actions": {}
                   },
                   "runAfter": {
                     "Send_an_email_(V2)": [
@@ -519,7 +494,7 @@
                     }
                   },
                   "runAfter": {
-                    "Condition_-_Send_candidate_copy_once": [
+                    "Send_signed_form_copy_to_candidate_(V2)": [
                       "Succeeded"
                     ]
                   }

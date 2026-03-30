@@ -45,14 +45,14 @@
       "triggers": {
         "Recurrence": {
           "recurrence": {
-            "frequency": "Day",
+            "frequency": "Hour",
             "interval": "1",
-            "startTime": "2026-02-05T09:00:00Z"
+            "startTime": "2026-03-30T01:05:00Z"
           },
           "evaluatedRecurrence": {
-            "frequency": "Day",
+            "frequency": "Hour",
             "interval": "1",
-            "startTime": "2026-02-05T09:00:00Z"
+            "startTime": "2026-03-30T01:05:00Z"
           },
           "type": "Recurrence"
         }
@@ -84,13 +84,49 @@
                 "actions": {
                   "Condition_1": {
                     "actions": {
+                      "LocalNow_SGT": {
+                        "type": "Compose",
+                        "inputs": "@convertTimeZone(utcNow(),'UTC','Singapore Standard Time')"
+                      },
+                      "LinkCreatedLocal_SGT": {
+                        "type": "Compose",
+                        "inputs": "@convertTimeZone(items('Apply_to_each')?['AuthorizationLinkCreatedAt'],'UTC','Singapore Standard Time')",
+                        "runAfter": {
+                          "LocalNow_SGT": [
+                            "Succeeded"
+                          ]
+                        }
+                      },
                       "DaysSinceLink": {
                         "type": "Compose",
-                        "inputs": "@div( \n\n  sub(ticks(utcNow()), ticks(items('Apply_to_each')?['AuthorizationLinkCreatedAt'])), \n\n  864000000000 \n\n) "
+                        "inputs": "@div(sub(ticks(startOfDay(outputs('LocalNow_SGT'))),ticks(startOfDay(outputs('LinkCreatedLocal_SGT')))),864000000000)",
+                        "runAfter": {
+                          "LinkCreatedLocal_SGT": [
+                            "Succeeded"
+                          ]
+                        }
+                      },
+                      "CurrentHour_SGT": {
+                        "type": "Compose",
+                        "inputs": "@int(formatDateTime(outputs('LocalNow_SGT'),'HH'))",
+                        "runAfter": {
+                          "DaysSinceLink": [
+                            "Succeeded"
+                          ]
+                        }
+                      },
+                      "EligibleReminderWindow": {
+                        "type": "Compose",
+                        "inputs": "@or(and(equals(outputs('DaysSinceLink'),0),equals(outputs('CurrentHour_SGT'),21),less(int(formatDateTime(outputs('LinkCreatedLocal_SGT'),'HH')),21)),and(or(equals(outputs('DaysSinceLink'),1),equals(outputs('DaysSinceLink'),2)),or(equals(outputs('CurrentHour_SGT'),9),equals(outputs('CurrentHour_SGT'),21))),and(or(equals(outputs('DaysSinceLink'),3),equals(outputs('DaysSinceLink'),4),equals(outputs('DaysSinceLink'),5)),equals(outputs('CurrentHour_SGT'),9)))",
+                        "runAfter": {
+                          "CurrentHour_SGT": [
+                            "Succeeded"
+                          ]
+                        }
                       },
                       "Condition_2": {
                         "actions": {
-                          "Condition__-_not_reminded_today_": {
+                          "Condition__-_not_reminded_this_slot_": {
                             "actions": {
                               "Send_an_email_(V2)": {
                                 "type": "OpenApiConnection",
@@ -141,13 +177,13 @@
                               "or": [
                                 {
                                   "equals": [
-                                    "@empty(items('Apply_to_each')?['LastAuthReminderAt']) ",
+                                    "@empty(items('Apply_to_each')?['LastAuthReminderAt'])",
                                     true
                                   ]
                                 },
                                 {
                                   "equals": [
-                                    "@not(equals(formatDateTime(items('Apply_to_each')?['LastAuthReminderAt'],'yyyy-MM-dd'), formatDateTime(utcNow(),'yyyy-MM-dd'))) ",
+                                    "@not(and(equals(formatDateTime(convertTimeZone(items('Apply_to_each')?['LastAuthReminderAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd'),formatDateTime(outputs('LocalNow_SGT'),'yyyy-MM-dd')),equals(int(formatDateTime(convertTimeZone(items('Apply_to_each')?['LastAuthReminderAt'],'UTC','Singapore Standard Time'),'HH')),outputs('CurrentHour_SGT'))))",
                                     true
                                   ]
                                 }
@@ -157,7 +193,7 @@
                           }
                         },
                         "runAfter": {
-                          "DaysSinceLink": [
+                          "EligibleReminderWindow": [
                             "Succeeded"
                           ]
                         },
@@ -167,15 +203,9 @@
                         "expression": {
                           "and": [
                             {
-                              "greaterOrEquals": [
-                                "@outputs('DaysSinceLink')",
-                                1
-                              ]
-                            },
-                            {
-                              "lessOrEquals": [
-                                "@outputs('DaysSinceLink')",
-                                5
+                              "equals": [
+                                "@outputs('EligibleReminderWindow')",
+                                true
                               ]
                             }
                           ]
@@ -243,6 +273,12 @@
                               "equals": [
                                 "@outputs('DaysSinceLink')",
                                 5
+                              ]
+                            },
+                            {
+                              "equals": [
+                                "@outputs('CurrentHour_SGT')",
+                                9
                               ]
                             }
                           ]
