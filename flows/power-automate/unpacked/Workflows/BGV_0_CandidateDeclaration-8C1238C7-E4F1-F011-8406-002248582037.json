@@ -318,6 +318,26 @@
             "operationMetadataId": "23339f4d-1240-408a-a87f-c7f82b6875c8"
           }
         },
+        "Get_Instructions_For_Authorisation_Form_PDF": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+              "path": "/BGV Records/Templates/Instructions For Authorisation Form.pdf",
+              "inferContentType": true
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetFileContentByPath",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {
+            "Create_sharing_link_for_a_file_or_folder": [
+              "Succeeded"
+            ]
+          }
+        },
         "Update_BGV_Candidates_List_Row_Status": {
           "type": "OpenApiConnection",
           "inputs": {
@@ -794,7 +814,13 @@
               "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
               "emailMessage/To": "@outputs('Get_response_details')?['body/rcd8057cd92b24b5594681a5b39c07e3d']",
               "emailMessage/Subject": "Please Sign: Authorization Form - @{variables('varCandidateID')}",
-              "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{outputs('Get_response_details')?['body/rfe96c622120343f294de908deb0e849d']},</p><br><p class=\"editor-paragraph\">This authorization form allows us to proceed with your background verification check.</p><br><p class=\"editor-paragraph\">Please review the form, sign it, and ensure that you confirm your signature by ticking the checkbox in the form. Note: A copy of your signed form will be sent to your email later on.</p><br><p class=\"editor-paragraph\">You may access the form using the link below:<br>@{outputs('Create_sharing_link_for_a_file_or_folder')?['body/link/webUrl']}</p><br><p class=\"editor-paragraph\">Kindly complete this as soon as possible to avoid delays in processing your background verification.</p><br><p class=\"editor-paragraph\">Thank you.</p><br><p class=\"editor-paragraph\">Best regards,<br>DL Resources Recruitment Team</p>",
+              "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{outputs('Get_response_details')?['body/rfe96c622120343f294de908deb0e849d']},</p><br><p class=\"editor-paragraph\">This authorization form allows us to proceed with your background verification check.</p><br><p class=\"editor-paragraph\">Please review the form, sign it, and ensure that you confirm your signature by ticking the checkbox in the form. Note: A copy of your signed form will be sent to your email later on.</p><br><p class=\"editor-paragraph\">For guidance, please refer to the attached PDF titled <strong>Instructions For Authorisation Form</strong>.</p><br><p class=\"editor-paragraph\">You may access the form using the link below:<br>@{outputs('Create_sharing_link_for_a_file_or_folder')?['body/link/webUrl']}</p><br><p class=\"editor-paragraph\">Kindly complete this as soon as possible to avoid delays in processing your background verification.</p><br><p class=\"editor-paragraph\">Thank you.</p><br><p class=\"editor-paragraph\">Best regards,<br>DL Resources Recruitment Team</p>",
+              "emailMessage/Attachments": [
+                {
+                  "Name": "Instructions For Authorisation Form.pdf",
+                  "ContentBytes": "@base64ToBinary(outputs('Get_Instructions_For_Authorisation_Form_PDF')?['body/$content'])"
+                }
+              ],
               "emailMessage/Importance": "Normal"
             },
             "host": {
@@ -804,7 +830,7 @@
             }
           },
           "runAfter": {
-            "Create_sharing_link_for_a_file_or_folder": [
+            "Get_Instructions_For_Authorisation_Form_PDF": [
               "Succeeded"
             ]
           }

@@ -22,6 +22,7 @@ This document describes the current behavior in your canonical flow files under 
   - Creates candidate folder and authorization subfolder in SharePoint.
   - Creates candidate row in `BGV_Candidates`.
   - Generates and saves authorization `.docx` from the target-site template in `DLR Recruitment Ops > BGV Records > Templates > DLRAuthorizationLetter_Template.docx`, then shares it and emails candidate.
+  - Candidate authorization email now also attaches `BGV Records > Templates > Instructions For Authorisation Form.pdf` so the candidate has a fixed PDF guide while completing the editable Word form.
   - The authorization link is created as an anonymous edit link so the candidate can open and edit the Word document directly, even outside the organisation.
   - When filling the authorization Word template ID content controls:
     - NRIC control gets the last 5 cleaned alphanumeric characters from the candidate's full NRIC, else `N/A`.
@@ -371,9 +372,10 @@ This document describes the current behavior in your canonical flow files under 
     - `Employer Response Received At`
     - `Employer Email Reply At`
     - `Last Activity At`
+    - `Candidate Folder Link`
     - `Severity`
     - `Outcome`
-  - Candidate-folder link is not written into the Excel table yet because the live workbook table `tblDashboardCasesPA` does not currently expose a matching column header for the flow to populate safely.
+  - `Candidate Folder Link` now points to `BGV Records/Candidate Files/<CandidateID>/` for each dashboard row.
   - Appends a run entry into:
     - `tblDashboardRefreshLog`
     - timestamp value is written as `Run At (SGT)`

@@ -28,6 +28,7 @@ The current operational dashboard is `BGVDashboard_FLow.xlsx`.
 | `Employer Response Received At` | Timestamp of completed employer response. | `BGV_Requests.ResponseReceivedAt` shown in SGT |
 | `Employer Email Reply At` | Timestamp of latest inbound employer mailbox reply. | `BGV_Requests.EmployerEmailReplyAt` shown in SGT |
 | `Last Activity At` | Latest known case activity for sorting and recency checks. | Max of key candidate/request/reminder/response timestamps shown in SGT |
+| `Candidate Folder Link` | One-click path to the candidate’s SharePoint case folder. | Derived as `BGV Records/Candidate Files/<CandidateID>/` |
 | `Severity` | Reported risk level from employer response. | `BGV_Requests.Severity` |
 | `Outcome` | Short result/flag summary from employer response. | `BGV_Requests.Outcome` |
 

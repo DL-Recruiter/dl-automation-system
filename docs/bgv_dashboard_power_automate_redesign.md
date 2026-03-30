@@ -74,6 +74,7 @@ This is a redesign, not a patch. The current builder rebuilds workbook structure
 - `Employer Response Received At`
 - `Employer Email Reply At`
 - `Last Activity At`
+- `Candidate Folder Link`
 - `Severity`
 - `Outcome`
 
@@ -121,6 +122,7 @@ This is a redesign, not a patch. The current builder rebuilds workbook structure
 | `Employer Response Received At` | `BGV_Requests` | `ResponseReceivedAt` |
 | `Employer Email Reply At` | `BGV_Requests` | `EmployerEmailReplyAt` |
 | `Last Activity At` | Derived | latest relevant timestamp |
+| `Candidate Folder Link` | Derived | `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/<CandidateID>/` |
 | `Severity` | `BGV_Requests` / fallback `BGV_FormData` | direct |
 | `Outcome` | `BGV_Requests` / fallback `BGV_FormData` | direct |
 

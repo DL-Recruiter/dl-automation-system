@@ -6,6 +6,29 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-30 (Dashboard candidate-folder link + candidate auth email PDF guide)
+- Current status:
+  - Wired the new dashboard `Candidate Folder Link` column into `BGV_9_Refresh_Dashboard_Excel`, attached the new `Instructions For Authorisation Form.pdf` guide in the candidate authorization email sent by `BGV_0_CandidateDeclaration`, and documented the final root cause/fix summary for the Saturday `BGV_4` outage.
+- Completed tasks:
+  - Updated `BGV_9_Refresh_Dashboard_Excel`:
+    - now writes `Candidate Folder Link` for every dashboard row using the candidate SharePoint folder URL
+  - Updated `BGV_0_CandidateDeclaration`:
+    - reads `BGV Records/Templates/Instructions For Authorisation Form.pdf`
+    - attaches that PDF to the candidate authorization email alongside the editable Word-form link
+    - keeps the existing shared-link behavior for the live authorization Word document
+  - Updated dashboard/docs:
+    - documented the new `Candidate Folder Link` column in dashboard docs
+    - documented the candidate-email PDF guide attachment in the flow guide
+  - Saturday `BGV_4` failure summary:
+    - the original failures looked like business-logic problems around `Condition - AuthorisationSigned` and `Condition - if file exist`, but the deeper issue was Power Automate rejecting imported nested control nodes and some mail-action shapes at runtime after PAC import
+    - that is why early JSON-only fixes did not stick even when the expressions themselves were valid
+    - the final stable fix came from simplifying the control structure, using safer gating/data-shaping patterns, and correcting the attachment payload/mail-action format that the live runtime would actually accept
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_0_CandidateDeclaration-8C1238C7-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Import the updated solution to live and run daily sync so PAC, local repo, and GitHub all match again.
+
 ## 2026-03-30 (BGV_4 recruiter email polish + BGV_5 Teams formatting + BGV_7 report-post catch-up)
 - Current status:
   - Polished the active employer/candidate email wording in `BGV_4_SendToEmployer_Clean`, fixed medium-severity Teams notification coverage and message formatting in `BGV_5_Response1`, and patched `BGV_7_Generate_Report_Summary` so the Teams report-link post can still happen when the report file already exists and is only being updated.
