@@ -82,15 +82,20 @@ This document describes the current behavior in your canonical flow files under 
 - Main outcome: Signed authorization files are locked against Developer-mode content-control edits and are no longer broadly shared.
 
 ### `BGV_3_AuthReminder_5Days`
-- Trigger: Daily recurrence.
+- Trigger: Hourly recurrence with Singapore-time slot gating.
 - What it does:
   - Gets candidates with `Status = Pending Authorization Form Signature`.
-  - Computes days since authorization link creation.
-  - Sends reminder emails between day 1 and day 5, max once per day.
-  - Uses `LastAuthReminderAt` consistently to avoid duplicate same-day reminders.
+  - Computes days since authorization link creation using Singapore local calendar days.
+  - Uses the live candidate item state (`Status` + `AuthorisationSigned`) at send time, so reminder checks happen against the current signed-status update rather than stale earlier values.
+  - Schedules reminders at these local Singapore times:
+    - same day as authorization send: one reminder at `9:05 PM` only if the authorization link was created before `9:00 PM`
+    - local days 2 and 3 after send: two reminders per day at `9:05 AM` and `9:05 PM`
+    - local days 4 and 5 after send: one reminder per day at `9:05 AM`
+  - Uses `LastAuthReminderAt` consistently to avoid duplicate reminders in the same reminder slot.
   - Reminder updates only stamp `LastAuthReminderAt`; they do not change candidate status to signed/obtained.
   - Reminder update no longer flips `ConsentCaptured`; it only stamps reminder timestamp fields.`\n  - Outer reminder gate now checks `AuthorisationSigned` instead of `ConsentCaptured` so stale consent flags do not block pending reminders.
   - Day-5 escalation now runs independently of whether a same-day reminder email was sent, so stale `LastAuthReminderAt` values do not suppress escalation.
+  - Day-5 escalation is limited to the `9:05 AM` slot so the hourly recurrence does not spam repeated alerts.
   - Day-5 escalation email now uses current candidate item values directly and still sends even if the Teams post step fails.
   - On day 5 unresolved cases, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email to `recruitment@dlresources.com.sg`.
   - Email sends are routed via shared mailbox `recruitment@dlresources.com.sg`.

@@ -6,6 +6,24 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-30 (BGV_3 authorization reminder cadence increased with signed-status buffer)
+- Current status:
+  - Updated `BGV_3_AuthReminder_5Days` so authorization reminders now run on Singapore-time reminder slots with a small post-hour buffer, while still checking the latest candidate signed state before sending.
+- Completed tasks:
+  - Updated `BGV_3_AuthReminder_5Days`:
+    - changed recurrence from daily to hourly so the flow can evaluate `9:05 AM` and `9:05 PM` local reminder slots
+    - computes reminder eligibility using Singapore local time rather than raw UTC elapsed days
+    - sends one reminder on the authorization-send day at `9:05 PM` only when the link was created before `9:00 PM`
+    - sends two reminders per day on local days 2 and 3 at `9:05 AM` and `9:05 PM`
+    - keeps later reminder days to a single `9:05 AM` slot and limits Day-5 escalation to that same morning slot
+    - changed duplicate guarding from “same day” to “same reminder slot” using `LastAuthReminderAt`
+    - keeps the existing signed-status gate so reminders only continue when `AuthorisationSigned` is still not true at runtime
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `rg -n "Recurrence|LocalNow_SGT|LinkCreatedLocal_SGT|EligibleReminderWindow|Condition__-_not_reminded_this_slot_|CurrentHour_SGT" flows/power-automate/unpacked/Workflows/BGV_3_AuthReminder_5Days-FF4BF0E3-0916-F111-8341-002248582037.json`
+- Next actions and blockers:
+  - Import the updated solution, run daily sync, and verify the live reminder flow remains started.
+
 ## 2026-03-30 (BGV_4 candidate-copy attachment + single-send guard + employer stamp wording)
 - Current status:
   - Updated the live `BGV_4_SendToEmployer_Clean` mail actions so candidate copies carry the authorization attachment again, candidates only receive that copy once on the `EMP1` send, and employer wording now politely asks HR to place the company stamp into the shared Word document.
