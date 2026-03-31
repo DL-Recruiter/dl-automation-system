@@ -174,7 +174,7 @@ This document describes the current behavior in your canonical flow files under 
 - Trigger: New response in employer HR verification Microsoft Form.
 - Matching:
   - Looks up `BGV_Requests` by `startswith(RequestID, <submitted RequestID>)`.
-  - Looks up `BGV_FormData` by exact `RequestID`.
+  - Looks up `BGV_FormData` by `RecordItemID` from the matched request row.
 - What it does:
   - Initializes scoring variables (`Severity`, `Outcome`, notify flags).
   - Applies risk logic:
@@ -290,7 +290,14 @@ This document describes the current behavior in your canonical flow files under 
   - Reads the live Word template by path:
     - `DLR Recruitment Ops > BGV Records > Templates > ReportSummary_Template.docx`
   - Loads the matching `BGV_FormData` row by exact `RequestID`.
-  - Requires non-empty `Form2RawJson` from `BGV_FormData`.
+  - No longer hard-stops when `BGV_FormData.Form2RawJson` is blank.
+  - If `Form2RawJson` exists, it uses that saved raw employer payload.
+  - If `Form2RawJson` is blank, it synthesizes a fallback Form 2 JSON payload from the responded `BGV_Requests` row, including:
+    - highest severity
+    - combined flagged issues / outcome
+    - notes / explanations
+    - Form 1 reason for leaving when available
+    - derived flags for company-details inaccurate, MAS, disciplinary, re-employ, and other comments
   - Uses `Form1RawJson` when present, and falls back to normalized `BGV_FormData` Form 1 fields when `Form1RawJson` is blank:
     - `F1_CandidateFullName`
     - `F1_CandidateEmail`
@@ -328,7 +335,7 @@ This document describes the current behavior in your canonical flow files under 
     - report summary link
     - details block built from request notes, including MAS-style reasons where present
   - After a successful Teams post, flow stamps both fields with current UTC time so it will not post that same report summary again.
-- Main outcome: Each completed employer verification now gets a report-summary DOCX generated from the real SharePoint template and stored in the correct candidate folder.
+- Main outcome: Each completed employer verification now gets a report-summary DOCX generated from the real SharePoint template and stored in the correct candidate folder, even when the Form 2 raw payload was not written back into `BGV_FormData`.
 
 ### `BGV_8_Track_Employer_Email_Replies`
 - Trigger: `When a new email arrives (V3)` on the recruitment mailbox inbox.

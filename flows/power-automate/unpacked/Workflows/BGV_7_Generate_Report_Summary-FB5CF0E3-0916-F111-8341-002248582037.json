@@ -146,12 +146,6 @@
                           "@length(body('Get_items_(BGV_FormData)')?['value'])",
                           0
                         ]
-                      },
-                      {
-                        "equals": [
-                          "@empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson'])",
-                          false
-                        ]
                       }
                     ]
                   },
@@ -205,11 +199,47 @@
                         ]
                       }
                     },
+                    "Compose_ReportFlaggedIssuesJsonSafe": {
+                      "type": "Compose",
+                      "inputs": "@replace(replace(replace(string(outputs('Compose_ReportFlaggedIssues')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                      "runAfter": {
+                        "Compose_ReportDetailsHtml": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_ReportNotesJsonSafe": {
+                      "type": "Compose",
+                      "inputs": "@replace(replace(replace(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Notes'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                      "runAfter": {
+                        "Compose_ReportFlaggedIssuesJsonSafe": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_Form1ReasonForLeavingJsonSafe": {
+                      "type": "Compose",
+                      "inputs": "@replace(replace(replace(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_ReasonForLeaving'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                      "runAfter": {
+                        "Compose_ReportNotesJsonSafe": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
                     "Compose_IsAdverseSeverity": {
                       "type": "Compose",
                       "inputs": "@or(equals(toLower(outputs('Compose_ReportSeverityText')),'low'),equals(toLower(outputs('Compose_ReportSeverityText')),'medium'),equals(toLower(outputs('Compose_ReportSeverityText')),'high'))",
                       "runAfter": {
-                        "Compose_ReportDetailsHtml": [
+                        "Compose_Form1ReasonForLeavingJsonSafe": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Compose_ReportForm2RawJson": {
+                      "type": "Compose",
+                      "inputs": "@if(equals(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson']),false),first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson'],concat('{\"r9594fab1bfa04c90883b1dffd7f4549e\":\"',if(empty(outputs('Compose_ReportSeverityText')),'','No'),'\",\"r72b23e4aa192405091846e1279085029\":\"',outputs('Compose_ReportFlaggedIssuesJsonSafe'),'\",\"r2d39255c2449439096683ca0e39241b0\":\"',if(or(contains(outputs('Compose_ReportFlaggedIssues'),'Company Name'),contains(outputs('Compose_ReportFlaggedIssues'),'Company UEN'),contains(outputs('Compose_ReportFlaggedIssues'),'Company Address'),contains(outputs('Compose_ReportFlaggedIssues'),'Company Details')),'No',''),'\",\"rd05170e51ac34fef95f5464cf348bedc\":\"',if(or(contains(outputs('Compose_ReportFlaggedIssues'),'Company Name'),contains(outputs('Compose_ReportFlaggedIssues'),'Company UEN'),contains(outputs('Compose_ReportFlaggedIssues'),'Company Address'),contains(outputs('Compose_ReportFlaggedIssues'),'Company Details')),outputs('Compose_ReportFlaggedIssuesJsonSafe'),''),'\",\"r7bd26b4a7e94430dbda54f9e8b8212e4\":\"',if(contains(outputs('Compose_ReportFlaggedIssues'),'MAS'),outputs('Compose_ReportNotesJsonSafe'),''),'\",\"r96d079f9858e40bab89ab0ea4ad23931\":\"',if(contains(outputs('Compose_ReportFlaggedIssues'),'Disciplinary'),'Yes',''),'\",\"rafe3ada4157c49fb9e555cd0fb53bd59\":\"',if(contains(outputs('Compose_ReportFlaggedIssues'),'Re-employ'),'No',''),'\",\"r5f7ebc3390bc4699b160504c65254c3e\":\"',if(contains(outputs('Compose_ReportFlaggedIssues'),'Re-employ'),outputs('Compose_ReportNotesJsonSafe'),''),'\",\"r513ad5ab3a14453286bdb910820985ec\":\"',outputs('Compose_Form1ReasonForLeavingJsonSafe'),'\",\"r57e4baaeaafc4ffc8b3977149b18f2f2\":\"\",\"rab9c2a586db943b18ac02367d3b1d3f7\":\"',if(contains(outputs('Compose_ReportFlaggedIssues'),'Other Comments'),outputs('Compose_ReportNotesJsonSafe'),''),'\",\"r1f2d7ec255b1430fbb2a6e56ce4042d1\":\"\",\"r7b65617c391a48239b9f75dd239702c3\":\"\",\"reb80c95cd24242998cbc884c24254bed\":\"\"}'))",
+                      "runAfter": {
+                        "Compose_IsAdverseSeverity": [
                           "Succeeded"
                         ]
                       }
@@ -226,7 +256,7 @@
                           "fileName": "@outputs('Compose_ReportFileName')",
                           "docxBase64": "@outputs('Compose_Template_Base64')",
                           "form1RawJson": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Form1RawJson']",
-                          "form2RawJson": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson']",
+                          "form2RawJson": "@outputs('Compose_ReportForm2RawJson')",
                           "form1CandidateFullName": "@first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName']",
                           "form1CandidateEmail": "@first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateEmail']",
                           "form1IdentificationNumberNRIC": "@first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']",
@@ -234,7 +264,7 @@
                         }
                       },
                       "runAfter": {
-                        "Compose_IsAdverseSeverity": [
+                        "Compose_ReportForm2RawJson": [
                           "Succeeded"
                         ]
                       }

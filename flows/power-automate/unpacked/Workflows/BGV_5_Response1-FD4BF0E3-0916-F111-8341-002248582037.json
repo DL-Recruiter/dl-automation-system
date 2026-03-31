@@ -127,7 +127,7 @@
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
               "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
-              "$filter": "@concat('RequestID eq ''', outputs('Get_response_details')?['body/rd745d133eb7f4611b59ea051f980f97a'], '''')",
+              "$filter": "@concat('RecordItemID eq ', string(first(outputs('Get_items')?['body/value'])?['ID']))",
               "$top": 1
             },
             "host": {

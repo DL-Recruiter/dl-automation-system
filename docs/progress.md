@@ -6,6 +6,37 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-31 (Flow 7 report-summary generation restored for responded cases)
+- Current status:
+  - Rechecked the live Flow 7/report-summary pipeline after recent employer responses were not producing `RS_Emp*.docx` files, found the real skip condition, and restored report generation for new responded cases while confirming the dashboard flow is still refreshing on schedule.
+- Completed tasks:
+  - Investigated the live data path:
+    - confirmed recent responded requests such as `REQ-BGV-20260331-55c26-EMP1` and `REQ-BGV-20260330-9bf33-EMP1` had no report-summary DOCX in their candidate folders before the fix
+    - confirmed the matching `BGV_FormData` rows existed but had blank `Form2RawJson`, blank `Form2SubmittedAt`, and blank normalized `F2_*` fields
+    - confirmed `BGV_7_Generate_Report_Summary` was still running on schedule but silently skipping report generation because it required `Form2RawJson` to be non-empty
+  - Updated `BGV_5_Response1`:
+    - hardened the `BGV_FormData` lookup so it now matches by `RecordItemID` from the resolved request row instead of relying only on `RequestID` text matching
+  - Updated `BGV_7_Generate_Report_Summary`:
+    - removed the hard requirement for non-empty `Form2RawJson`
+    - added fallback payload builders so the report-summary Azure Function can still run when `Form2RawJson` is blank
+    - fallback payload now derives Form 2 report values from the responded `BGV_Requests` row, including severity, flagged issues, notes, reason for leaving, and the key yes/no issue flags
+  - Verified the live fix worked:
+    - `BGV Records/Candidate Files/BGV-20260331-55c26/RS_Emp1.docx` now exists
+    - `BGV Records/Candidate Files/BGV-20260330-9bf33/RS_Emp1.docx` now exists
+  - Verified `BGV_9_Refresh_Dashboard_Excel` is still running on its 10-minute cadence, so dashboard refresh is not the blocker for these cases.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `m365 spo listitem list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_Requests --fields ID,Title,RequestID,CandidateID,VerificationStatus,ResponseReceivedAt,Severity,Outcome,Modified --output json`
+  - `m365 spo listitem get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_FormData --id 122 --output json`
+  - `m365 spo file list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --folderUrl \"/sites/DLRRecruitmentOps570/BGV Records/Candidate Files/BGV-20260331-55c26\" --recursive --output json`
+  - `m365 spo file list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --folderUrl \"/sites/DLRRecruitmentOps570/BGV Records/Candidate Files/BGV-20260330-9bf33\" --recursive --output json`
+  - `m365 flow run list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName fb5cf0e3-0916-f111-8341-002248582037 --output json`
+  - `m365 flow run list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 03b36e72-1ace-4fcf-ad6d-80a583012f31 --output json`
+- Next actions and blockers:
+  - Run daily sync so the canonical local export matches the repaired live state.
+  - Commit and push the synced `BGV_5` / `BGV_7` changes plus these doc updates so GitHub matches PAC and local again.
+
 ## 2026-03-31 (PEV response email merge + Form 2 Q8 prefill removal + faster Flow 7/9 polling)
 - Current status:
   - Removed the employer Form 2 Q8 hard-prefill, merged recruiter response/severity emails into one `PEV Response Received` email, hardened `BGV_7` report pickup, and sped up dashboard refresh timing so live test changes appear sooner.
