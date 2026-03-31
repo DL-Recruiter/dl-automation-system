@@ -6,6 +6,38 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-03-31 (PEV response email merge + Form 2 Q8 prefill removal + faster Flow 7/9 polling)
+- Current status:
+  - Removed the employer Form 2 Q8 hard-prefill, merged recruiter response/severity emails into one `PEV Response Received` email, hardened `BGV_7` report pickup, and sped up dashboard refresh timing so live test changes appear sooner.
+- Completed tasks:
+  - Updated `BGV_4_SendToEmployer_Clean`:
+    - removed the prefilled `Yes` value from employer Form 2 question `Q8 / information accurate`
+    - employers now see that field blank and must answer it themselves
+  - Updated `BGV_5_Response1`:
+    - disabled the separate high-severity-only email branch
+    - consolidated recruiter response emails into one shared-mailbox email for every employer response
+    - subject now starts with `PEV Response Received`
+    - subject always includes `Severity: <value>` and leaves the value blank when severity is empty
+    - body keeps employer details, request id, candidate folder link, flagged issues, and cleaned details/comments
+    - cleared responses still keep the TAC follow-up note in that same email
+  - Updated `BGV_7_Generate_Report_Summary`:
+    - recurrence changed from every 30 minutes to every 10 minutes
+    - request query now pulls broadly with `$top 5000` and relies on in-flow `ResponseReceivedAt` gating instead of server-side null filtering
+  - Updated `BGV_9_Refresh_Dashboard_Excel`:
+    - recurrence changed from every 30 minutes to every 10 minutes
+    - removed the Singapore-time execution-window gate so the dashboard refresh can run on every recurrence instead of waiting for specific clock slots
+  - Updated docs to reflect the new PEV wording, blank Q8 behavior, and faster report/dashboard polling.
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+  - `m365 flow list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --output json`
+  - `m365 flow run get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 3e03d678-ce7d-1508-99ab-a7624987e9cd --name 08584266826858603029469062913CU18 --output json`
+- Next actions and blockers:
+  - Import the updated solution to live, run daily sync, and push GitHub so PAC, local, and repo match again.
+  - After deployment, verify one recent employer-response case now gets picked up by `BGV_7` within the faster polling window and that the dashboard row refreshes without waiting for a time gate.
+
 ## 2026-03-30 (BGV_5/BGV_6/BGV_7/BGV_9 notification and dashboard-clearing logic refresh)
 - Current status:
   - Tightened the adverse-case/report-summary pipeline so report creation/posting keys off actual employer response timestamps, removed the immediate BGV-response Teams post from `BGV_5`, aligned the severity ladder so old neutral cases are treated as low, and updated dashboard completion logic for reminder/escalation-cleared cases.

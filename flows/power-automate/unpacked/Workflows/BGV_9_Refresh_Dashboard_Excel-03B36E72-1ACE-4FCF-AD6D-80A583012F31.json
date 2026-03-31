@@ -38,7 +38,7 @@
           "type": "Recurrence",
           "recurrence": {
             "frequency": "Minute",
-            "interval": 30,
+            "interval": 10,
             "timeZone": "Singapore Standard Time",
             "startTime": "2026-03-27T08:00:00"
           }
@@ -48,67 +48,9 @@
         "Condition_-_Refresh_Window_SGT": {
           "type": "If",
           "expression": {
-            "or": [
-              {
-                "equals": [
-                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
-                  "08:00"
-                ]
-              },
-              {
-                "equals": [
-                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
-                  "09:30"
-                ]
-              },
-              {
-                "equals": [
-                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
-                  "11:00"
-                ]
-              },
-              {
-                "equals": [
-                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
-                  "12:30"
-                ]
-              },
-              {
-                "equals": [
-                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
-                  "14:00"
-                ]
-              },
-              {
-                "equals": [
-                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
-                  "15:30"
-                ]
-              },
-              {
-                "equals": [
-                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
-                  "17:00"
-                ]
-              },
-              {
-                "equals": [
-                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
-                  "18:30"
-                ]
-              },
-              {
-                "equals": [
-                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
-                  "20:00"
-                ]
-              },
-              {
-                "equals": [
-                  "@formatDateTime(convertTimeZone(utcNow(),'UTC','Singapore Standard Time'),'HH:mm')",
-                  "21:00"
-                ]
-              }
+            "equals": [
+              true,
+              true
             ]
           },
           "actions": {

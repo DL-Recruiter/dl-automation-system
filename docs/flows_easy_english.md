@@ -138,6 +138,7 @@ This document describes the current behavior in your canonical flow files under 
     - Employer name
     - Employer UEN
     - Employer address
+    - Company-details accuracy / `Q8` is no longer prefilled to `Yes`; the employer must answer that field manually
     - Employment period
     - Last drawn salary
     - Job title
@@ -232,8 +233,12 @@ This document describes the current behavior in your canonical flow files under 
   - Recruiter-facing email details are cleaned before send so escaped newline markers such as `\n` or `\n\n` render as normal line breaks instead of raw text.
   - Recruiter-facing notifications include a direct candidate-folder link for faster follow-up.
   - If severity is blank after employer response, both the recruiter email and the Teams post are treated as cleared-case notifications and say the PEV checks are cleared and TAC form is to be sent.
-  - Sends internal high-severity email when severity is `High`, including employer name and employer HR email in the body.
-  - Recruiter-facing BGV_5 emails now include `EmployerName` in the email body context and tell recruiters where to find the later report summary under `BGV_Records > Candidate Files (<CandidateID>)`.
+  - Recruiter-facing response emails are now combined into one mailbox email for every employer response:
+    - subject starts with `PEV Response Received`
+    - subject always includes `Severity: <value>` and leaves it blank when there is no severity
+    - body always includes employer details, request ID, candidate folder link, flagged issues, and the cleaned details/comments block
+    - cleared cases still add the TAC follow-up note in that same email instead of using a separate response-vs-severity email split
+  - Recruiter-facing response emails tell recruiters where to find the later report summary under `BGV_Records > Candidate Files (<CandidateID>)`.
   - All email notifications in this flow are routed via shared mailbox and addressed to `recruitment@dlresources.com.sg`.
   - Teams notification target for this flow is `DLR Recruitment Ops > BGV`:
     - `groupId = 4475a565-7f2b-4df1-91cd-c8e3df8f805a`
@@ -277,9 +282,9 @@ This document describes the current behavior in your canonical flow files under 
 - Main outcome: Employer follow-up is systematic, time-based, and auditable.
 
 ### `BGV_7_Generate_Report_Summary`
-- Trigger: Recurrence every 30 minutes.
+- Trigger: Recurrence every 10 minutes.
 - Selection:
-  - Reads `BGV_Requests` where `ResponseReceivedAt` is not empty.
+  - Reads the request list broadly and then filters inside the flow for rows where `ResponseReceivedAt` is not empty.
   - Only continues for rows with a non-empty `ResponseReceivedAt` and a `RequestID` ending in an employer slot such as `EMP1`.
 - What it does:
   - Reads the live Word template by path:
@@ -347,12 +352,7 @@ This document describes the current behavior in your canonical flow files under 
     - subject
 
 ### `BGV_9_Refresh_Dashboard_Excel`
-- Trigger: Recurrence five times a day in Singapore time:
-  - `9:00 AM`
-  - `12:00 PM`
-  - `3:00 PM`
-  - internal cadence trigger: every 30 minutes
-  - execution window gate (SGT): `8:00 AM`, `9:30 AM`, `11:00 AM`, `12:30 PM`, `2:00 PM`, `3:30 PM`, `5:00 PM`, `6:30 PM`, `8:00 PM`, `9:00 PM`
+- Trigger: Recurrence every 10 minutes in Singapore time.
 - Purpose:
   - Keeps the Power Automate-friendly dashboard workbook refreshed in SharePoint without depending on the local PC.
   - Writes into:
