@@ -290,14 +290,7 @@ This document describes the current behavior in your canonical flow files under 
   - Reads the live Word template by path:
     - `DLR Recruitment Ops > BGV Records > Templates > ReportSummary_Template.docx`
   - Loads the matching `BGV_FormData` row by exact `RequestID`.
-  - No longer hard-stops when `BGV_FormData.Form2RawJson` is blank.
-  - If `Form2RawJson` exists, it uses that saved raw employer payload.
-  - If `Form2RawJson` is blank, it synthesizes a fallback Form 2 JSON payload from the responded `BGV_Requests` row, including:
-    - highest severity
-    - combined flagged issues / outcome
-    - notes / explanations
-    - Form 1 reason for leaving when available
-    - derived flags for company-details inaccurate, MAS, disciplinary, re-employ, and other comments
+  - Uses the saved raw employer payload from `BGV_FormData.Form2RawJson` and passes it back into the report-summary filler so the report template maps directly to the employer Form 2 question keys.
   - Uses `Form1RawJson` when present, and falls back to normalized `BGV_FormData` Form 1 fields when `Form1RawJson` is blank:
     - `F1_CandidateFullName`
     - `F1_CandidateEmail`
@@ -322,9 +315,11 @@ This document describes the current behavior in your canonical flow files under 
     - `RS_Emp3.docx`
   - Candidate folder path used:
     - `BGV Records/Candidate Files/<CandidateID>/`
-  - If the report already exists, updates the file content in place.
-  - If the report does not exist yet, creates it and checks one-time post flags before posting to Teams.
-  - If the report already exists but has never been posted to Teams before, the flow now posts the report link after the update path as well.
+  - The final save path now uses a simple update-then-create fallback:
+    - first tries `Update_report_summary_file_v2` against the matched `RS_EmpN.docx`
+    - if update fails because the file does not exist yet, it falls back to `Create_report_summary_file_v2`
+    - `Compose_Report_Save_Complete_v2` then normalizes the save result before the Teams post branch continues
+  - If the report already exists but has never been posted to Teams before, the flow still posts the report link after the update path.
   - Teams report-summary post only sends when both `BGV_Requests.Report Summary Teams Posted At` and `BGV_FormData.Report Summary Teams Posted At` are blank.
   - Teams report-summary post only sends for adverse cases where the highest mapped severity is `Low`, `Medium`, or `High`.
   - Old `Neutral` severity is treated as `Low`, so low/medium/high is now the full adverse ladder.
@@ -335,7 +330,7 @@ This document describes the current behavior in your canonical flow files under 
     - report summary link
     - details block built from request notes, including MAS-style reasons where present
   - After a successful Teams post, flow stamps both fields with current UTC time so it will not post that same report summary again.
-- Main outcome: Each completed employer verification now gets a report-summary DOCX generated from the real SharePoint template and stored in the correct candidate folder, even when the Form 2 raw payload was not written back into `BGV_FormData`.
+- Main outcome: Each completed employer verification now gets one employer-specific report-summary DOCX generated from the real SharePoint template and stored in the correct candidate folder, with a live-tested save path that updates existing files or creates new ones reliably.
 
 ### `BGV_8_Track_Employer_Email_Replies`
 - Trigger: `When a new email arrives (V3)` on the recruitment mailbox inbox.

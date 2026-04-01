@@ -6,6 +6,34 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-04-01 (Flow 7 live report-write branch rebuilt and verified)
+- Current status:
+  - Reworked the final `BGV_7_Generate_Report_Summary` save path until the live runtime stopped skipping the report-write actions, then verified repeated successful scheduled runs in PAC.
+- Completed tasks:
+  - Confirmed the earlier designer-native reconnect fixed the old payload blocker:
+    - `Compose_ReportForm2RawJson` now succeeds live
+    - `HTTP - Fill Report Summary Controls` now succeeds live
+  - Identified the remaining blocker as the final report save branch:
+    - earlier `Condition` and `For_each` gate patterns were importing cleanly but still behaving inconsistently at runtime
+    - update/create child actions were being skipped even when the parent branch action showed `Succeeded`
+  - Rebuilt the save path into a simpler runtime-safe pattern:
+    - `Update_report_summary_file_v2` now runs directly after `Filter_array_-_Existing_Report_v2`
+    - `Create_report_summary_file_v2` now runs only when `Update_report_summary_file_v2` fails
+    - `Compose_Report_Save_Complete_v2` now normalizes the save branch outcome before the Teams post branch runs
+    - `Condition_-_Report_Summary_Post_Not_Already_Sent_v2` now runs after `Compose_Report_Save_Complete_v2`
+  - Synced the final live Flow 7 definition back into the repo with daily sync.
+  - Verified the repaired live flow on repeated scheduled runs after redeploy.
+- Validation commands run:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\active\bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+  - `m365 flow run list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName fb5cf0e3-0916-f111-8341-002248582037 --output json`
+  - `git diff -- flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json`
+- Verified live runs:
+  - `08584265800857617127484671768CU19`
+  - `08584265794854886476509176992CU21`
+  - `08584265788852176206870688990CU25`
+- Next actions and blockers:
+  - Commit and push the synced Flow 7 fix plus doc updates so local repo, PAC, and GitHub match.
+
 ## 2026-03-31 (Flow 7 report-summary generation restored for responded cases)
 - Current status:
   - Rechecked the live Flow 7/report-summary pipeline after recent employer responses were not producing `RS_Emp*.docx` files, found the real skip condition, and restored report generation for new responded cases while confirming the dashboard flow is still refreshing on schedule.

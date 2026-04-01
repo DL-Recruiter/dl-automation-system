@@ -11,13 +11,13 @@
         "runtimeSource": "embedded"
       },
       "shared_teams": {
-        "runtimeSource": "embedded",
+        "api": {
+          "name": "shared_teams"
+        },
         "connection": {
           "connectionReferenceLogicalName": "cr94d_sharedteams_4466d"
         },
-        "api": {
-          "name": "shared_teams"
-        }
+        "runtimeSource": "embedded"
       }
     },
     "definition": {
@@ -56,8 +56,7 @@
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
               "operationId": "GetFileContentByPath",
               "connectionName": "shared_sharepointonline"
-            },
-            "authentication": "@parameters('$authentication')"
+            }
           },
           "runAfter": {}
         },
@@ -82,8 +81,7 @@
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
               "operationId": "GetItems",
               "connectionName": "shared_sharepointonline"
-            },
-            "authentication": "@parameters('$authentication')"
+            }
           },
           "runAfter": {
             "Compose_Template_Base64": [
@@ -133,425 +131,262 @@
                       "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
                       "operationId": "GetItems",
                       "connectionName": "shared_sharepointonline"
-                    },
-                    "authentication": "@parameters('$authentication')"
+                    }
                   }
                 },
-                "Condition_-_FormData_Found": {
+                "Compose_CandidateFolderPath": {
+                  "type": "Compose",
+                  "inputs": "@concat('/BGV Records/Candidate Files/', items('Apply_to_each_(Completed_Requests)')?['CandidateID'])",
+                  "runAfter": {
+                    "Get_items_(BGV_FormData)": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportFileName": {
+                  "type": "Compose",
+                  "inputs": "@concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')",
+                  "runAfter": {
+                    "Compose_CandidateFolderPath": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportFileWebLink": {
+                  "type": "Compose",
+                  "inputs": "@concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570',replace(outputs('Compose_CandidateFolderPath'),' ','%20'),'/',replace(outputs('Compose_ReportFileName'),' ','%20'))",
+                  "runAfter": {
+                    "Compose_ReportFileName": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportSeverityText": {
+                  "type": "Compose",
+                  "inputs": "@trim(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Severity']?['Value'],items('Apply_to_each_(Completed_Requests)')?['Severity'],'')))",
+                  "runAfter": {
+                    "Compose_ReportFileWebLink": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportFlaggedIssues": {
+                  "type": "Compose",
+                  "inputs": "@if(empty(trim(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Outcome']?['Value'],items('Apply_to_each_(Completed_Requests)')?['Outcome'],'')))),'None',trim(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Outcome']?['Value'],items('Apply_to_each_(Completed_Requests)')?['Outcome'],''))))",
+                  "runAfter": {
+                    "Compose_ReportSeverityText": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportDetailsHtml": {
+                  "type": "Compose",
+                  "inputs": "@trim(replace(replace(replace(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F2_Notes'],items('Apply_to_each_(Completed_Requests)')?['Notes'],'')),'\\r',''),'\\n','<br>'),decodeUriComponent('%0A'),'<br>'))",
+                  "runAfter": {
+                    "Compose_ReportFlaggedIssues": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportFlaggedIssuesJsonSafe": {
+                  "type": "Compose",
+                  "inputs": "@replace(replace(replace(string(outputs('Compose_ReportFlaggedIssues')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                  "runAfter": {
+                    "Compose_ReportDetailsHtml": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportNotesJsonSafe": {
+                  "type": "Compose",
+                  "inputs": "@replace(replace(replace(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F2_Notes'],items('Apply_to_each_(Completed_Requests)')?['Notes'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                  "runAfter": {
+                    "Compose_ReportFlaggedIssuesJsonSafe": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportRequestIdJsonSafe": {
+                  "type": "Compose",
+                  "inputs": "@replace(replace(replace(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['RequestID'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                  "runAfter": {
+                    "Compose_ReportNotesJsonSafe": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportCompanyNameJsonSafe": {
+                  "type": "Compose",
+                  "inputs": "@replace(replace(replace(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Completed_Requests)')?['EmployerName'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                  "runAfter": {
+                    "Compose_ReportRequestIdJsonSafe": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportCompanyUenJsonSafe": {
+                  "type": "Compose",
+                  "inputs": "@replace(replace(replace(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN'],items('Apply_to_each_(Completed_Requests)')?['EmployerUEN'],items('Apply_to_each_(Completed_Requests)')?['Employer_UEN'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                  "runAfter": {
+                    "Compose_ReportCompanyNameJsonSafe": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportCompanyAddressJsonSafe": {
+                  "type": "Compose",
+                  "inputs": "@replace(replace(replace(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress'],items('Apply_to_each_(Completed_Requests)')?['EmployerAddress'],items('Apply_to_each_(Completed_Requests)')?['Employer_Address'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                  "runAfter": {
+                    "Compose_ReportCompanyUenJsonSafe": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportEmploymentPeriodJsonSafe": {
+                  "type": "Compose",
+                  "inputs": "@replace(replace(replace(string(if(and(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),'',if(or(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),formatDateTime(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate']),'yyyy-MM-dd'),concat(formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],'yyyy-MM-dd'),' to ',formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'],'yyyy-MM-dd'))))),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                  "runAfter": {
+                    "Compose_ReportCompanyAddressJsonSafe": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_Form1ReasonForLeavingJsonSafe": {
+                  "type": "Compose",
+                  "inputs": "@replace(replace(replace(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_ReasonForLeaving'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                  "runAfter": {
+                    "Compose_ReportEmploymentPeriodJsonSafe": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportLastDrawnSalaryJsonSafe": {
+                  "type": "Compose",
+                  "inputs": "@replace(replace(replace(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_LastDrawnSalary'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                  "runAfter": {
+                    "Compose_Form1ReasonForLeavingJsonSafe": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportJobTitleJsonSafe": {
+                  "type": "Compose",
+                  "inputs": "@replace(replace(replace(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_JobTitle'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
+                  "runAfter": {
+                    "Compose_ReportLastDrawnSalaryJsonSafe": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportCompanyAccuracyText": {
+                  "type": "Compose",
+                  "inputs": "@if(equals(first(body('Get_items_(BGV_FormData)')?['value'])?['F2_CompanyDetailsAccurate'],true),'Yes',if(equals(first(body('Get_items_(BGV_FormData)')?['value'])?['F2_CompanyDetailsAccurate'],false),'No',if(or(contains(outputs('Compose_ReportFlaggedIssues'),'Company Name'),contains(outputs('Compose_ReportFlaggedIssues'),'Company UEN'),contains(outputs('Compose_ReportFlaggedIssues'),'Company Address'),contains(outputs('Compose_ReportFlaggedIssues'),'Company Details')),'No','')))",
+                  "runAfter": {
+                    "Compose_ReportJobTitleJsonSafe": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportInformationAccuracyText": {
+                  "type": "Compose",
+                  "inputs": "@if(equals(first(body('Get_items_(BGV_FormData)')?['value'])?['F2_InformationAccurate'],true),'Yes',if(equals(first(body('Get_items_(BGV_FormData)')?['value'])?['F2_InformationAccurate'],false),'No',if(or(contains(outputs('Compose_ReportFlaggedIssues'),'Employment Period'),contains(outputs('Compose_ReportFlaggedIssues'),'Last Position Held'),contains(outputs('Compose_ReportFlaggedIssues'),'Job Title/Position'),contains(outputs('Compose_ReportFlaggedIssues'),'Remuneration Package'),contains(outputs('Compose_ReportFlaggedIssues'),'Other abnormalities')),'No','')))",
+                  "runAfter": {
+                    "Compose_ReportCompanyAccuracyText": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_IsAdverseSeverity": {
+                  "type": "Compose",
+                  "inputs": "@or(equals(toLower(outputs('Compose_ReportSeverityText')),'low'),equals(toLower(outputs('Compose_ReportSeverityText')),'medium'),equals(toLower(outputs('Compose_ReportSeverityText')),'high'))",
+                  "runAfter": {
+                    "Compose_ReportInformationAccuracyText": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Condition_-_Report_Summary_Post_Not_Already_Sent_v2": {
                   "type": "If",
                   "expression": {
                     "and": [
                       {
-                        "greater": [
-                          "@length(body('Get_items_(BGV_FormData)')?['value'])",
-                          0
+                        "equals": [
+                          "@empty(items('Apply_to_each_(Completed_Requests)')?['Report_x0020_Summary_x0020_Teams'])",
+                          true
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Report_x0020_Summary_x0020_Teams'])",
+                          true
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@outputs('Compose_IsAdverseSeverity')",
+                          true
                         ]
                       }
                     ]
                   },
                   "actions": {
-                    "Compose_CandidateFolderPath": {
-                      "type": "Compose",
-                      "inputs": "@concat('/BGV Records/Candidate Files/', items('Apply_to_each_(Completed_Requests)')?['CandidateID'])"
-                    },
-                    "Compose_ReportFileName": {
-                      "type": "Compose",
-                      "inputs": "@concat('RS_Emp', replace(last(split(items('Apply_to_each_(Completed_Requests)')?['RequestID'], '-')), 'EMP', ''), '.docx')",
-                      "runAfter": {
-                        "Compose_CandidateFolderPath": [
-                          "Succeeded"
-                        ]
-                      }
-                    },
-                    "Compose_ReportFileWebLink": {
-                      "type": "Compose",
-                      "inputs": "@concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570',replace(outputs('Compose_CandidateFolderPath'),' ','%20'),'/',replace(outputs('Compose_ReportFileName'),' ','%20'))",
-                      "runAfter": {
-                        "Compose_ReportFileName": [
-                          "Succeeded"
-                        ]
-                      }
-                    },
-                    "Compose_ReportSeverityText": {
-                      "type": "Compose",
-                      "inputs": "@trim(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Severity']?['Value'],items('Apply_to_each_(Completed_Requests)')?['Severity'],'')))",
-                      "runAfter": {
-                        "Compose_ReportFileWebLink": [
-                          "Succeeded"
-                        ]
-                      }
-                    },
-                    "Compose_ReportFlaggedIssues": {
-                      "type": "Compose",
-                      "inputs": "@if(empty(trim(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Outcome']?['Value'],items('Apply_to_each_(Completed_Requests)')?['Outcome'],'')))),'None',trim(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Outcome']?['Value'],items('Apply_to_each_(Completed_Requests)')?['Outcome'],''))))",
-                      "runAfter": {
-                        "Compose_ReportSeverityText": [
-                          "Succeeded"
-                        ]
-                      }
-                    },
-                    "Compose_ReportDetailsHtml": {
-                      "type": "Compose",
-                      "inputs": "@trim(replace(replace(replace(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Notes'],'')),'\\r',''),'\\n','<br>'),decodeUriComponent('%0A'),'<br>'))",
-                      "runAfter": {
-                        "Compose_ReportFlaggedIssues": [
-                          "Succeeded"
-                        ]
-                      }
-                    },
-                    "Compose_ReportFlaggedIssuesJsonSafe": {
-                      "type": "Compose",
-                      "inputs": "@replace(replace(replace(string(outputs('Compose_ReportFlaggedIssues')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
-                      "runAfter": {
-                        "Compose_ReportDetailsHtml": [
-                          "Succeeded"
-                        ]
-                      }
-                    },
-                    "Compose_ReportNotesJsonSafe": {
-                      "type": "Compose",
-                      "inputs": "@replace(replace(replace(string(coalesce(items('Apply_to_each_(Completed_Requests)')?['Notes'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
-                      "runAfter": {
-                        "Compose_ReportFlaggedIssuesJsonSafe": [
-                          "Succeeded"
-                        ]
-                      }
-                    },
-                    "Compose_Form1ReasonForLeavingJsonSafe": {
-                      "type": "Compose",
-                      "inputs": "@replace(replace(replace(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_ReasonForLeaving'],'')),'\"','\\\\\"'),decodeUriComponent('%0D'),' '),decodeUriComponent('%0A'),' ')",
-                      "runAfter": {
-                        "Compose_ReportNotesJsonSafe": [
-                          "Succeeded"
-                        ]
-                      }
-                    },
-                    "Compose_IsAdverseSeverity": {
-                      "type": "Compose",
-                      "inputs": "@or(equals(toLower(outputs('Compose_ReportSeverityText')),'low'),equals(toLower(outputs('Compose_ReportSeverityText')),'medium'),equals(toLower(outputs('Compose_ReportSeverityText')),'high'))",
-                      "runAfter": {
-                        "Compose_Form1ReasonForLeavingJsonSafe": [
-                          "Succeeded"
-                        ]
-                      }
-                    },
-                    "Compose_ReportForm2RawJson": {
-                      "type": "Compose",
-                      "inputs": "@if(equals(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson']),false),first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson'],concat('{\"r9594fab1bfa04c90883b1dffd7f4549e\":\"',if(empty(outputs('Compose_ReportSeverityText')),'','No'),'\",\"r72b23e4aa192405091846e1279085029\":\"',outputs('Compose_ReportFlaggedIssuesJsonSafe'),'\",\"r2d39255c2449439096683ca0e39241b0\":\"',if(or(contains(outputs('Compose_ReportFlaggedIssues'),'Company Name'),contains(outputs('Compose_ReportFlaggedIssues'),'Company UEN'),contains(outputs('Compose_ReportFlaggedIssues'),'Company Address'),contains(outputs('Compose_ReportFlaggedIssues'),'Company Details')),'No',''),'\",\"rd05170e51ac34fef95f5464cf348bedc\":\"',if(or(contains(outputs('Compose_ReportFlaggedIssues'),'Company Name'),contains(outputs('Compose_ReportFlaggedIssues'),'Company UEN'),contains(outputs('Compose_ReportFlaggedIssues'),'Company Address'),contains(outputs('Compose_ReportFlaggedIssues'),'Company Details')),outputs('Compose_ReportFlaggedIssuesJsonSafe'),''),'\",\"r7bd26b4a7e94430dbda54f9e8b8212e4\":\"',if(contains(outputs('Compose_ReportFlaggedIssues'),'MAS'),outputs('Compose_ReportNotesJsonSafe'),''),'\",\"r96d079f9858e40bab89ab0ea4ad23931\":\"',if(contains(outputs('Compose_ReportFlaggedIssues'),'Disciplinary'),'Yes',''),'\",\"rafe3ada4157c49fb9e555cd0fb53bd59\":\"',if(contains(outputs('Compose_ReportFlaggedIssues'),'Re-employ'),'No',''),'\",\"r5f7ebc3390bc4699b160504c65254c3e\":\"',if(contains(outputs('Compose_ReportFlaggedIssues'),'Re-employ'),outputs('Compose_ReportNotesJsonSafe'),''),'\",\"r513ad5ab3a14453286bdb910820985ec\":\"',outputs('Compose_Form1ReasonForLeavingJsonSafe'),'\",\"r57e4baaeaafc4ffc8b3977149b18f2f2\":\"\",\"rab9c2a586db943b18ac02367d3b1d3f7\":\"',if(contains(outputs('Compose_ReportFlaggedIssues'),'Other Comments'),outputs('Compose_ReportNotesJsonSafe'),''),'\",\"r1f2d7ec255b1430fbb2a6e56ce4042d1\":\"\",\"r7b65617c391a48239b9f75dd239702c3\":\"\",\"reb80c95cd24242998cbc884c24254bed\":\"\"}'))",
-                      "runAfter": {
-                        "Compose_IsAdverseSeverity": [
-                          "Succeeded"
-                        ]
-                      }
-                    },
-                    "HTTP_-_Fill_Report_Summary_Controls": {
-                      "type": "Http",
+                    "Post_message_in_a_chat_or_channel_-_Report_Summary_Created": {
+                      "type": "OpenApiConnection",
                       "inputs": {
-                        "uri": "https://bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net/api/fillreportsummarycontrols",
-                        "method": "POST",
-                        "headers": {
-                          "Content-Type": "application/json"
+                        "parameters": {
+                          "poster": "Flow bot",
+                          "location": "Channel",
+                          "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
+                          "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
+                          "body/messageBody": "<p class=\"editor-paragraph\">PEV Report Summary Created</p><br><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each_(Completed_Requests)')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value'],'')}</p><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Completed_Requests)')?['RequestID']}</p><p class=\"editor-paragraph\">Severity: @{outputs('Compose_ReportSeverityText')}</p><p class=\"editor-paragraph\">Flagged Issues: @{outputs('Compose_ReportFlaggedIssues')}</p><p class=\"editor-paragraph\">Candidate Folder: <a href=\"@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}\">@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}</a></p><p class=\"editor-paragraph\">Report Link: <a href=\"@{outputs('Compose_ReportFileWebLink')}\">@{outputs('Compose_ReportFileWebLink')}</a></p><br><p class=\"editor-paragraph\">Details:<br>@{outputs('Compose_ReportDetailsHtml')}</p>"
                         },
-                        "body": {
-                          "fileName": "@outputs('Compose_ReportFileName')",
-                          "docxBase64": "@outputs('Compose_Template_Base64')",
-                          "form1RawJson": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Form1RawJson']",
-                          "form2RawJson": "@outputs('Compose_ReportForm2RawJson')",
-                          "form1CandidateFullName": "@first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName']",
-                          "form1CandidateEmail": "@first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateEmail']",
-                          "form1IdentificationNumberNRIC": "@first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']",
-                          "form1IdentificationNumberPassport": "@first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']"
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                          "operationId": "PostMessageToConversation",
+                          "connectionName": "shared_teams"
                         }
-                      },
-                      "runAfter": {
-                        "Compose_ReportForm2RawJson": [
-                          "Succeeded"
-                        ]
                       }
                     },
-                    "Get_files_(properties_only)": {
+                    "Update_item_-_BGV_Requests_-_Report_Summary_PostedAt": {
                       "type": "OpenApiConnection",
                       "inputs": {
                         "parameters": {
                           "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                          "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
-                          "folderPath": "@outputs('Compose_CandidateFolderPath')"
+                          "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+                          "id": "@items('Apply_to_each_(Completed_Requests)')?['ID']",
+                          "item/Title": "@items('Apply_to_each_(Completed_Requests)')?['Title']",
+                          "item/Report_x0020_Summary_x0020_Teams": "@utcNow()"
                         },
                         "host": {
                           "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                          "operationId": "GetFileItems",
+                          "operationId": "PatchItem",
                           "connectionName": "shared_sharepointonline"
-                        },
-                        "authentication": "@parameters('$authentication')"
+                        }
                       },
                       "runAfter": {
-                        "HTTP_-_Fill_Report_Summary_Controls": [
+                        "Post_message_in_a_chat_or_channel_-_Report_Summary_Created": [
                           "Succeeded"
                         ]
                       }
                     },
-                    "Filter_array_-_Existing_Report": {
-                      "type": "Query",
+                    "Update_item_-_BGV_FormData_-_Report_Summary_PostedAt": {
+                      "type": "OpenApiConnection",
                       "inputs": {
-                        "from": "@outputs('Get_files_(properties_only)')?['body/value']",
-                        "where": "@equals(item()?['{Name}'], outputs('Compose_ReportFileName'))"
-                      },
-                      "runAfter": {
-                        "Get_files_(properties_only)": [
-                          "Succeeded"
-                        ]
-                      }
-                    },
-                    "Condition_-_Report_Exists": {
-                      "type": "If",
-                      "expression": {
-                        "greater": [
-                          "@length(body('Filter_array_-_Existing_Report'))",
-                          0
-                        ]
-                      },
-                      "actions": {
-                        "Update_report_summary_file": {
-                          "type": "OpenApiConnection",
-                          "inputs": {
-                            "parameters": {
-                              "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                              "id": "@first(body('Filter_array_-_Existing_Report'))?['{Identifier}']",
-                              "body": "@base64ToBinary(body('HTTP_-_Fill_Report_Summary_Controls')?['filledDocxBase64'])"
-                            },
-                            "host": {
-                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                              "operationId": "UpdateFile",
-                              "connectionName": "shared_sharepointonline"
-                            },
-                            "authentication": "@parameters('$authentication')"
-                          }
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                          "id": "@first(body('Get_items_(BGV_FormData)')?['value'])?['ID']",
+                          "item/Title": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Title']",
+                          "item/Report_x0020_Summary_x0020_Teams": "@utcNow()"
                         },
-                        "Condition_-_Report_Summary_Post_Not_Already_Sent_After_Update": {
-                          "type": "If",
-                          "expression": {
-                            "and": [
-                              {
-                                "equals": [
-                                  "@empty(items('Apply_to_each_(Completed_Requests)')?['Report_x0020_Summary_x0020_Teams'])",
-                                  true
-                                ]
-                              },
-                              {
-                                "equals": [
-                                  "@empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Report_x0020_Summary_x0020_Teams'])",
-                                  true
-                                ]
-                              },
-                              {
-                                "equals": [
-                                  "@outputs('Compose_IsAdverseSeverity')",
-                                  true
-                                ]
-                              }
-                            ]
-                          },
-                          "actions": {
-                            "Post_message_in_a_chat_or_channel_-_Report_Summary_Ready": {
-                              "type": "OpenApiConnection",
-                              "inputs": {
-                                "parameters": {
-                                  "poster": "Flow bot",
-                                  "location": "Channel",
-                                  "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
-                                  "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
-                                  "body/messageBody": "<p class=\"editor-paragraph\">PEV Report Summary Ready</p><br><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each_(Completed_Requests)')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value'],'')}</p><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Completed_Requests)')?['RequestID']}</p><p class=\"editor-paragraph\">Severity: @{outputs('Compose_ReportSeverityText')}</p><p class=\"editor-paragraph\">Flagged Issues: @{outputs('Compose_ReportFlaggedIssues')}</p><p class=\"editor-paragraph\">Candidate Folder: <a href=\"@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}\">@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}</a></p><p class=\"editor-paragraph\">Report Link: <a href=\"@{outputs('Compose_ReportFileWebLink')}\">@{outputs('Compose_ReportFileWebLink')}</a></p><br><p class=\"editor-paragraph\">Details:<br>@{outputs('Compose_ReportDetailsHtml')}</p>"
-                                },
-                                "host": {
-                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
-                                  "operationId": "PostMessageToConversation",
-                                  "connectionName": "shared_teams"
-                                }
-                              }
-                            },
-                            "Update_item_-_BGV_Requests_-_Report_Summary_PostedAt_After_Update": {
-                              "type": "OpenApiConnection",
-                              "inputs": {
-                                "parameters": {
-                                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                                  "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-                                  "id": "@items('Apply_to_each_(Completed_Requests)')?['ID']",
-                                  "item/Title": "@items('Apply_to_each_(Completed_Requests)')?['Title']",
-                                  "item/Report_x0020_Summary_x0020_Teams": "@utcNow()"
-                                },
-                                "host": {
-                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                                  "operationId": "PatchItem",
-                                  "connectionName": "shared_sharepointonline"
-                                },
-                                "authentication": "@parameters('$authentication')"
-                              },
-                              "runAfter": {
-                                "Post_message_in_a_chat_or_channel_-_Report_Summary_Ready": [
-                                  "Succeeded"
-                                ]
-                              }
-                            },
-                            "Update_item_-_BGV_FormData_-_Report_Summary_PostedAt_After_Update": {
-                              "type": "OpenApiConnection",
-                              "inputs": {
-                                "parameters": {
-                                  "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                                  "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
-                                  "id": "@first(body('Get_items_(BGV_FormData)')?['value'])?['ID']",
-                                  "item/Title": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Title']",
-                                  "item/Report_x0020_Summary_x0020_Teams": "@utcNow()"
-                                },
-                                "host": {
-                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                                  "operationId": "PatchItem",
-                                  "connectionName": "shared_sharepointonline"
-                                },
-                                "authentication": "@parameters('$authentication')"
-                              },
-                              "runAfter": {
-                                "Update_item_-_BGV_Requests_-_Report_Summary_PostedAt_After_Update": [
-                                  "Succeeded"
-                                ]
-                              }
-                            }
-                          },
-                          "else": {
-                            "actions": {}
-                          },
-                          "runAfter": {
-                            "Update_report_summary_file": [
-                              "Succeeded"
-                            ]
-                          }
-                        }
-                      },
-                      "else": {
-                        "actions": {
-                          "Create_report_summary_file": {
-                            "type": "OpenApiConnection",
-                            "inputs": {
-                              "parameters": {
-                                "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                                "folderPath": "@outputs('Compose_CandidateFolderPath')",
-                                "name": "@outputs('Compose_ReportFileName')",
-                                "body": "@base64ToBinary(body('HTTP_-_Fill_Report_Summary_Controls')?['filledDocxBase64'])"
-                              },
-                              "host": {
-                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                                "operationId": "CreateFile",
-                                "connectionName": "shared_sharepointonline"
-                              },
-                              "authentication": "@parameters('$authentication')"
-                            },
-                            "runtimeConfiguration": {
-                              "contentTransfer": {
-                                "transferMode": "Chunked"
-                              }
-                            }
-                          },
-                          "Condition_-_Report_Summary_Post_Not_Already_Sent": {
-                            "type": "If",
-                            "expression": {
-                              "and": [
-                                {
-                                  "equals": [
-                                    "@empty(items('Apply_to_each_(Completed_Requests)')?['Report_x0020_Summary_x0020_Teams'])",
-                                    true
-                                  ]
-                                },
-                                {
-                                  "equals": [
-                                    "@empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Report_x0020_Summary_x0020_Teams'])",
-                                    true
-                                  ]
-                                },
-                                {
-                                  "equals": [
-                                    "@outputs('Compose_IsAdverseSeverity')",
-                                    true
-                                  ]
-                                }
-                              ]
-                            },
-                            "actions": {
-                              "Post_message_in_a_chat_or_channel_-_Report_Summary_Created": {
-                                "type": "OpenApiConnection",
-                                "inputs": {
-                                  "parameters": {
-                                    "poster": "Flow bot",
-                                    "location": "Channel",
-                                    "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
-                                    "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
-                                    "body/messageBody": "<p class=\"editor-paragraph\">PEV Report Summary Created</p><br><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each_(Completed_Requests)')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value'],'')}</p><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Completed_Requests)')?['RequestID']}</p><p class=\"editor-paragraph\">Severity: @{outputs('Compose_ReportSeverityText')}</p><p class=\"editor-paragraph\">Flagged Issues: @{outputs('Compose_ReportFlaggedIssues')}</p><p class=\"editor-paragraph\">Candidate Folder: <a href=\"@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}\">@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}</a></p><p class=\"editor-paragraph\">Report Link: <a href=\"@{outputs('Compose_ReportFileWebLink')}\">@{outputs('Compose_ReportFileWebLink')}</a></p><br><p class=\"editor-paragraph\">Details:<br>@{outputs('Compose_ReportDetailsHtml')}</p>"
-                                  },
-                                  "host": {
-                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
-                                    "operationId": "PostMessageToConversation",
-                                    "connectionName": "shared_teams"
-                                  }
-                                }
-                              },
-                              "Update_item_-_BGV_Requests_-_Report_Summary_PostedAt": {
-                                "type": "OpenApiConnection",
-                                "inputs": {
-                                  "parameters": {
-                                    "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                                    "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
-                                    "id": "@items('Apply_to_each_(Completed_Requests)')?['ID']",
-                                    "item/Title": "@items('Apply_to_each_(Completed_Requests)')?['Title']",
-                                    "item/Report_x0020_Summary_x0020_Teams": "@utcNow()"
-                                  },
-                                  "host": {
-                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                                    "operationId": "PatchItem",
-                                    "connectionName": "shared_sharepointonline"
-                                  },
-                                  "authentication": "@parameters('$authentication')"
-                                },
-                                "runAfter": {
-                                  "Post_message_in_a_chat_or_channel_-_Report_Summary_Created": [
-                                    "Succeeded"
-                                  ]
-                                }
-                              },
-                              "Update_item_-_BGV_FormData_-_Report_Summary_PostedAt": {
-                                "type": "OpenApiConnection",
-                                "inputs": {
-                                  "parameters": {
-                                    "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                                    "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
-                                    "id": "@first(body('Get_items_(BGV_FormData)')?['value'])?['ID']",
-                                    "item/Title": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Title']",
-                                    "item/Report_x0020_Summary_x0020_Teams": "@utcNow()"
-                                  },
-                                  "host": {
-                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                                    "operationId": "PatchItem",
-                                    "connectionName": "shared_sharepointonline"
-                                  },
-                                  "authentication": "@parameters('$authentication')"
-                                },
-                                "runAfter": {
-                                  "Update_item_-_BGV_Requests_-_Report_Summary_PostedAt": [
-                                    "Succeeded"
-                                  ]
-                                }
-                              }
-                            },
-                            "else": {
-                              "actions": {}
-                            },
-                            "runAfter": {
-                              "Create_report_summary_file": [
-                                "Succeeded"
-                              ]
-                            }
-                          }
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "PatchItem",
+                          "connectionName": "shared_sharepointonline"
                         }
                       },
                       "runAfter": {
-                        "Filter_array_-_Existing_Report": [
+                        "Update_item_-_BGV_Requests_-_Report_Summary_PostedAt": [
                           "Succeeded"
                         ]
                       }
@@ -561,8 +396,139 @@
                     "actions": {}
                   },
                   "runAfter": {
-                    "Get_items_(BGV_FormData)": [
+                    "Compose_Report_Save_Complete_v2": [
                       "Succeeded"
+                    ]
+                  }
+                },
+                "Compose_ReportForm2RawJson": {
+                  "type": "Compose",
+                  "inputs": "@if(\n  empty(first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson']),\n  '{}',\n  string(first(body('Get_items_(BGV_FormData)')?['value'])?['Form2RawJson'])\n)",
+                  "runAfter": {
+                    "Compose_IsAdverseSeverity": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "HTTP_-_Fill_Report_Summary_Controls": {
+                  "type": "Http",
+                  "inputs": {
+                    "uri": "https://bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net/api/fillreportsummarycontrols",
+                    "method": "POST",
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "body": {
+                      "fileName": "@{outputs('Compose_ReportFileName')}",
+                      "docxBase64": "@{outputs('Compose_Template_Base64')}",
+                      "form1RawJson": "@{first(body('Get_items_(BGV_FormData)')?['value'])?['Form1RawJson']}",
+                      "form2RawJson": "@{outputs('Compose_ReportForm2RawJson')}",
+                      "form1CandidateFullName": "@{first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName']}",
+                      "form1CandidateEmail": "@{first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateEmail']}",
+                      "form1IdentificationNumberNRIC": "@{first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']}",
+                      "form1IdentificationNumberPassport": "@{first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']}"
+                    }
+                  },
+                  "runAfter": {
+                    "Compose_ReportForm2RawJson": [
+                      "Succeeded"
+                    ]
+                  },
+                  "runtimeConfiguration": {
+                    "contentTransfer": {
+                      "transferMode": "Chunked"
+                    }
+                  }
+                },
+                "Get_files_(Candidate_Folder_for_Report_v2)": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                      "folderPath": "@outputs('Compose_CandidateFolderPath')"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "GetFileItems",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  },
+                  "runAfter": {
+                    "HTTP_-_Fill_Report_Summary_Controls": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Filter_array_-_Existing_Report_v2": {
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@body('Get_files_(Candidate_Folder_for_Report_v2)')?['value']",
+                    "where": "@equals(item()?['{FilenameWithExtension}'],outputs('Compose_ReportFileName'))"
+                  },
+                  "runAfter": {
+                    "Get_files_(Candidate_Folder_for_Report_v2)": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Update_report_summary_file_v2": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "id": "@first(body('Filter_array_-_Existing_Report_v2'))?['{Identifier}']",
+                      "body": "@base64ToBinary(body('HTTP_-_Fill_Report_Summary_Controls')?['filledDocxBase64'])"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "UpdateFile",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  },
+                  "runAfter": {
+                    "Filter_array_-_Existing_Report_v2": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Create_report_summary_file_v2": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "folderPath": "@outputs('Compose_CandidateFolderPath')",
+                      "name": "@outputs('Compose_ReportFileName')",
+                      "body": "@base64ToBinary(body('HTTP_-_Fill_Report_Summary_Controls')?['filledDocxBase64'])"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "CreateFile",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  },
+                  "runtimeConfiguration": {
+                    "contentTransfer": {
+                      "transferMode": "Chunked"
+                    }
+                  },
+                  "runAfter": {
+                    "Update_report_summary_file_v2": [
+                      "Failed"
+                    ]
+                  }
+                },
+                "Compose_Report_Save_Complete_v2": {
+                  "type": "Compose",
+                  "inputs": "saved",
+                  "runAfter": {
+                    "Update_report_summary_file_v2": [
+                      "Succeeded",
+                      "Failed"
+                    ],
+                    "Create_report_summary_file_v2": [
+                      "Succeeded",
+                      "Skipped"
                     ]
                   }
                 }
