@@ -456,13 +456,9 @@
                 "Condition_-_Send_candidate_copy_once": {
                   "type": "If",
                   "expression": {
-                    "and": [
-                      {
-                        "equals": [
-                          "@endsWith(string(items('Apply_to_each_(Requests_Loop)')?['RequestID']), '-EMP1')",
-                          true
-                        ]
-                      }
+                    "equals": [
+                      "@if(endsWith(string(items('Apply_to_each_(Requests_Loop)')?['RequestID']), '-EMP1'),'true','false')",
+                      "true"
                     ]
                   },
                   "actions": {
