@@ -49,7 +49,7 @@
           "inputs": {
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "path": "/BGV Records/Templates/ReportSummary_Template.docx",
+              "path": "/PEV Records/Templates/ReportSummary_Template.docx",
               "inferContentType": true
             },
             "host": {
@@ -74,7 +74,7 @@
           "inputs": {
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+              "table": "df824861-8e10-4a8c-ad88-f7cf1ef3ef26",
               "$top": 5000
             },
             "host": {
@@ -123,7 +123,7 @@
                   "inputs": {
                     "parameters": {
                       "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                      "table": "f271b227-c654-4241-8968-054dc7f1d47c",
                       "$filter": "@concat('RequestID eq ''', string(items('Apply_to_each_(Completed_Requests)')?['RequestID']), '''')",
                       "$top": 1
                     },
@@ -136,7 +136,7 @@
                 },
                 "Compose_CandidateFolderPath": {
                   "type": "Compose",
-                  "inputs": "@concat('/BGV Records/Candidate Files/', items('Apply_to_each_(Completed_Requests)')?['CandidateID'])",
+                  "inputs": "@concat('/PEV Records/Candidate Files/', items('Apply_to_each_(Completed_Requests)')?['CandidateID'])",
                   "runAfter": {
                     "Get_items_(BGV_FormData)": [
                       "Succeeded"
@@ -352,7 +352,7 @@
                       "inputs": {
                         "parameters": {
                           "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                          "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+                          "table": "df824861-8e10-4a8c-ad88-f7cf1ef3ef26",
                           "id": "@items('Apply_to_each_(Completed_Requests)')?['ID']",
                           "item/Title": "@items('Apply_to_each_(Completed_Requests)')?['Title']",
                           "item/Report_x0020_Summary_x0020_Teams": "@utcNow()"
@@ -374,7 +374,7 @@
                       "inputs": {
                         "parameters": {
                           "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                          "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                          "table": "f271b227-c654-4241-8968-054dc7f1d47c",
                           "id": "@first(body('Get_items_(BGV_FormData)')?['value'])?['ID']",
                           "item/Title": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Title']",
                           "item/Report_x0020_Summary_x0020_Teams": "@utcNow()"
@@ -445,7 +445,7 @@
                   "inputs": {
                     "parameters": {
                       "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                      "table": "30d02a3a-74da-4a16-a887-7b8dd043a547",
                       "folderPath": "@outputs('Compose_CandidateFolderPath')"
                     },
                     "host": {

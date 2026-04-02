@@ -1,4 +1,4 @@
-# BGV Flows in Simple English
+# PEV Flows in Simple English
 
 This document describes the current behavior in your canonical flow files under `flows/power-automate/unpacked/Workflows/`.
 
@@ -188,7 +188,7 @@ This document describes the current behavior in your canonical flow files under 
   - Writes final result to `BGV_Requests`:
     - `VerificationStatus = Responded`
     - `ResponseReceivedAt`
-    - `Severity`, `Outcome`, `BGV Checks`, `Notes`
+    - `Severity`, `Outcome`, `PEV Checks`, `Notes`
   - Medium-severity employment-detail discrepancies now also set the Teams notify flag, not just the high-severity branches.
   - Neutral severity is no longer used; low-severity/cleared logic now treats the old neutral path as `Low`.
   - Expires employer upload access when HR has responded:
@@ -201,9 +201,9 @@ This document describes the current behavior in your canonical flow files under 
     - `Disciplinary` when disciplinary action is `Yes`
     - `Re-employ` when re-employ is `No`
     - `Other Comments` when `Q27` is filled
-  - `BGV Checks` is set to:
+  - `PEV Checks` is set to:
     - `Form Filled and Cleared` when the employer has responded and severity is blank
-    - `Adverse BGV Checks - see severity` when the employer has responded and severity is `Low`, `Medium`, or `High`
+    - `Adverse PEV Checks - see severity` when the employer has responded and severity is `Low`, `Medium`, or `High`
   - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including:
     - `F2_CompanyDetailsAccurate`
     - `F2_CompanyDetailsSelectedIssues`
@@ -256,7 +256,7 @@ This document describes the current behavior in your canonical flow files under 
 - What it updates:
   - Reminder timestamps (`Reminder1At`, `Reminder2At`, `Reminder3At`)
   - `EscalatedAt` when the recruiter escalation post is sent
-  - `BGV Checks`:
+  - `PEV Checks`:
     - `No response at Reminder 2` one day after reminder 2 has been sent
     - `Form Filled and Cleared` once reminder 3 is sent and there is still no response
   - `VerificationStatus` lifecycle:
@@ -394,7 +394,7 @@ This document describes the current behavior in your canonical flow files under 
     - `Outcome`
   - `Candidate Folder Link` now points to `BGV Records/Candidate Files/<CandidateID>/` for each dashboard row.
   - `Completed Status` now also shows `Yes` for reminder/escalation-cleared cases:
-    - request `BGV Checks = No response at Reminder 2`
+    - request `PEV Checks = No response at Reminder 2`
     - `Employer Reminder 3 Sent`
   - `Completed Date` uses the first available completion-style timestamp in this order:
     - `ResponseReceivedAt`
@@ -424,9 +424,9 @@ This document describes the current behavior in your canonical flow files under 
     - `Employer Form Received But Flagged`
 - Important note:
   - This refresh target is the comparison/live-flow workbook:
-    - `BGVDashboard_FLow.xlsx`
+    - `PEVDashboard_Flow.xlsx`
   - The older local COM-based snapshot workbook:
-    - `BGV Dashboard.xlsx`
+    - `PEV Dashboard.xlsx`
     remains unchanged unless you choose to cut over later.
 
 ## How the Flows Connect
@@ -442,7 +442,7 @@ This document describes the current behavior in your canonical flow files under 
   - `BGV_3` for candidate signature delays
   - `BGV_6` for employer response delays
 - Dashboard refresh track:
-  - `BGV_9` refreshes `BGVDashboard_FLow.xlsx` from live SharePoint list data
+  - `BGV_9` refreshes `PEVDashboard_Flow.xlsx` from live SharePoint list data
 
 ## Notes
 - This summary is based on the current unpacked canonical flow JSON in the repo.

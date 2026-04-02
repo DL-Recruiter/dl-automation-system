@@ -61,34 +61,34 @@ if ($template.ContainsKey("ConnectionIds")) {
     $connectionIdMap = $template.ConnectionIds
 }
 $knownConnectionEnvNames = [ordered]@{
-    "cr94d_sharedmicrosoftforms_a2caf"    = "BGV_CONN_MICROSOFTFORMS_ID"
-    "cr94d_sharedoffice365_bdd97"         = "BGV_CONN_OFFICE365_ID"
-    "cr94d_sharedsharepointonline_96d5d"  = "BGV_CONN_SHAREPOINT_ID"
-    "cr94d_sharedteams_4466d"             = "BGV_CONN_TEAMS_ID"
-    "new_sharedwordonlinebusiness_2ff9a"  = "BGV_CONN_WORDONLINEBUSINESS_ID"
+    "cr94d_sharedmicrosoftforms_a2caf"    = @("BGV_CONN_MICROSOFTFORMS_ID", "PEV_CONN_MICROSOFTFORMS_ID")
+    "cr94d_sharedoffice365_bdd97"         = @("BGV_CONN_OFFICE365_ID", "PEV_CONN_OFFICE365_ID")
+    "cr94d_sharedsharepointonline_96d5d"  = @("BGV_CONN_SHAREPOINT_ID", "PEV_CONN_SHAREPOINT_ID")
+    "cr94d_sharedteams_4466d"             = @("BGV_CONN_TEAMS_ID", "PEV_CONN_TEAMS_ID")
+    "new_sharedwordonlinebusiness_2ff9a"  = @("BGV_CONN_WORDONLINEBUSINESS_ID", "PEV_CONN_WORDONLINEBUSINESS_ID")
 }
 $tokenValues = @{}
 if ($template.ContainsKey("TokenValues")) {
     $tokenValues = $template.TokenValues
 }
-$knownTokenNames = @(
-    "BGV_SPO_SITE_URL",
-    "BGV_LIST_CANDIDATES_ID",
-    "BGV_LIST_REQUESTS_ID",
-    "BGV_LIST_FORMDATA_ID",
-    "BGV_LIBRARY_RECORDS_ID",
-    "BGV_AUTH_TEMPLATE_SOURCE",
-    "BGV_AUTH_TEMPLATE_DRIVE_ID",
-    "BGV_AUTH_TEMPLATE_FILE_ID",
-    "BGV_FORM1_ID",
-    "BGV_FORM2_ID",
-    "BGV_SHARED_MAILBOX_ADDRESS",
-    "BGV_INTERNAL_ALERT_TO",
-    "BGV_EMPLOYER_FALLBACK_TO",
-    "BGV_TEAMS_GROUP_ID",
-    "BGV_TEAMS_CHANNEL_ID",
-    "BGV_DOCX_PARSER_URI"
-)
+$knownTokenEnvAliases = [ordered]@{
+    "BGV_SPO_SITE_URL"            = @("BGV_SPO_SITE_URL", "PEV_SPO_SITE_URL")
+    "BGV_LIST_CANDIDATES_ID"      = @("BGV_LIST_CANDIDATES_ID", "PEV_LIST_CANDIDATES_ID")
+    "BGV_LIST_REQUESTS_ID"        = @("BGV_LIST_REQUESTS_ID", "PEV_LIST_REQUESTS_ID")
+    "BGV_LIST_FORMDATA_ID"        = @("BGV_LIST_FORMDATA_ID", "PEV_LIST_FORMDATA_ID")
+    "BGV_LIBRARY_RECORDS_ID"      = @("BGV_LIBRARY_RECORDS_ID", "PEV_LIBRARY_RECORDS_ID")
+    "BGV_AUTH_TEMPLATE_SOURCE"    = @("BGV_AUTH_TEMPLATE_SOURCE", "PEV_AUTH_TEMPLATE_SOURCE")
+    "BGV_AUTH_TEMPLATE_DRIVE_ID"  = @("BGV_AUTH_TEMPLATE_DRIVE_ID", "PEV_AUTH_TEMPLATE_DRIVE_ID")
+    "BGV_AUTH_TEMPLATE_FILE_ID"   = @("BGV_AUTH_TEMPLATE_FILE_ID", "PEV_AUTH_TEMPLATE_FILE_ID")
+    "BGV_FORM1_ID"                = @("BGV_FORM1_ID", "PEV_FORM1_ID")
+    "BGV_FORM2_ID"                = @("BGV_FORM2_ID", "PEV_FORM2_ID")
+    "BGV_SHARED_MAILBOX_ADDRESS"  = @("BGV_SHARED_MAILBOX_ADDRESS", "PEV_SHARED_MAILBOX_ADDRESS")
+    "BGV_INTERNAL_ALERT_TO"       = @("BGV_INTERNAL_ALERT_TO", "PEV_INTERNAL_ALERT_TO")
+    "BGV_EMPLOYER_FALLBACK_TO"    = @("BGV_EMPLOYER_FALLBACK_TO", "PEV_EMPLOYER_FALLBACK_TO")
+    "BGV_TEAMS_GROUP_ID"          = @("BGV_TEAMS_GROUP_ID", "PEV_TEAMS_GROUP_ID")
+    "BGV_TEAMS_CHANNEL_ID"        = @("BGV_TEAMS_CHANNEL_ID", "PEV_TEAMS_CHANNEL_ID")
+    "BGV_DOCX_PARSER_URI"         = @("BGV_DOCX_PARSER_URI", "PEV_DOCX_PARSER_URI")
+}
 
 if (-not [string]::IsNullOrWhiteSpace($TargetSchemaPath) -and (Test-Path $TargetSchemaPath)) {
     $targetSchema = ConvertFrom-BgvJson (Get-Content -Raw $TargetSchemaPath)
@@ -128,19 +128,27 @@ if (-not [string]::IsNullOrWhiteSpace($TargetSchemaPath) -and (Test-Path $Target
     }
 }
 
-foreach ($tokenName in $knownTokenNames) {
-    $environmentValue = [Environment]::GetEnvironmentVariable($tokenName)
-    if (-not [string]::IsNullOrWhiteSpace($environmentValue)) {
-        $tokenValues[$tokenName] = $environmentValue
+foreach ($tokenName in $knownTokenEnvAliases.Keys) {
+    foreach ($aliasName in @($knownTokenEnvAliases[$tokenName])) {
+        $environmentValue = [Environment]::GetEnvironmentVariable([string]$aliasName)
+        if (-not [string]::IsNullOrWhiteSpace($environmentValue)) {
+            $tokenValues[$tokenName] = $environmentValue
+            break
+        }
     }
 }
 
 foreach ($connectionRef in $generatedSettings.ConnectionReferences) {
     $logicalName = [string]$connectionRef.LogicalName
     if ($knownConnectionEnvNames.Contains($logicalName)) {
-        $environmentConnectionId = [Environment]::GetEnvironmentVariable([string]$knownConnectionEnvNames[$logicalName])
-        if (-not [string]::IsNullOrWhiteSpace($environmentConnectionId)) {
-            $connectionRef.ConnectionId = [string]$environmentConnectionId
+        foreach ($envName in @($knownConnectionEnvNames[$logicalName])) {
+            $environmentConnectionId = [Environment]::GetEnvironmentVariable([string]$envName)
+            if (-not [string]::IsNullOrWhiteSpace($environmentConnectionId)) {
+                $connectionRef.ConnectionId = [string]$environmentConnectionId
+                break
+            }
+        }
+        if (-not [string]::IsNullOrWhiteSpace([string]$connectionRef.ConnectionId)) {
             continue
         }
     }

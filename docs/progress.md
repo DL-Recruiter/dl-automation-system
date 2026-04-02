@@ -6,6 +6,40 @@ Log each session with:
 - Validation commands run
 - Next actions and blockers
 
+## 2026-04-01 (Flow 5 Form 2 write-path fixed so Flow 7 can map employer data)
+- Current status:
+  - Traced the missing employer-side report-summary mapping back to `BGV_5_Response1`: the employer response was updating `BGV_Requests`, but the matching `BGV_FormData` row was being skipped, so Flow 7 only had Form 1 data to populate.
+- Completed tasks:
+  - Investigated the real live failure path for the latest employer response:
+    - confirmed `BGV_FormData` item `128` for `REQ-BGV-20260401-87341-EMP1` had `Form2RawJson = null` and blank `F2_*` fields
+    - confirmed the matching `BGV_Requests` item `68` was already `Responded` with `ResponseReceivedAt` and `Severity = High`
+    - inspected live Flow 5 run `08584265694446505565001042226CU06`
+    - confirmed `Update_item_-_of_BGV_Request` succeeded but `Condition_-_if_FormData_row_found` and `Update_item_-_BGV_FormData` were skipped
+    - found the skip cause: `Condition_-_if_FormData_row_found` only allowed `Succeeded, Skipped` after `Condition_-_Expire_Employer_Upload_Link`, but the unshare branch was actually failing
+  - Patched `BGV_5_Response1`:
+    - `Condition_-_if_FormData_row_found.runAfter` now accepts `Failed` from `Condition_-_Expire_Employer_Upload_Link`
+    - `Stop_sharing_request_upload_folder.authentication` corrected from `@parameters('')` to `@parameters('$authentication')`
+  - Packed and imported the updated solution into PAC and published the changes.
+  - Verified live Flow 5 returned to `Started` state after deploy.
+  - Backfilled the current broken `BGV_FormData` test row so Flow 7 has the real employer response to map on the next recurrence:
+    - item `128`
+    - `Form2SubmittedAt = 2026-04-01T09:57:25Z`
+    - `Form2RawJson` restored from historical Flow 5 `Get_response_details` output for response `35`
+- Validation commands run:
+  - `m365 spo listitem get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_FormData --id 128 --output json`
+  - `m365 flow run list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName fd4bf0e3-0916-f111-8341-002248582037 --output json`
+  - `m365 flow run get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName fd4bf0e3-0916-f111-8341-002248582037 --name 08584265694446505565001042226CU06 --withActions --output json`
+  - `pac solution pack --zipfile .\\artifacts\\exports\\BGV_System_form2_mapping_fix_20260401.zip --folder .\\flows\\power-automate\\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\\artifacts\\exports\\BGV_System_form2_mapping_fix_20260401.zip --publish-changes --force-overwrite`
+  - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name fd4bf0e3-0916-f111-8341-002248582037 --query "{displayName:name,state:properties.state,lastModified:properties.lastModifiedTime}" --output json`
+  - `m365 flow run get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName fd4bf0e3-0916-f111-8341-002248582037 --name 08584265694446505565001042226CU06 --withActions Get_response_details --output json`
+  - `m365 spo listitem set --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle BGV_FormData --id 128 --Form2SubmittedAt "2026-04-01 17:57:25" --Form2RawJson <historical Get_response_details payload>`
+- Next actions and blockers:
+  - Wait for the next `BGV_7_Generate_Report_Summary` recurrence and verify:
+    - `RS_Emp1.docx` is created/updated under `BGV Records/Candidate Files/BGV-20260401-87341`
+    - the employer-side Form 2 details now populate in the report summary
+  - If the next Flow 7 run passes, run daily sync again, update any final docs if needed, and then commit/push GitHub so PAC, local repo, and GitHub all match.
+
 ## 2026-04-01 (Flow 7 live report-write branch rebuilt and verified)
 - Current status:
   - Reworked the final `BGV_7_Generate_Report_Summary` save path until the live runtime stopped skipping the report-write actions, then verified repeated successful scheduled runs in PAC.
@@ -4399,3 +4433,129 @@ Log each session with:
   - Validation to run next after import:
     - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
     - import the updated solution and resubmit the failed `BGV_4` run
+## 2026-04-02 (Safe BGV to PEV wording sweep)
+  - Applied a safe user-facing wording sweep from `BGV` to `PEV` without renaming internal technical objects.
+  - Updated recruiter-facing/high-severity response wording in `BGV_5_Response1`:
+    - `HIGH BGV FLAG` -> `HIGH PEV FLAG`
+    - `A High Severity BGV issue has been flagged.` -> `A High Severity PEV issue has been flagged.`
+    - `Adverse BGV Checks - see severity` -> `Adverse PEV Checks - see severity`
+  - Updated dashboard/docs display wording:
+    - `BGV Dashboard Headers` -> `PEV Dashboard Headers`
+    - `BGV Dashboard Power Automate Redesign` -> `PEV Dashboard Power Automate Redesign`
+    - dashboard workbook display references changed from `BGV Dashboard.xlsx` / `BGVDashboard_FLow.xlsx` to `PEV Dashboard.xlsx` / `PEVDashboard_Flow.xlsx`
+    - `BGV Checks` doc wording -> `PEV Checks`
+  - Kept internal technical names unchanged on purpose:
+    - SharePoint site/list/library names
+    - flow names
+    - folder paths
+    - `CandidateID` / `RequestID` prefixes like `BGV-...` and `REQ-BGV-...`
+  - Next recommended migration, if still wanted later:
+    - separate controlled backend rename project for lists, folders, solution names, IDs, and dashboard file/table names
+## 2026-04-02 (Additional safe PEV wording updates)
+  - Continued the user-facing wording sweep in current docs and visible workbook references.
+  - Updated current documentation titles:
+    - `BGV Dashboard` -> `PEV Dashboard`
+    - `BGV Dashboard Implementation Guide` -> `PEV Dashboard Implementation Guide`
+    - `BGV Flows in Simple English` -> `PEV Flows in Simple English`
+  - Updated current display wording:
+    - `BGV Checks` -> `PEV Checks`
+    - `Adverse BGV Checks - see severity` -> `Adverse PEV Checks - see severity`
+  - Updated current dashboard workbook display references:
+    - `BGV Dashboard.xlsx` -> `PEV Dashboard.xlsx`
+    - `BGVDashboard_FLow.xlsx` -> `PEVDashboard_Flow.xlsx`
+    - `BGV Dashboard Master Query.m` -> `PEV Dashboard Master Query.m`
+  - Left historical log entries, live technical object names, internal paths, and automation IDs unchanged on purpose.
+## 2026-04-02 (PEV backend migration staging started)
+  - Audited the backend rename surface and confirmed a true `BGV` -> `PEV` migration is a staged cutover, not a safe single-pass rename.
+  - Confirmed the current live technical dependencies still point to:
+    - `BGV_Candidates`
+    - `BGV_Requests`
+    - `BGV_FormData`
+    - `BGV Records`
+    - `BGV-...` / `REQ-BGV-...` identifiers
+  - Added a staged migration plan:
+    - `docs/pev_backend_migration_plan.md`
+  - Added migration alias support for deployment settings generation:
+    - `scripts/active/bgv_build_deployment_settings.ps1` now accepts both `BGV_*` and `PEV_*` environment variable names
+    - added wrapper script `scripts/active/pev_build_deployment_settings.ps1`
+  - Decision:
+    - do not perform a blind in-place rename of live backend objects
+    - next safe step is parallel `PEV_*` object creation and a parallel PEV-connected flow package before cutover
+## 2026-04-02 (Parallel PEV cutover artifacts added)
+  - Added parallel deployment-settings templates for the planned `PEV` cutover:
+    - `flows/power-automate/deployment-settings/pev.prod.settings.template.json`
+    - `flows/power-automate/deployment-settings/pev.test.settings.template.json`
+  - These preserve the current canonical `__BGV_*__` token markers but point to planned `PEV` target placeholders so the same materialization process can be reused during cutover.
+  - Added the technical naming map:
+    - `docs/pev_object_naming_map.md`
+  - Current decision remains unchanged:
+    - do not rename live `BGV_*` technical objects in place
+    - build the parallel `PEV_*` layer first, then test, then cut over
+## 2026-04-02 (Parallel PEV backend cutover executed)
+  - Current status:
+    - Built and populated a parallel live `PEV_*` backend in the same SharePoint site, retargeted the active flow package to the new `PEV` lists/library, imported it to PAC, and verified the main production flows are still `Started`.
+  - Completed tasks:
+    - Ran `scripts/active/pev_ensure_target_schema.ps1` successfully against:
+      - source site: `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570`
+      - target site: `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570`
+    - Created/verified parallel live stores:
+      - `PEV_Candidates`
+      - `PEV_Requests`
+      - `PEV_FormData`
+      - `PEV Records`
+      - `Shared Documents/PEV Templates/AuthorizationLetter_Template.docx`
+    - Patched the shared migration helper:
+      - added `Get-BgvLookupFieldTargetListId` into `shared/bgv_migration_common.ps1`
+      - improved Graph-token parsing for `m365 util accesstoken get`
+    - Patched the new copy script:
+      - `scripts/active/pev_copy_site_data.ps1` now supports `-SkipListData` and `-SkipFiles` so list and file migration can be run independently
+    - Added `scripts/active/pev_inspect_counts.ps1` to verify BGV/PEV live parity by item count.
+    - Ran list-data migration successfully:
+      - `PEV_Candidates` item count = `38`
+      - `PEV_Requests` item count = `46`
+      - `PEV_FormData` item count = `129`
+      - all matched the live BGV sources
+    - Ran file/library migration successfully:
+      - `PEV Records` item count = `433`
+      - matched the live `BGV Records` item count = `433`
+    - Retargeted the active flow JSON to the parallel `PEV` backend:
+      - SharePoint list/library table IDs swapped to:
+        - candidates: `8c19755d-0e9c-4680-8d18-783eb9ec56be`
+        - requests: `df824861-8e10-4a8c-ad88-f7cf1ef3ef26`
+        - form data: `f271b227-c654-4241-8968-054dc7f1d47c`
+        - records library: `30d02a3a-74da-4a16-a887-7b8dd043a547`
+      - `BGV Records` paths in the active workflow JSON changed to `PEV Records`
+      - Flow 0 candidate ID generator changed from `BGV-...` to `PEV-...`
+      - request IDs generated from new cases will therefore move from `REQ-BGV-...` to `REQ-PEV-...`
+    - Repacked the solution as unmanaged:
+      - `flows/power-automate/exports/BGV_System_1_0_0_3.zip`
+    - Imported the updated solution into PAC with publish enabled.
+    - Ran daily sync after import so local unpacked files match the live PAC export.
+  - Validation commands run:
+    - `pwsh -File .\scripts\active\pev_ensure_target_schema.ps1 ...`
+    - `pwsh -File .\scripts\active\pev_copy_site_data.ps1 -SkipFiles ...`
+    - `pwsh -File .\scripts\active\pev_copy_site_data.ps1 -SkipListData ...`
+    - `pwsh -File .\scripts\active\pev_inspect_counts.ps1 ...`
+    - `pac solution pack --folder flows\power-automate\unpacked --zipfile flows\power-automate\exports\BGV_System_1_0_0_3.zip --packagetype Unmanaged`
+    - `pac solution import --path <resolved zip path> --force-overwrite --publish-changes`
+    - `m365 flow list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --withSolutions --asAdmin --output json`
+    - `pwsh -ExecutionPolicy Bypass -File .\scripts\active\bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+  - Live verification:
+    - active production flows remained `Started` after import:
+      - `BGV_0_CandidateDeclaration`
+      - `BGV_1_Detect_Authorization_Signature`
+      - `BGV_2_Postsignature`
+      - `BGV_3_AuthReminder_5Days`
+      - `BGV_4_SendToEmployer_Clean`
+      - `BGV_5_Response1`
+      - `BGV_6_HRReminderAndEscalation`
+      - `BGV_7_Generate_Report_Summary`
+      - `BGV_8_Track_Employer_Email_Replies`
+      - `BGV_9_Refresh_Dashboard_Excel`
+    - intentionally stopped:
+      - `BGV_4_SendToEmployer_Clean_v2`
+  - Important notes / remaining non-cutover items:
+    - display names of the flows are still `BGV_*`
+    - historical copied rows in the new `PEV_*` lists still keep their original legacy IDs like `BGV-...` / `REQ-BGV-...`
+    - future new cases should start using `PEV-...` / `REQ-PEV-...` because Flow 0’s generator was retargeted
+    - docs still need a broader technical refresh if we want every reference file to describe the new `PEV_*` backend as canonical

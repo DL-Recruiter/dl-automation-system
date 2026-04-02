@@ -30,7 +30,7 @@
           "inputs": {
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "table": "65747b59-c6b0-4671-ae37-79e35ad84c48"
+              "table": "8c19755d-0e9c-4680-8d18-783eb9ec56be"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -61,14 +61,14 @@
           "actions": {
             "Compose": {
               "type": "Compose",
-              "inputs": "@{trim(concat('/BGV Records/Candidate Files/', triggerBody()?['CandidateID'], '/Authorization/'))}"
+              "inputs": "@{trim(concat('/PEV Records/Candidate Files/', triggerBody()?['CandidateID'], '/Authorization/'))}"
             },
             "Get_files_(properties_only)": {
               "type": "OpenApiConnection",
               "inputs": {
                 "parameters": {
                   "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                  "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                  "table": "30d02a3a-74da-4a16-a887-7b8dd043a547",
                   "folderPath": "@outputs('Compose')"
                 },
                 "host": {
@@ -160,7 +160,7 @@
                   "inputs": {
                     "parameters": {
                       "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                      "table": "30d02a3a-74da-4a16-a887-7b8dd043a547",
                       "id": "@items('For_each')?['ID']"
                     },
                     "host": {

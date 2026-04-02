@@ -148,6 +148,10 @@ function Connect-BgvPnPSite {
         throw "PNP_TENANT_ID must be provided via parameter or environment variable."
     }
 
+    if (-not (Get-Command Connect-PnPOnline -ErrorAction SilentlyContinue)) {
+        Import-Module PnP.PowerShell -ErrorAction Stop
+    }
+
     return Connect-PnPOnline -Url $Url -Interactive -ClientId $ClientId -Tenant $TenantId -ReturnConnection
 }
 
@@ -489,7 +493,13 @@ function Get-BgvTemplateGraphMetadata {
     }
     else {
         Require-BgvCommand "m365"
-        $token = (& m365 util accesstoken get --resource "https://graph.microsoft.com" --output text).Trim()
+        $rawTokenLines = @(& m365 util accesstoken get --resource "https://graph.microsoft.com" --output text | ForEach-Object { [string]$_ })
+        $token = @(
+            $rawTokenLines |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+            Where-Object { $_.Contains(".") -and -not $_.StartsWith("To sign in", [System.StringComparison]::OrdinalIgnoreCase) }
+        ) | Select-Object -Last 1
+        $token = [string]$token
         if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($token)) {
             throw "Unable to acquire Graph token via CLI for Microsoft 365."
         }
@@ -559,4 +569,24 @@ function Get-BgvFieldXmlForTarget {
         }
     }
     return $fieldXml
+}
+
+function Get-BgvLookupFieldTargetListId {
+    param($Field)
+
+    if ($null -eq $Field) {
+        return ""
+    }
+
+    $schemaXml = [string]$Field.SchemaXml
+    if ([string]::IsNullOrWhiteSpace($schemaXml)) {
+        return ""
+    }
+
+    $match = [regex]::Match($schemaXml, 'List="\{?([^"}]+)\}?"')
+    if (-not $match.Success) {
+        return ""
+    }
+
+    return [string]$match.Groups[1].Value
 }

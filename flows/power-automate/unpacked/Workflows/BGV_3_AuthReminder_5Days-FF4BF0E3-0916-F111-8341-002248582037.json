@@ -64,7 +64,7 @@
           "inputs": {
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "table": "65747b59-c6b0-4671-ae37-79e35ad84c48",
+              "table": "8c19755d-0e9c-4680-8d18-783eb9ec56be",
               "$filter": "Status eq 'Pending Authorization Form Signature'"
             },
             "host": {
@@ -156,7 +156,7 @@
                                 "inputs": {
                                   "parameters": {
                                     "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                                    "table": "65747b59-c6b0-4671-ae37-79e35ad84c48",
+                                    "table": "8c19755d-0e9c-4680-8d18-783eb9ec56be",
                                     "id": "@items('Apply_to_each')?['ID']",
                                     "item/Title": "@items('Apply_to_each')?['Title']",
                                     "item/LastAuthReminderAt": "@utcNow()"

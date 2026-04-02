@@ -30,8 +30,8 @@
           "inputs": {
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
-              "folderPath": "/BGV Records/Candidate Files"
+              "table": "30d02a3a-74da-4a16-a887-7b8dd043a547",
+              "folderPath": "/PEV Records/Candidate Files"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -87,7 +87,7 @@
               "inputs": {
                 "parameters": {
                   "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                  "table": "65747b59-c6b0-4671-ae37-79e35ad84c48",
+                  "table": "8c19755d-0e9c-4680-8d18-783eb9ec56be",
                   "$filter": "CandidateID eq '@{outputs('Extract_candidateID')}'",
                   "$top": 1
                 },
@@ -203,7 +203,7 @@
                       "inputs": {
                         "parameters": {
                           "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                          "table": "65747b59-c6b0-4671-ae37-79e35ad84c48",
+                          "table": "8c19755d-0e9c-4680-8d18-783eb9ec56be",
                           "id": "@first(body('Get_CandidateID_from_Auth_File')?['value'])?['ID'] ",
                           "item/Title": "@first(body('Get_CandidateID_from_Auth_File')?['value'])?['Title']",
                           "item/ConsentTimestamp": "@utcNow()",
@@ -222,7 +222,7 @@
                       "inputs": {
                         "parameters": {
                           "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                          "table": "8bab5b4d-b441-4f3f-99d4-5bf49557a8e9",
+                          "table": "30d02a3a-74da-4a16-a887-7b8dd043a547",
                           "id": "@triggerBody()?['ID']"
                         },
                         "host": {

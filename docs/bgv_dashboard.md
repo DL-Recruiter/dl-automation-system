@@ -1,10 +1,10 @@
-# BGV Dashboard
+# PEV Dashboard
 
-`BGV Dashboard` is a lean Excel workbook for recruiters on the `DLR Recruitment Ops` SharePoint site.
+`PEV Dashboard` is a lean Excel workbook for recruiters on the `DLR Recruitment Ops` SharePoint site.
 
 It is designed to live in the `BGV Records` document library and is currently uploaded at:
 
-- `BGV Records/Dashboard/BGV Dashboard.xlsx`
+- `BGV Records/Dashboard/PEV Dashboard.xlsx`
 
 It is built from fresh exports of:
 
@@ -100,7 +100,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\active\build_bgv_dashboard.ps
 
 The builder also exports the reusable Power Query M logic beside the workbook for reference/documentation:
 
-- `out/dashboard/BGV Dashboard Master Query.m`
+- `out/dashboard/PEV Dashboard Master Query.m`
 
 This avoids needing Power Automate for the dashboard itself.
 
@@ -109,9 +109,9 @@ This avoids needing Power Automate for the dashboard itself.
 There is now a separate redesign document and a cloud-refreshable dashboard workbook for the Power Automate-managed version:
 
 - `docs/bgv_dashboard_power_automate_redesign.md`
-- `out/dashboard/BGVDashboard_FLow.xlsx`
+- `out/dashboard/PEVDashboard_Flow.xlsx`
 - SharePoint comparison workbook:
-  - `BGV Records/Dashboard/BGVDashboard_FLow.xlsx`
+  - `BGV Records/Dashboard/PEVDashboard_Flow.xlsx`
 
 This workbook keeps the Summary/Cases feel close to the current dashboard, removes `Overdue`, and is centered around stable Excel tables so Power Automate can refresh rows without rebuilding workbook structure.
 
@@ -119,7 +119,7 @@ This workbook keeps the Summary/Cases feel close to the current dashboard, remov
 
 The Power Automate-managed dashboard workbook is now:
 
-- `BGV Records/Dashboard/BGVDashboard_FLow.xlsx`
+- `BGV Records/Dashboard/PEVDashboard_Flow.xlsx`
 
 It is refreshed by:
 
@@ -145,7 +145,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\active\run_bgv_dashboard_refr
 
 This rebuilds the workbook from live SharePoint list data and uploads it back to:
 
-- `BGV Records/Dashboard/BGV Dashboard.xlsx`
+- `BGV Records/Dashboard/PEV Dashboard.xlsx`
 
 ## Automatic Refresh Schedule
 

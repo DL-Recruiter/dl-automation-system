@@ -79,7 +79,7 @@
           "inputs": {
             "parameters": {
               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-              "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+              "table": "df824861-8e10-4a8c-ad88-f7cf1ef3ef26",
               "$top": 5000
             },
             "host": {
@@ -182,7 +182,7 @@
                   "inputs": {
                     "parameters": {
                       "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                      "table": "f271b227-c654-4241-8968-054dc7f1d47c",
                       "$filter": "@concat('RequestID eq ''', string(variables('varSelectedRequest')?['RequestID']), '''')",
                       "$top": 2
                     },
@@ -206,7 +206,7 @@
                           "inputs": {
                             "parameters": {
                               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                              "table": "a27f05fc-84e5-4784-b7ee-ef6e1d145284",
+                              "table": "df824861-8e10-4a8c-ad88-f7cf1ef3ef26",
                               "id": "@variables('varSelectedRequest')?['ID']",
                               "item/Title": "@variables('varSelectedRequest')?['Title']",
                               "item/EmployerEmailReplyAt": "@triggerBody()?['receivedDateTime']"
@@ -223,7 +223,7 @@
                           "inputs": {
                             "parameters": {
                               "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                              "table": "272ed87f-f02c-4cf4-9bb5-e36d88c3593e",
+                              "table": "f271b227-c654-4241-8968-054dc7f1d47c",
                               "id": "@first(body('Get_items_(BGV_FormData)')?['value'])?['ID']",
                               "item/Title": "@first(body('Get_items_(BGV_FormData)')?['value'])?['Title']",
                               "item/EmployerEmailReplyAt": "@triggerBody()?['receivedDateTime']"

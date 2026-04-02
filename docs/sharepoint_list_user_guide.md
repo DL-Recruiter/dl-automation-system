@@ -114,7 +114,7 @@ Typical user questions this list answers:
 | `Reminder2At` | Timestamp of the second employer reminder. | `BGV_6` | `BGV_6`, users |
 | `Reminder3At` | Timestamp of the later/final employer reminder stage tracked by the automation. | `BGV_6` | `BGV_6`, users |
 | `EscalatedAt` | Timestamp for when the case was escalated to recruiters in Teams after repeated non-response. | `BGV_6` | `BGV_6`, users |
-| `BGV Checks` | Request-side summary of whether the case is cleared, adverse, or stalled after reminder 2. | `BGV_5`, `BGV_6` | users |
+| `PEV Checks` | Request-side summary of whether the case is cleared, adverse, or stalled after reminder 2. | `BGV_5`, `BGV_6` | users |
 | `Severity` | Risk level assigned from the employer HR response. In the current flow this can be `High`, `Medium`, `Low`, or blank when no rule is triggered. | `BGV_5` | users, recruiter notifications |
 | `Outcome` | Stores the combined flagged items detected from the employer form response. | `BGV_5` | users, reporting |
 | `Notes` | Plain-text explanation built by the flow from the triggered rule(s), then saved into the request row for users and recruiters to review. | `BGV_5` | users, reporting |
@@ -181,12 +181,12 @@ Where users will see the explanation:
 - `BGV_Requests.Notes`
 - `BGV_FormData.F2_Notes`
 
-### 2.4 How `BGV Checks` is calculated
+### 2.4 How `PEV Checks` is calculated
 
 This field is separate from `VerificationStatus` and `Outcome`.
 
 - `BGV_5` sets it to `Form Filled and Cleared` when the employer has responded and `Severity` is blank or `Neutral`.
-- `BGV_5` sets it to `Adverse BGV Checks - see severity` when the employer has responded and `Severity` is `Low`, `Medium`, or `High`.
+- `BGV_5` sets it to `Adverse PEV Checks - see severity` when the employer has responded and `Severity` is `Low`, `Medium`, or `High`.
 - `BGV_6` sets it to `No response at Reminder 2` once the reminder-2 delay has matured and the employer still has not responded.
 - `BGV_6` sets it to `Form Filled and Cleared` again when reminder 3 is sent and there is still no response, based on the requested business rule.
 

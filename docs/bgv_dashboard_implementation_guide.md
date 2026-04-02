@@ -1,6 +1,6 @@
-# BGV Dashboard Implementation Guide
+# PEV Dashboard Implementation Guide
 
-This document explains, in simple terms, how the `BGV Dashboard` workbook is built, what tools/connectors are used, and how it is synced between local, GitHub, and SharePoint.
+This document explains, in simple terms, how the `PEV Dashboard` workbook is built, what tools/connectors are used, and how it is synced between local, GitHub, and SharePoint.
 
 ## What Was Built
 
@@ -19,7 +19,7 @@ It has:
 
 The workbook is stored in SharePoint here:
 
-- `BGV Records/Dashboard/BGV Dashboard.xlsx`
+- `BGV Records/Dashboard/PEV Dashboard.xlsx`
 
 ## Data Sources Used
 
@@ -87,7 +87,7 @@ The repo now also contains a separate redesign package for a cloud-refreshable v
 - design document:
   - `docs/bgv_dashboard_power_automate_redesign.md`
 - workbook builder output:
-  - `out/dashboard/BGVDashboard_FLow.xlsx`
+  - `out/dashboard/PEVDashboard_Flow.xlsx`
 
 That workbook is intentionally separate from the original snapshot dashboard so both approaches can be compared side by side in SharePoint.
 
@@ -99,11 +99,11 @@ The repo now also includes a cloud refresh flow for the Power Automate-friendly 
 
 Current target workbook:
 
-- `BGV Records/Dashboard/BGVDashboard_FLow.xlsx`
+- `BGV Records/Dashboard/PEVDashboard_Flow.xlsx`
 
 The older local builder and scheduled task remain available as backup for the original snapshot workbook:
 
-- `BGV Records/Dashboard/BGV Dashboard.xlsx`
+- `BGV Records/Dashboard/PEV Dashboard.xlsx`
 
 ### 4. Windows Task Scheduler
 
@@ -120,7 +120,7 @@ What they do:
   - runs the dashboard build with `-UploadToSharePoint`
   - writes refresh output into `out/logs/bgv_dashboard_refresh.log`
 - `register_bgv_dashboard_refresh_task.ps1`
-  - creates a local scheduled task named `DLR BGV Dashboard Refresh`
+  - creates a local scheduled task named `DLR PEV Dashboard Refresh`
   - schedules refreshes at `09:00`, `12:00`, `15:00`, `18:00`, and `21:00`
 
 ## Was Power Query Used?
@@ -129,7 +129,7 @@ Yes, but with an important detail.
 
 There is reusable Power Query M logic exported here:
 
-- `out/dashboard/BGV Dashboard Master Query.m`
+- `out/dashboard/PEV Dashboard Master Query.m`
 
 That M logic documents the intended table-combination logic.
 
