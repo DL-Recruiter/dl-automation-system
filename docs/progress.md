@@ -4649,3 +4649,79 @@ Log each session with:
     - `BGV Dashboard.xlsx` -> `PEV Dashboard.xlsx`
     - `BGVDashboard_FLow.xlsx` -> `PEVDashboard_FLow.xlsx`
   - verified that the active flow workbook kept the same file id `017QXH3HY5X73LM5443ZFLLGMN5IWZBI6R`, so no further `BGV_9` patch was needed after the rename
+
+## 2026-04-03 (Fresh live PEV smoke test + BGV_3 reminder data repair)
+
+- Current status:
+  - Ran a fresh controlled live smoke test through the active `PEV_*` backend and verified the send, report-summary, and dashboard-refresh path on a brand-new `PEV` case.
+  - While checking the full flow set, found and fixed a real live data issue that was breaking `BGV_3_AuthReminder_5Days`.
+- Completed tasks:
+  - Created a fresh controlled live smoke-test case:
+    - candidate: `PEV-SMOKE-20260403-B`
+    - request: `REQ-PEV-SMOKE-20260403-B-EMP1`
+    - form-data row: `PEV-SMOKE-20260403-B|EMP1`
+  - Added the live candidate/request/form-data rows directly into:
+    - `PEV_Candidates`
+    - `PEV_Requests`
+    - `PEV_FormData`
+  - Created the live candidate folder structure and copied a signed authorization document into:
+    - `PEV Records/Candidate Files/PEV-SMOKE-20260403-B/Authorization/Authorization Form - PEV-SMOKE-20260403-B.docx`
+  - Resubmitted the latest successful `BGV_4_SendToEmployer_Clean` recurrence and confirmed the fresh request was processed:
+    - `VerificationStatus = Email Sent`
+    - `HRRequestSentAt` stamped
+    - employer prefilled link populated
+    - request folder created:
+      - `PEV Records/Candidate Files/PEV-SMOKE-20260403-B/REQ-PEV-SMOKE-20260403-B-EMP1`
+    - company-stamp doc created:
+      - `Company Stamp - REQ-PEV-SMOKE-20260403-B-EMP1.docx`
+  - Wrote a realistic employer-response state onto the same smoke-test case and resubmitted:
+    - `BGV_7_Generate_Report_Summary`
+    - `BGV_9_Refresh_Dashboard_Excel`
+  - Verified the downstream path on the same live case:
+    - `RS_Emp1.docx` generated under:
+      - `PEV Records/Candidate Files/PEV-SMOKE-20260403-B/RS_Emp1.docx`
+    - active dashboard workbook row created for:
+      - `PEV-SMOKE-20260403-B`
+    - dashboard candidate-folder link points to:
+      - `https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/PEV%20Records/Candidate%20Files/PEV-SMOKE-20260403-B/`
+  - Verified active flow health during the smoke test:
+    - `BGV_0_CandidateDeclaration`: latest checked run `Succeeded`
+    - `BGV_1_Detect_Authorization_Signature`: latest checked run `Succeeded`
+    - `BGV_4_SendToEmployer_Clean`: fresh smoke-test rerun `Succeeded`
+    - `BGV_5_Response1`: latest checked run `Succeeded`
+    - `BGV_6_HRReminderAndEscalation`: latest checked run `Succeeded`
+    - `BGV_7_Generate_Report_Summary`: fresh smoke-test rerun `Succeeded`
+    - `BGV_8_Track_Employer_Email_Replies`: latest checked run `Succeeded`
+    - `BGV_9_Refresh_Dashboard_Excel`: dashboard refresh picked up the smoke-test case
+  - Investigated the failing `BGV_3_AuthReminder_5Days` run:
+    - root cause was not flow logic
+    - several migrated `PEV_Candidates` rows still had `Title = null`
+    - the SharePoint connector schema for `Get_items` expected `Title`, so the flow failed with:
+      - `ResponseSwaggerSchemaValidationFailure`
+      - `The API operation 'GetItems' is missing required property 'body/value/0/Title'`
+  - Repaired the bad live rows in `PEV_Candidates` by backfilling `Title = CandidateID` for ids:
+    - `1`
+    - `2`
+    - `3`
+    - `4`
+    - `5`
+  - Resubmitted the reminder flow and verified the next `BGV_3_AuthReminder_5Days` run returned to `Succeeded`.
+- Validation commands run:
+  - `m365 spo listitem add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Candidates ...`
+  - `m365 spo listitem add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Requests ...`
+  - `m365 spo listitem add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_FormData ...`
+  - `m365 spo folder add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --parentFolderUrl '/sites/DLRRecruitmentOps570/PEV Records/Candidate Files' --name 'PEV-SMOKE-20260403-B'`
+  - `m365 spo file copy --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --sourceUrl '/sites/DLRRecruitmentOps570/PEV Records/Candidate Files/PEV-TEST-CAND/Authorization/Authorization Form - PEV-TEST-CAND.docx' --targetUrl '/sites/DLRRecruitmentOps570/PEV Records/Candidate Files/PEV-SMOKE-20260403-B/Authorization' --newName 'Authorization Form - PEV-SMOKE-20260403-B.docx'`
+  - `m365 flow run resubmit --force --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 8eeeed39-e02f-4b7a-82c8-fc51f245d863 --name 08584264000857375046807143936CU19`
+  - `m365 spo listitem set --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Requests --id 49 ...`
+  - `m365 spo listitem set --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_FormData --id 132 ...`
+  - `m365 flow run resubmit --force --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 3e03d678-ce7d-1508-99ab-a7624987e9cd --name 08584263994858580597328441992CU15`
+  - `m365 flow run resubmit --force --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 7f4dbc87-1117-af35-a703-126c8a6485c0 --name 08584263994852702735092509303CU26`
+  - `m365 request --url 'https://graph.microsoft.com/v1.0/drives/b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErEk6KtAw2nQWSqiHe43QQ6VH/items/017QXH3HY5X73LM5443ZFLLGMN5IWZBI6R/workbook/tables/tblDashboardCasesPA/rows' --output json`
+  - `m365 spo listitem set --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Candidates --id <1..5> --Title <CandidateID>`
+  - `m365 flow run resubmit --force --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName fc8d5023-f8fe-42e5-8982-a523f761d8e7 --name 08584263997855448202500883517CU11`
+- Important notes:
+  - `BGV_2_Postsignature` showed mixed results during the smoke test because the authorization file used for the live test was copied from an already-processed signed document; that is not a clean reproduction of the normal Flow 0 -> Flow 1 -> Flow 2 document lifecycle.
+  - The fresh smoke test did prove the current production send/report/dashboard path on the active `PEV_*` backend.
+- Next actions and blockers:
+  - If needed, run one true candidate-form submission through `BGV_0` -> `BGV_2` with a brand-new authorization document to validate the pre-signature and post-signature document path without using a copied smoke-test file.
