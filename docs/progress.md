@@ -4645,8 +4645,7 @@ Log each session with:
   - old rows still keep historical candidate/request IDs like `BGV-...` where the original live data itself still uses legacy IDs
   - link paths are now corrected to `PEV Records` even for those legacy-ID rows
 - Remaining cosmetic issue only:
-  - visible dashboard file names in `/PEV Records/Dashboard` are still:
-    - `BGV Dashboard.xlsx`
-    - `BGVDashboard_FLow.xlsx`
-  - attempted CLI/Graph rename/copy operations failed due SharePoint/Graph restrictions on those files
-  - backend targeting is correct; file-name cleanup may need a manual SharePoint UI copy/rename if still desired
+  - resolved manually in SharePoint UI on 2026-04-03:
+    - `BGV Dashboard.xlsx` -> `PEV Dashboard.xlsx`
+    - `BGVDashboard_FLow.xlsx` -> `PEVDashboard_FLow.xlsx`
+  - verified that the active flow workbook kept the same file id `017QXH3HY5X73LM5443ZFLLGMN5IWZBI6R`, so no further `BGV_9` patch was needed after the rename
