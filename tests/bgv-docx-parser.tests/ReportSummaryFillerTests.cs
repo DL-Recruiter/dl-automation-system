@@ -92,6 +92,25 @@ public class ReportSummaryFillerTests
     }
 
     [Fact]
+    public void Mapper_Supports_Current_Live_Form2_WriteIn_Question_Keys()
+    {
+        string form2RawJson = JsonSerializer.Serialize(new Dictionary<string, string?>
+        {
+            ["rb0aafb54344e4a3aa982d1d934bea772"] = "Employment period mismatch",
+            ["r2f96ac1d76c5452d89ddf71d8e62d34d"] = "Job title mismatch",
+            ["r049d77f872984fdb9b67110db534a792"] = "Salary mismatch",
+            ["r0dbb99e26abc4bcd90544e9ac3bd924e"] = "Other abnormality noted"
+        });
+
+        IReadOnlyDictionary<string, string> mappings = _mapper.BuildMappings(null, form2RawJson);
+
+        Assert.Equal("Employment period mismatch", mappings["Form2.Q17"]);
+        Assert.Equal("Job title mismatch", mappings["Form2.Q18"]);
+        Assert.Equal("Salary mismatch", mappings["Form2.Q19"]);
+        Assert.Equal("Other abnormality noted", mappings["Form2.Q20"]);
+    }
+
+    [Fact]
     public void Filler_Replaces_Content_Control_Text_By_Tag()
     {
         byte[] template = CreateTextControlDocument(new Dictionary<string, string>

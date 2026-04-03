@@ -13,37 +13,37 @@ public sealed class ReportSummaryValueMapper : IReportSummaryValueMapper
             ["Form1.IdentificationNumberPassport"] = "rf5b324c022804863a720ef13edeb9d9b"
         };
 
-    private static readonly IReadOnlyDictionary<string, string> Form2TagToKey =
-        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    private static readonly IReadOnlyDictionary<string, string[]> Form2TagToKeys =
+        new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
         {
-            ["Form2.Q4"] = "rd745d133eb7f4611b59ea051f980f97a",
-            ["Form2.Q5"] = "rccaf3632669648baaa335c12d4ea40bf",
-            ["Form2.Q6"] = "rcf35c7cc008e472f9d0b84bde67cc1ff",
-            ["Form2.Q7"] = "r19aae6e8163d4aaeb8a3f3f2d5329be2",
-            ["Form2.Q8"] = "r2d39255c2449439096683ca0e39241b0",
-            ["Form2.Q9"] = "rd05170e51ac34fef95f5464cf348bedc",
-            ["Form2.Q10"] = "ra03058e9bbfd40d28014b0c669e92434",
-            ["Form2.Q11"] = "r0bef44c0d22d493f95a33484875b951e",
-            ["Form2.Q12"] = "r513ad5ab3a14453286bdb910820985ec",
-            ["Form2.Q13"] = "ra6ab2e26d2d84a92b33148fc4694773a",
-            ["Form2.Q14"] = "r49ca8a655f5e4bcba0e8f75d4475ad77",
-            ["Form2.Q15"] = "r9594fab1bfa04c90883b1dffd7f4549e",
-            ["Form2.Q16"] = "r72b23e4aa192405091846e1279085029",
-            ["Form2.Q17"] = "r9a95095b3d7d4d9f8bc985025614bd79",
-            ["Form2.Q18"] = "r83027392ccb043e2a637b06ff4b54ac8",
-            ["Form2.Q19"] = "r4061a9d19aae45d9915d2f508a5c3ea9",
-            ["Form2.Q20"] = "ra15c799c557d42d1bcee1de947c29466",
-            ["Form2.Q21"] = "r7bd26b4a7e94430dbda54f9e8b8212e4",
-            ["Form2.Q22"] = "rc50b684c30314c5d991ff39a0d3d0dd1",
-            ["Form2.Q23"] = "r96d079f9858e40bab89ab0ea4ad23931",
-            ["Form2.Q24"] = "r35197d5910d2489db0d5786157b35295",
-            ["Form2.Q25"] = "rafe3ada4157c49fb9e555cd0fb53bd59",
-            ["Form2.Q26"] = "r5f7ebc3390bc4699b160504c65254c3e",
-            ["Form2.Q27"] = "rab9c2a586db943b18ac02367d3b1d3f7",
-            ["Form2.Q28"] = "r1f2d7ec255b1430fbb2a6e56ce4042d1",
-            ["Form2.Q29"] = "r7b65617c391a48239b9f75dd239702c3",
-            ["Form2.Q30"] = "reb80c95cd24242998cbc884c24254bed",
-            ["Form2.Q31"] = "r57e4baaeaafc4ffc8b3977149b18f2f2"
+            ["Form2.Q4"] = ["rd745d133eb7f4611b59ea051f980f97a"],
+            ["Form2.Q5"] = ["rccaf3632669648baaa335c12d4ea40bf"],
+            ["Form2.Q6"] = ["rcf35c7cc008e472f9d0b84bde67cc1ff"],
+            ["Form2.Q7"] = ["r19aae6e8163d4aaeb8a3f3f2d5329be2"],
+            ["Form2.Q8"] = ["r2d39255c2449439096683ca0e39241b0"],
+            ["Form2.Q9"] = ["rd05170e51ac34fef95f5464cf348bedc"],
+            ["Form2.Q10"] = ["ra03058e9bbfd40d28014b0c669e92434"],
+            ["Form2.Q11"] = ["r0bef44c0d22d493f95a33484875b951e"],
+            ["Form2.Q12"] = ["r513ad5ab3a14453286bdb910820985ec"],
+            ["Form2.Q13"] = ["ra6ab2e26d2d84a92b33148fc4694773a"],
+            ["Form2.Q14"] = ["r49ca8a655f5e4bcba0e8f75d4475ad77"],
+            ["Form2.Q15"] = ["r9594fab1bfa04c90883b1dffd7f4549e"],
+            ["Form2.Q16"] = ["r72b23e4aa192405091846e1279085029"],
+            ["Form2.Q17"] = ["rb0aafb54344e4a3aa982d1d934bea772", "r9a95095b3d7d4d9f8bc985025614bd79"],
+            ["Form2.Q18"] = ["r2f96ac1d76c5452d89ddf71d8e62d34d", "r83027392ccb043e2a637b06ff4b54ac8"],
+            ["Form2.Q19"] = ["r049d77f872984fdb9b67110db534a792", "r4061a9d19aae45d9915d2f508a5c3ea9"],
+            ["Form2.Q20"] = ["r0dbb99e26abc4bcd90544e9ac3bd924e", "ra15c799c557d42d1bcee1de947c29466"],
+            ["Form2.Q21"] = ["r7bd26b4a7e94430dbda54f9e8b8212e4"],
+            ["Form2.Q22"] = ["rc50b684c30314c5d991ff39a0d3d0dd1"],
+            ["Form2.Q23"] = ["r96d079f9858e40bab89ab0ea4ad23931"],
+            ["Form2.Q24"] = ["r35197d5910d2489db0d5786157b35295"],
+            ["Form2.Q25"] = ["rafe3ada4157c49fb9e555cd0fb53bd59"],
+            ["Form2.Q26"] = ["r5f7ebc3390bc4699b160504c65254c3e"],
+            ["Form2.Q27"] = ["rab9c2a586db943b18ac02367d3b1d3f7"],
+            ["Form2.Q28"] = ["r1f2d7ec255b1430fbb2a6e56ce4042d1"],
+            ["Form2.Q29"] = ["r7b65617c391a48239b9f75dd239702c3"],
+            ["Form2.Q30"] = ["reb80c95cd24242998cbc884c24254bed"],
+            ["Form2.Q31"] = ["r57e4baaeaafc4ffc8b3977149b18f2f2"]
         };
 
     public IReadOnlyDictionary<string, string> BuildMappings(
@@ -81,9 +81,9 @@ public sealed class ReportSummaryValueMapper : IReportSummaryValueMapper
             }
         }
 
-        foreach ((string tag, string key) in Form2TagToKey)
+        foreach ((string tag, string[] keys) in Form2TagToKeys)
         {
-            replacements[tag] = GetNormalizedFormValue(form2Values, key);
+            replacements[tag] = GetNormalizedFormValue(form2Values, keys);
         }
 
         ApplyInaccuracyFallbacks(replacements);
@@ -171,6 +171,20 @@ public sealed class ReportSummaryValueMapper : IReportSummaryValueMapper
         }
 
         return NormalizeValue(value);
+    }
+
+    private static string GetNormalizedFormValue(IReadOnlyDictionary<string, string> values, IEnumerable<string> keys)
+    {
+        foreach (string key in keys)
+        {
+            string value = GetNormalizedFormValue(values, key);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+
+        return string.Empty;
     }
 
     private static string NormalizeValue(string value)

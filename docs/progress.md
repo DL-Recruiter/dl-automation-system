@@ -4559,3 +4559,94 @@ Log each session with:
     - historical copied rows in the new `PEV_*` lists still keep their original legacy IDs like `BGV-...` / `REQ-BGV-...`
     - future new cases should start using `PEV-...` / `REQ-PEV-...` because Flow 0’s generator was retargeted
     - docs still need a broader technical refresh if we want every reference file to describe the new `PEV_*` backend as canonical
+
+## 2026-04-02 (Final live PEV UI cleanup and smoke test)
+  - Cleaned up the remaining visible SharePoint UI labels after the backend cutover:
+    - legacy live objects were relabeled to make it clear they are not the active backend:
+      - `BGV_Candidates` -> `Legacy_BGV_Candidates`
+      - `BGV_Requests` -> `Legacy_BGV_Requests`
+      - `BGV_FormData` -> `Legacy_BGV_FormData`
+      - `BGV Records` -> `Legacy BGV Records`
+    - quick-launch navigation links were updated to the active `PEV_*` lists:
+      - `PEV_Candidates`
+      - `PEV_Requests`
+      - `PEV_FormData`
+    - active request column display name changed from `BGV Checks` to `PEV Checks` on `PEV_Requests`
+  - Repaired one stale cutover case where the employer response had landed in the old backend before the fresh import:
+    - backfilled `PEV_FormData` item `129` with the missing `Form2RawJson`, `Form2SubmittedAt`, parsed `F2_*` fields, and `Report Summary Teams Posted At`
+    - used SharePoint `ValidateUpdateListItem()` because the standard CLI list-item update wrapper failed on the large raw JSON payload
+  - Ran a fresh controlled live smoke test against the active `PEV_*` backend:
+    - created candidate `PEV-TEST-CAND`
+    - created request `REQ-PEV-TEST-CAND-EMP1`
+    - created matching `PEV_FormData` row and copied a valid signed authorization file into `PEV Records/Candidate Files/PEV-TEST-CAND/Authorization`
+    - resubmitted the latest successful `BGV_4_SendToEmployer_Clean` recurrence
+    - confirmed the request moved to `VerificationStatus = Email Sent`
+    - confirmed `HRRequestSentAt` was stamped
+    - confirmed the request folder was created under `PEV Records/Candidate Files/PEV-TEST-CAND/REQ-PEV-TEST-CAND-EMP1`
+  - Verified the downstream report path on the same live smoke-test case:
+    - wrote a realistic employer-response state onto the fresh `PEV` test request and form-data row
+    - allowed the scheduled `BGV_7_Generate_Report_Summary` recurrence to pick it up
+    - confirmed `RS_Emp1.docx` was generated under `PEV Records/Candidate Files/PEV-TEST-CAND`
+  - Live operational conclusion:
+    - active production lists/libraries are the `PEV_*` set
+    - the live quick-launch menu now points at `PEV_*`
+    - the core send path and report-generation path both worked on a fresh `PEV` smoke-test case
+  - Remaining cosmetic item:
+    - flow display names are still `BGV_*` because they are not exposed through the same simple live rename path as SharePoint lists/navigation
+  - Default live SharePoint list views were normalized for the active `PEV_*` backend:
+    - `PEV_FormData -> All Items` now shows:
+      - `Title`
+      - `CandidateID`
+      - `RequestID`
+      - `EmployerSlot`
+      - `F1_CandidateFullName`
+      - `Form1SubmittedAt`
+      - `Form2SubmittedAt`
+      - `F2_Severity`
+      - `F2_Outcome`
+    - `PEV_Candidates -> All Items` now shows:
+      - `Title`
+      - `CandidateID`
+      - `FullName`
+      - `CandidateEmail`
+      - `Status`
+      - `IDTypeProvided`
+      - `IdentificationNumberNRIC`
+      - `IdentificationNumberPassport`
+      - `AuthorizationLinkCreatedAt`
+      - `AuthorisationSigned`
+    - `PEV_Requests -> All Items` now shows:
+      - `Title`
+      - `RequestID`
+      - `CandidateID`
+      - `EmployerName`
+      - `EmployerHR_Email`
+      - `VerificationStatus`
+      - `PEV Checks`
+      - `Severity`
+      - `HRRequestSentAt`
+      - `ResponseReceivedAt`
+      - `Reminder1At`
+      - `Reminder2At`
+      - `Reminder3At`
+    - user-facing effect:
+      - opening the active `PEV_*` lists no longer shows only the `Title` column; the key business fields are visible again in the default view
+## 2026-04-03 Dashboard / PEV follow-up
+
+- Confirmed `BGV_9_Refresh_Dashboard_Excel` repo JSON and exported live JSON now both point to the active `PEV Records` dashboard flow workbook:
+  - drive: `b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErEk6KtAw2nQWSqiHe43QQ6VH`
+  - file: `017QXH3HY5X73LM5443ZFLLGMN5IWZBI6R`
+- Repacked and re-imported the solution successfully; latest live `BGV_9` scheduled runs after import were still succeeding.
+- Verified the active PEV dashboard workbook rows now contain `PEV Records` candidate-folder links, not `BGV Records`.
+- Verified latest PEV-side cases exist in the active dashboard workbook, including:
+  - `PEV-TEST-CAND`
+  - `PEV-20260402-6c181`
+- Important nuance:
+  - old rows still keep historical candidate/request IDs like `BGV-...` where the original live data itself still uses legacy IDs
+  - link paths are now corrected to `PEV Records` even for those legacy-ID rows
+- Remaining cosmetic issue only:
+  - visible dashboard file names in `/PEV Records/Dashboard` are still:
+    - `BGV Dashboard.xlsx`
+    - `BGVDashboard_FLow.xlsx`
+  - attempted CLI/Graph rename/copy operations failed due SharePoint/Graph restrictions on those files
+  - backend targeting is correct; file-name cleanup may need a manual SharePoint UI copy/rename if still desired

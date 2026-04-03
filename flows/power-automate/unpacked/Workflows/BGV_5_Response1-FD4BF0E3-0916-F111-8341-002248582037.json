@@ -907,7 +907,7 @@
                 },
                 "Compose_CandidateFolderLink": {
                   "type": "Compose",
-                  "inputs": "@concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/BGV%20Records/Candidate%20Files/',encodeUriComponent(string(outputs('Update_item_-_of_BGV_Request')?['body/CandidateID'])),'/')",
+                  "inputs": "@concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/PEV%20Records/Candidate%20Files/',encodeUriComponent(string(outputs('Update_item_-_of_BGV_Request')?['body/CandidateID'])),'/')",
                   "runAfter": {
                     "Condition_-_if_FormData_row_found": [
                       "Succeeded",
