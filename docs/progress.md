@@ -4725,3 +4725,37 @@ Log each session with:
   - The fresh smoke test did prove the current production send/report/dashboard path on the active `PEV_*` backend.
 - Next actions and blockers:
   - If needed, run one true candidate-form submission through `BGV_0` -> `BGV_2` with a brand-new authorization document to validate the pre-signature and post-signature document path without using a copied smoke-test file.
+
+## 2026-04-03 - PEV_FormData mapping repair
+
+- Investigated the user report that `PEV_FormData` "should have mapped more rows".
+- Confirmed this was **not** a bulk row-loss problem:
+  - `PEV_FormData` contains `133` items.
+  - Legacy archive `Legacy_BGV_FormData` contains `129` items.
+  - The extra `PEV` items are expected newer `PEV-*` records.
+- Confirmed one historical data contamination issue:
+  - `PEV_FormData` item `5` had a March `Title` but had previously been overwritten with April `CandidateID` / `RequestID`.
+  - Repaired the visible key fields so they now match the item title again:
+    - `CandidateID = BGV-20260305-15be9`
+    - `RequestID = REQ-BGV-20260305-15be9-EMP1`
+  - Note: that row is historically polluted even in legacy data, so it was **not** caused by the `PEV` cutover.
+- Found one real live under-mapped response row:
+  - `PEV_FormData` item `128`
+  - `Title = BGV-20260401-87341|EMP1`
+  - `Form2SubmittedAt` was present, but the mapped `F2_*` fields were blank.
+- Backfilled item `128` from its stored `Form2RawJson` and the matching processed `PEV_Requests` row:
+  - `F2_Severity = High`
+  - `F2_Outcome = Disciplinary, Re-employ, "Employment Period", "Company UEN"`
+  - `F2_Notes` restored
+  - `F2_InformationAccurate = false`
+  - `F2_SelectedIssues = ["Employment Period"]`
+  - `F2_CompanyDetailsAccurate = false`
+  - `F2_CompanyDetailsSelectedIssues = ["Company UEN"]`
+  - `F2_FormCompleterName = melissa ong`
+  - `F2_FormCompleterJobTitle = hr manager`
+  - and the other related `F2_*` fields
+- Re-ran the health scan after repair:
+  - no remaining `PEV_FormData` rows have `Form2SubmittedAt` present while all key mapped `F2_*` fields are blank.
+- Important interpretation:
+  - The active `PEV_FormData` list is now healthy for current mapped response rows.
+  - Some older historical `BGV-*` `FormData` rows remain archival/orphan-style records because the source system itself had incomplete candidate/request coverage long before the `PEV` migration.
