@@ -187,6 +187,12 @@ Note:
 | Form 2 response key | Meaning (from flow usage) | Target column | Transform |
 | --- | --- | --- | --- |
 | `rd745d133eb7f4611b59ea051f980f97a` | Request ID | `BGV_FormData.RequestID` | direct |
+| `rccaf3632669648baaa335c12d4ea40bf` | Company name entered/confirmed by employer | `PEV_FormData.Employer_x0020_Verified_x0020_Co` | column created and documented; live auto-population still pending safe flow schema refresh |
+| `rcf35c7cc008e472f9d0b84bde67cc1ff` | Company UEN entered/confirmed by employer | `PEV_FormData.Employer_x0020_Verified_x0020_Co0` | column created and documented; live auto-population still pending safe flow schema refresh |
+| `r19aae6e8163d4aaeb8a3f3f2d5329be2` | Company address entered/confirmed by employer | `PEV_FormData.Employer_x0020_Verified_x0020_Co1` | column created and documented; live auto-population still pending safe flow schema refresh |
+| `r0bef44c0d22d493f95a33484875b951e` | Employment period entered/confirmed by employer | `PEV_FormData.Employer_x0020_Verified_x0020_Em` | column created and documented; live auto-population still pending safe flow schema refresh |
+| `ra6ab2e26d2d84a92b33148fc4694773a` | Last drawn remuneration entered/confirmed by employer | `PEV_FormData.Employer_x0020_Verified_x0020_La` | column created and documented; live auto-population still pending safe flow schema refresh |
+| `r49ca8a655f5e4bcba0e8f75d4475ad77` | Last position held entered/confirmed by employer | `PEV_FormData.Employer_x0020_Verified_x0020_La0` | column created and documented; live auto-population still pending safe flow schema refresh |
 | `r9594fab1bfa04c90883b1dffd7f4549e` | Employment details accurate yes/no | `BGV_FormData.F2_InformationAccurate` | `equals(value,'Yes')` (boolean) |
 | `r72b23e4aa192405091846e1279085029` | Selected issues | `BGV_FormData.F2_SelectedIssues` | direct |
 | `r2d39255c2449439096683ca0e39241b0` | Company-details accuracy yes/no | `BGV_FormData.F2_CompanyDetailsAccurate` | `equals(value,'Yes')` (boolean) |

@@ -205,6 +205,7 @@ This document describes the current behavior in your canonical flow files under 
     - `Form Filled and Cleared` when the employer has responded and severity is blank
     - `Adverse PEV Checks - see severity` when the employer has responded and severity is `Low`, `Medium`, or `High`
   - If FormData row exists, updates `BGV_FormData` with Form 2 raw payload + normalized Form 2 result fields, including:
+    - The new readable employer-verification columns exist on `PEV_FormData`, but they are not yet being auto-populated by `BGV_5` because the SharePoint action schema still needs a safe refresh in Power Automate.
     - `F2_CompanyDetailsAccurate`
     - `F2_CompanyDetailsSelectedIssues`
     - `F2_MASQuestion`

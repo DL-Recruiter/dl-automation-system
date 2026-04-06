@@ -301,6 +301,12 @@ These fields come from Form 2, the employer HR verification form.
 | Column | What it is for | Mainly written by | Mainly read by |
 | --- | --- | --- | --- |
 | `F2_InformationAccurate` | Normalized yes/no answer for whether the employer says the information is accurate. | `BGV_5` | users, troubleshooting |
+| `Employer_x0020_Verified_x0020_Co` | Employer-entered or employer-confirmed company name from Form 2. | planned `BGV_5` target column | users, troubleshooting |
+| `Employer_x0020_Verified_x0020_Co0` | Employer-entered or employer-confirmed company UEN from Form 2. | planned `BGV_5` target column | users, troubleshooting |
+| `Employer_x0020_Verified_x0020_Co1` | Employer-entered or employer-confirmed company address from Form 2. | planned `BGV_5` target column | users, troubleshooting |
+| `Employer_x0020_Verified_x0020_Em` | Employer-entered or employer-confirmed employment period from Form 2. | planned `BGV_5` target column | users, troubleshooting |
+| `Employer_x0020_Verified_x0020_La` | Employer-entered or employer-confirmed remuneration package from Form 2. | planned `BGV_5` target column | users, troubleshooting |
+| `Employer_x0020_Verified_x0020_La0` | Employer-entered or employer-confirmed last position held from Form 2. | planned `BGV_5` target column | users, troubleshooting |
 | `F2_SelectedIssues` | Selected issue list captured from the employer response. | `BGV_5` | users, troubleshooting |
 | `F2_CompanyDetailsAccurate` | Normalized yes/no answer for whether the employer says the declared company details are accurate. | `BGV_5` | users, troubleshooting |
 | `F2_CompanyDetailsSelectedIssues` | Selected inaccurate company-detail fields from the employer response. | `BGV_5` | users, troubleshooting |

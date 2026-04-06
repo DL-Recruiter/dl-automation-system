@@ -4781,3 +4781,41 @@ Log each session with:
 - Important interpretation:
   - The active `PEV_FormData` list is now healthy for current mapped response rows.
   - Some older historical `BGV-*` `FormData` rows remain archival/orphan-style records because the source system itself had incomplete candidate/request coverage long before the `PEV` migration.
+
+## 2026-04-06 - PEV_FormData structured header expansion
+
+- Reviewed the active form-data backend and confirmed the live production list is `PEV_FormData`, not the legacy `BGV_FormData`.
+- Confirmed `BGV_5_Response1` is the response-processing flow writing employer form results into `PEV_FormData`.
+- Expanded the structured employer-side mapping so the key non-narrative Form 2 values are stored as their own readable columns instead of only living inside raw JSON:
+  - Employer Verified Company Name
+  - Employer Verified Company UEN
+  - Employer Verified Company Address
+  - Employer Verified Employment Period
+  - Employer Verified Last Drawn Salary
+  - Employer Verified Last Position Held
+- Added the six live SharePoint columns on `PEV_FormData`.
+- Found an internal-name mismatch:
+  - the columns were created with readable display names, so SharePoint generated encoded internal names
+  - attempted two safe flow-writer approaches in `BGV_5_Response1`:
+    - direct `Update item` mapping to encoded internal names
+    - separate `Send an HTTP request to SharePoint` patch step
+  - both versions imported, but Power Automate rejected them at activation time with template validation errors
+  - restored `BGV_5_Response1` to its last known-good logic so employer response processing is not left in a broken state
+- Intentionally kept long narrative answers out of new dedicated columns:
+  - discrepancy explanations
+  - other long comments / free-text narratives
+  - these remain in raw JSON / notes so the list stays readable
+- Added a dedicated header dictionary document for the active list:
+  - `docs/pev_formdata_headers.md`
+- Updated supporting docs so the field meanings and mapping logic are documented consistently.
+- Validation commands run:
+  - `pac auth who`
+  - `m365 spo list list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --output json`
+  - `m365 spo field list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_FormData --output json`
+  - `m365 spo field add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_FormData ...`
+  - `pac solution pack --folder .\\flows\\power-automate\\unpacked --zipfile .\\artifacts\\exports\\BGV_System_formdata_mapping.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\\artifacts\\exports\\BGV_System_formdata_mapping.zip --settings-file .\\out\\deployment-settings\\bgv9_live.settings.json --publish-changes --force-overwrite`
+- Important notes:
+  - The six new live columns use SharePoint-generated internal names derived from their display labels, not the original shorthand names first proposed locally.
+  - The columns now exist live and are documented, but live auto-population is still pending a safe SharePoint action schema refresh in `BGV_5`.
+  - `BGV_5_Response1` was observed in `Stopped` state during verification; after the revert it still needs explicit activation/validation on the platform side.
