@@ -4423,6 +4423,28 @@ Log each session with:
   - `m365 flow enable --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 8eeeed39-e02f-4b7a-82c8-fc51f245d863`
   - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 8eeeed39-e02f-4b7a-82c8-fc51f245d863 --output json`
   - `m365 flow list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --output json`
+- Date: 2026-04-06
+- Task: Run daily sync and refresh local canonical flow source from the latest live environment.
+- Completed tasks:
+  - Ran `scripts/active/bgv_daily_sync.ps1` against:
+    - `https://orgde64dc49.crm5.dynamics.com/`
+  - Confirmed PAC identity before export:
+    - `recruitment@dlresources.com.sg`
+  - Exported and unpacked the latest unmanaged `BGV_System` solution into canonical source:
+    - `flows/power-automate/unpacked/`
+  - Confirmed the sync now includes live workflow inventory through:
+    - `BGV_9_Refresh_Dashboard_Excel`
+    - `BGV_4_SendToEmployer_Clean_v2`
+  - Reviewed post-sync drift and confirmed it is limited to:
+    - environment version updates in `Customizations.xml` and `Solution.xml`
+    - newline normalization only in `BGV_5`, `BGV_6`, `BGV_7`, and `BGV_9`
+  - No new logic drift was detected in the reviewed workflow JSON diffs.
+- Validation commands run:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\active\bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+  - `git status --short --branch`
+  - `git diff --stat`
+  - `git diff -- flows/power-automate/unpacked/Other/Customizations.xml flows/power-automate/unpacked/Other/Solution.xml`
+  - `git diff -- flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json flows/power-automate/unpacked/Workflows/BGV_7_Generate_Report_Summary-FB5CF0E3-0916-F111-8341-002248582037.json flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json`
 ## 2026-03-27 (BGV_4 candidate lookup hardened for run-time AuthorisationSigned failure)
   - Investigated the failing live `BGV_4_SendToEmployer_Clean` run where the UI surfaced the error on `Condition - AuthorisationSigned`.
   - Hardened the canonical flow so the candidate read no longer depends on `BGV_Requests.CandidateItemID` staying valid:
