@@ -142,12 +142,11 @@ This document describes the current behavior in your canonical flow files under 
     - Employment period
     - Last drawn salary
     - Job title
-    - Company-stamp document link (`rd5d9cb98b1aa47dd8bcd7914cd4bdc87`) pointing to an employer-specific shared Word document.
-  - Creates an employer-specific request folder in `BGV Records/Candidate Files/<CandidateID>/<RequestID>`.
-  - Creates or reuses `Company Stamp - <RequestID>.docx` inside that request folder from `BGV Records/Templates/Company Stamp.docx`.
-  - Creates an anonymous edit sharing link for that employer-specific company-stamp document and injects it into the prefilled Form 2 key for stamp collection.
+    - Request upload folder link (`rd5d9cb98b1aa47dd8bcd7914cd4bdc87`) pointing to an employer-specific shared request folder.
+  - Creates or reuses an employer-specific request folder in `PEV Records/Candidate Files/<CandidateID>/<RequestID>`.
+  - Creates an anonymous edit sharing link for that employer-specific request folder and injects it into the prefilled Form 2 key for company-stamp or proof-of-contact upload.
   - Uses the matching `BGV_FormData` row as the first source for company name/address/UEN in the employer email body, so EMP1/EMP2/EMP3 show the correct declared company details.
-  - Employer email now includes the Request ID and the direct shared company-stamp Word-document link, and politely asks HR to place the company stamp into that Word document and save it back using the shared link.
+  - Employer email now includes the Request ID and the direct shared request-folder link, and asks HR to upload the company stamp or proof of HR contact into that folder.
   - Employer email subject/body wording is synced to the latest cloud-edited template while preserving the existing dynamic mappings for declared-details, verification-link, and authorization-attachment sections.
   - Employer email wording now also tells the employer to reply to the email or include the `RequestID` in the subject line when they need more information, so mailbox replies can be matched safely.
   - Finds authorization file, attaches it, and emails employer HR.
@@ -272,7 +271,7 @@ This document describes the current behavior in your canonical flow files under 
   - Shared-mailbox sender is `recruitment@dlresources.com.sg`.
   - Reminder conditions now use `empty(...)`-safe checks for SharePoint date fields so null/blank timestamps do not block reminder branches unexpectedly.
 - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
-- Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, including the employer-specific shared company-stamp document link, so reminders still contain the current Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
+- Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, including the employer-specific shared request-folder link, so reminders still contain the current Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
 - Escalation now stamps `EscalatedAt`, so the same unresolved request is not escalated again on every later run.
 - One day after Reminder 2 with no employer response, the recruiter notification now says `PEV Checks Cleared`, includes the candidate-folder link, and tells recruiters TAC form is to be sent.
 - When Reminder 3 is sent, the flow also saves an HTML copy of that final reminder email into the same request folder under the candidate folder for audit/reference.

@@ -163,9 +163,9 @@
                   "inputs": "@concat('/PEV Records/Candidate Files/',coalesce(first(body('Get_item')?['value'])?['CandidateID'], items('Apply_to_each_(Requests_Loop)')?['CandidateID']),'/',items('Apply_to_each_(Requests_Loop)')?['RequestID'])",
                   "runAfter": {}
                 },
-                "CompanyStampDocumentName": {
+                "CandidateRootFolderPath": {
                   "type": "Compose",
-                  "inputs": "@concat('Company Stamp - ',items('Apply_to_each_(Requests_Loop)')?['RequestID'],'.docx')",
+                  "inputs": "@concat('/PEV Records/Candidate Files/',coalesce(first(body('Get_item')?['value'])?['CandidateID'], items('Apply_to_each_(Requests_Loop)')?['CandidateID']))",
                   "runAfter": {
                     "RequestFolderPath": [
                       "Succeeded"
@@ -188,18 +188,18 @@
                     "authentication": "@parameters('$authentication')"
                   },
                   "runAfter": {
-                    "CompanyStampDocumentName": [
+                    "CandidateRootFolderPath": [
                       "Succeeded"
                     ]
                   }
                 },
-                "Get_files_(Request_Folder)": {
+                "Get_files_(Candidate_root_for_request_folder)": {
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
                       "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
                       "table": "30d02a3a-74da-4a16-a887-7b8dd043a547",
-                      "folderPath": "@outputs('RequestFolderPath')"
+                      "folderPath": "@outputs('CandidateRootFolderPath')"
                     },
                     "host": {
                       "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -215,101 +215,34 @@
                     ]
                   }
                 },
-                "Filter_array_-_Company_Stamp_Document": {
+                "Filter_array_-_Request_folder_for_share": {
                   "type": "Query",
                   "inputs": {
-                    "from": "@body('Get_files_(Request_Folder)')?['value']",
-                    "where": "@equals(item()?['{Name}'],outputs('CompanyStampDocumentName'))"
+                    "from": "@body('Get_files_(Candidate_root_for_request_folder)')?['value']",
+                    "where": "@equals(item()?['{Name}'],items('Apply_to_each_(Requests_Loop)')?['RequestID'])"
                   },
                   "runAfter": {
-                    "Get_files_(Request_Folder)": [
+                    "Get_files_(Candidate_root_for_request_folder)": [
                       "Succeeded"
                     ]
                   }
                 },
-                "Condition_-_Create_Company_Stamp_Document": {
-                  "type": "If",
-                  "expression": {
-                    "and": [
-                      {
-                        "equals": [
-                          "@length(body('Filter_array_-_Company_Stamp_Document'))",
-                          0
-                        ]
-                      }
-                    ]
-                  },
-                  "actions": {
-                    "Get_company_stamp_template_content": {
-                      "type": "OpenApiConnection",
-                      "inputs": {
-                        "parameters": {
-                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                          "path": "/PEV Records/Templates/Company Stamp.docx",
-                          "inferContentType": true
-                        },
-                        "host": {
-                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                          "operationId": "GetFileContentByPath",
-                          "connectionName": "shared_sharepointonline"
-                        },
-                        "authentication": "@parameters('$authentication')"
-                      },
-                      "runAfter": {}
-                    },
-                    "Create_company_stamp_document": {
-                      "type": "OpenApiConnection",
-                      "inputs": {
-                        "parameters": {
-                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                          "folderPath": "@outputs('RequestFolderPath')",
-                          "name": "@outputs('CompanyStampDocumentName')",
-                          "body": "@body('Get_company_stamp_template_content')"
-                        },
-                        "host": {
-                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                          "operationId": "CreateFile",
-                          "connectionName": "shared_sharepointonline"
-                        },
-                        "authentication": "@parameters('$authentication')"
-                      },
-                      "runAfter": {
-                        "Get_company_stamp_template_content": [
-                          "Succeeded"
-                        ]
-                      },
-                      "runtimeConfiguration": {
-                        "contentTransfer": {
-                          "transferMode": "Chunked"
-                        }
-                      }
-                    }
-                  },
-                  "else": {
-                    "actions": {}
-                  },
-                  "runAfter": {
-                    "Filter_array_-_Company_Stamp_Document": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "CompanyStampDocumentItemId": {
+                "RequestUploadFolderItemId": {
                   "type": "Compose",
-                  "inputs": "@coalesce(outputs('Create_company_stamp_document')?['body/ItemId'],first(body('Filter_array_-_Company_Stamp_Document'))?['ID'])",
+                  "inputs": "@first(body('Filter_array_-_Request_folder_for_share'))?['ID']",
                   "runAfter": {
-                    "Condition_-_Create_Company_Stamp_Document": [
+                    "Filter_array_-_Request_folder_for_share": [
                       "Succeeded"
                     ]
                   }
                 },
-                "Create_sharing_link_for_request_stamp_folder": {
+                "Create_sharing_link_for_request_upload_folder": {
                   "type": "OpenApiConnection",
                   "inputs": {
                     "parameters": {
                       "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
                       "table": "30d02a3a-74da-4a16-a887-7b8dd043a547",
-                      "id": "@outputs('CompanyStampDocumentItemId')",
+                      "id": "@outputs('RequestUploadFolderItemId')",
                       "permission/type": "edit",
                       "permission/scope": "anonymous"
                     },
@@ -321,16 +254,16 @@
                     "authentication": "@parameters('$authentication')"
                   },
                   "runAfter": {
-                    "CompanyStampDocumentItemId": [
+                    "RequestUploadFolderItemId": [
                       "Succeeded"
                     ]
                   }
                 },
                 "FinalVerificationLink": {
                   "type": "Compose",
-                  "inputs": "@concat('https://forms.office.com/Pages/ResponsePage.aspx?id=cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUN1c5NE0wWEI2Nk1OMDlJSkI0N0RXUTRHMS4u','&r4930fc603c0f4cada09832be79f2a76f=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],first(body('Get_item')?['value'])?['FullName'],'')))),'&r27b6bdb850dd48339dc05df11d485470=',encodeUriComponent(if(empty(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'],first(body('Get_item')?['value'])?['IdentificationNumberNRIC'],'')))),'N/A',trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'],first(body('Get_item')?['value'])?['IdentificationNumberNRIC'],''))))),'&r425242341d6143c7a29307136debe938=',encodeUriComponent(if(empty(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'],first(body('Get_item')?['value'])?['IdentificationNumberNRIC'],'')))),if(empty(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport'],first(body('Get_item')?['value'])?['IdentificationNumberPassport'],'')))),'N/A',trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport'],first(body('Get_item')?['value'])?['IdentificationNumberPassport'],'')))),'N/A')),'&rd745d133eb7f4611b59ea051f980f97a=',encodeUriComponent(trim(string(items('Apply_to_each_(Requests_Loop)')?['RequestID']))),'&rccaf3632669648baaa335c12d4ea40bf=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'')))),'&rcf35c7cc008e472f9d0b84bde67cc1ff=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN']))),'&r19aae6e8163d4aaeb8a3f3f2d5329be2=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress']))),'&r0bef44c0d22d493f95a33484875b951e=',encodeUriComponent(if(and(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),'',if(or(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),formatDateTime(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate']),'yyyy-MM-dd'),concat(formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],'yyyy-MM-dd'),' to ',formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'],'yyyy-MM-dd'))))),'&r513ad5ab3a14453286bdb910820985ec=',encodeUriComponent(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F2_ReasonForLeaving'],'')),'&ra6ab2e26d2d84a92b33148fc4694773a=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_LastDrawnSalary']))),'&r49ca8a655f5e4bcba0e8f75d4475ad77=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_JobTitle']))),'&rd5d9cb98b1aa47dd8bcd7914cd4bdc87=',encodeUriComponent(outputs('Create_sharing_link_for_request_stamp_folder')?['body/link/webUrl']))",
+                  "inputs": "@concat('https://forms.office.com/Pages/ResponsePage.aspx?id=cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUN1c5NE0wWEI2Nk1OMDlJSkI0N0RXUTRHMS4u','&r4930fc603c0f4cada09832be79f2a76f=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],first(body('Get_item')?['value'])?['FullName'],'')))),'&r27b6bdb850dd48339dc05df11d485470=',encodeUriComponent(if(empty(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'],first(body('Get_item')?['value'])?['IdentificationNumberNRIC'],'')))),'N/A',trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'],first(body('Get_item')?['value'])?['IdentificationNumberNRIC'],''))))),'&r425242341d6143c7a29307136debe938=',encodeUriComponent(if(empty(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC'],first(body('Get_item')?['value'])?['IdentificationNumberNRIC'],'')))),if(empty(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport'],first(body('Get_item')?['value'])?['IdentificationNumberPassport'],'')))),'N/A',trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport'],first(body('Get_item')?['value'])?['IdentificationNumberPassport'],'')))),'N/A')),'&rd745d133eb7f4611b59ea051f980f97a=',encodeUriComponent(trim(string(items('Apply_to_each_(Requests_Loop)')?['RequestID']))),'&rccaf3632669648baaa335c12d4ea40bf=',encodeUriComponent(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'')))),'&rcf35c7cc008e472f9d0b84bde67cc1ff=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN']))),'&r19aae6e8163d4aaeb8a3f3f2d5329be2=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress']))),'&r0bef44c0d22d493f95a33484875b951e=',encodeUriComponent(if(and(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),'',if(or(empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate']),empty(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'])),formatDateTime(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate']),'yyyy-MM-dd'),concat(formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentStartDate'],'yyyy-MM-dd'),' to ',formatDateTime(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmploymentEndDate'],'yyyy-MM-dd'))))),'&r513ad5ab3a14453286bdb910820985ec=',encodeUriComponent(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F2_ReasonForLeaving'],'')),'&ra6ab2e26d2d84a92b33148fc4694773a=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_LastDrawnSalary']))),'&r49ca8a655f5e4bcba0e8f75d4475ad77=',encodeUriComponent(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_JobTitle']))),'&rd5d9cb98b1aa47dd8bcd7914cd4bdc87=',encodeUriComponent(outputs('Create_sharing_link_for_request_upload_folder')?['body/link/webUrl']))",
                   "runAfter": {
-                    "Create_sharing_link_for_request_stamp_folder": [
+                    "Create_sharing_link_for_request_upload_folder": [
                       "Succeeded"
                     ]
                   }
@@ -432,7 +365,7 @@
                       "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
                       "emailMessage/To": "@outputs('EmployerRecipientEmail')",
                       "emailMessage/Subject": "Request for Employment Verification - @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">Dear HR Department,<br><br>We are reaching out to the Human Resource Department of your company to conduct a Previous Employment Verification Check for</p><p class=\"editor-paragraph\">@{first(body('Get_item')?['value'])?['FullName']}, who has listed your organisation (@{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}) as the relevant previous employer.</p><br><p class=\"editor-paragraph\">Declared company details from candidate:</p><p class=\"editor-paragraph\">- Company Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}<br>- Company Address: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['Employer_Address'],'(Not captured)')}<br>- Company UEN: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['Employer_UEN'],'(Not captured)')}</p><br><p class=\"editor-paragraph\">We would greatly appreciate your assistance in completing the \"Previous Employment Verification Form\" via the link provided below as soon as possible to support a smooth and timely onboarding process.</p><br><p class=\"editor-paragraph\">For verification purposes, we would also appreciate it if you could upload your company stamp using the shared Word document provided below.</p><br><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}<br>Company stamp document:<br><a href=\"@{outputs('Create_sharing_link_for_request_stamp_folder')?['body/link/webUrl']}\" class=\"editor-link\">Open Company Stamp - @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.docx</a><br><br>Please open the document, place your company stamp in it, and save it back using the same shared link.</p><br><p class=\"editor-paragraph\">The following is the link to the form:<br><a href=\"@{outputs('FinalVerificationLink')}\" class=\"editor-link\"><br><br>Click here to complete verification</a><br><br>For your reference, the candidate's signed authorisation has been recorded for this request.</p><br><p class=\"editor-paragraph\">Please be assured that all information provided will be treated with the strictest confidence and used solely for internal HR and employment verification purposes. Please note: if you have any questions or require further information, please reply to this email or include this Request ID in the subject line: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.</p><br><p class=\"editor-paragraph\">Thank you for your time and we appreciate your verification.</p><br><p class=\"editor-paragraph\">Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">Dear HR Department,<br><br>We are reaching out to the Human Resource Department of your company to conduct a Previous Employment Verification Check for</p><p class=\"editor-paragraph\">@{first(body('Get_item')?['value'])?['FullName']}, who has listed your organisation (@{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}) as the relevant previous employer.</p><br><p class=\"editor-paragraph\">Declared company details from candidate:</p><p class=\"editor-paragraph\">- Company Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}<br>- Company Address: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['Employer_Address'],'(Not captured)')}<br>- Company UEN: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['Employer_UEN'],'(Not captured)')}</p><br><p class=\"editor-paragraph\">We would greatly appreciate your assistance in completing the \"Previous Employment Verification Form\" via the link provided below as soon as possible to support a smooth and timely onboarding process.</p><br><p class=\"editor-paragraph\">For verification purposes, please upload your company stamp or proof of HR contact into the shared request folder below.</p><br><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}<br>Request upload folder:<br><a href=\"@{outputs('Create_sharing_link_for_request_upload_folder')?['body/link/webUrl']}\" class=\"editor-link\">Open Request Folder - @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}</a><br><br>Please upload the relevant file into that folder using the same shared link.</p><br><p class=\"editor-paragraph\">The following is the link to the form:<br><a href=\"@{outputs('FinalVerificationLink')}\" class=\"editor-link\"><br><br>Click here to complete verification</a><br><br>For your reference, the candidate's signed authorisation has been recorded for this request.</p><br><p class=\"editor-paragraph\">Please be assured that all information provided will be treated with the strictest confidence and used solely for internal HR and employment verification purposes. Please note: if you have any questions or require further information, please reply to this email or include this Request ID in the subject line: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.</p><br><p class=\"editor-paragraph\">Thank you for your time and we appreciate your verification.</p><br><p class=\"editor-paragraph\">Thanks &amp; Regards,<br>D L Resources Pte Ltd</p><br>",
                       "emailMessage/Attachments": [
                         {
                           "Name": "@variables('AuthFileName')",

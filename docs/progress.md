@@ -4872,3 +4872,83 @@ Log each session with:
   - no launch-blocking logic defect was found in the currently running main production flow path
   - no canonical flow JSON changes were required from this specific audit
   - docs were updated so dashboard reading and launch-readiness checks are recorded in repo history
+
+## 2026-04-06 - Controlled smoke candidate check
+
+- Created one internal-only smoke candidate set to validate the live launch path without sending to external employer contacts:
+  - candidate: `BGV-20260406-smk1139`
+  - requests:
+    - `REQ-BGV-20260406-smk1139-EMP1`
+    - `REQ-BGV-20260406-smk1139-EMP2`
+    - `REQ-BGV-20260406-smk1139-EMP3`
+- Smoke setup design:
+  - `EMP1` used a future `SendAfterDate` to validate defer behavior
+  - `EMP2` used an immediate/past `SendAfterDate` to validate employer-send behavior
+  - `EMP3` used backdated `HRRequestSentAt` to stage a reminder-path check
+- Created the expected SharePoint smoke artifacts:
+  - candidate folder under `PEV Records/Candidate Files/BGV-20260406-smk1139`
+  - authorization subfolder and copied smoke authorization DOCX into:
+    - `PEV Records/Candidate Files/BGV-20260406-smk1139/Authorization/SMOKE_Authorization.docx`
+- Reminder-flow result:
+  - verified that `BGV_6_HRReminderAndEscalation` wakes up every 30 minutes but only actually processes reminder logic at `09:00` and `17:30` Singapore time
+  - noon/afternoon smoke checks therefore did not move the reminder row, which is expected outside those run windows
+- Employer-send flow result:
+  - the smoke check exposed an active live blocker in `BGV_4_SendToEmployer_Clean`
+  - repeated live runs at `12:00`, `12:30`, `14:00`, and `14:30` Singapore time failed
+  - failure consistently remained inside the company-stamp creation branch:
+    - `Condition_-_Create_Company_Stamp_Document`
+    - parent loop: `Apply_to_each_(Requests_Loop)`
+- Attempted canonical/live hardening:
+  - first patch changed the condition expression to an `empty(first(...))` form; this was deployed but still failed because `first()` can fault on an empty result
+  - second patch changed the condition expression to a safe length-based form:
+    - `@equals(length(body('Filter_array_-_Company_Stamp_Document')), 0)`
+  - repacked and reimported the unmanaged solution after each patch using PAC CLI
+- Current truthful state after the smoke run:
+  - `SendAfterDate` deferral remains correct at the data level (`EMP1` stayed `Not Sent`)
+  - `BGV_6` reminder timing logic remains documented and consistent with the configured run window
+  - `BGV_4` is still failing live in the company-stamp creation branch, so employer-send launch is not yet fully cleared by smoke validation
+- Immediate next action:
+  - rebuild or repair the `Condition_-_Create_Company_Stamp_Document` branch in the Power Automate designer so the company-stamp document path can be created/shared without aborting the full request loop
+
+## 2026-04-06 - Flow 4 repaired to use request-folder upload link
+
+- Reworked the fragile company-stamp branch in the canonical live sender/reminder flows:
+  - `BGV_4_SendToEmployer_Clean`
+  - `BGV_6_HRReminderAndEscalation`
+- Removed the runtime dependency on creating and sharing `Company Stamp - <RequestID>.docx` during employer send/reminder generation.
+- Replaced that branch with the safer folder-link pattern already compatible with Flow 5 expiry logic:
+  - create or reuse `PEV Records/Candidate Files/<CandidateID>/<RequestID>`
+  - look up the request folder item from the candidate root
+  - create an anonymous edit sharing link for the request folder
+  - inject that folder link into employer Form 2 prefill key `rd5d9cb98b1aa47dd8bcd7914cd4bdc87`
+  - update employer/reminder email wording to tell HR to upload company stamp or proof of HR contact into the shared request folder
+- Packed and imported the updated unmanaged solution with PAC CLI under the verified `recruitment@dlresources.com.sg` context.
+- Live smoke validation result for Flow 4:
+  - resubmitted latest failed Flow 4 recurrence after deployment
+  - new resubmitted run `08584261432611440233977674720CU03` succeeded
+  - smoke defer case remained correct:
+    - `REQ-BGV-20260406-smk1139-EMP1` stayed `VerificationStatus = Not Sent`
+  - smoke immediate-send case now passed:
+    - `REQ-BGV-20260406-smk1139-EMP2` changed to `VerificationStatus = Email Sent`
+    - `HRRequestSentAt = 2026-04-06T08:20:41Z`
+    - `uniquelinktoemployers` now contains the employer Form 2 prefill URL with an `rd5...` value pointing to a SharePoint folder link (`/:f:/...`) instead of the old Word-document link (`/:w:/...`)
+- Reminder-flow verification note:
+  - Flow 6 was updated to the same folder-link logic and redeployed successfully
+  - direct resubmits outside the production reminder-window branch did not stamp the smoke reminder row, which is expected because `BGV_6` only actively processes reminders at `09:00` and `17:30` Singapore time
+  - no new failure was observed in the redeployed Flow 6 runs
+- Validation commands run:
+  - `pac auth who`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --folder .\\flows\\power-automate\\unpacked --zipfile .\\artifacts\\exports\\BGV_System_flow4_flow6_folderlink_fix_20260406.zip --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\\artifacts\\exports\\BGV_System_flow4_flow6_folderlink_fix_20260406.zip --publish-changes --force-overwrite`
+  - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 8eeeed39-e02f-4b7a-82c8-fc51f245d863 --query "{displayName:name,state:properties.state,lastModified:properties.lastModifiedTime}" --output json`
+  - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name fc4bf0e3-0916-f111-8341-002248582037 --query "{displayName:name,state:properties.state,lastModified:properties.lastModifiedTime}" --output json`
+  - `m365 flow run resubmit --force --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 8eeeed39-e02f-4b7a-82c8-fc51f245d863 --name 08584261444855072460698310771CU22 --output json`
+  - `m365 flow run get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 8eeeed39-e02f-4b7a-82c8-fc51f245d863 --name 08584261432611440233977674720CU03 --withActions --output json`
+  - `m365 spo listitem get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Requests --id 52 --output json`
+  - `m365 spo listitem get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Requests --id 53 --output json`
+- Current launch-readiness conclusion:
+  - Flow 4 employer send path is repaired and smoke-cleared.
+  - Flow 6 reminder path is aligned to the same upload-folder model and remains constrained to its production run windows.
+  - Next action: run daily sync and push GitHub once this repaired state is confirmed as the new baseline.
