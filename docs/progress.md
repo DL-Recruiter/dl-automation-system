@@ -4819,3 +4819,56 @@ Log each session with:
   - The six new live columns use SharePoint-generated internal names derived from their display labels, not the original shorthand names first proposed locally.
   - The columns now exist live and are documented, but live auto-population is still pending a safe SharePoint action schema refresh in `BGV_5`.
   - `BGV_5_Response1` was observed in `Stopped` state during verification; after the revert it still needs explicit activation/validation on the platform side.
+
+## 2026-04-06 - Dashboard reading guide added
+
+- Expanded `docs/flows_easy_english.md` with a dedicated recruiter-facing dashboard guide.
+- Added an easy-English section explaining:
+  - which workbook is the live dashboard
+  - what each sheet is used for
+  - how to read `Summary`
+  - how to read `Cases`
+  - what each main dashboard column means
+  - what each dashboard `Status` means
+  - how `Severity` should be interpreted
+  - why rows disappear from the active dashboard after the retention window
+- This was added so the dashboard logic is documented in a user-readable format, not only in technical design notes such as `docs/bgv_dashboard_power_automate_redesign.md`.
+
+## 2026-04-06 - Launch-readiness live audit
+
+- Ran a final live audit across the production BGV flows using the `recruitment@dlresources.com.sg` PAC/M365 context.
+- Confirmed the main production flows are in `Started` state:
+  - `BGV_0_CandidateDeclaration`
+  - `BGV_1_Detect_Authorization_Signature`
+  - `BGV_2_Postsignature`
+  - `BGV_3_AuthReminder_5Days`
+  - `BGV_4_SendToEmployer_Clean`
+  - `BGV_5_Response1`
+  - `BGV_6_HRReminderAndEscalation`
+  - `BGV_7_Generate_Report_Summary`
+  - `BGV_8_Track_Employer_Email_Replies`
+  - `BGV_9_Refresh_Dashboard_Excel`
+- Noted non-primary flows outside the main launch path:
+  - `BGV_4_SendToEmployer_Clean_v2` remains stopped
+  - `BGV_A_CandidateSubmission` remains stopped
+- Reviewed recent live run history and confirmed recent successful runs for:
+  - `BGV_0`, `BGV_2`, `BGV_3`, `BGV_4`, `BGV_5`, `BGV_6`, `BGV_7`, `BGV_8`, `BGV_9`
+- `BGV_1` run-history query timed out during admin polling, but the flow remains `Started`; no live failure signal was found during this audit.
+- Rechecked the current `SendAfterDate` gate in `BGV_4`:
+  - employer send is held when `RequestID` ends with `-EMP1` and `SendAfterDate` is still in the future
+  - the send is allowed when `SendAfterDate` is blank or on/before today
+  - `EMP2` and `EMP3` rows are not deferred by `SendAfterDate`
+- Rechecked the employer reminder/escalation timing in `BGV_6`:
+  - Reminder 1: 2 days after initial employer send
+  - Reminder 2: 3 days after Reminder 1
+  - Escalation: 1 day after Reminder 2 if still no response
+  - Reminder 3: 11 days after initial employer send if still no response
+  - no-response closure path: 5 days after Reminder 3 if still no response
+- Rechecked the candidate authorization reminder logic in `BGV_3`:
+  - reminder dedupe still relies on `LastAuthReminderAt`
+  - same-slot duplicate reminders are blocked using Singapore date/hour comparison
+- Chose not to force-run the recurrence flows during the launch audit because live `PEV_Requests` still contains active operational rows; replaying recurrence logic would risk duplicate real emails or reminders.
+- Outcome of the audit:
+  - no launch-blocking logic defect was found in the currently running main production flow path
+  - no canonical flow JSON changes were required from this specific audit
+  - docs were updated so dashboard reading and launch-readiness checks are recorded in repo history

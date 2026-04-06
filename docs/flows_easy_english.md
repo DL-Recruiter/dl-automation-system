@@ -430,6 +430,156 @@ This document describes the current behavior in your canonical flow files under 
     - `PEV Dashboard.xlsx`
     remains unchanged unless you choose to cut over later.
 
+## How to Read the Dashboard
+
+### Which workbook to open
+- The live Power Automate dashboard workbook is:
+  - `BGV Records/Dashboard/PEVDashboard_Flow.xlsx`
+- This is the workbook refreshed by `BGV_9`.
+- The older workbook (`PEV Dashboard.xlsx`) is the older snapshot-style version and is not the main live-flow workbook.
+
+### What each sheet is for
+- `Summary`
+  - This is the quick management view.
+  - It shows the headline counts and small summary tables.
+- `Cases`
+  - This is the working list for recruiters.
+  - Each row is one employer request, not one whole candidate.
+  - If one candidate has 3 employers, that candidate can appear in 3 rows.
+- `Helper`
+  - This supports formulas and lookups.
+  - Recruiters normally do not need to use this sheet directly.
+- `RefreshLog`
+  - This records when `BGV_9` last refreshed the workbook and what counts were produced in that run.
+
+### How to read the Summary sheet
+- `Total Requests`
+  - Total dashboard rows included in the current dashboard logic.
+  - This is the sum of active rows still shown in the dashboard plus the closed-case counts tracked by the refresh flow.
+- `Open Cases`
+  - Requests still actively being worked.
+  - These are rows that have not yet aged out of the dashboard cleanup logic.
+- `Completed Cases`
+  - Requests treated as closed by the dashboard logic.
+  - This includes:
+    - `Employer Form Received`
+    - `Employer Form Received But Flagged`
+    - `Employer Reminder 3 Sent` cases once they move into the closed/cleared logic
+- `Employer Forms Received`
+  - Count of cases closed with a normal employer response and no flagged severity issue.
+- `Authorisation Forms Received`
+  - Count of candidates whose authorization stage is complete enough for the employer stage to proceed.
+- `Closed Cases Report`
+  - Breaks the closed rows into the main end states:
+    - `Employer Form Received`
+    - `Employer Form Received But Flagged`
+    - `Employer Reminder 3 Sent`
+    - `Cleared Rows (Total)`
+
+### How to read the Cases sheet
+- Each row = one `RequestID`
+- Read the row left to right:
+  - who the candidate is
+  - which employer/request this is
+  - what stage the case is at
+  - when the key emails/reminders happened
+  - whether the case is completed
+  - whether severity/issues were found
+
+### Meaning of the main dashboard columns
+- `Candidate Name`
+  - Candidate linked to this employer request.
+- `CandidateID`
+  - Main candidate tracking ID.
+- `RequestID`
+  - Employer-request tracking ID for this specific employer slot.
+- `Company Name`
+  - Employer/company being verified for this row.
+- `HR Name`, `HR Email`, `HR Mobile Number`
+  - Contact details from the candidate form for that employer.
+- `Status`
+  - Current stage of the request based on candidate auth, employer send, reminders, and response.
+- `Candidate Email Sent At`
+  - When the authorization form was first sent to the candidate.
+- `Candidate Reminder`
+  - Shows the latest authorization reminder stage sent to the candidate.
+- `Employer Email Sent At`
+  - When the verification request was first emailed to employer HR.
+- `Employer Reminder`
+  - Shows the latest employer reminder stage sent.
+- `Completed Status`
+  - `Yes` when the request is treated as completed/closed by dashboard logic.
+  - `No` when the request is still active.
+- `Completed Date`
+  - The main completion-style timestamp shown in the dashboard.
+  - Uses first available from:
+    - employer response time
+    - escalation time
+    - reminder 3 time
+- `Employer Response Received At`
+  - When the employer submitted the Microsoft Form.
+- `Employer Email Reply At`
+  - When the latest employer email reply was detected in the mailbox.
+- `Last Activity At`
+  - Latest relevant activity timestamp across sends, reminders, replies, and responses.
+- `Candidate Folder Link`
+  - Direct SharePoint link to the candidate folder.
+- `Severity`
+  - Risk level from the employer response:
+    - blank
+    - `Low`
+    - `Medium`
+    - `High`
+- `Outcome`
+  - Flagged issue summary pulled from the employer form logic.
+
+### What each Status means
+- `Candidate Form Received`
+  - Candidate has submitted the declaration form, but the authorization link has not yet been sent.
+- `Authorisation Form Sent`
+  - Candidate has received the authorization form and signature is still pending.
+- `Authorisation Form Received`
+  - Authorization is signed/received and the request is waiting for employer-send conditions.
+- `Authorisation Received - Employer Email Queued`
+  - Authorization is done, but the employer email is intentionally waiting because of `SendAfterDate`.
+- `Email Sent to Employer`
+  - Employer verification email has been sent and no reminder has been sent yet.
+- `Employer Reminder 1 Sent`
+  - First reminder has been sent to employer HR.
+- `Employer Reminder 2 Sent`
+  - Second reminder has been sent to employer HR.
+- `Employer Reminder 3 Sent`
+  - Final reminder has been sent to employer HR.
+- `Employer Form Received`
+  - Employer submitted the form and no flagged severity was recorded.
+- `Employer Form Received But Flagged`
+  - Employer submitted the form and severity is `Low`, `Medium`, or `High`.
+
+### How severity should be interpreted
+- blank
+  - no flagged severity logic triggered
+- `Low`
+  - lower-level issue from the employer response logic
+- `Medium`
+  - employment-detail discrepancy issue
+- `High`
+  - more serious flagged issue such as MAS / disciplinary / re-employ problem
+
+### Why rows disappear from the dashboard
+- `BGV_9` intentionally removes older rows from the visible dashboard once they are treated as closed.
+- A row is skipped from the active dashboard when:
+  - `Employer Reminder 3 Sent` and there is still no response for 5 days after `Reminder3At`
+  - completed employer-response cases are 5 days past the response/completion timestamp
+- Those rows are not “lost”.
+- They are simply no longer shown in the active dashboard table because the dashboard is meant to focus on current working cases plus tracked close counts.
+
+### Important practical note
+- If you want to investigate a case in detail, use:
+  - the `Cases` sheet row
+  - the `Candidate Folder Link`
+  - the SharePoint lists (`PEV_Candidates`, `PEV_Requests`, `PEV_FormData`)
+- The dashboard is the recruiter-facing summary layer, not the full data store.
+
 ## How the Flows Connect
 - Candidate signature track:
   - `BGV_0` -> `BGV_1` -> `BGV_2`
