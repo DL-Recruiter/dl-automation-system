@@ -4982,3 +4982,69 @@ Log each session with:
 - Next actions and blockers:
   - Repack/import the updated solution to live, then verify a fresh generated employer link from `PEV_Requests.uniquelinktoemployers` uses `forms.cloud.microsoft` and still carries the request-specific field values.
 
+## 2026-04-07 (Employer Form 2 prefill fixed by reverting to proven office.com domain)
+
+- Current status:
+  - Investigated the follow-up report that employer Form 2 still opened blank even after the domain change.
+- Completed tasks:
+  - Verified from a successful live `BGV_5_Response1` run on `2026-04-03` that the employer form was returning the first-page values under the expected keys, including:
+    - `r4930fc603c0f4cada09832be79f2a76f` candidate name
+    - `r27b6bdb850dd48339dc05df11d485470` NRIC
+    - `r425242341d6143c7a29307136debe938` Passport
+    - `rd745d133eb7f4611b59ea051f980f97a` RequestID
+    - `rccaf3632669648baaa335c12d4ea40bf` employer name
+    - `rcf35c7cc008e472f9d0b84bde67cc1ff` employer UEN
+    - `r19aae6e8163d4aaeb8a3f3f2d5329be2` employer address
+  - Confirmed that this proved the key set itself was still valid; the regression aligned with the recent switch from `forms.office.com` to `forms.cloud.microsoft`.
+  - Reverted both active canonical sender/reminder flows back to the last proven-good employer prefill base URL:
+    - `BGV_4_SendToEmployer_Clean`
+    - `BGV_6_HRReminderAndEscalation`
+  - Packed and imported the updated solution successfully under the verified `recruitment@dlresources.com.sg` PAC context.
+- Validation commands run:
+  - `pac auth who`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --zipfile .\\artifacts\\exports\\BGV_System_prefill_office_revert_20260407.zip --folder .\\flows\\power-automate\\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\\artifacts\\exports\\BGV_System_prefill_office_revert_20260407.zip --publish-changes --force-overwrite`
+  - `m365 flow run get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName fb38d48c-6c03-42d8-8af7-b085a20c2def --name 08584263965925123704267412207CU24 --withActions --output json`
+- Notes:
+  - The post-import smoke resubmit succeeded at the flow-run level but did not stamp the smoke request row again, so the strongest proof remains the live successful `BGV_5` run showing `forms.office.com` links returned the first-page prefilled values correctly.
+  - Use newly generated employer links after this import as the source of truth; older generated links may still reflect earlier domain variants.
+
+## 2026-04-07 (Employer Form 2 prefill final live smoke proof)
+
+- Current status:
+  - Confirmed the employer prefilled fields are now showing again on newly generated links.
+- Completed tasks:
+  - Repacked and reimported the corrected canonical `BGV_4_SendToEmployer_Clean` and `BGV_6_HRReminderAndEscalation` definitions after verifying both use the proven `forms.office.com` base URL.
+  - Reset internal smoke request `PEV_Requests` item `52` (`REQ-BGV-20260406-smk1139-EMP2`) back to a fresh send state:
+    - `VerificationStatus = Not Sent`
+    - `HRRequestSentAt = null`
+    - `uniquelinktoemployers = null`
+  - Allowed the next live Flow 4 recurrence to regenerate the employer request from the repaired live definition.
+  - Verified the regenerated request row now contains:
+    - `VerificationStatus = Email Sent`
+    - `HRRequestSentAt = 2026-04-07T06:01:42Z`
+    - `uniquelinktoemployers` using `https://forms.office.com/Pages/ResponsePage.aspx?...`
+    - request-specific prefill values for:
+      - candidate name
+      - NRIC / passport fallback
+      - RequestID
+      - employer name
+      - employer UEN
+      - employer address
+      - employment period
+      - last drawn salary
+      - job title
+      - shared Word company-stamp document link
+- Validation commands run:
+  - `pac auth who`
+  - `pac solution pack --zipfile .\\artifacts\\exports\\BGV_System_prefill_office_revert_final_20260407.zip --folder .\\flows\\power-automate\\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\\artifacts\\exports\\BGV_System_prefill_office_revert_final_20260407.zip --publish-changes --force-overwrite`
+  - `m365 spo listitem set --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Requests --id 52 --VerificationStatus 'Not Sent' --HRRequestSentAt '' --uniquelinktoemployers '' --output json`
+  - `m365 spo listitem get --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Requests --id 52 --output json`
+- Final conclusion:
+  - the field keys were not the defect
+  - the regression came from changing the employer form base domain
+  - production is now correctly back on `forms.office.com` for new employer sends
+

@@ -131,6 +131,7 @@ This document describes the current behavior in your canonical flow files under 
     - EMP1 sends only when `SendAfterDate` is today or earlier
     - EMP2 and EMP3 are not blocked by the defer date
 - Builds prefilled HR verification form URL with:
+  - Base URL: `https://forms.office.com/Pages/ResponsePage.aspx`
     - Candidate name
     - Candidate NRIC mapped into the HR form NRIC field; when NRIC is absent it shows `N/A`
     - Candidate Passport mapped into the HR form Passport field; when NRIC is present it shows `N/A`
@@ -144,6 +145,7 @@ This document describes the current behavior in your canonical flow files under 
     - Job title
   - Company stamp Word document link (`rd5d9cb98b1aa47dd8bcd7914cd4bdc87`) pointing to the employer-specific shared Word document.
 - Creates or reuses the employer-specific company-stamp Word document and injects its shared edit link into the prefilled Form 2 key.
+  - Production note: the live working employer prefill path is `forms.office.com`; a later `forms.cloud.microsoft` variant opened the form but left the first-page values blank, so the flow was reverted to the proven `forms.office.com` base.
   - Uses the matching `BGV_FormData` row as the first source for company name/address/UEN in the employer email body, so EMP1/EMP2/EMP3 show the correct declared company details.
   - Employer email now includes the Request ID and the direct shared request-folder link, and asks HR to upload the company stamp or proof of HR contact into that folder.
   - Employer email subject/body wording is synced to the latest cloud-edited template while preserving the existing dynamic mappings for declared-details, verification-link, and authorization-attachment sections.
