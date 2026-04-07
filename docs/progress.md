@@ -4964,3 +4964,21 @@ Log each session with:
     - New live employer links observed in PEV_Requests now include SharePoint /:w:/... document links again for d5d..., confirming the shared Word document mapping is back.
   - Note: one smoke request iteration remained inconsistent for EMP2 loop validation, but the live generated employer document-link format is corrected for new sends.
 
+## 2026-04-07 (Employer Form 2 prefill base URL repaired to live Forms domain)
+
+- Current status:
+  - Investigated the report that employer Form 2 links were opening without their prefilled values showing.
+- Completed tasks:
+  - Confirmed the active canonical sender/reminder flows were still building the employer prefilled URL on the older `forms.office.com` base.
+  - Verified the current live user-provided Form 2 prefilled URL pattern is `forms.cloud.microsoft`.
+  - Updated both active canonical flows so the prefilled employer Form 2 link now uses the current live base URL while preserving the existing request-specific `r...` field mappings:
+    - `BGV_4_SendToEmployer_Clean`
+    - `BGV_6_HRReminderAndEscalation`
+  - Updated flow documentation so the company-stamp prefill description matches the current live Word-document model rather than the older request-folder wording.
+- Validation commands run:
+  - `rg -n "forms\\.office\\.com/Pages/ResponsePage\\.aspx\\?id=cHRZOFNHGkaDf62MFIYLIq9-liquOypMpApm-AyRSqVUN1c5NE0wWEI2Nk1OMDlJSkI0N0RXUTRHMS4u" flows/power-automate/unpacked/Workflows/`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+- Next actions and blockers:
+  - Repack/import the updated solution to live, then verify a fresh generated employer link from `PEV_Requests.uniquelinktoemployers` uses `forms.cloud.microsoft` and still carries the request-specific field values.
+
