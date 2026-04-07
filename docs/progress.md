@@ -4952,3 +4952,15 @@ Log each session with:
   - Flow 4 employer send path is repaired and smoke-cleared.
   - Flow 6 reminder path is aligned to the same upload-folder model and remains constrained to its production run windows.
   - Next action: run daily sync and push GitHub once this repaired state is confirmed as the new baseline.
+
+- 2026-04-07: Repaired employer company-stamp link path in Flow 4/6 back to shared Word document behavior.
+  - Root cause: employer prefill key d5d9cb98b1aa47dd8bcd7914cd4bdc87 and employer email body had previously been redirected to a shared request-folder link.
+  - Canonical files updated:
+    - flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json
+    - flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json
+  - Re-imported solution and re-enabled live Flow 4 and Flow 6.
+  - Live validation:
+    - Flow 4 is Started and recurring successfully.
+    - New live employer links observed in PEV_Requests now include SharePoint /:w:/... document links again for d5d..., confirming the shared Word document mapping is back.
+  - Note: one smoke request iteration remained inconsistent for EMP2 loop validation, but the live generated employer document-link format is corrected for new sends.
+
