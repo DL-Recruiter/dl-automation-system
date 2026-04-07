@@ -5048,3 +5048,32 @@ Log each session with:
   - the regression came from changing the employer form base domain
   - production is now correctly back on `forms.office.com` for new employer sends
 
+## 2026-04-07 (Dashboard status fix for unsigned authorization cases)
+
+- Current status:
+  - Corrected the live dashboard status logic so unsigned authorization cases no longer appear as `Authorisation Form Received`.
+- Completed tasks:
+  - Investigated the specific test candidate from the dashboard screenshot:
+    - `CandidateID = PEV-20260407-9d6e7`
+    - `FullName = test 3 7/4 - Joel Ng Wei Kiat`
+  - Verified the live SharePoint state:
+    - `PEV_Candidates.Status = Pending Authorization Form Signature`
+    - `PEV_Candidates.AuthorisationSigned = false`
+    - `PEV_Candidates.AuthorizationLinkCreatedAt = 2026-04-07T06:22:09Z`
+    - matching `PEV_Requests.VerificationStatus = Not Sent`
+    - matching `PEV_Requests.HRRequestSentAt = null`
+  - Confirmed the bug was in `BGV_9_Refresh_Dashboard_Excel`:
+    - `Compose_Status` was falling through to `Authorisation Form Received` for any request not yet in the employer reminder chain.
+  - Patched `Compose_Status` so status derivation now follows the documented order:
+    - no authorization link created -> `Candidate Form Received`
+    - authorization link created but not signed -> `Authorisation Form Sent`
+    - signed + employer not yet sent -> `Authorisation Form Received`
+    - signed + future `SendAfterDate` -> `Authorisation Received - Employer Email Queued`
+    - then the normal employer reminder / responded statuses
+- Validation commands run:
+  - `m365 spo listitem list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Candidates --filter "CandidateID eq 'PEV-20260407-9d6e7'" --output json`
+  - `m365 spo listitem list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Requests --filter "CandidateID eq 'PEV-20260407-9d6e7'" --output json`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+- Next action:
+  - Repack/import the patched `BGV_9` flow and run a refresh so the workbook row updates from `Authorisation Form Received` to `Authorisation Form Sent`.
+
