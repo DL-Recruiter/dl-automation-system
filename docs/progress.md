@@ -5192,7 +5192,37 @@ Log each session with:
   - Graph file upload back to the same live template item id using the saved backup:
     - `out/template_backups/DLRAuthorizationLetter_Template_20260408_140447.docx`
   - local XML inspection of the restored live template after re-download
-- Notes:
+  - Notes:
   - This restores candidate browser editing, including draw/sign use in the browser and checkbox ticking.
   - Word for the browser does not reliably support a true partly-locked / partly-editable experience when document protection is enforced, so the live template is intentionally kept browser-editable to preserve the candidate flow.
+
+## 2026-04-08 (Flow 9 blank DashboardKey guard fix)
+
+- Current status:
+  - Fixed the Flow 9 dashboard refresh failure caused by a blank row in `tblDashboardCasesPA`.
+- Completed tasks:
+  - Patched the canonical Flow 9 condition branch so `Condition_-_Has_DashboardKey` now trims/coalesces `DashboardKey` before deciding whether to delete an existing dashboard row.
+  - Patched the `Delete_row_from_tblDashboardCasesPA` action to pass a trimmed/coalesced `DashboardKey` value as the delete id.
+  - Repacked and reimported the live unmanaged solution using the existing Flow 9 deployment settings file:
+    - `out/deployment-settings/bgv9_live.settings.json`
+  - Confirmed the live flow remained `Started` after import:
+    - `BGV_9_Refresh_Dashboard_Excel`
+  - Waited for the next scheduled post-fix recurrence run and verified it succeeded:
+    - run id `08584259632853808651567547947CU22`
+  - Confirmed the previously failing loop now succeeds even when the Excel table still contains a blank dashboard row:
+    - `Apply_to_each_(Existing_Dashboard_Rows)` succeeded
+    - the first row in the live Excel input still had `DashboardKey = ""`
+  - Confirmed the refresh completed all the way through:
+    - `Add_a_row_into_tblDashboardRefreshLog` succeeded
+    - refresh log recorded `Rows Written = 44`, `Total Requests = 66`, `Active Cases = 44`, `Cleared Cases = 22`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+  - `pac auth who`
+  - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_live.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_dashboard_live.zip --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
+  - `m365 flow list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --asAdmin --output json`
+  - `m365 flow run list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 7f4dbc87-1117-af35-a703-126c8a6485c0 --output json`
+  - `m365 flow run get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 7f4dbc87-1117-af35-a703-126c8a6485c0 --name 08584259632853808651567547947CU22 --withActions --output json`
+- Notes:
+  - The fix is intentionally defensive: blank rows in the Excel table are now skipped safely instead of breaking the dashboard refresh.
 

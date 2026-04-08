@@ -142,10 +142,12 @@
                 "Condition_-_Has_DashboardKey": {
                   "type": "If",
                   "expression": {
-                    "equals": [
-                      "@empty(items('Apply_to_each_(Existing_Dashboard_Rows)')?['DashboardKey'])",
-                      false
-                    ]
+                    "not": {
+                      "equals": [
+                        "@trim(string(coalesce(items('Apply_to_each_(Existing_Dashboard_Rows)')?['DashboardKey'],'')))",
+                        ""
+                      ]
+                    }
                   },
                   "actions": {
                     "Delete_row_from_tblDashboardCasesPA": {
@@ -157,7 +159,7 @@
                           "file": "017QXH3HY5X73LM5443ZFLLGMN5IWZBI6R",
                           "table": "tblDashboardCasesPA",
                           "idColumn": "DashboardKey",
-                          "id": "@items('Apply_to_each_(Existing_Dashboard_Rows)')?['DashboardKey']"
+                          "id": "@trim(string(coalesce(items('Apply_to_each_(Existing_Dashboard_Rows)')?['DashboardKey'],'')))"
                         },
                         "host": {
                           "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
