@@ -5114,3 +5114,59 @@ Log each session with:
   - The authorization template hardening was deliberately minimal and reversible: only the document protection enforcement changed, while the live file path/id and the flow-detection controls remained the same.
   - The smoke verification here was a safe structural/live-data check using the internal smoke candidate rows rather than a fresh external send.
 
+## 2026-04-08 (Employer reminder smoke test completed and production-safe Flow 6 restored)
+
+- Current status:
+  - Completed the internal-only live smoke validation for employer Reminder 1, Reminder 2, and Final Reminder using smoke candidate `BGV-20260406-smk1139`.
+  - Restored `BGV_6_HRReminderAndEscalation` to the production-safe version after the smoke run and reset the smoke request rows back to their baseline values.
+- Completed tasks:
+  - Verified PAC context first:
+    - `recruitment@dlresources.com.sg`
+  - Confirmed the local canonical `BGV_6_HRReminderAndEscalation` definition had:
+    - the real reminder run window logic (`09:00` and `17:30` Singapore time)
+    - no leftover smoke-only candidate filter
+    - the permanent `CandidateDisplayName` compose action used by reminder email bodies
+  - Repacked and reimported the full unmanaged solution from canonical source and re-enabled live `BGV_6_HRReminderAndEscalation`.
+  - Verified live `BGV_6_HRReminderAndEscalation` is now back to `Started`.
+  - Restored the internal smoke `PEV_Requests` rows to their baseline values:
+    - item `51` / `REQ-BGV-20260406-smk1139-EMP1`
+      - back to `VerificationStatus = Email Sent`
+      - `Reminder1At`, `Reminder2At`, `Reminder3At`, `ResponseReceivedAt`, `EscalatedAt` cleared
+    - item `52` / `REQ-BGV-20260406-smk1139-EMP2`
+      - back to `VerificationStatus = Email Sent`
+      - `Reminder1At`, `Reminder2At`, `Reminder3At`, `ResponseReceivedAt`, `EscalatedAt` cleared
+    - item `53` / `REQ-BGV-20260406-smk1139-EMP3`
+      - back to `VerificationStatus = Reminder 1 Sent`
+      - `Reminder1At` restored
+      - `Reminder2At`, `Reminder3At`, `ResponseReceivedAt`, `EscalatedAt` cleared
+  - Confirmed actual reminder email outputs in the recruitment mailbox during the smoke test:
+    - Reminder 1 subject:
+      - `Reminder: Employment Verification Request`
+    - Reminder 2 subject:
+      - `2nd Reminder: Employment Verification Request from D L Resources`
+    - Final Reminder subject:
+      - `Final Reminder: Employment Verification Request`
+    - Reminder 1, Reminder 2, and Final Reminder all contained:
+      - the correct candidate name (`SMOKE Launch Candidate 2026-04-06`)
+      - wording that the candidate authorized D L Resources to conduct the background check
+      - wording that the employer was provided as the verification contact
+      - the request-specific prefilled employer Form 2 link
+      - the request-specific shared Word company-stamp document link
+  - Confirmed reminder-state transitions during the smoke execution:
+    - Reminder 1 stamped `Reminder1At` and `VerificationStatus = Reminder 1 Sent`
+    - Reminder 2 stamped `Reminder2At` and `VerificationStatus = Reminder 2 Sent`
+    - Final Reminder stamped `Reminder3At` and `VerificationStatus = Reminder 3 Sent`
+- Validation commands run:
+  - `pac auth who`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --folder flows\\power-automate\\unpacked --zipfile artifacts\\exports\\bgv_smoke_finalize_20260408.zip --packagetype Unmanaged`
+  - `pac solution import --path artifacts\\exports\\bgv_smoke_finalize_20260408.zip --environment https://orgde64dc49.crm5.dynamics.com/ --publish-changes --force-overwrite`
+  - `m365 flow enable --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 3df19738-dfe2-4068-995c-46198ff91435`
+  - `m365 flow list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --asAdmin --output json`
+  - `m365 spo listitem set --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Requests --id 51 ...`
+  - `m365 spo listitem set --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Requests --id 52 ...`
+  - `m365 spo listitem set --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Requests --id 53 ...`
+- Notes:
+  - The smoke run stayed internal-only by using `recruitment@dlresources.com.sg` as the mailbox target; no external employer mailbox was used for this validation.
+  - The reminder-body defect from earlier in the day was fixed permanently by using `CandidateDisplayName` in reminder email bodies instead of relying on inline fallback rendering that could blank the candidate name.
+

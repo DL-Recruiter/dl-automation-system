@@ -290,6 +290,20 @@ This document describes the current behavior in your canonical flow files under 
 - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, including the employer-specific shared request-folder link, so reminders still contain the current Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
 - Reminder 1, Reminder 2, and Final Reminder wording now clearly names the candidate and says that the candidate authorized D L Resources to conduct the background check and provided the employer contact for verification.
+- Controlled internal-only smoke validation on `2026-04-08` confirmed all three employer reminder emails render correctly when sent to `recruitment@dlresources.com.sg`:
+  - Reminder 1 subject: `Reminder: Employment Verification Request`
+  - Reminder 2 subject: `2nd Reminder: Employment Verification Request from D L Resources`
+  - Final Reminder subject: `Final Reminder: Employment Verification Request`
+  - each email included:
+    - the correct candidate name
+    - wording that the candidate authorized D L Resources to conduct the background check
+    - wording that the employer was provided as the verification contact
+    - the request-specific prefilled Form 2 link
+    - the request-specific shared Word company-stamp document link
+  - request-row state transitions also matched the intended logic:
+    - Reminder 1 stamped `Reminder1At` and `VerificationStatus = Reminder 1 Sent`
+    - Reminder 2 stamped `Reminder2At` and `VerificationStatus = Reminder 2 Sent`
+    - Final Reminder stamped `Reminder3At` and `VerificationStatus = Reminder 3 Sent`
 - Escalation now stamps `EscalatedAt`, so the same unresolved request is not escalated again on every later run.
 - One day after Reminder 2 with no employer response, the recruiter notification now says `PEV Checks Cleared`, includes the candidate-folder link, and tells recruiters TAC form is to be sent.
 - When Reminder 3 is sent, the flow also saves an HTML copy of that final reminder email into the same request folder under the candidate folder for audit/reference.
