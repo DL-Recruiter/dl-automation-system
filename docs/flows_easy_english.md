@@ -102,6 +102,22 @@ This document describes the current behavior in your canonical flow files under 
   - Email sends are routed via shared mailbox `recruitment@dlresources.com.sg`.
 - Main outcome: Unsigned candidate authorization forms are actively chased and escalated.
 
+### Authorization Template Locking
+- The live candidate authorization template is still:
+  - `DLR Recruitment Ops > PEV Records > Templates > DLRAuthorizationLetter_Template.docx`
+- `BGV_0_CandidateDeclaration` still points to that same live template file; it was not remapped to a different document.
+- The template is now protected in Word `forms` mode so candidates should only be able to edit the intended content controls instead of the whole document.
+- The flow-critical controls were preserved:
+  - `CandidateName`
+  - `Identification Number NRIC`
+  - `Identification Number Passport`
+  - `Date`
+  - `SignedYes`
+- Because `SignedYes` is still present, `BGV_1_Detect_Authorization_Signature` can still detect the signed checkbox path it depends on.
+- This hardening is reversible:
+  - a timestamped local backup was saved before the patched template was uploaded
+  - only the document protection setting was changed, not the business fields or file reference
+
 ### `BGV_Candidates` field usage snapshot
 - `JobTitle`
   - Not used by the current canonical flows.
@@ -273,6 +289,7 @@ This document describes the current behavior in your canonical flow files under 
   - Reminder conditions now use `empty(...)`-safe checks for SharePoint date fields so null/blank timestamps do not block reminder branches unexpectedly.
 - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, including the employer-specific shared request-folder link, so reminders still contain the current Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
+- Reminder 1, Reminder 2, and Final Reminder wording now clearly names the candidate and says that the candidate authorized D L Resources to conduct the background check and provided the employer contact for verification.
 - Escalation now stamps `EscalatedAt`, so the same unresolved request is not escalated again on every later run.
 - One day after Reminder 2 with no employer response, the recruiter notification now says `PEV Checks Cleared`, includes the candidate-folder link, and tells recruiters TAC form is to be sent.
 - When Reminder 3 is sent, the flow also saves an HTML copy of that final reminder email into the same request folder under the candidate folder for audit/reference.

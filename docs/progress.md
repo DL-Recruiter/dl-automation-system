@@ -5077,3 +5077,40 @@ Log each session with:
 - Next action:
   - Repack/import the patched `BGV_9` flow and run a refresh so the workbook row updates from `Authorisation Form Received` to `Authorisation Form Sent`.
 
+## 2026-04-08 (Authorization template hardened and employer reminder wording clarified)
+
+- Current status:
+  - Recompleted the interrupted validation pass for the candidate authorization template and employer reminder wording.
+- Completed tasks:
+  - Verified `BGV_0_CandidateDeclaration` still points to the same live SharePoint template file:
+    - `PEV Records/Templates/DLRAuthorizationLetter_Template.docx`
+    - live file id remains `017QXH3H2C7KNCCUL4KRDIDZKFV4VC5U6H`
+  - Downloaded the live template, saved a timestamped local backup, and patched only the Word protection setting so the document now uses enforced `forms` protection.
+  - Uploaded the patched template back to the same live SharePoint file id so no flow file reference had to change.
+  - Re-downloaded the live template and verified the required controls still exist after patching:
+    - `CandidateName`
+    - `Identification Number NRIC`
+    - `Identification Number Passport`
+    - `Date`
+    - `SignedYes`
+  - Confirmed this keeps `BGV_1_Detect_Authorization_Signature` compatible with the current signed-checkbox detection logic.
+  - Patched `BGV_6_HRReminderAndEscalation` reminder email wording so Reminder 1, Reminder 2, and Final Reminder now clearly name the candidate and state that the candidate authorized D L Resources to conduct the background check and provided the employer contact for verification.
+  - Repacked and reimported the solution successfully under verified PAC context `recruitment@dlresources.com.sg`.
+  - Rechecked internal smoke candidate `BGV-20260406-smk1139` request rows after the live changes:
+    - `EMP1` still holds a valid `forms.office.com` prefilled employer link and a SharePoint `/:w:/` Word document stamp link
+    - `EMP2` still holds a valid `forms.office.com` prefilled employer link and a SharePoint `/:w:/` Word document stamp link
+    - `EMP3` remains in the reminder chain as `Reminder 1 Sent`, confirming no structural break in the reminder-state data
+  - Updated `docs/flows_easy_english.md` to explain the hardened authorization template behavior and the clarified employer reminder wording.
+- Validation commands run:
+  - `pac auth who`
+  - `m365 request --url "https://graph.microsoft.com/v1.0/drives/b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErElNW6uLQbQ_T5nUW_SVV6jp/items/017QXH3H2C7KNCCUL4KRDIDZKFV4VC5U6H?$select=id,name,lastModifiedDateTime,lastModifiedBy,parentReference,webUrl" --output json`
+  - Graph file upload back to the same live template item id using a token from `m365 util accesstoken get`
+  - local XML verification of `word/settings.xml` and `word/document.xml` from the re-downloaded live template
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --zipfile .\artifacts\exports\BGV_System_reminder_wording_auth_template_20260408.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_reminder_wording_auth_template_20260408.zip --publish-changes --force-overwrite`
+  - `m365 spo listitem list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle PEV_Requests --filter "CandidateID eq 'BGV-20260406-smk1139'" --output json`
+- Notes:
+  - The authorization template hardening was deliberately minimal and reversible: only the document protection enforcement changed, while the live file path/id and the flow-detection controls remained the same.
+  - The smoke verification here was a safe structural/live-data check using the internal smoke candidate rows rather than a fresh external send.
+
