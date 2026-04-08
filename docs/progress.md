@@ -5170,3 +5170,29 @@ Log each session with:
   - The smoke run stayed internal-only by using `recruitment@dlresources.com.sg` as the mailbox target; no external employer mailbox was used for this validation.
   - The reminder-body defect from earlier in the day was fixed permanently by using `CandidateDisplayName` in reminder email bodies instead of relying on inline fallback rendering that could blank the candidate name.
 
+## 2026-04-08 (Authorization template reverted to browser-editable version)
+
+- Current status:
+  - Reverted the live authorization template back to the original browser-editable version because the protected version could not be edited in Word for the browser.
+- Completed tasks:
+  - Restored the original template backup over the same live SharePoint template item:
+    - `PEV Records/Templates/DLRAuthorizationLetter_Template.docx`
+    - item id `017QXH3H2C7KNCCUL4KRDIDZKFV4VC5U6H`
+  - Verified `BGV_0_CandidateDeclaration` still points to that exact template item id and file path; no flow remap was needed.
+  - Downloaded the restored live template and rechecked the critical XML markers:
+    - `SignedYes` still present
+    - `CandidateName` still present
+    - `Identification Number NRIC` still present
+    - `Identification Number Passport` still present
+  - Confirmed the restored template now has:
+    - `w:documentProtection w:edit="forms" w:enforcement="0"`
+    - which means browser editing is allowed again
+- Validation commands run:
+  - Graph metadata read on live template item id `017QXH3H2C7KNCCUL4KRDIDZKFV4VC5U6H`
+  - Graph file upload back to the same live template item id using the saved backup:
+    - `out/template_backups/DLRAuthorizationLetter_Template_20260408_140447.docx`
+  - local XML inspection of the restored live template after re-download
+- Notes:
+  - This restores candidate browser editing, including draw/sign use in the browser and checkbox ticking.
+  - Word for the browser does not reliably support a true partly-locked / partly-editable experience when document protection is enforced, so the live template is intentionally kept browser-editable to preserve the candidate flow.
+

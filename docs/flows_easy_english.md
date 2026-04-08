@@ -106,7 +106,7 @@ This document describes the current behavior in your canonical flow files under 
 - The live candidate authorization template is still:
   - `DLR Recruitment Ops > PEV Records > Templates > DLRAuthorizationLetter_Template.docx`
 - `BGV_0_CandidateDeclaration` still points to that same live template file; it was not remapped to a different document.
-- The template is now protected in Word `forms` mode so candidates should only be able to edit the intended content controls instead of the whole document.
+- The template has been reverted back to the browser-editable version.
 - The flow-critical controls were preserved:
   - `CandidateName`
   - `Identification Number NRIC`
@@ -114,9 +114,15 @@ This document describes the current behavior in your canonical flow files under 
   - `Date`
   - `SignedYes`
 - Because `SignedYes` is still present, `BGV_1_Detect_Authorization_Signature` can still detect the signed checkbox path it depends on.
-- This hardening is reversible:
-  - a timestamped local backup was saved before the patched template was uploaded
-  - only the document protection setting was changed, not the business fields or file reference
+- Word for the browser limitation:
+  - if the document is protected in Word `forms` mode, users can be blocked from editing in the browser entirely
+  - this means a true "some wording locked, rest editable in browser" setup is not reliable for your candidate flow
+  - the live template therefore keeps `documentProtection enforcement="0"` so candidates can still open in browser, draw/sign, and tick the checkbox
+- Practical outcome:
+  - the correct template is still sent
+  - browser editing works again
+  - checkbox detection in `BGV_1` still works
+  - but static wording is not hard-locked in Word for the browser
 
 ### `BGV_Candidates` field usage snapshot
 - `JobTitle`
