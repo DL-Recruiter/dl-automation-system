@@ -5226,3 +5226,35 @@ Log each session with:
 - Notes:
   - The fix is intentionally defensive: blank rows in the Excel table are now skipped safely instead of breaking the dashboard refresh.
 
+## 2026-04-08 (Flow 9 delete path switched to Excel ItemInternalId)
+
+- Current status:
+  - Followed up on a new Flow 9 failure report and confirmed the real remaining blocker was still the Excel delete loop inside `Apply_to_each_(Existing_Dashboard_Rows)`, not the outer refresh-window condition.
+- Completed tasks:
+  - Investigated the latest live Flow 9 runs and separated:
+    - old manual `testFlow` failures
+    - one real scheduled failure at `10:00`
+    - later scheduled successes
+  - Confirmed the failing action was still:
+    - `Delete_row_from_tblDashboardCasesPA`
+  - Confirmed the workbook still contained a leading blank row, but there were no duplicate populated `DashboardKey` values in the failed run input.
+  - Patched the canonical Flow 9 delete loop so it no longer deletes rows by the custom `DashboardKey`.
+  - Switched the existing-row delete path to use the Excel-native row identifier instead:
+    - `Condition_-_Has_DashboardKey` now guards on `ItemInternalId`
+    - `Delete_row_from_tblDashboardCasesPA` now uses:
+      - `idColumn = ItemInternalId`
+      - `id = items('Apply_to_each_(Existing_Dashboard_Rows)')?['ItemInternalId']`
+  - Repacked and reimported the live unmanaged solution using the existing Flow 9 deployment settings.
+  - Verified the next scheduled live Flow 9 recurrence succeeded after deployment:
+    - run `08584259620858971942330106765CU07`
+    - status `Succeeded`
+- Validation commands run:
+  - `pac auth who`
+  - `m365 flow run list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 7f4dbc87-1117-af35-a703-126c8a6485c0 --output json`
+  - `m365 flow run get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 7f4dbc87-1117-af35-a703-126c8a6485c0 --name 08584259644853406400390462231CU03 --withActions --output json`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_9_Refresh_Dashboard_Excel-03B36E72-1ACE-4FCF-AD6D-80A583012F31.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --folder .\flows\power-automate\unpacked --zipfile .\artifacts\exports\BGV_System_dashboard_iteminternalid_fix_20260408.zip --packagetype Unmanaged`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path <resolved zip path> --settings-file .\out\deployment-settings\bgv9_live.settings.json --publish-changes --force-overwrite`
+- Notes:
+  - This makes the refresh safer because the delete loop now uses Excel’s own stable row identifier instead of a user-data column that can be blank or malformed.
+
