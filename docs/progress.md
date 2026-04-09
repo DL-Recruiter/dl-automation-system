@@ -5258,3 +5258,35 @@ Log each session with:
 - Notes:
   - This makes the refresh safer because the delete loop now uses Excel’s own stable row identifier instead of a user-data column that can be blank or malformed.
 
+## 2026-04-09 (Daily sync + candidate-name fallback fix for employer reminders and response email)
+
+- Current status:
+  - Ran the daily sync first, then fixed the remaining blank candidate-name issue in employer reminder emails and the `PEV Response Received` recruiter email.
+- Completed tasks:
+  - Ran `scripts/active/bgv_daily_sync.ps1` against `https://orgde64dc49.crm5.dynamics.com/` and confirmed PAC identity was `recruitment@dlresources.com.sg`.
+  - Confirmed the local repo was clean immediately after sync.
+  - Investigated the live-exported canonical flow JSON and found two stale/brittle candidate-name sources still in use:
+    - `BGV_6_HRReminderAndEscalation` still had reminder/escalation body text using the old request lookup display name path in some places.
+    - `BGV_5_Response1` still had the `PEV Response Received` subject/body, the cleared Teams post, and the high-severity email subject using the old request lookup display name path.
+  - Patched `BGV_6_HRReminderAndEscalation` so reminder emails and the reminder-2 escalation Teams post consistently use `CandidateDisplayName`.
+  - Patched `BGV_5_Response1` by adding `Compose_ResponseCandidateName` with the fallback order:
+    - `PEV_FormData.F1_CandidateFullName`
+    - request lookup display name
+    - `CandidateID`
+  - Repointed the recruiter-facing response email subject/body, the cleared Teams post, and the high-severity email subject in `BGV_5` to `Compose_ResponseCandidateName`.
+  - Validated both patched canonical workflow JSON files with `ConvertFrom-Json`.
+  - Repacked and imported the unmanaged solution successfully into the live environment.
+  - Updated `docs/flows_easy_english.md` to document the candidate-name fallback logic for both `BGV_5` and `BGV_6`.
+  - Removed the temporary packed solution zip after import.
+- Validation commands run:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\active\bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+  - `git status --short --branch`
+  - `rg -n "Compose_ResponseCandidateName|CandidateItemID_x003a__x0020_Ful/Value|PEV Response Received|A PEV response has been received for|PEV Checks Cleared|Severity:|Candidate:" flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json`
+  - `rg -n "CandidateDisplayName|CandidateItemID_x003a__x0020_Ful/Value|complete the employment verification for|has authorized D L Resources|Candidate:" flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `pac auth who`
+  - `pac solution pack --zipfile flows/power-automate/BGV_Automation_Unmanaged.zip --folder flows/power-automate/unpacked --packagetype Unmanaged`
+  - `pac solution import --path flows/power-automate/BGV_Automation_Unmanaged.zip --publish-changes --force-overwrite`
+- Notes:
+  - The account used for this deployment can import via PAC successfully, but `m365 flow list --asAdmin` in the Default environment is not permitted for this account, so live verification is being handled by post-import sync/export consistency rather than admin flow-list calls.

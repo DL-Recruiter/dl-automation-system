@@ -256,11 +256,16 @@ This document describes the current behavior in your canonical flow files under 
   - Recruiter-facing email details are cleaned before send so escaped newline markers such as `\n` or `\n\n` render as normal line breaks instead of raw text.
   - Recruiter-facing notifications include a direct candidate-folder link for faster follow-up.
   - If severity is blank after employer response, both the recruiter email and the Teams post are treated as cleared-case notifications and say the PEV checks are cleared and TAC form is to be sent.
-  - Recruiter-facing response emails are now combined into one mailbox email for every employer response:
-    - subject starts with `PEV Response Received`
-    - subject always includes `Severity: <value>` and leaves it blank when there is no severity
-    - body always includes employer details, request ID, candidate folder link, flagged issues, and the cleaned details/comments block
-    - cleared cases still add the TAC follow-up note in that same email instead of using a separate response-vs-severity email split
+- Recruiter-facing response emails are now combined into one mailbox email for every employer response:
+  - subject starts with `PEV Response Received`
+  - subject always includes `Severity: <value>` and leaves it blank when there is no severity
+  - body always includes employer details, request ID, candidate folder link, flagged issues, and the cleaned details/comments block
+  - cleared cases still add the TAC follow-up note in that same email instead of using a separate response-vs-severity email split
+- Candidate name in recruiter-facing notifications now resolves safely in this order:
+  - `PEV_FormData.F1_CandidateFullName`
+  - the request lookup display name
+  - `CandidateID` as the final fallback
+  - this prevents blank candidate names in the `PEV Response Received` email subject/body and related cleared/high-severity notifications.
   - Recruiter-facing response emails tell recruiters where to find the later report summary under `BGV_Records > Candidate Files (<CandidateID>)`.
   - All email notifications in this flow are routed via shared mailbox and addressed to `recruitment@dlresources.com.sg`.
   - Teams notification target for this flow is `DLR Recruitment Ops > BGV`:
@@ -296,6 +301,11 @@ This document describes the current behavior in your canonical flow files under 
 - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, including the employer-specific shared request-folder link, so reminders still contain the current Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
 - Reminder 1, Reminder 2, and Final Reminder wording now clearly names the candidate and says that the candidate authorized D L Resources to conduct the background check and provided the employer contact for verification.
+- Candidate name in employer reminders now resolves safely in this order:
+  - `PEV_FormData.F1_CandidateFullName`
+  - the request lookup display name
+  - `CandidateID` as the final fallback
+  - this prevents blank candidate names in Reminder 1, Reminder 2, Final Reminder, and the recruiter escalation Teams post after Reminder 2.
 - Controlled internal-only smoke validation on `2026-04-08` confirmed all three employer reminder emails render correctly when sent to `recruitment@dlresources.com.sg`:
   - Reminder 1 subject: `Reminder: Employment Verification Request`
   - Reminder 2 subject: `2nd Reminder: Employment Verification Request from D L Resources`
