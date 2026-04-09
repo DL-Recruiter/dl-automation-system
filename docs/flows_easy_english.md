@@ -261,11 +261,12 @@ This document describes the current behavior in your canonical flow files under 
   - subject always includes `Severity: <value>` and leaves it blank when there is no severity
   - body always includes employer details, request ID, candidate folder link, flagged issues, and the cleaned details/comments block
   - cleared cases still add the TAC follow-up note in that same email instead of using a separate response-vs-severity email split
+  - there is no separate high-severity-only recruiter email anymore; high-severity cases also use this same `PEV Response Received` email
 - Candidate name in recruiter-facing notifications now resolves safely in this order:
   - `PEV_FormData.F1_CandidateFullName`
   - the request lookup display name
   - `CandidateID` as the final fallback
-  - this prevents blank candidate names in the `PEV Response Received` email subject/body and related cleared/high-severity notifications.
+  - this prevents blank candidate names in the `PEV Response Received` email subject/body and related notifications.
   - Recruiter-facing response emails tell recruiters where to find the later report summary under `BGV_Records > Candidate Files (<CandidateID>)`.
   - All email notifications in this flow are routed via shared mailbox and addressed to `recruitment@dlresources.com.sg`.
   - Teams notification target for this flow is `DLR Recruitment Ops > BGV`:

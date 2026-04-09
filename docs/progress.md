@@ -5290,3 +5290,20 @@ Log each session with:
   - `pac solution import --path flows/power-automate/BGV_Automation_Unmanaged.zip --publish-changes --force-overwrite`
 - Notes:
   - The account used for this deployment can import via PAC successfully, but `m365 flow list --asAdmin` in the Default environment is not permitted for this account, so live verification is being handled by post-import sync/export consistency rather than admin flow-list calls.
+
+## 2026-04-09 (Flow 5 separate high-severity email removed)
+
+- Current status:
+  - Simplified recruiter response notifications so employer Form 2 responses now send only the standard `PEV Response Received` email, with no separate high-severity-only email branch.
+- Completed tasks:
+  - Removed the disabled/legacy `Condition_-_Send_Email` branch and `Send_an_email_-_High_Severity_(V2)` action from `BGV_5_Response1`.
+  - Repointed the standard recruiter response email action to run directly after `Condition_-_Notifying_Teams`.
+  - Updated `docs/flows_easy_english.md` so the documented recruiter email behavior now explicitly matches the single-email design.
+- Validation commands run:
+  - `pac auth who`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_5_Response1-FD4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `pac solution pack --zipfile flows/power-automate/BGV_Automation_Unmanaged.zip --folder flows/power-automate/unpacked --packagetype Unmanaged`
+  - `pac solution import --path flows/power-automate/BGV_Automation_Unmanaged.zip --publish-changes --force-overwrite`
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\active\bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
+- Notes:
+  - This change makes the explicit flow definition match the behavior you wanted: recruiters receive one response email per employer submission, with severity and flagged issues included in that single email.
