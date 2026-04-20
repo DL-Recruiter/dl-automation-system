@@ -144,7 +144,7 @@
                   "expression": {
                     "not": {
                       "equals": [
-                        "@trim(string(coalesce(items('Apply_to_each_(Existing_Dashboard_Rows)')?['ItemInternalId'],'')))",
+                        "@trim(string(coalesce(items('Apply_to_each_(Existing_Dashboard_Rows)')?['DashboardKey'],items('Apply_to_each_(Existing_Dashboard_Rows)')?['RequestID'],'')))",
                         ""
                       ]
                     }
@@ -158,8 +158,8 @@
                           "drive": "b!4bIASqxJ3kC7mLqOoWQ6QkHCxThCNSlGm37xVevErEk6KtAw2nQWSqiHe43QQ6VH",
                           "file": "017QXH3HY5X73LM5443ZFLLGMN5IWZBI6R",
                           "table": "tblDashboardCasesPA",
-                          "idColumn": "ItemInternalId",
-                          "id": "@trim(string(coalesce(items('Apply_to_each_(Existing_Dashboard_Rows)')?['ItemInternalId'],'')))"
+                          "idColumn": "DashboardKey",
+                          "id": "@trim(string(coalesce(items('Apply_to_each_(Existing_Dashboard_Rows)')?['DashboardKey'],items('Apply_to_each_(Existing_Dashboard_Rows)')?['RequestID'],'')))"
                         },
                         "host": {
                           "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",

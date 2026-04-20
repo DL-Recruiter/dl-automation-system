@@ -97,6 +97,7 @@ This document describes the current behavior in your canonical flow files under 
   - Reminder update no longer flips `ConsentCaptured`; it only stamps reminder timestamp fields.`\n  - Outer reminder gate now checks `AuthorisationSigned` instead of `ConsentCaptured` so stale consent flags do not block pending reminders.
   - Day-5 escalation now runs independently of whether a same-day reminder email was sent, so stale `LastAuthReminderAt` values do not suppress escalation.
   - Day-5 escalation is limited to the `9:05 AM` slot so the hourly recurrence does not spam repeated alerts.
+  - Day-5 escalation now also requires `Day5Sent != true`, and the flow stamps `Day5Sent = true` after the alert email succeeds so the same candidate record is only escalated once.
   - Day-5 escalation email now uses current candidate item values directly and still sends even if the Teams post step fails.
   - On day 5 unresolved cases, posts Teams escalation to `DLR Recruitment Ops > BGV` and sends internal escalation email to `recruitment@dlresources.com.sg`.
   - Email sends are routed via shared mailbox `recruitment@dlresources.com.sg`.

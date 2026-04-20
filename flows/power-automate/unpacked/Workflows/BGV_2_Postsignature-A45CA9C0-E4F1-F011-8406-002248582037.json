@@ -114,7 +114,7 @@
                 "HTTP_-_Lock_Authorization_Content_Controls": {
                   "type": "Http",
                   "inputs": {
-                    "uri": "@replace('https://bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net/api/parseauthorizationcontrols?code=kAnie8Zeiq83_f9E4NZQMPfrxJasZfoo1iFQqbWZKQTpAzFuZCATcQ%3D%3D','parseauthorizationcontrols','lockauthorizationcontrols')",
+                    "uri": "https://bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net/api/lockauthorizationcontrols?code=EdUBGwVNxjHLv6nv76tBeDedgn2tw8_daPN1JXsnlqG-AzFuW1YdFw%3D%3D",
                     "method": "POST",
                     "headers": {
                       "Content-Type": "application/json"

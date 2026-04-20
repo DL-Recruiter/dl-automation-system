@@ -909,6 +909,29 @@
                   "type": "Compose",
                   "inputs": "@concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/PEV%20Records/Candidate%20Files/',encodeUriComponent(string(outputs('Update_item_-_of_BGV_Request')?['body/CandidateID'])),'/')",
                   "runAfter": {
+                    "Get_items_(PEV_Candidates)": [
+                      "Succeeded",
+                      "Skipped"
+                    ]
+                  }
+                },
+                "Get_items_(PEV_Candidates)": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "8c19755d-0e9c-4680-8d18-783eb9ec56be",
+                      "$filter": "@concat('CandidateID eq ''', string(items('Apply_to_each')?['CandidateID']), '''')",
+                      "$top": 1
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "connectionName": "shared_sharepointonline",
+                      "operationId": "GetItems"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  },
+                  "runAfter": {
                     "Condition_-_if_FormData_row_found": [
                       "Succeeded",
                       "Skipped"
@@ -917,7 +940,7 @@
                 },
                 "Compose_ResponseCandidateName": {
                   "type": "Compose",
-                  "inputs": "@coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value'],outputs('Update_item_-_of_BGV_Request')?['body/CandidateID'])",
+                  "inputs": "@if(empty(trim(string(first(body('Get_items_(PEV_Candidates)')?['value'])?['FullName']))),if(empty(trim(string(outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']))),if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName']))),outputs('Update_item_-_of_BGV_Request')?['body/CandidateID'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName']),outputs('Update_item_-_of_BGV_Request')?['body/CandidateItemID_x003a__x0020_Ful/Value']),first(body('Get_items_(PEV_Candidates)')?['value'])?['FullName'])",
                   "runAfter": {
                     "Compose_CandidateFolderLink": [
                       "Succeeded"
@@ -978,7 +1001,7 @@
                         "parameters": {
                           "emailMessage/To": "recruitment@dlresources.com.sg",
                           "emailMessage/Subject": "HIGH PEV FLAG - @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}, @{outputs('Compose_ResponseCandidateName')}",
-                          "emailMessage/Body": "<p class=\"editor-paragraph\">A High Severity PEV issue has been flagged. <br><br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br>Employer HR Email: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerHR_Email']}<br>Candidate Folder: <a href=\"@{outputs('Compose_CandidateFolderLink')}\">@{outputs('Compose_CandidateFolderLink')}</a><br><br>Severity: High<br><br>Details:<br>@{outputs('Compose_NotifyBodyHtml')}</p>",
+                          "emailMessage/Body": "<p class=\"editor-paragraph\">A High Severity PEV issue has been flagged for @{outputs('Compose_ResponseCandidateName')}.<br><br>Request ID: @{outputs('Update_item_-_of_BGV_Request')?['body/RequestID']}<br>Candidate ID: @{outputs('Update_item_-_of_BGV_Request')?['body/CandidateID']}<br>Employer: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerName']}<br>Employer HR Email: @{outputs('Update_item_-_of_BGV_Request')?['body/EmployerHR_Email']}<br>Candidate Folder: <a href=\"@{outputs('Compose_CandidateFolderLink')}\">@{outputs('Compose_CandidateFolderLink')}</a><br><br>Severity: High<br><br>Details:<br>@{outputs('Compose_NotifyBodyHtml')}</p>",
                           "emailMessage/Importance": "Normal",
                           "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg"
                         },

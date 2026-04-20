@@ -67,6 +67,7 @@ Typical user questions this list answers:
 | `AuthorisationSigned` | Main yes/no field showing whether the candidate's authorization has been confirmed as signed. | `BGV_1` | `BGV_3`, `BGV_4`, users |
 | `ConsentTimestamp` | Timestamp of when the signed authorization was detected and recorded. | `BGV_1` | users, audit/review |
 | `LastAuthReminderAt` | Timestamp of the last reminder email sent to the candidate. Prevents duplicate same-day reminders. | `BGV_3` | `BGV_3`, users |
+| `Day5Sent` | Boolean flag showing whether the one-time Day 5 authorization escalation alert has already been sent for that candidate row. | `BGV_3` | `BGV_3`, users |
 
 Legacy note:
 
