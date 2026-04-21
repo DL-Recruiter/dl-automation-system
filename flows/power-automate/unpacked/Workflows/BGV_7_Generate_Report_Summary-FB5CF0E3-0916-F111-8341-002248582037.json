@@ -134,11 +134,32 @@
                     }
                   }
                 },
+                "Get_items_(PEV_Candidates)": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "table": "8c19755d-0e9c-4680-8d18-783eb9ec56be",
+                      "$filter": "@concat('CandidateID eq ''', string(items('Apply_to_each_(Completed_Requests)')?['CandidateID']), '''')",
+                      "$top": 1
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "GetItems",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  },
+                  "runAfter": {
+                    "Get_items_(BGV_FormData)": [
+                      "Succeeded"
+                    ]
+                  }
+                },
                 "Compose_CandidateFolderPath": {
                   "type": "Compose",
                   "inputs": "@concat('/PEV Records/Candidate Files/', items('Apply_to_each_(Completed_Requests)')?['CandidateID'])",
                   "runAfter": {
-                    "Get_items_(BGV_FormData)": [
+                    "Get_items_(PEV_Candidates)": [
                       "Succeeded"
                     ]
                   }
@@ -338,7 +359,7 @@
                           "location": "Channel",
                           "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
                           "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
-                          "body/messageBody": "<p class=\"editor-paragraph\">PEV Report Summary Created</p><br><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each_(Completed_Requests)')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name: @{if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName']))),if(empty(trim(string(items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value']))),items('Apply_to_each_(Completed_Requests)')?['CandidateID'],items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value']),first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'])}</p><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Completed_Requests)')?['RequestID']}</p><p class=\"editor-paragraph\">Severity: @{outputs('Compose_ReportSeverityText')}</p><p class=\"editor-paragraph\">Flagged Issues: @{outputs('Compose_ReportFlaggedIssues')}</p><p class=\"editor-paragraph\">Candidate Folder: <a href=\"@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/PEV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}\">@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/PEV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}</a></p><p class=\"editor-paragraph\">Report Link: <a href=\"@{outputs('Compose_ReportFileWebLink')}\">@{outputs('Compose_ReportFileWebLink')}</a></p><br><p class=\"editor-paragraph\">Details:<br>@{outputs('Compose_ReportDetailsHtml')}</p>"
+                          "body/messageBody": "<p class=\"editor-paragraph\">PEV Report Summary Created</p><br><p class=\"editor-paragraph\">Candidate ID: @{items('Apply_to_each_(Completed_Requests)')?['CandidateID']}</p><p class=\"editor-paragraph\">Candidate Name: @{if(empty(trim(string(first(body('Get_items_(PEV_Candidates)')?['value'])?['FullName']))),if(empty(trim(string(items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value']))),if(empty(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName']))),items('Apply_to_each_(Completed_Requests)')?['CandidateID'],first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName']),items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value']),first(body('Get_items_(PEV_Candidates)')?['value'])?['FullName'])}</p><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Completed_Requests)')?['RequestID']}</p><p class=\"editor-paragraph\">Severity: @{outputs('Compose_ReportSeverityText')}</p><p class=\"editor-paragraph\">Flagged Issues: @{outputs('Compose_ReportFlaggedIssues')}</p><p class=\"editor-paragraph\">Candidate Folder: <a href=\"@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/PEV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}\">@{concat('https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/PEV%20Records/Candidate%20Files/', encodeUriComponent(string(items('Apply_to_each_(Completed_Requests)')?['CandidateID'])), '/')}</a></p><p class=\"editor-paragraph\">Report Link: <a href=\"@{outputs('Compose_ReportFileWebLink')}\">@{outputs('Compose_ReportFileWebLink')}</a></p><br><p class=\"editor-paragraph\">Details:<br>@{outputs('Compose_ReportDetailsHtml')}</p>"
                         },
                         "host": {
                           "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
@@ -423,7 +444,7 @@
                       "docxBase64": "@{outputs('Compose_Template_Base64')}",
                       "form1RawJson": "@{first(body('Get_items_(BGV_FormData)')?['value'])?['Form1RawJson']}",
                       "form2RawJson": "@{outputs('Compose_ReportForm2RawJson')}",
-                      "form1CandidateFullName": "@{first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName']}",
+                      "form1CandidateFullName": "@{if(empty(trim(string(first(body('Get_items_(PEV_Candidates)')?['value'])?['FullName']))),if(empty(trim(string(items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value']))),first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateFullName'],items('Apply_to_each_(Completed_Requests)')?['CandidateItemID_x003a__x0020_Ful/Value']),first(body('Get_items_(PEV_Candidates)')?['value'])?['FullName'])}",
                       "form1CandidateEmail": "@{first(body('Get_items_(BGV_FormData)')?['value'])?['F1_CandidateEmail']}",
                       "form1IdentificationNumberNRIC": "@{first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberNRIC']}",
                       "form1IdentificationNumberPassport": "@{first(body('Get_items_(BGV_FormData)')?['value'])?['F1_IDNumberPassport']}"
