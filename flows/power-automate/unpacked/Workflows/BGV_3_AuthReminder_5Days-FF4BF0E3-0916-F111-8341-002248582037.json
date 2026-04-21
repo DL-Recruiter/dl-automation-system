@@ -134,7 +134,7 @@
                                   "parameters": {
                                     "emailMessage/To": "@items('Apply_to_each')?['CandidateEmail']",
                                     "emailMessage/Subject": "Reminder: Please complete your authorization form",
-                                    "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{items('Apply_to_each')?['FullName']},</p><br><p class=\"editor-paragraph\">This is a reminder to complete your authorization form required for verification step. Note: These reminder emails will stop when you have completed the form.</p><br><p class=\"editor-paragraph\">Link: @{items('Apply_to_each')?['AuthorizationLink']}<br><br>Thank you,</p><p class=\"editor-paragraph\">D L Resources</p>",
+                                    "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{items('Apply_to_each')?['FullName']},</p><br><p class=\"editor-paragraph\">This is a reminder to complete your authorization form required for verification step. Note: These reminder emails will stop when you have completed the form.</p><br><p class=\"editor-paragraph\">Link: @{items('Apply_to_each')?['AuthorizationLink']}</p><br><p class=\"editor-paragraph\">Thanks &amp; Regards,<br>D L Resources Pte Ltd<br><br>Phil Wong | HR Officer<br>Co. Reg. No. 199600101K<br>EA License No: 24C2333<br>Tel: +65 8205 9002<br>Email: <a href=\"mailto:recruitment@dlresources.com.sg\">recruitment@dlresources.com.sg</a></p>",
                                     "emailMessage/Importance": "Normal",
                                     "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg"
                                   },
