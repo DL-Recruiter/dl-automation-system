@@ -58,13 +58,16 @@ public sealed class ReportSummaryValueMapper : IReportSummaryValueMapper
 
         foreach ((string tag, string key) in Form1TagToKey)
         {
-            string value = GetNormalizedFormValue(form1Values, key);
-            if (string.IsNullOrWhiteSpace(value) &&
-                form1FallbackValues is not null &&
+            string value = string.Empty;
+            if (form1FallbackValues is not null &&
                 form1FallbackValues.TryGetValue(tag, out string? fallbackValue) &&
                 !string.IsNullOrWhiteSpace(fallbackValue))
             {
                 value = fallbackValue.Trim();
+            }
+            else
+            {
+                value = GetNormalizedFormValue(form1Values, key);
             }
 
             if (tag.Equals("Form1.IdentificationNumberNRIC", StringComparison.OrdinalIgnoreCase))

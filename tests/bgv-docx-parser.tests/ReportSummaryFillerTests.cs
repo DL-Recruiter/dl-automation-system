@@ -71,6 +71,33 @@ public class ReportSummaryFillerTests
     }
 
     [Fact]
+    public void Mapper_Prefers_Form1Fallback_When_Raw_Form1_Contains_Stale_Candidate_Values()
+    {
+        string form1RawJson = JsonSerializer.Serialize(new Dictionary<string, string?>
+        {
+            ["rfe96c622120343f294de908deb0e849d"] = "Wrong Candidate Name",
+            ["rcd8057cd92b24b5594681a5b39c07e3d"] = "wrong@example.com",
+            ["rd2fba2b09afd478ba21df420406c9b49"] = "S1111111A"
+        });
+
+        IReadOnlyDictionary<string, string> mappings = _mapper.BuildMappings(
+            form1RawJson,
+            null,
+            new Dictionary<string, string?>
+            {
+                ["Form1.CandidateFullName"] = "Leon",
+                ["Form1.CandidateEmail"] = "leon@example.com",
+                ["Form1.IdentificationNumberNRIC"] = "S2222222B",
+                ["Form1.IdentificationNumberPassport"] = null
+            });
+
+        Assert.Equal("Leon", mappings["Form1.CandidateFullName"]);
+        Assert.Equal("leon@example.com", mappings["Form1.CandidateEmail"]);
+        Assert.Equal("S2222222B", mappings["Form1.IdentificationNumberNRIC"]);
+        Assert.Equal("N/A", mappings["Form1.IdentificationNumberPassport"]);
+    }
+
+    [Fact]
     public void Mapper_Uses_General_Inaccuracy_Details_As_Fallback_For_Selected_Employment_Issues()
     {
         string form2RawJson = JsonSerializer.Serialize(new Dictionary<string, string?>
