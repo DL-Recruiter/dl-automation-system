@@ -332,7 +332,7 @@
                     },
                     "Compose_CandidateReminder": {
                       "type": "Compose",
-                      "inputs": "@if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt']),false)),concat('1: ',formatDateTime(convertTimeZone(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),'Not sent')",
+                      "inputs": "@if(and(outputs('Compose_HasCandidate'),equals(empty(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt']),false)),concat(if(equals(bool(coalesce(first(body('Filter_array_-_Candidate_Match'))?['Day5Sent'],false)),true),'5','1'),': ',formatDateTime(convertTimeZone(first(body('Filter_array_-_Candidate_Match'))?['LastAuthReminderAt'],'UTC','Singapore Standard Time'),'yyyy-MM-dd HH:mm')),'Not sent')",
                       "runAfter": {
                         "Compose_CandidateEmailSentAt": [
                           "Succeeded"
