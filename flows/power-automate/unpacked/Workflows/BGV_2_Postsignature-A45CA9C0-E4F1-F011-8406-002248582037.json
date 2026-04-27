@@ -135,42 +135,143 @@
                     }
                   }
                 },
-                "Update_file_content_with_locked_controls": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "id": "@items('For_each')?['{Identifier}']",
-                      "body": "@base64ToBinary(body('HTTP_-_Lock_Authorization_Content_Controls')?['lockedDocxBase64'])"
+                "Condition_-_Lock_response_valid": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@empty(body('HTTP_-_Lock_Authorization_Content_Controls')?['lockedDocxBase64'])",
+                          false
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "Update_file_content_with_locked_controls": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "id": "@items('For_each')?['{Identifier}']",
+                          "body": "@base64ToBinary(body('HTTP_-_Lock_Authorization_Content_Controls')?['lockedDocxBase64'])"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "UpdateFile",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      }
                     },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                      "operationId": "UpdateFile",
-                      "connectionName": "shared_sharepointonline"
+                    "Stop_sharing_an_item_or_a_file": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "table": "30d02a3a-74da-4a16-a887-7b8dd043a547",
+                          "id": "@items('For_each')?['ID']"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "UnshareItem",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      },
+                      "runAfter": {
+                        "Update_file_content_with_locked_controls": [
+                          "Succeeded"
+                        ]
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {
+                      "HTTP_-_Lock_Authorization_Content_Controls_Retry": {
+                        "type": "Http",
+                        "inputs": {
+                          "uri": "https://bgv-docx-parser-cshnd7aucchwfmfz.southeastasia-01.azurewebsites.net/api/lockauthorizationcontrols?code=EdUBGwVNxjHLv6nv76tBeDedgn2tw8_daPN1JXsnlqG-AzFuW1YdFw%3D%3D",
+                          "method": "POST",
+                          "headers": {
+                            "Content-Type": "application/json"
+                          },
+                          "body": {
+                            "fileName": "@{items('For_each')?['{FilenameWithExtension}']}",
+                            "docxBase64": "@{outputs('Compose_Base64_for_Lock')}"
+                          }
+                        },
+                        "runtimeConfiguration": {
+                          "contentTransfer": {
+                            "transferMode": "Chunked"
+                          }
+                        }
+                      },
+                      "Condition_-_Retry_lock_response_valid": {
+                        "type": "If",
+                        "expression": {
+                          "and": [
+                            {
+                              "equals": [
+                                "@empty(body('HTTP_-_Lock_Authorization_Content_Controls_Retry')?['lockedDocxBase64'])",
+                                false
+                              ]
+                            }
+                          ]
+                        },
+                        "actions": {
+                          "Update_file_content_with_locked_controls_Retry": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                                "id": "@items('For_each')?['{Identifier}']",
+                                "body": "@base64ToBinary(body('HTTP_-_Lock_Authorization_Content_Controls_Retry')?['lockedDocxBase64'])"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                                "operationId": "UpdateFile",
+                                "connectionName": "shared_sharepointonline"
+                              }
+                            }
+                          },
+                          "Stop_sharing_an_item_or_a_file_Retry": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                                "table": "30d02a3a-74da-4a16-a887-7b8dd043a547",
+                                "id": "@items('For_each')?['ID']"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                                "operationId": "UnshareItem",
+                                "connectionName": "shared_sharepointonline"
+                              }
+                            },
+                            "runAfter": {
+                              "Update_file_content_with_locked_controls_Retry": [
+                                "Succeeded"
+                              ]
+                            }
+                          }
+                        },
+                        "else": {
+                          "actions": {
+                            "Compose_-_Lock_authorization_failed_after_retry": {
+                              "type": "Compose",
+                              "inputs": "LockAuthorizationControls did not return lockedDocxBase64 after retry."
+                            }
+                          }
+                        },
+                        "runAfter": {
+                          "HTTP_-_Lock_Authorization_Content_Controls_Retry": [
+                            "Succeeded"
+                          ]
+                        }
+                      }
                     }
                   },
                   "runAfter": {
                     "HTTP_-_Lock_Authorization_Content_Controls": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Stop_sharing_an_item_or_a_file": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "table": "30d02a3a-74da-4a16-a887-7b8dd043a547",
-                      "id": "@items('For_each')?['ID']"
-                    },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                      "operationId": "UnshareItem",
-                      "connectionName": "shared_sharepointonline"
-                    }
-                  },
-                  "runAfter": {
-                    "Update_file_content_with_locked_controls": [
                       "Succeeded"
                     ]
                   }

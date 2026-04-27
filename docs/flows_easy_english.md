@@ -78,6 +78,7 @@ This document describes the current behavior in your canonical flow files under 
   - Acts as the post-signature file cleanup/lock pass after the candidate has already been marked signed.
   - Finds related files only inside the candidate's own authorization folder.
   - Reads each authorization `.docx` and sends it to `LockAuthorizationControls` function.
+  - If the lock function returns an empty or malformed response, it retries the lock call once before giving up.
   - Overwrites the same file content with the function-returned locked DOCX (content controls set to non-editable/non-deletable).
   - Stops sharing for those files.
 - Main outcome: Signed authorization files are locked against Developer-mode content-control edits and are no longer broadly shared.
@@ -302,6 +303,10 @@ This document describes the current behavior in your canonical flow files under 
   - Reminder conditions now use `empty(...)`-safe checks for SharePoint date fields so null/blank timestamps do not block reminder branches unexpectedly.
 - Reminder conditions/messages resolve values from the current request row (`items('Apply_to_each')`) so logic works even when earlier reminder update actions are skipped in that run.
 - Reminder emails now rebuild the same employer `FinalVerificationLink` used by `BGV_4`, including the employer-specific shared request-folder link, so reminders still contain the current Microsoft Form URL even when the legacy `uniquelinktoemployers` SharePoint field is blank.
+- Company stamp handling now follows the same fallback pattern as `BGV_4`:
+  - if the request-specific company stamp document already exists, the flow shares that file
+  - if it does not exist, the flow creates it from the `Company Stamp.docx` template, then shares the newly created file
+  - this prevents reminder runs from failing just because one request folder is missing its stamp document
 - Reminder 1, Reminder 2, and Final Reminder wording now clearly names the candidate and says that the candidate authorized D L Resources to conduct the background check and provided the employer contact for verification.
 - Candidate name in employer reminders now resolves safely in this order:
   - `PEV_FormData.F1_CandidateFullName`

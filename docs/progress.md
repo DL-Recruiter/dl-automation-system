@@ -5291,6 +5291,47 @@ Log each session with:
 - Notes:
   - The account used for this deployment can import via PAC successfully, but `m365 flow list --asAdmin` in the Default environment is not permitted for this account, so live verification is being handled by post-import sync/export consistency rather than admin flow-list calls.
 
+## 2026-04-27 (BGV_2 lock-response retry + BGV_6 company-stamp fallback + full sync)
+
+- Current status:
+  - Repaired the two live failure patterns reported from Saturday, April 25, 2026 and synced PAC, local source, and GitHub.
+- Completed tasks:
+  - Investigated the Saturday failures without changing production first:
+    - `BGV_2_Postsignature` was failing when `LockAuthorizationControls` returned an HTML runtime-error page instead of JSON, which caused `Update_file_content_with_locked_controls` to fail.
+    - `BGV_6_HRReminderAndEscalation` was failing when `Get_company_stamp_document_metadata_by_path` could not find the request-specific company stamp file for one row in the reminder batch.
+  - Updated `BGV_2_Postsignature`:
+    - wrapped the lock response in a validity check
+    - added one retry call to `LockAuthorizationControls` when `lockedDocxBase64` is missing
+    - kept the normal file-update and unshare path unchanged when the lock response is valid
+  - Updated `BGV_6_HRReminderAndEscalation`:
+    - replaced the single-path company-stamp lookup chain with the same resilient fallback already used in `BGV_4`
+    - if the request-specific company stamp document is missing, the flow now loads `/PEV Records/Templates/Company Stamp.docx`, creates the request-specific stamp document, re-reads its metadata, and then creates the share link
+    - repointed reminder email bodies and `FinalVerificationLink` generation to use the composed `CompanyStampDocumentLink`
+  - Updated `docs/flows_easy_english.md` so the documented behavior now matches the new BGV_2 retry logic and the new BGV_6 company-stamp fallback behavior.
+  - Packed and imported the unmanaged solution live.
+  - Re-enabled `BGV_2_Postsignature` and `BGV_6_HRReminderAndEscalation` after import.
+  - Confirmed live state:
+    - `BGV_2_Postsignature` = `Started`
+    - `BGV_6_HRReminderAndEscalation` = `Started`
+    - both show `flowSuspensionReason = None`
+  - Committed and pushed the repo changes so GitHub matches the deployed canonical source.
+- Validation commands run:
+  - `m365 flow run list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName a45ca9c0-e4f1-f011-8406-002248582037 --status Failed --triggerStartTime 2026-04-24T00:00:00Z --triggerEndTime 2026-04-27T00:00:00Z --output json`
+  - `m365 flow run get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName a45ca9c0-e4f1-f011-8406-002248582037 --name 08584245485025135919781428669CU30 --withActions --output json`
+  - `m365 flow run list --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 3df19738-dfe2-4068-995c-46198ff91435 --status Failed --triggerStartTime 2026-04-24T16:00:00Z --triggerEndTime 2026-04-25T16:00:00Z --output json`
+  - `m365 flow run get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --flowName 3df19738-dfe2-4068-995c-46198ff91435 --name 08584245280852824521653839391cU14 --withActions --output json`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_2_Postsignature-A45CA9C0-E4F1-F011-8406-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `git diff -- flows/power-automate/unpacked/Workflows/BGV_2_Postsignature-A45CA9C0-E4F1-F011-8406-002248582037.json flows/power-automate/unpacked/Workflows/BGV_6_HRReminderAndEscalation-FC4BF0E3-0916-F111-8341-002248582037.json`
+  - `pac solution pack --zipfile .\artifacts\exports\BGV_System_bgv2_bgv6_resilience_20260427.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_bgv2_bgv6_resilience_20260427.zip --publish-changes --force-overwrite`
+  - `m365 flow enable --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name a45ca9c0-e4f1-f011-8406-002248582037`
+  - `m365 flow enable --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 3df19738-dfe2-4068-995c-46198ff91435`
+  - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name a45ca9c0-e4f1-f011-8406-002248582037 --output json`
+  - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name 3df19738-dfe2-4068-995c-46198ff91435 --output json`
+- Notes:
+  - The old local-only artifact `202604170355470169_BGV_System_5236.zip` is not part of the deployed source and should remain out of source control.
+
 ## 2026-04-09 (Flow 5 separate high-severity email removed)
 
 - Current status:
