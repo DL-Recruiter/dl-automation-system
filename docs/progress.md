@@ -5348,3 +5348,105 @@ Log each session with:
   - `powershell -ExecutionPolicy Bypass -File .\scripts\active\bgv_daily_sync.ps1 -EnvironmentUrl https://orgde64dc49.crm5.dynamics.com/`
 - Notes:
   - This change makes the explicit flow definition match the behavior you wanted: recruiters receive one response email per employer submission, with severity and flagged issues included in that single email.
+## 2026-05-14 (PEV approved-contact guardrail live rollout + workbook migration)
+
+- Current status:
+  - Deployed the first-pass guardrail live, created the new SharePoint artifacts, and populated the approved-contact list from the current workbook.
+- Completed tasks:
+  - Verified deployment auth:
+    - `pac auth who` connected as `recruitment@dlresources.com.sg`
+    - `m365 status` connected as `recruitment@dlresources.com.sg`
+  - Ran the live schema builder:
+    - `scripts/active/pev_ensure_target_schema.ps1`
+    - created the SharePoint list `Approved HR Reference Contacts`
+    - added `PEV_Requests` guardrail fields:
+      - `ReferenceGuardrailStatus`
+      - `ReferenceGuardrailCheckedAt`
+      - `ReferenceGuardrailNotifiedAt`
+      - `ReferenceGuardrailLastEmailNormalized`
+      - `ReferenceGuardrailNotes`
+  - Packed and imported the updated unmanaged solution to the live environment.
+  - Verified the live `BGV_4_SendToEmployer_Clean` flow after import:
+    - `DisplayName = BGV_4_SendToEmployer_Clean`
+    - `State = Started`
+    - `FlowSuspensionReason = None`
+    - live definition includes `Condition_-_Approved_contact_found`
+  - Located the current workbook under:
+    - `PEV Records/Previous HR Reference List/HR_Referencing_Emails_updated.xlsx`
+  - Inspected workbook structure:
+    - `Companys HR email` sheet contains `20` data rows
+    - `Personal HR email` sheet is currently header-only
+  - Added `scripts/active/pev_import_approved_hr_reference_contacts.py` for reusable workbook-to-list migration.
+  - Migrated the workbook data into the live `Approved HR Reference Contacts` list:
+    - live list now contains `20` items
+    - all `20` preview rows had unique normalized emails
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `[System.Management.Automation.Language.Parser]::ParseFile('scripts/active/pev_ensure_target_schema.ps1',[ref]$null,[ref]$errors)`
+  - `Import-Module PnP.PowerShell -ErrorAction Stop; .\scripts\active\pev_ensure_target_schema.ps1 -SourceSiteUrl https://dlresourcespl88.sharepoint.com/sites/dlrespl -TargetSiteUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 -ClientId 3e59bbcc-3e14-4837-b6e0-0a1870286f31 -TenantId 38597470-4753-461a-837f-ad8c14860b22`
+  - `pac solution pack --zipfile artifacts\exports\BGV_System_pev_guardrail_20260514.zip --folder flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path artifacts\exports\BGV_System_pev_guardrail_20260514.zip --publish-changes --force-overwrite`
+  - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name fe4bf0e3-0916-f111-8341-002248582037 --output json`
+  - `m365 spo file list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --folderUrl "/sites/DLRRecruitmentOps570/PEV Records/Previous HR Reference List" --output json`
+  - `python scripts\active\pev_import_approved_hr_reference_contacts.py --workbook out\migration\HR_Referencing_Emails_updated.xlsx --web-url https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --json-out out\migration\approved_hr_reference_contacts_preview.json`
+  - `Get-PnPList -Identity 'Approved HR Reference Contacts' -Includes Id,Title,ItemCount`
+  - `Get-PnPField -List 'PEV_Requests' -Identity 'ReferenceGuardrailStatus'`
+  - `Get-PnPListItem -List 'Approved HR Reference Contacts' -PageSize 5000 -Fields 'Title','HRReferenceEmailNormalized','CompanyName'`
+- Notes:
+  - The first-pass guardrail is now live and functional.
+  - Because the personal-contact sheet is empty, the live approved-contact list currently contains only the `General Company HR` rows from the workbook.
+  - The reusable migration script currently prepares preview data correctly; the live import path that actually succeeded in this rollout was completed/verified through direct live SharePoint checks after the initial CLI-based import calls proved slow.
+
+## 2026-05-14 (PEV approved-contact guardrail first-pass implementation)
+
+- Current status:
+  - Implemented the first code pass for the approved HR/reference contact guardrail in the canonical PEV repo.
+- Completed tasks:
+  - Updated `BGV_4_SendToEmployer_Clean` to add a pre-send approved-contact gate:
+    - added `shared_teams` connection reference to the flow
+    - composed and normalized the submitted employer HR/reference email before send
+    - looked up `Approved HR Reference Contacts` by SharePoint HTTP request using list title plus `HRReferenceEmailNormalized`
+    - allowed employer send only when the normalized submitted email is valid and found in the approved-contact list
+    - blocked send when the submitted email is missing, invalid, or not approved
+    - posted a Teams action message to `DLR Recruitment Ops > BGV` for blocked employer contacts
+    - stamped request-side guardrail fields for audit and duplicate-notification suppression
+  - Updated `scripts/active/pev_ensure_target_schema.ps1` to provision:
+    - the new SharePoint list `Approved HR Reference Contacts`
+    - new request-side fields on `PEV_Requests`:
+      - `ReferenceGuardrailStatus`
+      - `ReferenceGuardrailCheckedAt`
+      - `ReferenceGuardrailNotifiedAt`
+      - `ReferenceGuardrailLastEmailNormalized`
+      - `ReferenceGuardrailNotes`
+  - Synced the linked documentation so it now matches the first-pass implementation:
+    - `docs/flows_easy_english.md`
+    - `docs/sharepoint_list_user_guide.md`
+    - `docs/data_mapping_dictionary.md`
+    - `docs/pev_reference_contact_guardrail.md`
+- Validation commands run:
+  - `Get-Content -Raw flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json | ConvertFrom-Json | Out-Null`
+  - `[System.Management.Automation.Language.Parser]::ParseFile('scripts/active/pev_ensure_target_schema.ps1',[ref]$null,[ref]$errors)`
+  - `rg -n "Approved HR Reference Contacts|ReferenceGuardrail|Condition_-_Approved_contact_found|Post_message_in_a_chat_or_channel_-_Guardrail" flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json scripts/active/pev_ensure_target_schema.ps1`
+- Notes:
+  - This is a safe first pass using the existing Teams channel connector and automatic recurrence retry after the approved-contact row is added.
+  - A later enhancement can convert the recruiter step to a true Teams Approvals card if we decide to add and bind the approvals connector in the solution.
+
+## 2026-05-14 (PEV approved HR reference contact guardrail design synced)
+
+- Current status:
+  - Switched back to the `BGV_Checks` PEV repo context and documented the approved-contact guardrail design so the flow, list, and repo indexes stay aligned.
+- Completed tasks:
+  - Added `docs/pev_reference_contact_guardrail.md` with:
+    - recommended SharePoint list schema for `Approved HR Reference Contacts`
+    - Excel-to-SharePoint migration plan for the current `Previous HR Reference List` workbook
+    - exact Power Automate action sequence for the pre-send lookup/approval gate in `BGV_4_SendToEmployer_Clean`
+    - normalization expressions, `Get items` filter pattern, approval template, multi-employer loop handling, and re-check logic after approval
+  - Updated `docs/flows_easy_english.md` so the `BGV_4_SendToEmployer_Clean` section now points to the planned approved-contact guardrail behavior.
+  - Updated `docs/sharepoint_list_user_guide.md` to include the planned `Approved HR Reference Contacts` list and its business-purpose columns.
+  - Updated `docs/file_index.md` and `docs/repo_inventory.md` so the new guardrail document is discoverable from the repo indexes.
+- Validation commands run:
+  - `git status --short`
+  - `rg -n "recruiter|reference|PEV|previous employer|HR email|approval" docs flows shared README.md System_SPEC.md`
+  - `rg -n "BGV_4|SendToEmployer|approval|Teams|Apply to each|EmployerHR_Email|reference contact|approved" docs/flows_easy_english.md flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
+- Notes:
+  - This pass documents the exact build pattern but does not yet modify the live cloud-flow JSON or create the SharePoint list in the tenant.

@@ -34,6 +34,90 @@ $storeMap = @(
     [ordered]@{ SourceTitle = "BGV Records"; TargetTitle = "PEV Records"; Template = 101 }
 )
 
+$approvedReferenceContactListTitle = "Approved HR Reference Contacts"
+
+$requestExtensionFields = @(
+    [ordered]@{
+        InternalName = "ReferenceGuardrailStatus"
+        FieldXml = '<Field Type="Text" DisplayName="Reference Guardrail Status" Name="ReferenceGuardrailStatus" StaticName="ReferenceGuardrailStatus" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "ReferenceGuardrailCheckedAt"
+        FieldXml = '<Field Type="DateTime" DisplayName="Reference Guardrail Checked At" Name="ReferenceGuardrailCheckedAt" StaticName="ReferenceGuardrailCheckedAt" Format="DateTime" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "ReferenceGuardrailNotifiedAt"
+        FieldXml = '<Field Type="DateTime" DisplayName="Reference Guardrail Notified At" Name="ReferenceGuardrailNotifiedAt" StaticName="ReferenceGuardrailNotifiedAt" Format="DateTime" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "ReferenceGuardrailLastEmailNormalized"
+        FieldXml = '<Field Type="Text" DisplayName="Reference Guardrail Last Email Normalized" Name="ReferenceGuardrailLastEmailNormalized" StaticName="ReferenceGuardrailLastEmailNormalized" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "ReferenceGuardrailNotes"
+        FieldXml = '<Field Type="Note" DisplayName="Reference Guardrail Notes" Name="ReferenceGuardrailNotes" StaticName="ReferenceGuardrailNotes" NumLines="6" RichText="FALSE" Group="PEV Custom Columns" />'
+    }
+)
+
+$approvedReferenceContactFields = @(
+    [ordered]@{
+        InternalName = "CompanyName"
+        FieldXml = '<Field Type="Text" DisplayName="Company Name" Name="CompanyName" StaticName="CompanyName" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "CompanyAddress"
+        FieldXml = '<Field Type="Note" DisplayName="Company Address" Name="CompanyAddress" StaticName="CompanyAddress" NumLines="6" RichText="FALSE" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "TelContact"
+        FieldXml = '<Field Type="Text" DisplayName="Tel Contact" Name="TelContact" StaticName="TelContact" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "HRReferenceEmail"
+        FieldXml = '<Field Type="Text" DisplayName="HR Reference Email" Name="HRReferenceEmail" StaticName="HRReferenceEmail" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "HRReferenceEmailNormalized"
+        FieldXml = '<Field Type="Text" DisplayName="HR Reference Email Normalized" Name="HRReferenceEmailNormalized" StaticName="HRReferenceEmailNormalized" Indexed="TRUE" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "CompanyUEN"
+        FieldXml = '<Field Type="Text" DisplayName="Company UEN" Name="CompanyUEN" StaticName="CompanyUEN" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "ContactType"
+        FieldXml = '<Field Type="Choice" DisplayName="Contact Type" Name="ContactType" StaticName="ContactType" FillInChoice="FALSE" Group="PEV Custom Columns"><CHOICES><CHOICE>General Company HR</CHOICE><CHOICE>Personal HR Contact</CHOICE></CHOICES></Field>'
+    },
+    [ordered]@{
+        InternalName = "ContactPersonName"
+        FieldXml = '<Field Type="Text" DisplayName="Contact Person Name" Name="ContactPersonName" StaticName="ContactPersonName" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "Notes"
+        FieldXml = '<Field Type="Note" DisplayName="Notes" Name="Notes" StaticName="Notes" NumLines="6" RichText="FALSE" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "IsActive"
+        FieldXml = '<Field Type="Boolean" DisplayName="Is Active" Name="IsActive" StaticName="IsActive" Group="PEV Custom Columns"><Default>1</Default></Field>'
+    },
+    [ordered]@{
+        InternalName = "IsVerified"
+        FieldXml = '<Field Type="Boolean" DisplayName="Is Verified" Name="IsVerified" StaticName="IsVerified" Group="PEV Custom Columns"><Default>1</Default></Field>'
+    },
+    [ordered]@{
+        InternalName = "SourceSheet"
+        FieldXml = '<Field Type="Text" DisplayName="Source Sheet" Name="SourceSheet" StaticName="SourceSheet" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "VerifiedOn"
+        FieldXml = '<Field Type="DateTime" DisplayName="Verified On" Name="VerifiedOn" StaticName="VerifiedOn" Format="DateTime" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
+        InternalName = "VerifiedByPerson"
+        FieldXml = '<Field Type="User" DisplayName="Verified By Person" Name="VerifiedByPerson" StaticName="VerifiedByPerson" UserSelectionMode="PeopleOnly" Group="PEV Custom Columns" />'
+    }
+)
+
 function Ensure-PevFolder {
     param(
         [Parameter(Mandatory = $true)]$Connection,
@@ -70,6 +154,48 @@ function Get-PevTargetDocumentsList {
         throw "Unable to locate a default target documents library."
     }
     return $fallback
+}
+
+function Ensure-PevList {
+    param(
+        [Parameter(Mandatory = $true)]$Connection,
+        [Parameter(Mandatory = $true)][string]$Title,
+        [Parameter(Mandatory = $true)][string]$TemplateName
+    )
+
+    $list = Get-BgvPnPListOrNull -Connection $Connection -Title $Title
+    if (-not $list) {
+        New-PnPList -Title $Title -Template $TemplateName -Connection $Connection | Out-Null
+        $list = Get-BgvPnPListOrNull -Connection $Connection -Title $Title
+    }
+
+    return $list
+}
+
+function Ensure-PevCustomFields {
+    param(
+        [Parameter(Mandatory = $true)]$Connection,
+        [Parameter(Mandatory = $true)][string]$ListTitle,
+        [Parameter(Mandatory = $true)][object[]]$FieldSpecs
+    )
+
+    $existingFields = @(Get-PnPField -List $ListTitle -Connection $Connection)
+    $existingMap = @{}
+    foreach ($field in $existingFields) {
+        $existingMap[$field.InternalName] = $field
+    }
+
+    $created = New-Object System.Collections.Generic.List[string]
+    foreach ($fieldSpec in $FieldSpecs) {
+        if ($existingMap.ContainsKey($fieldSpec.InternalName)) {
+            continue
+        }
+
+        Add-PnPFieldFromXml -List $ListTitle -FieldXml $fieldSpec.FieldXml -Connection $Connection | Out-Null
+        $created.Add([string]$fieldSpec.InternalName)
+    }
+
+    return @($created)
 }
 
 Write-BgvStep "Connect to source and target SharePoint sites"
@@ -139,6 +265,29 @@ foreach ($spec in $storeMap) {
         CreatedFields = @($createdFields)
         TargetStoreId = $targetList.Id.Guid
     }
+}
+
+Write-BgvStep "Ensure PEV request guardrail fields and approved-contact list exist"
+$requestGuardrailCreatedFields = Ensure-PevCustomFields -Connection $targetConnection -ListTitle "PEV_Requests" -FieldSpecs $requestExtensionFields
+$approvedReferenceContactList = Ensure-PevList -Connection $targetConnection -Title $approvedReferenceContactListTitle -TemplateName "GenericList"
+$approvedReferenceContactCreatedFields = Ensure-PevCustomFields -Connection $targetConnection -ListTitle $approvedReferenceContactListTitle -FieldSpecs $approvedReferenceContactFields
+
+$results += [ordered]@{
+    SourceStoreTitle = ""
+    StoreTitle = "PEV_Requests"
+    BaseTemplate = 100
+    CreatedFields = @($requestGuardrailCreatedFields)
+    TargetStoreId = (Get-BgvPnPListOrNull -Connection $targetConnection -Title "PEV_Requests").Id.Guid
+    Notes = "Guardrail extension fields"
+}
+
+$results += [ordered]@{
+    SourceStoreTitle = ""
+    StoreTitle = $approvedReferenceContactListTitle
+    BaseTemplate = $approvedReferenceContactList.BaseTemplate
+    CreatedFields = @($approvedReferenceContactCreatedFields)
+    TargetStoreId = $approvedReferenceContactList.Id.Guid
+    Notes = "Custom approved HR/reference contact list"
 }
 
 Write-BgvStep "Ensure parallel PEV template folder and upload template"

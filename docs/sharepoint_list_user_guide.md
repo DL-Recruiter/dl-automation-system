@@ -30,6 +30,7 @@ Important scope:
 | `BGV_Requests` | One row per employer request (`EMP1`, `EMP2`, `EMP3`). Tracks employer outreach, reminder status, and final verification result. |
 | `BGV_FormData` | One row per employer slot. Stores the normalized Form 1 and Form 2 values used for prefilling, audit, and troubleshooting. |
 | `BGV Records` | Document library that stores candidate folders, authorization files, and related documents. |
+| `Approved HR Reference Contacts` | SharePoint list for recruiter-approved employer HR/reference emails used by the pre-send guardrail in `BGV_4`. |
 
 ## 1) `BGV_Candidates`
 
@@ -119,6 +120,11 @@ Typical user questions this list answers:
 | `Severity` | Risk level assigned from the employer HR response. In the current flow this can be `High`, `Medium`, `Low`, or blank when no rule is triggered. | `BGV_5` | users, recruiter notifications |
 | `Outcome` | Stores the combined flagged items detected from the employer form response. | `BGV_5` | users, reporting |
 | `Notes` | Plain-text explanation built by the flow from the triggered rule(s), then saved into the request row for users and recruiters to review. | `BGV_5` | users, reporting |
+| `ReferenceGuardrailStatus` | Tracks whether the submitted HR/reference email was approved, blocked for review, or invalid during the pre-send guardrail. | `BGV_4` | `BGV_4`, users |
+| `ReferenceGuardrailCheckedAt` | Timestamp of the latest approved-contact check before employer send. | `BGV_4` | `BGV_4`, users |
+| `ReferenceGuardrailNotifiedAt` | Timestamp of the latest Teams recruiter notification for a blocked/unapproved employer contact. | `BGV_4` | `BGV_4`, users |
+| `ReferenceGuardrailLastEmailNormalized` | Lowercase trimmed submitted HR/reference email last checked by the guardrail. Helps suppress duplicate notifications for the same pending case. | `BGV_4` | `BGV_4`, users |
+| `ReferenceGuardrailNotes` | Short audit note captured when a request is held by the guardrail. | `BGV_4` | users |
 
 ### 2.3 How `Severity/Value` is calculated
 
@@ -218,6 +224,45 @@ The same note body is then used in three places:
 1. reused in internal notification content such as Teams/email details
 
 Example:
+
+## 4) `Approved HR Reference Contacts`
+
+What this list is for:
+
+- one row per approved employer HR/reference contact email
+- replaces the current Excel-held approved-contact source for flow lookups
+- gives `BGV_4` a reliable pre-send guardrail before employer emails go out
+
+Typical user questions this list answers:
+
+- Has this HR/reference email already been approved for use?
+- Is this a general company HR inbox or a named personal HR contact?
+- Which company/UEN does this approved email belong to?
+
+### 4.1 Recommended business columns
+
+| Column | What it is for |
+| --- | --- |
+| `CompanyName` | Employer/company name for the approved contact. |
+| `CompanyAddress` | Employer address when known. |
+| `TelContact` | Main phone or contact number when known. |
+| `HRReferenceEmail` | Display/audit copy of the approved HR/reference email. |
+| `HRReferenceEmailNormalized` | Lowercase trimmed email used as the main flow lookup key. |
+| `CompanyUEN` | Optional company registration/UEN field for cross-checking. |
+| `ContactType` | Distinguishes `General Company HR` from `Personal HR Contact`. |
+| `ContactPersonName` | Named HR contact when the approved email belongs to a person. |
+| `Notes` | Recruiter notes or approval context. |
+| `IsActive` | Main yes/no gate for whether the contact should still be used. |
+| `IsVerified` | Optional yes/no flag for whether the contact has been checked and approved. |
+| `SourceSheet` | Tracks whether the row came from `Companys HR email` or `Personal HR email` during migration. |
+
+Operational notes:
+
+- The planned primary flow lookup field is `HRReferenceEmailNormalized`.
+- That field should be indexed in SharePoint for faster `Get items` filters.
+- SharePoint system fields such as `Created`, `Modified`, `Created By`, and `Modified By` already cover the audit basics and do not need custom duplicates.
+- The current first-pass implementation in `BGV_4` uses a Teams channel action message plus automatic retry on the next recurrence run after recruiters add the approved email to this list.
+- Full implementation detail for the guardrail flow pattern lives in `docs/pev_reference_contact_guardrail.md`.
 
 ```text
 [Low] Information provided was not fully accurate.

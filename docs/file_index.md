@@ -30,6 +30,7 @@
 - `docs/first_time_and_daily_sop_guide.md` - Reading-order guide that tells collaborators which repo documents to use for first-time setup, daily SOP, migration, troubleshooting, and deployment.
 - `docs/flows_easy_english.md` - Plain-language explanation of the current BGV_0 to BGV_8 process flow.
 - `docs/ms365_authentication_runbook.md` - Authentication reference for PAC, Azure, PnP PowerShell, CLI for Microsoft 365, and Microsoft Graph.
+- `docs/pev_reference_contact_guardrail.md` - Build-ready design for the approved HR/reference contact SharePoint list and the recruiter approval gate before employer sends.
 - `docs/progress.md` - Ongoing status log for completed tasks and next actions.
 - `docs/repo_inventory.md` - Full tracked-file inventory with file-by-file purpose descriptions.
 - `docs/sharepoint_list_user_guide.md` - Beginner-friendly guide to the main BGV SharePoint stores and their important business columns.
@@ -66,6 +67,7 @@
 - `scripts/active/bgv_copy_site_data.ps1` - Copies selected BGV rows/files from blue to green with lookup remapping.
 - `scripts/active/bgv_build_deployment_settings.ps1` - Generates PAC settings, token values, and optional materialized green solution folders.
 - `scripts/active/bgv_validate_target_migration.ps1` - Validates migrated counts, samples, files, and portability guard status.
+- `scripts/active/pev_import_approved_hr_reference_contacts.py` - Reads the HR reference workbook and prepares or upserts rows into the live `Approved HR Reference Contacts` SharePoint list.
 - `scripts/active/verify_flow_runs.py` - Flow run-history verification script using OAuth and ARM/connector endpoint support.
 - `scripts/active/pull_all_flow_runs.py` - Pulls run history for all canonical flow JSON files and writes a combined report to `out/`.
 - `scripts/active/enforce_linked_docs.py` - Diff-based policy checker for linked documentation updates tied to flow JSON changes.

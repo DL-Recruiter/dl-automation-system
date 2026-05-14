@@ -145,6 +145,13 @@ This document describes the current behavior in your canonical flow files under 
 - Active production flow note:
   - Use `BGV_4_SendToEmployer_Clean`.
   - `BGV_4_SendToEmployer_Clean_v2` is a parked replacement draft and remains off; it is not the live production sender.
+- Guardrail extension now added in the canonical flow:
+  - before the employer send action, the flow checks the normalized submitted HR/reference email against the SharePoint list `Approved HR Reference Contacts`
+  - found email -> continue send
+  - not found or invalid/blank email -> do not send for that employer request
+  - the flow posts a Teams action message to `DLR Recruitment Ops > BGV`, stamps request-side guardrail fields, and waits for the next recurrence run
+  - after recruiters add the approved contact to the list, the same pending request will pass the lookup automatically on a later recurrence run and then send normally
+  - this first implementation uses a Teams channel action message plus automatic retry; it does not yet use a blocking Teams Approvals card
 - Trigger: Recurrence every 30 minutes.
 - Selection:
   - Reads `BGV_Requests` where `VerificationStatus = Not Sent` and `HRRequestSentAt` is null.
@@ -184,11 +191,22 @@ This document describes the current behavior in your canonical flow files under 
     - use `BGV_FormData.F1_HREmail` when it is email-formatted
     - else use `BGV_Requests.EmployerHR_Email` when it is email-formatted
     - else fallback to `dlresplmain@dlresources.com.sg` to avoid runtime send failure.
+  - Submitted HR/reference email guardrail:
+    - flow composes the submitted employer HR/reference email from `BGV_FormData.F1_HREmail`, fallback `BGV_Requests.EmployerHR_Email`
+    - flow normalizes that submitted value to lowercase trimmed text
+    - flow looks up `Approved HR Reference Contacts.HRReferenceEmailNormalized` through a SharePoint HTTP request by list title
+    - if no active approved-contact row matches, flow does not send the employer email in that run
+    - instead it posts a Teams message to the BGV channel with candidate/employer/email details and the direct SharePoint list link
+    - flow stamps request-side guardrail fields such as `ReferenceGuardrailStatus`, `ReferenceGuardrailCheckedAt`, `ReferenceGuardrailNotifiedAt`, and `ReferenceGuardrailLastEmailNormalized`
+    - duplicate Teams guardrail posts are suppressed for the same pending request when the normalized email has not changed since the last notification
   - Updates request row:
     - `VerificationStatus = Email Sent`
     - `HRRequestSentAt = utcNow()`
     - `LinktoEmployers = FinalVerificationLink`
-  - `LinkDue` is a SharePoint calculated column, not a flow-written field and not used by any canonical flow:
+    - `ReferenceGuardrailStatus = Email found in approved list`
+    - `ReferenceGuardrailCheckedAt = utcNow()`
+    - `ReferenceGuardrailLastEmailNormalized = <normalized submitted HR/reference email>`
+- `LinkDue` is a SharePoint calculated column, not a flow-written field and not used by any canonical flow:
     - `Due` when `SendAfterDate` is blank
     - `Due` when `SendAfterDate <= Today`
     - `Not Due` when `SendAfterDate > Today`

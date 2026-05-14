@@ -18,6 +18,15 @@
           "connectionReferenceLogicalName": "cr94d_sharedoffice365_bdd97"
         },
         "runtimeSource": "embedded"
+      },
+      "shared_teams": {
+        "api": {
+          "name": "shared_teams"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "cr94d_sharedteams_4466d"
+        },
+        "runtimeSource": "embedded"
       }
     },
     "definition": {
@@ -349,60 +358,119 @@
                     ]
                   }
                 },
-                "EmployerRecipientEmail": {
+                "SubmittedEmployerReferenceEmail": {
                   "type": "Compose",
-                  "inputs": "@if(and(contains(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),'@'),not(contains(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),' ')),contains(last(split(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),'@')),'.')),trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),if(and(contains(trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'@'),not(contains(trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),' ')),contains(last(split(trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'@')),'.')),trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'dlresplmain@dlresources.com.sg'))",
+                  "inputs": "@coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'],items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'],'')",
                   "runAfter": {
                     "Set_variable": [
                       "Succeeded"
                     ]
                   }
                 },
-                "Send_an_email_(V2)": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
-                      "emailMessage/To": "@outputs('EmployerRecipientEmail')",
-                      "emailMessage/Subject": "Request for Employment Verification - @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}",
-                      "emailMessage/Body": "<p class=\"editor-paragraph\">Dear HR Department,<br><br>We are reaching out to the Human Resource Department of your company to conduct a Previous Employment Verification Check for</p><p class=\"editor-paragraph\">@{first(body('Get_item')?['value'])?['FullName']}, who has listed your organisation (@{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}) as the relevant previous employer.</p><br><p class=\"editor-paragraph\">Declared company details from candidate:</p><p class=\"editor-paragraph\">- Company Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}<br>- Company Address: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['Employer_Address'],'(Not captured)')}<br>- Company UEN: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['Employer_UEN'],'(Not captured)')}</p><br><p class=\"editor-paragraph\">We would greatly appreciate your assistance in completing the \"Previous Employment Verification Form\" via the link provided below as soon as possible to support a smooth and timely onboarding process.</p><br><p class=\"editor-paragraph\">For verification purposes, we would also appreciate it if you could upload your company stamp using the shared Word document provided below.</p><br><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}<br>Company stamp document:<br><a href=\"@{outputs('CompanyStampDocumentLink')}\" class=\"editor-link\">Open Company Stamp - @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.docx</a><br><br>Please open the document, place your company stamp in it, and save it back using the same shared link.</p><br><p class=\"editor-paragraph\">The following is the link to the form:<br><a href=\"@{outputs('FinalVerificationLink')}\" class=\"editor-link\"><br><br>Click here to complete verification</a><br><br>For your reference, the candidate's signed authorisation has been recorded for this request.</p><br><p class=\"editor-paragraph\">Please be assured that all information provided will be treated with the strictest confidence and used solely for internal HR and employment verification purposes. Please note: if you have any questions or require further information, please reply to this email or include this Request ID in the subject line: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.</p><br><p class=\"editor-paragraph\">Thank you for your time and we appreciate your verification.</p><br><p class=\"editor-paragraph\">Thanks &amp; Regards,<br>D L Resources Pte Ltd<br><br>Phil Wong | HR Officer<br>Co. Reg. No. 199600101K<br>EA License No: 24C2333<br>Tel: +65 8205 9002<br>Email: <a href=\"mailto:recruitment@dlresources.com.sg\">recruitment@dlresources.com.sg</a></p><br>",
-                      "emailMessage/Attachments": [
-                        {
-                          "Name": "@variables('AuthFileName')",
-                          "ContentBytes": "@base64ToBinary(outputs('Get_file_content')?['body/$content'])"
-                        }
-                      ],
-                      "emailMessage/Importance": "Normal"
-                    },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
-                      "operationId": "SharedMailboxSendEmailV2",
-                      "connectionName": "shared_office365"
-                    }
-                  },
+                "IsSubmittedEmployerReferenceEmailValid": {
+                  "type": "Compose",
+                  "inputs": "@and(contains(trim(string(outputs('SubmittedEmployerReferenceEmail'))),'@'),not(contains(trim(string(outputs('SubmittedEmployerReferenceEmail'))),' ')),contains(last(split(trim(string(outputs('SubmittedEmployerReferenceEmail'))),'@')),'.'))",
+                  "runAfter": {
+                    "SubmittedEmployerReferenceEmail": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "EmployerRecipientEmail": {
+                  "type": "Compose",
+                  "inputs": "@if(and(contains(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),'@'),not(contains(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),' ')),contains(last(split(trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),'@')),'.')),trim(string(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_HREmail'])),if(and(contains(trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'@'),not(contains(trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),' ')),contains(last(split(trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'@')),'.')),trim(string(items('Apply_to_each_(Requests_Loop)')?['EmployerHR_Email'])),'dlresplmain@dlresources.com.sg'))",
+                  "runAfter": {
+                    "IsSubmittedEmployerReferenceEmailValid": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "NormalizedSubmittedEmployerReferenceEmail": {
+                  "type": "Compose",
+                  "inputs": "@toLower(trim(string(outputs('SubmittedEmployerReferenceEmail'))))",
                   "runAfter": {
                     "EmployerRecipientEmail": [
                       "Succeeded"
                     ]
                   }
                 },
-                "Condition_-_Send_candidate_copy_once": {
+                "EmployerNumber": {
+                  "type": "Compose",
+                  "inputs": "@last(split(items('Apply_to_each_(Requests_Loop)')?['RequestID'],'-'))",
+                  "runAfter": {
+                    "NormalizedSubmittedEmployerReferenceEmail": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Get_Approved_HR_Reference_Contacts": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                      "parameters/method": "GET",
+                      "parameters/uri": "@concat('_api/web/lists/GetByTitle(''Approved HR Reference Contacts'')/items?$top=1&$select=Id,Title,HRReferenceEmailNormalized,IsActive&$filter=HRReferenceEmailNormalized eq ''', replace(outputs('NormalizedSubmittedEmployerReferenceEmail'),'''',''''''), ''' and IsActive eq 1')",
+                      "parameters/headers": {
+                        "Accept": "application/json;odata=nometadata"
+                      }
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "HttpRequest",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  },
+                  "runAfter": {
+                    "EmployerNumber": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "ApprovedContactMatchCount": {
+                  "type": "Compose",
+                  "inputs": "@length(body('Get_Approved_HR_Reference_Contacts')?['value'])",
+                  "runAfter": {
+                    "Get_Approved_HR_Reference_Contacts": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "ShouldNotifyGuardrailTeams": {
+                  "type": "Compose",
+                  "inputs": "@or(empty(items('Apply_to_each_(Requests_Loop)')?['ReferenceGuardrailNotifiedAt']),not(equals(toLower(trim(string(coalesce(items('Apply_to_each_(Requests_Loop)')?['ReferenceGuardrailLastEmailNormalized'],'')))),outputs('NormalizedSubmittedEmployerReferenceEmail'))))",
+                  "runAfter": {
+                    "ApprovedContactMatchCount": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Condition_-_Approved_contact_found": {
                   "type": "If",
                   "expression": {
-                    "equals": [
-                      "@if(endsWith(string(items('Apply_to_each_(Requests_Loop)')?['RequestID']), '-EMP1'),'true','false')",
-                      "true"
+                    "and": [
+                      {
+                        "equals": [
+                          "@outputs('IsSubmittedEmployerReferenceEmailValid')",
+                          true
+                        ]
+                      },
+                      {
+                        "greater": [
+                          "@outputs('ApprovedContactMatchCount')",
+                          0
+                        ]
+                      }
                     ]
                   },
                   "actions": {
-                    "Send_signed_form_copy_to_candidate_(V2)": {
+                    "Send_an_email_(V2)": {
                       "type": "OpenApiConnection",
                       "inputs": {
                         "parameters": {
                           "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
-                          "emailMessage/To": "@if(contains(trim(string(first(body('Get_item')?['value'])?['CandidateEmail'])),'@'),trim(string(first(body('Get_item')?['value'])?['CandidateEmail'])),'recruitment@dlresources.com.sg')",
-                          "emailMessage/Subject": "Copy of Signed Authorization Form - @{first(body('Get_item')?['value'])?['FullName']}",
-                          "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{first(body('Get_item')?['value'])?['FullName']},</p><br><p class=\"editor-paragraph\">An email will be sent to your employers based on the details you have provided for the previous employment verification process.</p><br><p class=\"editor-paragraph\">For your reference, your signed authorization form is attached to this email. Please keep this copy for your records and open it in Microsoft Word to view the signed document properly.</p><br><p class=\"editor-paragraph\">Thanks &amp; Regards,<br>D L Resources Pte Ltd<br><br>Phil Wong | HR Officer<br>Co. Reg. No. 199600101K<br>EA License No: 24C2333<br>Tel: +65 8205 9002<br>Email: <a href=\"mailto:recruitment@dlresources.com.sg\">recruitment@dlresources.com.sg</a></p>",
+                          "emailMessage/To": "@outputs('EmployerRecipientEmail')",
+                          "emailMessage/Subject": "Request for Employment Verification - @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}",
+                          "emailMessage/Body": "<p class=\"editor-paragraph\">Dear HR Department,<br><br>We are reaching out to the Human Resource Department of your company to conduct a Previous Employment Verification Check for</p><p class=\"editor-paragraph\">@{first(body('Get_item')?['value'])?['FullName']}, who has listed your organisation (@{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}) as the relevant previous employer.</p><br><p class=\"editor-paragraph\">Declared company details from candidate:</p><p class=\"editor-paragraph\">- Company Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}<br>- Company Address: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['Employer_Address'],'(Not captured)')}<br>- Company UEN: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['Employer_UEN'],'(Not captured)')}</p><br><p class=\"editor-paragraph\">We would greatly appreciate your assistance in completing the \"Previous Employment Verification Form\" via the link provided below as soon as possible to support a smooth and timely onboarding process.</p><br><p class=\"editor-paragraph\">For verification purposes, we would also appreciate it if you could upload your company stamp using the shared Word document provided below.</p><br><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}<br>Company stamp document:<br><a href=\"@{outputs('CompanyStampDocumentLink')}\" class=\"editor-link\">Open Company Stamp - @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.docx</a><br><br>Please open the document, place your company stamp in it, and save it back using the same shared link.</p><br><p class=\"editor-paragraph\">The following is the link to the form:<br><a href=\"@{outputs('FinalVerificationLink')}\" class=\"editor-link\"><br><br>Click here to complete verification</a><br><br>For your reference, the candidate's signed authorisation has been recorded for this request.</p><br><p class=\"editor-paragraph\">Please be assured that all information provided will be treated with the strictest confidence and used solely for internal HR and employment verification purposes. Please note: if you have any questions or require further information, please reply to this email or include this Request ID in the subject line: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.</p><br><p class=\"editor-paragraph\">Thank you for your time and we appreciate your verification.</p><br><p class=\"editor-paragraph\">Thanks &amp; Regards,<br>D L Resources Pte Ltd<br><br>Phil Wong | HR Officer<br>Co. Reg. No. 199600101K<br>EA License No: 24C2333<br>Tel: +65 8205 9002<br>Email: <a href=\"mailto:recruitment@dlresources.com.sg\">recruitment@dlresources.com.sg</a></p><br>",
                           "emailMessage/Attachments": [
                             {
                               "Name": "@variables('AuthFileName')",
@@ -418,39 +486,142 @@
                         }
                       },
                       "runAfter": {}
+                    },
+                    "Condition_-_Send_candidate_copy_once": {
+                      "type": "If",
+                      "expression": {
+                        "equals": [
+                          "@if(endsWith(string(items('Apply_to_each_(Requests_Loop)')?['RequestID']), '-EMP1'),'true','false')",
+                          "true"
+                        ]
+                      },
+                      "actions": {
+                        "Send_signed_form_copy_to_candidate_(V2)": {
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
+                              "emailMessage/To": "@if(contains(trim(string(first(body('Get_item')?['value'])?['CandidateEmail'])),'@'),trim(string(first(body('Get_item')?['value'])?['CandidateEmail'])),'recruitment@dlresources.com.sg')",
+                              "emailMessage/Subject": "Copy of Signed Authorization Form - @{first(body('Get_item')?['value'])?['FullName']}",
+                              "emailMessage/Body": "<p class=\"editor-paragraph\">Dear @{first(body('Get_item')?['value'])?['FullName']},</p><br><p class=\"editor-paragraph\">An email will be sent to your employers based on the details you have provided for the previous employment verification process.</p><br><p class=\"editor-paragraph\">For your reference, your signed authorization form is attached to this email. Please keep this copy for your records and open it in Microsoft Word to view the signed document properly.</p><br><p class=\"editor-paragraph\">Thanks &amp; Regards,<br>D L Resources Pte Ltd<br><br>Phil Wong | HR Officer<br>Co. Reg. No. 199600101K<br>EA License No: 24C2333<br>Tel: +65 8205 9002<br>Email: <a href=\"mailto:recruitment@dlresources.com.sg\">recruitment@dlresources.com.sg</a></p>",
+                              "emailMessage/Attachments": [
+                                {
+                                  "Name": "@variables('AuthFileName')",
+                                  "ContentBytes": "@base64ToBinary(outputs('Get_file_content')?['body/$content'])"
+                                }
+                              ],
+                              "emailMessage/Importance": "Normal"
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                              "operationId": "SharedMailboxSendEmailV2",
+                              "connectionName": "shared_office365"
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Send_an_email_(V2)": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Patch_BGV_Request_Status": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "parameters/method": "PATCH",
+                          "parameters/uri": "@concat('_api/web/lists(guid''df824861-8e10-4a8c-ad88-f7cf1ef3ef26'')/items(', string(items('Apply_to_each_(Requests_Loop)')?['ID']), ')')",
+                          "parameters/headers": {
+                            "Accept": "application/json;odata=nometadata",
+                            "Content-Type": "application/json;odata=nometadata",
+                            "IF-MATCH": "*"
+                          },
+                          "parameters/body": "@concat('{\"HRRequestSentAt\":\"', utcNow(), '\",\"VerificationStatus\":\"Email Sent\",\"uniquelinktoemployers\":\"', replace(string(outputs('FinalVerificationLink')), '\"', '\\\"'), '\",\"ReferenceGuardrailStatus\":\"Email found in approved list\",\"ReferenceGuardrailCheckedAt\":\"', utcNow(), '\",\"ReferenceGuardrailLastEmailNormalized\":\"', replace(string(outputs('NormalizedSubmittedEmployerReferenceEmail')), '\"', '\\\"'), '\"}')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "HttpRequest",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      },
+                      "runAfter": {
+                        "Condition_-_Send_candidate_copy_once": [
+                          "Succeeded"
+                        ]
+                      }
                     }
                   },
                   "else": {
-                    "actions": {}
-                  },
-                  "runAfter": {
-                    "Send_an_email_(V2)": [
-                      "Succeeded"
-                    ]
-                  }
-                },
-                "Patch_BGV_Request_Status": {
-                  "type": "OpenApiConnection",
-                  "inputs": {
-                    "parameters": {
-                      "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
-                      "parameters/method": "PATCH",
-                      "parameters/uri": "@concat('_api/web/lists(guid''df824861-8e10-4a8c-ad88-f7cf1ef3ef26'')/items(', string(items('Apply_to_each_(Requests_Loop)')?['ID']), ')')",
-                      "parameters/headers": {
-                        "Accept": "application/json;odata=nometadata",
-                        "Content-Type": "application/json;odata=nometadata",
-                        "IF-MATCH": "*"
+                    "actions": {
+                      "Condition_-_Post_guardrail_message": {
+                        "type": "If",
+                        "expression": {
+                          "equals": [
+                            "@outputs('ShouldNotifyGuardrailTeams')",
+                            true
+                          ]
+                        },
+                        "actions": {
+                          "Post_message_in_a_chat_or_channel_-_Guardrail": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "poster": "Flow bot",
+                                "location": "Channel",
+                                "body/recipient/groupId": "4475a565-7f2b-4df1-91cd-c8e3df8f805a",
+                                "body/recipient/channelId": "19:01523cb936ce49fca3e80d2ee293da6a@thread.tacv2",
+                                "body/messageBody": "<p class=\"editor-paragraph\"><strong>PEV HR/reference contact verification required</strong></p><p class=\"editor-paragraph\">Candidate Name: @{coalesce(first(body('Get_item')?['value'])?['FullName'],items('Apply_to_each_(Requests_Loop)')?['CandidateID'])}<br>Candidate ID: @{items('Apply_to_each_(Requests_Loop)')?['CandidateID']}<br>Employer Number: @{outputs('EmployerNumber')}<br>Employer Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}<br>Submitted HR/reference Email: @{outputs('NormalizedSubmittedEmployerReferenceEmail')}<br>Company UEN: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['Employer_UEN'],'(Not provided)')}<br>Check Result: @{if(outputs('IsSubmittedEmployerReferenceEmailValid'),'Email not found in approved list','Submitted HR/reference email is blank or invalid')}</p><p class=\"editor-paragraph\">Approved HR Reference Contacts list:<br><a href=\"https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570/Lists/Approved%20HR%20Reference%20Contacts/AllItems.aspx\">Open SharePoint List</a></p><p class=\"editor-paragraph\">Please verify this HR/reference contact. If valid, add the email and relevant details into the SharePoint List. This PEV request will retry automatically on the next scheduled flow run after the approved contact has been added.</p>"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                                "operationId": "PostMessageToConversation",
+                                "connectionName": "shared_teams"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          }
+                        },
+                        "else": {
+                          "actions": {}
+                        },
+                        "runAfter": {}
                       },
-                      "parameters/body": "@concat('{\"HRRequestSentAt\":\"', utcNow(), '\",\"VerificationStatus\":\"Email Sent\",\"uniquelinktoemployers\":\"', replace(string(outputs('FinalVerificationLink')), '\"', '\\\"'), '\"}')"
-                    },
-                    "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                      "operationId": "HttpRequest",
-                      "connectionName": "shared_sharepointonline"
+                      "Patch_BGV_Request_Guardrail_Hold": {
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "parameters": {
+                            "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                            "parameters/method": "PATCH",
+                            "parameters/uri": "@concat('_api/web/lists(guid''df824861-8e10-4a8c-ad88-f7cf1ef3ef26'')/items(', string(items('Apply_to_each_(Requests_Loop)')?['ID']), ')')",
+                            "parameters/headers": {
+                              "Accept": "application/json;odata=nometadata",
+                              "Content-Type": "application/json;odata=nometadata",
+                              "IF-MATCH": "*"
+                            },
+                            "parameters/body": "@concat('{\"ReferenceGuardrailStatus\":\"', if(outputs('IsSubmittedEmployerReferenceEmailValid'),'Approval required','Needs corrected HR email'), '\",\"ReferenceGuardrailCheckedAt\":\"', utcNow(), '\",\"ReferenceGuardrailNotifiedAt\":\"', utcNow(), '\",\"ReferenceGuardrailLastEmailNormalized\":\"', replace(string(outputs('NormalizedSubmittedEmployerReferenceEmail')), '\"', '\\\"'), '\",\"ReferenceGuardrailNotes\":\"', replace(concat('Candidate ', coalesce(first(body('Get_item')?['value'])?['FullName'],items('Apply_to_each_(Requests_Loop)')?['CandidateID']), ' / ', items('Apply_to_each_(Requests_Loop)')?['CandidateID'], ' - ', outputs('EmployerNumber'), ' - ', coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)'), ' - Submitted HR/reference email: ', outputs('NormalizedSubmittedEmployerReferenceEmail')), '\"', '\\\"'), '\"}')"
+                          },
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                            "operationId": "HttpRequest",
+                            "connectionName": "shared_sharepointonline"
+                          }
+                        },
+                        "runAfter": {
+                          "Condition_-_Post_guardrail_message": [
+                            "Succeeded"
+                          ]
+                        }
+                      }
                     }
                   },
                   "runAfter": {
-                    "Condition_-_Send_candidate_copy_once": [
+                    "ShouldNotifyGuardrailTeams": [
                       "Succeeded"
                     ]
                   }

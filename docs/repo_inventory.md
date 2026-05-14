@@ -33,6 +33,7 @@ Generated `.NET` build/test outputs such as `bin/`, `obj/`, and `TestResults/` a
 - `docs/first_time_and_daily_sop_guide.md` - Reading-order guide that tells collaborators which docs to use for first-time setup, daily work, migration, troubleshooting, and deployment.
 - `docs/flows_easy_english.md` - Plain-language explanation of BGV_0 to BGV_6 business logic.
 - `docs/ms365_authentication_runbook.md` - Authentication setup and daily verification reference for PAC, Azure, PnP PowerShell, CLI for Microsoft 365, and Graph PowerShell.
+- `docs/pev_reference_contact_guardrail.md` - Build-ready guardrail design for the approved HR/reference contact SharePoint list, migration approach, and recruiter approval flow pattern before employer sends.
 - `docs/progress.md` - Chronological change log with validation commands, blockers, and next actions.
 - `docs/repo_inventory.md` - Full tracked-file inventory with purpose descriptions.
 - `docs/sharepoint_list_user_guide.md` - Beginner-friendly user guide to the main BGV SharePoint stores and their important business columns.
@@ -99,6 +100,7 @@ Generated `.NET` build/test outputs such as `bin/`, `obj/`, and `TestResults/` a
 - `scripts/active/bgv_copy_site_data.ps1` - Copies selected candidate/request/form-data rows and related BGV Records files from blue to green with lookup remapping.
 - `scripts/active/bgv_build_deployment_settings.ps1` - Creates PAC connection settings, token values, and optional materialized green solution folders from templates plus target schema metadata.
 - `scripts/active/bgv_validate_target_migration.ps1` - Validates migrated row/file counts, compares random samples, and reruns the portability guard.
+- `scripts/active/pev_import_approved_hr_reference_contacts.py` - Reads the approved HR/reference workbook and prepares or upserts the normalized rows into the live `Approved HR Reference Contacts` SharePoint list.
 - `scripts/active/check_bgv_portability.py` - Enforces that canonical flow JSON contains portability tokens instead of old blue-site literals.
 - `scripts/active/import_flow_exports.ps1` - Copies exported flow files into repository-standard flow paths.
 - `scripts/active/pull_all_flow_runs.py` - Pulls run history for all canonical flow JSON files and writes a combined report.
