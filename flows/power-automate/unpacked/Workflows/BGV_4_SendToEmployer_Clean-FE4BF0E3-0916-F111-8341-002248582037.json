@@ -444,31 +444,104 @@
                     ]
                   }
                 },
+                "ApprovedContactBranchDecision": {
+                  "type": "Compose",
+                  "inputs": "@if(and(equals(string(outputs('IsSubmittedEmployerReferenceEmailValid')),'true'),greater(int(outputs('ApprovedContactMatchCount')),0)),'approved','hold')",
+                  "runAfter": {
+                    "ShouldNotifyGuardrailTeams": [
+                      "Succeeded"
+                    ]
+                  }
+                },
                 "Condition_-_Approved_contact_found": {
                   "type": "If",
-                  "expression": {
-                    "and": [
-                      {
-                        "equals": [
-                          "@outputs('IsSubmittedEmployerReferenceEmailValid')",
-                          true
-                        ]
-                      },
-                      {
-                        "greater": [
-                          "@outputs('ApprovedContactMatchCount')",
-                          0
-                        ]
-                      }
+                  "expression": "@and(equals(string(outputs('IsSubmittedEmployerReferenceEmailValid')),'true'),greater(int(outputs('ApprovedContactMatchCount')),0))",
+                  "runAfter": {
+                    "ApprovedContactBranchDecision": [
+                      "Succeeded"
                     ]
                   },
                   "actions": {
+                    "NormalizedEmployerUEN": {
+                      "type": "Compose",
+                      "inputs": "@toUpper(trim(string(coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['Employer_UEN'],''))))",
+                      "runAfter": {}
+                    },
+                    "Get_Centralised_Employer_Email_By_UEN": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "dataset": "https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570",
+                          "parameters/method": "GET",
+                          "parameters/uri": "@if(empty(outputs('NormalizedEmployerUEN')),'_api/web/lists/GetByTitle(''Approved HR Reference Contacts'')/items?$top=0',concat('_api/web/lists/GetByTitle(''Approved HR Reference Contacts'')/items?$top=1&$select=Id,Title,CompanyUENNormalized,HRReferenceEmail,HRReferenceEmailNormalized,IsActive&$filter=CompanyUENNormalized eq ''', replace(outputs('NormalizedEmployerUEN'),'''',''''''), ''' and IsActive eq 1'))",
+                          "parameters/headers": {
+                            "Accept": "application/json;odata=nometadata"
+                          }
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                          "operationId": "HttpRequest",
+                          "connectionName": "shared_sharepointonline"
+                        }
+                      },
+                      "runAfter": {
+                        "NormalizedEmployerUEN": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "CentralisedEmployerEmailCandidate": {
+                      "type": "Compose",
+                      "inputs": "@trim(string(coalesce(first(body('Get_Centralised_Employer_Email_By_UEN')?['value'])?['HRReferenceEmail'],'')))",
+                      "runAfter": {
+                        "Get_Centralised_Employer_Email_By_UEN": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "IsCentralisedEmployerEmailValid": {
+                      "type": "Compose",
+                      "inputs": "@and(contains(trim(string(outputs('CentralisedEmployerEmailCandidate'))),'@'),not(contains(trim(string(outputs('CentralisedEmployerEmailCandidate'))),' ')),contains(last(split(trim(string(outputs('CentralisedEmployerEmailCandidate'))),'@')),'.'))",
+                      "runAfter": {
+                        "CentralisedEmployerEmailCandidate": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "ResolvedEmployerToEmail": {
+                      "type": "Compose",
+                      "inputs": "@if(and(equals(string(outputs('IsCentralisedEmployerEmailValid')),'true'),equals(toLower(trim(string(outputs('EmployerRecipientEmail')))),'dlresplmain@dlresources.com.sg')),trim(string(outputs('CentralisedEmployerEmailCandidate'))),outputs('EmployerRecipientEmail'))",
+                      "runAfter": {
+                        "IsCentralisedEmployerEmailValid": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "DuplicatePrevention_CentralisedEmailMatchesResolvedTo": {
+                      "type": "Compose",
+                      "inputs": "@and(equals(string(outputs('IsCentralisedEmployerEmailValid')),'true'),equals(toLower(trim(string(outputs('CentralisedEmployerEmailCandidate')))),toLower(trim(string(outputs('ResolvedEmployerToEmail'))))))",
+                      "runAfter": {
+                        "ResolvedEmployerToEmail": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "ResolvedEmployerCcEmail": {
+                      "type": "Compose",
+                      "inputs": "@if(and(equals(string(outputs('IsCentralisedEmployerEmailValid')),'true'),equals(string(outputs('DuplicatePrevention_CentralisedEmailMatchesResolvedTo')),'false'),not(equals(toLower(trim(string(outputs('EmployerRecipientEmail')))),'dlresplmain@dlresources.com.sg'))),trim(string(outputs('CentralisedEmployerEmailCandidate'))),'')",
+                      "runAfter": {
+                        "DuplicatePrevention_CentralisedEmailMatchesResolvedTo": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
                     "Send_an_email_(V2)": {
                       "type": "OpenApiConnection",
                       "inputs": {
                         "parameters": {
                           "emailMessage/MailboxAddress": "recruitment@dlresources.com.sg",
-                          "emailMessage/To": "@outputs('EmployerRecipientEmail')",
+                          "emailMessage/To": "@outputs('ResolvedEmployerToEmail')",
+                          "emailMessage/CC": "@outputs('ResolvedEmployerCcEmail')",
                           "emailMessage/Subject": "Request for Employment Verification - @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}",
                           "emailMessage/Body": "<p class=\"editor-paragraph\">Dear HR Department,<br><br>We are reaching out to the Human Resource Department of your company to conduct a Previous Employment Verification Check for</p><p class=\"editor-paragraph\">@{first(body('Get_item')?['value'])?['FullName']}, who has listed your organisation (@{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}) as the relevant previous employer.</p><br><p class=\"editor-paragraph\">Declared company details from candidate:</p><p class=\"editor-paragraph\">- Company Name: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerName'],items('Apply_to_each_(Requests_Loop)')?['EmployerName'],'(Not captured)')}<br>- Company Address: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['EmployerAddress'],items('Apply_to_each_(Requests_Loop)')?['Employer_Address'],'(Not captured)')}<br>- Company UEN: @{coalesce(first(body('Get_items_(BGV_FormData)')?['value'])?['F1_EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['EmployerUEN'],items('Apply_to_each_(Requests_Loop)')?['Employer_UEN'],'(Not captured)')}</p><br><p class=\"editor-paragraph\">We would greatly appreciate your assistance in completing the \"Previous Employment Verification Form\" via the link provided below as soon as possible to support a smooth and timely onboarding process.</p><br><p class=\"editor-paragraph\">For verification purposes, we would also appreciate it if you could upload your company stamp using the shared Word document provided below.</p><br><p class=\"editor-paragraph\">Request ID: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}<br>Company stamp document:<br><a href=\"@{outputs('CompanyStampDocumentLink')}\" class=\"editor-link\">Open Company Stamp - @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.docx</a><br><br>Please open the document, place your company stamp in it, and save it back using the same shared link.</p><br><p class=\"editor-paragraph\">The following is the link to the form:<br><a href=\"@{outputs('FinalVerificationLink')}\" class=\"editor-link\"><br><br>Click here to complete verification</a><br><br>For your reference, the candidate's signed authorisation has been recorded for this request.</p><br><p class=\"editor-paragraph\">Please be assured that all information provided will be treated with the strictest confidence and used solely for internal HR and employment verification purposes. Please note: if you have any questions or require further information, please reply to this email or include this Request ID in the subject line: @{items('Apply_to_each_(Requests_Loop)')?['RequestID']}.</p><br><p class=\"editor-paragraph\">Thank you for your time and we appreciate your verification.</p><br><p class=\"editor-paragraph\">Thanks &amp; Regards,<br>D L Resources Pte Ltd<br><br>Phil Wong | HR Officer<br>Co. Reg. No. 199600101K<br>EA License No: 24C2333<br>Tel: +65 8205 9002<br>Email: <a href=\"mailto:recruitment@dlresources.com.sg\">recruitment@dlresources.com.sg</a></p><br>",
                           "emailMessage/Attachments": [
@@ -485,7 +558,11 @@
                           "connectionName": "shared_office365"
                         }
                       },
-                      "runAfter": {}
+                      "runAfter": {
+                        "ResolvedEmployerCcEmail": [
+                          "Succeeded"
+                        ]
+                      }
                     },
                     "Condition_-_Send_candidate_copy_once": {
                       "type": "If",

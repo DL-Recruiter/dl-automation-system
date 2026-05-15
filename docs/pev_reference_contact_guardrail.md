@@ -242,6 +242,43 @@ Important note:
 - the email match should be the primary decision point
 - UEN can be used for extra display context or optional warning logic, but not as the main blocker when the approved email already matches
 
+### 6A. Secondary UEN-based centralised email routing
+
+Smallest safe implementation choice:
+
+- reuse `Approved HR Reference Contacts` as the recruiter-maintained UEN routing source
+- keep the approved-email guardrail decision on `HRReferenceEmailNormalized`
+- add a second lookup by `CompanyUENNormalized` only inside the approved send branch
+
+Recommended list field:
+
+- `CompanyUENNormalized`
+  - uppercase trimmed version of `CompanyUEN`
+  - indexed in SharePoint
+
+Recommended flow actions:
+
+- `Compose` -> `NormalizedEmployerUEN`
+- `Send an HTTP request to SharePoint` -> `Get_Centralised_Employer_Email_By_UEN`
+- `Compose` -> `CentralisedEmployerEmailCandidate`
+- `Compose` -> `IsCentralisedEmployerEmailValid`
+- `Compose` -> `ResolvedEmployerToEmail`
+- `Compose` -> `DuplicatePrevention_CentralisedEmailMatchesResolvedTo`
+- `Compose` -> `ResolvedEmployerCcEmail`
+
+Routing rules:
+
+- UEN match + valid centralised email + submitted HR email is the same:
+  - `To = submitted HR email`
+  - `CC = blank`
+- UEN match + valid centralised email + submitted HR email is different:
+  - `To = submitted HR email`
+  - `CC = centralised email`
+- UEN match + valid centralised email + submitted HR email is blank/invalid:
+  - if existing guarded recipient logic would otherwise fall back to `dlresplmain@dlresources.com.sg`, replace `To` with the centralised email
+- No UEN match, blank centralised email, or invalid centralised email:
+  - keep existing behavior unchanged
+
 ### 7. Check whether the email was found
 
 Action:
@@ -478,3 +515,26 @@ equals(outputs('Start_and_wait_for_an_approval')?['body/outcome'],'Reject')
 - Add optional UEN mismatch warning logic:
   - email found, but UEN differs from current submission
   - allow send, but alert recruiter for review
+
+## 14) Test cases for UEN-based routing
+
+1. UEN match + candidate/submitted HR email different
+   - approved email guard passes
+   - `ResolvedEmployerToEmail = submitted HR email`
+   - `ResolvedEmployerCcEmail = centralised email`
+
+2. UEN match + candidate/submitted HR email same
+   - approved email guard passes
+   - `ResolvedEmployerToEmail = submitted HR email`
+   - `ResolvedEmployerCcEmail = blank`
+
+3. No UEN match
+   - approved email guard behavior remains the main gate
+   - employer recipient stays on the existing submitted-email or fallback logic
+
+4. Invalid or blank centralised email
+   - employer recipient stays on the existing submitted-email or fallback logic
+
+5. Blank or invalid candidate/submitted HR email + UEN match
+   - if the current guarded recipient would otherwise be the fallback mailbox and the centralised email is valid, use the centralised email as `To`
+   - do not add a duplicate `CC`

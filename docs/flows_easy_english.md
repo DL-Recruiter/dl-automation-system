@@ -191,6 +191,13 @@ This document describes the current behavior in your canonical flow files under 
     - use `BGV_FormData.F1_HREmail` when it is email-formatted
     - else use `BGV_Requests.EmployerHR_Email` when it is email-formatted
     - else fallback to `dlresplmain@dlresources.com.sg` to avoid runtime send failure.
+  - UEN-based centralised employer routing is now layered on top of that guarded recipient logic:
+    - inside the approved-send branch, the flow normalizes the employer UEN to uppercase trimmed text
+    - it looks up `Approved HR Reference Contacts.CompanyUENNormalized` for an active recruiter-maintained centralised employer email
+    - if the current resolved `To` address is only the fallback mailbox and the UEN lookup returns a valid email, the flow uses the centralised email as `To`
+    - if the current resolved `To` address is a valid submitted HR email and the UEN lookup returns a different valid centralised email, the flow keeps `To` as-is and adds the centralised email into `CC`
+    - if the centralised email matches the resolved `To` address, the duplicate-prevention compose leaves `CC` blank
+    - if no active UEN mapping exists or the mapped email is blank/invalid, the flow keeps the existing behavior unchanged
   - Submitted HR/reference email guardrail:
     - flow composes the submitted employer HR/reference email from `BGV_FormData.F1_HREmail`, fallback `BGV_Requests.EmployerHR_Email`
     - flow normalizes that submitted value to lowercase trimmed text
@@ -206,6 +213,12 @@ This document describes the current behavior in your canonical flow files under 
     - `ReferenceGuardrailStatus = Email found in approved list`
     - `ReferenceGuardrailCheckedAt = utcNow()`
     - `ReferenceGuardrailLastEmailNormalized = <normalized submitted HR/reference email>`
+- Suggested smoke tests for the new UEN routing:
+  - UEN match + submitted HR email different from centralised email -> employer send uses submitted HR email in `To` and centralised email in `CC`
+  - UEN match + submitted HR email same as centralised email -> employer send uses that email once only and leaves `CC` blank
+  - no UEN match -> employer send behavior stays on the existing submitted-email/fallback logic
+  - UEN match but centralised email blank/invalid -> employer send behavior stays on the existing submitted-email/fallback logic
+  - submitted HR email blank/invalid + UEN match with valid centralised email -> employer send uses the centralised email as `To`
 - `LinkDue` is a SharePoint calculated column, not a flow-written field and not used by any canonical flow:
     - `Due` when `SendAfterDate` is blank
     - `Due` when `SendAfterDate <= Today`

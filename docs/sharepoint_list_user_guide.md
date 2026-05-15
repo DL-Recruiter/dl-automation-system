@@ -249,6 +249,7 @@ Typical user questions this list answers:
 | `HRReferenceEmail` | Display/audit copy of the approved HR/reference email. |
 | `HRReferenceEmailNormalized` | Lowercase trimmed email used as the main flow lookup key. |
 | `CompanyUEN` | Optional company registration/UEN field for cross-checking. |
+| `CompanyUENNormalized` | Uppercase trimmed UEN used by `BGV_4` when it looks up a centralised employer routing email by UEN. In live SharePoint this column was created with the exact no-spaces key name so the flow OData filter can bind to it directly. |
 | `ContactType` | Distinguishes `General Company HR` from `Personal HR Contact`. |
 | `ContactPersonName` | Named HR contact when the approved email belongs to a person. |
 | `Notes` | Recruiter notes or approval context. |
@@ -259,6 +260,7 @@ Typical user questions this list answers:
 Operational notes:
 
 - The planned primary flow lookup field is `HRReferenceEmailNormalized`.
+- The same list now also supports a secondary `BGV_4` routing lookup by `CompanyUENNormalized` when recruiters maintain a centralised employer email against a UEN.
 - That field should be indexed in SharePoint for faster `Get items` filters.
 - SharePoint system fields such as `Created`, `Modified`, `Created By`, and `Modified By` already cover the audit basics and do not need custom duplicates.
 - The current first-pass implementation in `BGV_4` uses a Teams channel action message plus automatic retry on the next recurrence run after recruiters add the approved email to this list.

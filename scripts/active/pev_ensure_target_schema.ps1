@@ -85,6 +85,10 @@ $approvedReferenceContactFields = @(
         FieldXml = '<Field Type="Text" DisplayName="Company UEN" Name="CompanyUEN" StaticName="CompanyUEN" Group="PEV Custom Columns" />'
     },
     [ordered]@{
+        InternalName = "CompanyUENNormalized"
+        FieldXml = '<Field Type="Text" DisplayName="CompanyUENNormalized" Name="CompanyUENNormalized" StaticName="CompanyUENNormalized" Indexed="TRUE" Group="PEV Custom Columns" />'
+    },
+    [ordered]@{
         InternalName = "ContactType"
         FieldXml = '<Field Type="Choice" DisplayName="Contact Type" Name="ContactType" StaticName="ContactType" FillInChoice="FALSE" Group="PEV Custom Columns"><CHOICES><CHOICE>General Company HR</CHOICE><CHOICE>Personal HR Contact</CHOICE></CHOICES></Field>'
     },

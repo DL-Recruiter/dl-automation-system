@@ -27,6 +27,10 @@ def email_norm(value: object) -> str:
     return norm(value).lower()
 
 
+def uen_norm(value: object) -> str:
+    return norm(value).upper()
+
+
 def run_m365(args: list[str]) -> str:
     m365_cmd = shutil.which("m365")
     m365_cmd_file = shutil.which("m365.cmd")
@@ -94,6 +98,7 @@ def read_rows(workbook_path: Path) -> list[dict[str, object]]:
             company_address = norm(row[header_index["Company Address"]]) if "Company Address" in header_index else ""
             tel_contact = norm(row[header_index["Tel Contact"]]) if "Tel Contact" in header_index else ""
             company_uen = norm(row[header_index["Company UEN"]]) if "Company UEN" in header_index else ""
+            company_uen_normalized = uen_norm(company_uen)
             notes = norm(row[header_index["Notes"]]) if "Notes" in header_index else ""
 
             rows.append(
@@ -105,6 +110,7 @@ def read_rows(workbook_path: Path) -> list[dict[str, object]]:
                     "HRReferenceEmail": email,
                     "HRReferenceEmailNormalized": normalized,
                     "CompanyUEN": company_uen,
+                    "CompanyUENNormalized": company_uen_normalized,
                     "ContactType": contact_type,
                     "ContactPersonName": "",
                     "Notes": notes,
@@ -151,6 +157,7 @@ def build_field_args(row: dict[str, object]) -> list[str]:
         "HRReferenceEmail",
         "HRReferenceEmailNormalized",
         "CompanyUEN",
+        "CompanyUENNormalized",
         "ContactType",
         "ContactPersonName",
         "Notes",

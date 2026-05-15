@@ -28,7 +28,7 @@ When mappings change:
 | `BGV_Candidates` | SharePoint List | `7b78dcaf-8744-478b-a40f-633ed7becff3` | `CandidateID` | Candidate-level record, auth lifecycle tracking, authorization link. |
 | `BGV_Requests` | SharePoint List | `4acba8e0-46aa-4007-b752-b4aa88fee7f7` | `RequestID`, `CandidateID` | One row per employer slot (`EMP1/EMP2/EMP3`). |
 | `BGV_FormData` | SharePoint List | `f5248a99-fdf1-4660-946a-d54e00575a40` | `RecordKey`, `RequestID`, `CandidateID` | Normalized form data store. |
-| `Approved HR Reference Contacts` | SharePoint List | looked up by title via SharePoint HTTP request in `BGV_4` | `HRReferenceEmailNormalized` | Approved employer HR/reference email guardrail list. |
+| `Approved HR Reference Contacts` | SharePoint List | looked up by title via SharePoint HTTP request in `BGV_4` | `HRReferenceEmailNormalized`, `CompanyUENNormalized` | Approved employer HR/reference email guardrail list and recruiter-maintained UEN-based centralised routing source. |
 | `BGV Records` | SharePoint Document Library | `d411563f-2b1c-4fa5-90fc-ecc5f50941a1` | Folder path contains `CandidateID` | Candidate files and authorization documents. |
 
 ## 2.1) Requested View: BGV_Candidates <-> BGV_Requests <-> MS Forms (HR Verification Form) <-> Flow 4 Outputs
@@ -39,10 +39,11 @@ When mappings change:
 2. For each request row, flow reads the candidate from `BGV_Candidates` using the stable `CandidateID` value from the request row (`Get items`, top 1), so a stale SharePoint lookup ID does not break the run.
 3. Flow builds `FinalVerificationLink` (HR Verification Form prefilled URL) using request/candidate values with `BGV_FormData` as preferred source where available.
 4. Before send, flow normalizes the submitted employer HR/reference email and checks `Approved HR Reference Contacts.HRReferenceEmailNormalized` by SharePoint HTTP request.
-5. If the submitted email is approved, flow emails the employer with the prefilled HR verification link and signed authorization file.
-6. If the submitted email is not approved or is invalid/blank, flow does not send in that run, posts a recruiter action message into the Teams BGV channel, and stamps request-side guardrail fields for retry/audit.
-7. On approved sends, flow updates request row in SharePoint: `HRRequestSentAt=utcNow()`, `VerificationStatus='Email Sent'`, `uniquelinktoemployers=FinalVerificationLink`, and guardrail status fields.
-8. Later, `BGV_5_Response1` receives the HR form submission and uses prefilling key `rd745...` (RequestID) to find and update the same request row.
+5. If the submitted email is approved, flow normalizes the employer UEN and optionally looks up `Approved HR Reference Contacts.CompanyUENNormalized` for a centralised employer email before sending.
+6. If the submitted email is approved, flow emails the employer with the prefilled HR verification link and signed authorization file.
+7. If the submitted email is not approved or is invalid/blank, flow does not send in that run, posts a recruiter action message into the Teams BGV channel, and stamps request-side guardrail fields for retry/audit.
+8. On approved sends, flow updates request row in SharePoint: `HRRequestSentAt=utcNow()`, `VerificationStatus='Email Sent'`, `uniquelinktoemployers=FinalVerificationLink`, and guardrail status fields.
+9. Later, `BGV_5_Response1` receives the HR form submission and uses prefilling key `rd745...` (RequestID) to find and update the same request row.
 
 ### 2.1.2 Field mapping for the requested systems
 
@@ -58,6 +59,7 @@ When mappings change:
 | `BGV_Requests` | `VerificationStatus` | N/A | Updated by `BGV_0` to `Not Sent`, by `BGV_4` to `Email Sent`, by `BGV_6` to `Reminder 1 Sent` / `Reminder 2 Sent` / `Reminder 3 Sent`, and by `BGV_5` to `Responded` |
 | `BGV_Requests` | `EmployerEmailReplyAt` | N/A | Updated by `BGV_8` when a matching inbound employer reply email is detected |
 | `Approved HR Reference Contacts` | `HRReferenceEmailNormalized` | N/A | `BGV_4` pre-send approved-contact lookup key |
+| `Approved HR Reference Contacts` | `CompanyUENNormalized` | N/A | `BGV_4` secondary centralised-recipient lookup key after the approved-email guard passes |
 | `BGV_Requests` | `ReferenceGuardrailStatus` | N/A | Updated by `BGV_4` to record approved vs blocked/invalid employer-contact status |
 | `BGV_Requests` | `ReferenceGuardrailCheckedAt` | N/A | Updated by `BGV_4` when the approved-contact lookup runs |
 | `BGV_Requests` | `ReferenceGuardrailNotifiedAt` | N/A | Updated by `BGV_4` when a Teams recruiter action message is posted for a blocked contact |

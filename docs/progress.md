@@ -5450,3 +5450,69 @@ Log each session with:
   - `rg -n "BGV_4|SendToEmployer|approval|Teams|Apply to each|EmployerHR_Email|reference contact|approved" docs/flows_easy_english.md flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json`
 - Notes:
   - This pass documents the exact build pattern but does not yet modify the live cloud-flow JSON or create the SharePoint list in the tenant.
+
+## 2026-05-15 (BGV_4 UEN-based centralised employer routing layered onto approved-send branch)
+
+- Current status:
+  - Updated the canonical `BGV_4_SendToEmployer_Clean` repo flow so the employer send branch can optionally route by employer UEN after the existing signed-authorisation and approved-email guardrails pass.
+- Completed tasks:
+  - Patched `flows/power-automate/unpacked/Workflows/BGV_4_SendToEmployer_Clean-FE4BF0E3-0916-F111-8341-002248582037.json` to add:
+    - `NormalizedEmployerUEN`
+    - `Get_Centralised_Employer_Email_By_UEN`
+    - `CentralisedEmployerEmailCandidate`
+    - `IsCentralisedEmployerEmailValid`
+    - `ResolvedEmployerToEmail`
+    - `DuplicatePrevention_CentralisedEmailMatchesResolvedTo`
+    - `ResolvedEmployerCcEmail`
+  - Updated the employer send action so:
+    - `To` now uses `ResolvedEmployerToEmail`
+    - `CC` now uses `ResolvedEmployerCcEmail`
+  - Reused `Approved HR Reference Contacts` as the recruiter-maintained centralised routing source and extended the schema/import helpers with `CompanyUENNormalized`.
+  - Synced the linked docs:
+    - `docs/flows_easy_english.md`
+    - `docs/sharepoint_list_user_guide.md`
+    - `docs/data_mapping_dictionary.md`
+    - `docs/pev_reference_contact_guardrail.md`
+- Validation planned/run:
+  - validate `BGV_4` JSON with `ConvertFrom-Json`
+  - validate `scripts/active/pev_ensure_target_schema.ps1` with the PowerShell parser
+  - validate `scripts/active/pev_import_approved_hr_reference_contacts.py` with `python -m py_compile`
+- Notes:
+  - This is the smallest safe repo change and assumes recruiters will maintain one active routing row per employer UEN in `Approved HR Reference Contacts`.
+
+## 2026-05-15 (BGV_4 UEN routing deployed live and corrected after template validation failure)
+
+- Current status:
+  - The updated `BGV_4_SendToEmployer_Clean` UEN-routing change is now deployed live and the production flow is back in `Started` state.
+- Completed tasks:
+  - Created the live recruiter-maintained UEN lookup key on `Approved HR Reference Contacts` with the exact field name `CompanyUENNormalized`.
+  - Re-ran `scripts/active/pev_import_approved_hr_reference_contacts.py --apply` successfully after the field fix:
+    - `20` existing workbook rows updated
+    - live rows now carry both `CompanyUEN` and `CompanyUENNormalized`
+  - Packed and imported the updated unmanaged solution to production.
+  - Live import exposed a flow validation failure when re-enabling `BGV_4`:
+    - `Condition_-_Approved_contact_found` could not reference `ApprovedContactBranchDecision`
+  - Patched the flow condition to evaluate the approved-email guard inline instead of referencing the extra compose output.
+  - Repacked and reimported the corrected solution.
+  - Verified the live `BGV_4_SendToEmployer_Clean` definition now contains:
+    - `NormalizedEmployerUEN`
+    - `Get_Centralised_Employer_Email_By_UEN`
+    - `ResolvedEmployerToEmail`
+    - `ResolvedEmployerCcEmail`
+    - employer send action `To = @outputs('ResolvedEmployerToEmail')`
+    - employer send action `CC = @outputs('ResolvedEmployerCcEmail')`
+  - Re-enabled the live flow successfully:
+    - `DisplayName = BGV_4_SendToEmployer_Clean`
+    - `State = Started`
+    - `FlowSuspensionReason = None`
+- Validation commands run:
+  - `m365 spo field add --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle "Approved HR Reference Contacts" --xml "<Field Type='Text' DisplayName='CompanyUENNormalized' Name='CompanyUENNormalized' StaticName='CompanyUENNormalized' Indexed='TRUE' Group='PEV Custom Columns' />" --output json`
+  - `python scripts\active\pev_import_approved_hr_reference_contacts.py --workbook out\migration\HR_Referencing_Emails_updated.xlsx --web-url https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --json-out out\migration\approved_hr_reference_contacts_import_result.json --apply`
+  - `pac solution pack --zipfile .\artifacts\exports\BGV_System_uen_routing_20260515.zip --folder .\flows\power-automate\unpacked --packagetype Unmanaged --allowDelete true --allowWrite true --clobber true`
+  - `pac solution import --environment https://orgde64dc49.crm5.dynamics.com/ --path .\artifacts\exports\BGV_System_uen_routing_20260515.zip --publish-changes --force-overwrite`
+  - `m365 flow enable --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name fe4bf0e3-0916-f111-8341-002248582037 --debug`
+  - `m365 flow get --environmentName Default-38597470-4753-461a-837f-ad8c14860b22 --name fe4bf0e3-0916-f111-8341-002248582037 --query "{displayName:properties.displayName,state:properties.state,lastModified:properties.lastModifiedTime,flowSuspensionReason:properties.flowSuspensionReason}" --output json`
+  - `m365 spo listitem list --webUrl https://dlresourcespl88.sharepoint.com/sites/DLRRecruitmentOps570 --listTitle "Approved HR Reference Contacts" --fields "Id,CompanyUEN,CompanyUENNormalized,HRReferenceEmail" --output json`
+- Notes:
+  - The production validation here proves the live definition, live field, and live recruiter-maintained data path are aligned.
+  - A true end-to-end employer-send smoke was not auto-triggered in this pass because that would require intentionally creating or sending a real employer request from production data.
